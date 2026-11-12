@@ -193,7 +193,7 @@ html.rm *,html.rm *::before,html.rm *::after{animation:none!important;transition
 .fbar{position:relative;height:44px;border-radius:12px;background:linear-gradient(180deg,#2a1d16,#3a2418);border:2px solid #5a3a22;overflow:hidden;cursor:pointer;box-shadow:inset 0 0 18px rgba(255,120,40,.25)}
 .fgood{position:absolute;top:0;bottom:0;background:rgba(240,195,90,.55)}
 .fperf{position:absolute;top:0;bottom:0;background:#fff6d8;box-shadow:0 0 12px #ffd77a}
-.ftrack{position:absolute;inset:0;pointer-events:none;animation:fsweep linear infinite;will-change:transform}
+.ftrack{position:absolute;inset:0;pointer-events:none;will-change:transform}
 @keyframes fsweep{0%{transform:translateX(0)}50%{transform:translateX(100%)}100%{transform:translateX(0)}}
 .fcur{position:absolute;left:0;top:-4px;bottom:-4px;width:5px;margin-left:-2px;background:#ff6a2c;box-shadow:0 0 10px #ff6a2c;border-radius:3px}
 .odds{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;align-items:baseline}
@@ -1836,12 +1836,14 @@ document.addEventListener("pointerdown",()=>{if(!AC){audioInit();musicSync()}els
 let forge=null;
 function pickW(w){let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){if((r-=w[i])<0)return i}return 0}
 function startForge(it){forge={it,pts:[],pos:0,speed:.75*S.opt.forgeSpeed,zone:rnd(15,85),t0:performance.now(),done:false};
-  if(!S.opt.forgeQte){forgeFinish(true);return}drawForge()}
+  if(!S.opt.forgeQte){forgeFinish(true);return}drawForge();requestAnimationFrame(forgeAnim)}
+/* Le curseur suit l'heure réelle : même si une image saute, il est toujours au bon endroit */
+function forgeAnim(){const f=forge;if(!f||f.done)return;const t=$("ftrack");if(t)t.style.transform=`translateX(${forgePos(f)}%)`;requestAnimationFrame(forgeAnim)}
 function drawForge(){const f=forge,o=$("ov");o.hidden=false;const sc=f.pts.reduce((a,b)=>a+b,0);
   o.innerHTML=`<div class="ovc forge"><div class="row" style="justify-content:space-between"><h2>Forge</h2><span class="small muted">${f.it.name}</span></div>
   <p class="small muted" style="margin:0">Frappez quand le curseur passe dans la zone dorée. Trois coups de marteau. Zone blanche : 2 points, zone dorée : 1 point.</p>
   <div class="strikes">${[0,1,2].map(i=>`<span class="stk ${f.pts[i]==null?"":f.pts[i]===2?"pf":f.pts[i]===1?"gd":"ms"}">${f.pts[i]==null?"":f.pts[i]===2?"Parfait":f.pts[i]===1?"Bien":"Raté"}</span>`).join("")}</div>
-  <div class="fbar" data-a="forgeHit"><div class="fgood" style="left:${f.zone-11}%;width:22%"></div><div class="fperf" style="left:${f.zone-3.5}%;width:7%"></div><div class="ftrack" id="ftrack" style="animation-duration:${2/f.speed}s;animation-delay:-${((performance.now()-f.t0)/1000)%(2/f.speed)}s"><div class="fcur"></div></div></div>
+  <div class="fbar" data-a="forgeHit"><div class="fgood" style="left:${f.zone-11}%;width:22%"></div><div class="fperf" style="left:${f.zone-3.5}%;width:7%"></div><div class="ftrack" id="ftrack" style="transform:translateX(${forgePos(f)}%)"><div class="fcur"></div></div></div>
   <div class="odds">${RAR.map((r,i)=>`<span style="color:${r.c}">${r.n} <b class="num">${FORGE_W[Math.min(6,sc+2*(3-f.pts.length))][i]} %</b></span>`).join("")}<span class="small muted">au mieux</span></div>
   <div class="row"><button class="btn pri" data-a="forgeHit" style="padding:10px 22px;font-size:15px">Frapper <kbd>Espace</kbd></button><button class="btn" data-a="forgeSkip">Passer (chances de base)</button></div></div>`}
 const forgePos=f=>{const ph=((performance.now()-f.t0)/1000*f.speed*100)%200;return ph<=100?ph:200-ph};
@@ -2492,6 +2494,7 @@ function showOffline(s){
 }
 
 /* ================= Événements ================= */
+document.addEventListener("pointerdown",e=>{if(forge&&!forge.done&&e.button===0&&e.target.closest('[data-a="forgeHit"]')){e.preventDefault();forgeStrike()}},true);
 document.addEventListener("click",e=>{ptrDown=false;
   const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;
   if(a==="auto")return;
@@ -2524,7 +2527,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
     case"saveNow":save();lastSave=Date.now();toast("Partie enregistrée",1);break;
     case"pause":setPause(!paused);break;
-    case"forgeHit":forgeStrike();break;
+    case"forgeHit":break; /* géré au pointerdown, plus précis */
     case"forgeSkip":forgeFinish(true);break;
     case"forgeClose":$("ov").hidden=true;forge=null;renderPanel();break;
     case"drink":drink(b.dataset.r,false);renderPanel();break;
@@ -2576,7 +2579,7 @@ document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.datase
 document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="escape"&&atSel&&!forge){atSel=null;renderPanel(true);return}
   if(tutoI>=0){if(k==="escape"){tutoEnd()}else if(k==="arrowright"||k==="enter"){e.preventDefault();tutoI++;tutoDraw()}else if(k==="arrowleft"){tutoI=Math.max(0,tutoI-1);tutoDraw()}if(k!=="tab")e.preventDefault();return}
   if((k==="enter"||k===" ")&&e.target.dataset&&e.target.dataset.a==="atOpen"){e.preventDefault();e.target.click();return}
-  if(forge&&!forge.done&&(k===" "||k==="enter")){e.preventDefault();forgeStrike();return}
+  if(forge&&!forge.done&&(k===" "||k==="enter")){e.preventDefault();if(!e.repeat)forgeStrike();return}
   if(!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
   if(k==="p"){setPause(!paused);e.preventDefault();return}if(paused)return;
   if(k===" "||k==="a"){e.preventDefault();doClick(false);return}
