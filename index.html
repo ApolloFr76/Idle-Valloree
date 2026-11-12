@@ -1252,7 +1252,7 @@ const resIcon=r=>r.img?`<img src="${r.img}" alt="">`:r.kind==="g"?`<img class="p
 const kindLabel=r=>r.kind==="d"?"Butin de monstre":r.kind==="k"?"Clé de donjon":r.kind==="p"?"Potion":"Ressource · "+PROFS[r.prof].name;
 const resCol=r=>r.kind==="d"?ZCOL[r.zone]:r.kind==="k"?"#f0c35a":r.kind==="p"?r.col:PCOL[r.prof];
 const xpNeed=l=>Math.floor(40*Math.pow(l,1.75)+60*l);
-const pxNeed=l=>Math.floor(10*Math.pow(l,1.55)+6*l);
+const pxNeed=l=>Math.floor(6*Math.pow(l,1.5)+5*l);
 
 /* ================= État ================= */
 const SAVE_KEY="vallore-save-v1";
