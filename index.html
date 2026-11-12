@@ -192,7 +192,9 @@ html.rm *,html.rm *::before,html.rm *::after{animation:none!important;transition
 .fbar{position:relative;height:44px;border-radius:12px;background:linear-gradient(180deg,#2a1d16,#3a2418);border:2px solid #5a3a22;overflow:hidden;cursor:pointer;box-shadow:inset 0 0 18px rgba(255,120,40,.25)}
 .fgood{position:absolute;top:0;bottom:0;background:rgba(240,195,90,.55)}
 .fperf{position:absolute;top:0;bottom:0;background:#fff6d8;box-shadow:0 0 12px #ffd77a}
-.fcur{position:absolute;top:-4px;bottom:-4px;width:5px;margin-left:-2px;background:#ff6a2c;box-shadow:0 0 10px #ff6a2c;border-radius:3px}
+.ftrack{position:absolute;inset:0;pointer-events:none;animation:fsweep linear infinite;will-change:transform}
+@keyframes fsweep{0%{transform:translateX(0)}50%{transform:translateX(100%)}100%{transform:translateX(0)}}
+.fcur{position:absolute;left:0;top:-4px;bottom:-4px;width:5px;margin-left:-2px;background:#ff6a2c;box-shadow:0 0 10px #ff6a2c;border-radius:3px}
 .odds{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;align-items:baseline}
 .kostate{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-size:20px;background:rgba(10,14,20,.55)}
 .hint{font-size:12px;color:var(--muted);text-align:center;margin-top:4px}
@@ -1163,6 +1165,8 @@ const Q_TYPES=["kill","killEl","gather","boss","pickup","craft","sell"];
 const MK_MIN=.5,MK_MAX=2,MK_STEP=60,MK_SELL=.002;
 
 /* Réglages par défaut (onglet Options) */
+/* Réglages : complète et répare les valeurs absentes ou invalides (ex. NaN) */
+function fixOpts(o){o=Object.assign({},OPT_DEF,o||{});for(const k in OPT_DEF){const d=OPT_DEF[k];if(typeof d==="number"){const v=o[k]==null||o[k]===""?NaN:+o[k];o[k]=Number.isFinite(v)?v:d}else if(typeof d==="boolean"&&typeof o[k]!=="boolean")o[k]=d;else if(typeof d==="string"&&typeof o[k]!=="string")o[k]=d}return o}
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
   textSize:100,ambiance:true,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
@@ -1830,18 +1834,18 @@ document.addEventListener("pointerdown",()=>{if(!AC){audioInit();musicSync()}els
 /* ================= Forge : mini-jeu de rareté ================= */
 let forge=null;
 function pickW(w){let r=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<w.length;i++){if((r-=w[i])<0)return i}return 0}
-function startForge(it){forge={it,pts:[],pos:0,dir:1,speed:.75*S.opt.forgeSpeed,zone:rnd(15,85),last:performance.now(),done:false};
-  if(!S.opt.forgeQte){forgeFinish(true);return}drawForge();requestAnimationFrame(forgeAnim)}
+function startForge(it){forge={it,pts:[],pos:0,speed:.75*S.opt.forgeSpeed,zone:rnd(15,85),t0:performance.now(),done:false};
+  if(!S.opt.forgeQte){forgeFinish(true);return}drawForge()}
 function drawForge(){const f=forge,o=$("ov");o.hidden=false;const sc=f.pts.reduce((a,b)=>a+b,0);
   o.innerHTML=`<div class="ovc forge"><div class="row" style="justify-content:space-between"><h2>Forge</h2><span class="small muted">${f.it.name}</span></div>
   <p class="small muted" style="margin:0">Frappez quand le curseur passe dans la zone dorée. Trois coups de marteau. Zone blanche : 2 points, zone dorée : 1 point.</p>
   <div class="strikes">${[0,1,2].map(i=>`<span class="stk ${f.pts[i]==null?"":f.pts[i]===2?"pf":f.pts[i]===1?"gd":"ms"}">${f.pts[i]==null?"":f.pts[i]===2?"Parfait":f.pts[i]===1?"Bien":"Raté"}</span>`).join("")}</div>
-  <div class="fbar" data-a="forgeHit"><div class="fgood" style="left:${f.zone-11}%;width:22%"></div><div class="fperf" style="left:${f.zone-3.5}%;width:7%"></div><div class="fcur" id="fcur" style="left:${f.pos}%"></div></div>
+  <div class="fbar" data-a="forgeHit"><div class="fgood" style="left:${f.zone-11}%;width:22%"></div><div class="fperf" style="left:${f.zone-3.5}%;width:7%"></div><div class="ftrack" id="ftrack" style="animation-duration:${2/f.speed}s;animation-delay:-${((performance.now()-f.t0)/1000)%(2/f.speed)}s"><div class="fcur"></div></div></div>
   <div class="odds">${RAR.map((r,i)=>`<span style="color:${r.c}">${r.n} <b class="num">${FORGE_W[Math.min(6,sc+2*(3-f.pts.length))][i]} %</b></span>`).join("")}<span class="small muted">au mieux</span></div>
   <div class="row"><button class="btn pri" data-a="forgeHit" style="padding:10px 22px;font-size:15px">Frapper <kbd>Espace</kbd></button><button class="btn" data-a="forgeSkip">Passer (chances de base)</button></div></div>`}
-function forgeAnim(now){const f=forge;if(!f||f.done)return;const dt=Math.min(.05,(now-f.last)/1000);f.last=now;f.pos+=f.dir*f.speed*100*dt;if(f.pos>=100){f.pos=100;f.dir=-1}if(f.pos<=0){f.pos=0;f.dir=1}const c=$("fcur");if(c)c.style.left=f.pos+"%";requestAnimationFrame(forgeAnim)}
-function forgeStrike(){const f=forge;if(!f||f.done)return;const d=Math.abs(f.pos-f.zone),p=d<=3.5?2:d<=11?1:0;f.pts.push(p);sfx(p?"anvil":"anvilBad");
-  if(f.pts.length>=3){forgeFinish(false);return}f.speed*=1.3;f.zone=rnd(12,88);drawForge()}
+const forgePos=f=>{const ph=((performance.now()-f.t0)/1000*f.speed*100)%200;return ph<=100?ph:200-ph};
+function forgeStrike(){const f=forge;if(!f||f.done)return;f.pos=forgePos(f);const d=Math.abs(f.pos-f.zone),p=d<=3.5?2:d<=11?1:0;f.pts.push(p);sfx(p?"anvil":"anvilBad");
+  if(f.pts.length>=3){forgeFinish(false);return}{const p=forgePos(f);f.speed*=1.3;const T=2/f.speed,ph=p/100*T/2;f.t0=performance.now()-ph*1000}f.zone=rnd(12,88);drawForge()}
 function forgeFinish(skip){const f=forge;if(!f||f.done)return;f.done=true;const sc=f.pts.reduce((a,b)=>a+b,0),r=pickW(skip?FORGE_SKIP:FORGE_W[sc]),it=f.it;
   const u=S.uid++,inst={u,id:it.id,e:0,r};S.items.push(inst);inc("crafts");qProg("craft");if(r===3)inc("legend");mx("bestRar",r);
   const fs=freeSlot(it),cur=S.equip[fs];if(fs)S.equip[fs]=u;
@@ -2408,7 +2412,7 @@ let confirmReset=false;
 let otab="aide";
 function applyOpts(){if(!S||!S.opt)return;const O=S.opt;document.documentElement.classList.toggle("rm",!!O.reduceMotion);const app=$("app");if(app)app.style.zoom=O.textSize/100;
   const h=$("hint");if(h)h.hidden=!O.showHint;setVol();if(AC)musicSync();if($("weather"))drawWeather();if($("log")&&S.log)renderLog();potSig=""}
-const optFmt=(k,v)=>k.startsWith("vol")?Math.round(v*100)+" %":k==="textSize"||k==="potThreshold"?v+" %":k==="forgeSpeed"?"×"+v:v;
+const optFmt=(k,v)=>(v=Number.isFinite(+v)?v:OPT_DEF[k],0)||k.startsWith("vol")?Math.round(v*100)+" %":k==="textSize"||k==="potThreshold"?v+" %":k==="forgeSpeed"?"×"+v:v;
 function pOpts(){
   const O=S.opt;
   const sw=(k,t,d)=>`<div class="orow"><div class="ol"><b>${t}</b>${d?`<span>${d}</span>`:""}</div><div class="oc"><label class="sw"><input type="checkbox" data-opt="${k}" id="opt_${k}" ${O[k]?"checked":""} aria-label="${t}"><i></i></label></div></div>`;
@@ -2566,7 +2570,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"resetYes":confirmReset=false;S=fresh();try{localStorage.removeItem(SAVE_KEY)}catch(err){}showCreate();break;
   }
 });
-document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){S.opt[k]=+e.target.value;const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});
+document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){const v=+e.target.value;S.opt[k]=Number.isFinite(v)?v:OPT_DEF[k];const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});
 document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="checkbox"){S.opt[k]=e.target.checked;applyOpts();if(k==="music"){audioInit();musicSync()}}});
 document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="escape"&&atSel&&!forge){atSel=null;renderPanel(true);return}
   if(tutoI>=0){if(k==="escape"){tutoEnd()}else if(k==="arrowright"||k==="enter"){e.preventDefault();tutoI++;tutoDraw()}else if(k==="arrowleft"){tutoI=Math.max(0,tutoI-1);tutoDraw()}if(k!=="tab")e.preventDefault();return}
@@ -2607,9 +2611,9 @@ function start(data){
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});
   Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}
-  S.opt=Object.assign({},OPT_DEF,S.opt||{});applyOpts();checkUnlocks(true);
+  S.opt=fixOpts(S.opt);applyOpts();checkUnlocks(true);
   if(!S.cls){showCreate();}
-  else{const away=(Date.now()-(S.last||Date.now()))/1000;let sum=null;S.opt=Object.assign({},OPT_DEF,S.opt||{});if(away>60&&S.opt.offline)sum=offline(away);boot2();if(sum&&(sum.kills||Object.keys(sum.res).length))showOffline(sum)}
+  else{const away=(Date.now()-(S.last||Date.now()))/1000;let sum=null;S.opt=fixOpts(S.opt);if(away>60&&S.opt.offline)sum=offline(away);boot2();if(sum&&(sum.kills||Object.keys(sum.res).length))showOffline(sum)}
   lastT=performance.now();setInterval(loop,100);setInterval(()=>{if(Date.now()-lastSave>=(S.opt?.saveEvery||10)*1000){lastSave=Date.now();save()}},1000);
 }
 window.claude?.hot?.snapshot?.(()=>({S}));
