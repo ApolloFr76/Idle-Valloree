@@ -763,6 +763,20 @@ kbd{background:var(--cream);color:var(--ink);border:2px solid var(--ink);border-
 .pbon div{display:flex;gap:8px;align-items:baseline;font-size:15px;line-height:1.2;color:var(--muted)}
 .pbon div b{flex:none;min-width:22px;text-align:center;background:#c4a878;color:var(--cream);border:2px solid var(--ink);font-size:13px;padding:0 3px;text-shadow:1px 1px 0 var(--ink)}
 .pbon div.on{color:var(--xp);font-weight:600}.pbon div.on b{background:var(--leaf)}
+/* ---- Onboarding : visite guidée et cartes « Nouveau ! » ---- */
+#tuto{position:fixed;inset:0;z-index:95}
+.tspot{position:fixed;border:4px solid var(--sun);box-shadow:0 0 0 9999px rgba(20,12,8,.68),0 0 18px var(--sun);pointer-events:none;transition:all .25s}
+.tbub{position:fixed;width:min(360px,calc(100vw - 32px));background:var(--panel);color:var(--fg);border:4px solid var(--ink);box-shadow:inset 0 0 0 3px var(--wood-l),inset 0 0 0 7px var(--wood),0 6px 0 rgba(0,0,0,.4);padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.tbub h3{color:var(--gold);font-size:22px;margin:0}
+.tbub p{margin:0;font-size:17px;line-height:1.3}
+.tbub .tstep{font-size:14px;color:var(--muted)}
+.tbub .row{justify-content:space-between}
+.tipcard{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:85;width:min(340px,calc(100vw - 32px));background:var(--panel);color:var(--fg);border:4px solid var(--ink);box-shadow:inset 0 0 0 3px var(--wood-l),inset 0 0 0 7px var(--wood),0 6px 0 rgba(0,0,0,.4);padding:14px 16px;display:flex;flex-direction:column;gap:6px;animation:tipin .3s ease-out}
+.tipcard .nb{align-self:flex-start;background:var(--sun);color:#4a2606;border:2px solid var(--ink);font-size:14px;padding:0 8px;font-family:var(--display)}
+.tipcard h4{margin:0;font-family:var(--display);font-size:20px;color:var(--gold)}
+.tipcard p{margin:0;font-size:16px;line-height:1.3}
+.tipcard .tq{font-size:13px;color:var(--muted)}
+@keyframes tipin{from{transform:translateY(20px);opacity:0}}
 </style>
 </head>
 <body>
@@ -811,6 +825,8 @@ kbd{background:var(--cream);color:var(--ink);border:2px solid var(--ink);border-
 </div>
 <div class="ov" id="ov" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div id="tuto" hidden><div class="tspot" id="tspot"></div><div class="tbub" id="tbub" role="dialog" aria-live="polite"></div></div>
+<div class="tipcard" id="tipcard" hidden role="status"></div>
 <div id="tip" role="tooltip" hidden></div>
 
 <script>
@@ -1071,7 +1087,7 @@ const MK_MIN=.5,MK_MAX=2,MK_STEP=60,MK_SELL=.002;
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
-  potThreshold:30,autoSellFull:false,koRetreat:false,pauseHidden:false,confirmPrest:true,forgeQte:true,forgeSpeed:1,
+  potThreshold:30,autoSellFull:false,koRetreat:false,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
   keys:true,saveEvery:10,offline:true};
 /* Rareté des objets fabriqués */
@@ -1768,6 +1784,56 @@ document.addEventListener("pointermove",e=>{if(e.pointerType==="touch"||!S||!S.c
 document.addEventListener("pointerdown",()=>{tipEl=null;$("tip").hidden=true},true);
 setInterval(()=>{if(tipEl&&!$("tip").hidden){if(!tipEl.isConnected){tipEl=null;$("tip").hidden=true;return}const h=tipFor(tipEl);if(h)$("tip").innerHTML=h}},500);
 
+/* ================= Onboarding ================= */
+const TUTO=[
+  {sel:"#arena",t:"Bienvenue dans Vallorée !",d:"Voici l'arène. Votre héros combat tout seul. Cliquez sur le monstre (ou appuyez sur Espace) pour frapper plus vite : cliquer vite fait monter un combo."},
+  {sel:"#spells",t:"Vos sorts",d:"Lancez-les d'un clic ou avec les touches 1, 2 et 3. Cochez « Lancer automatiquement » pour qu'ils partent seuls. D'autres sorts se débloquent aux niveaux 10 et 25."},
+  {sel:"#zones",t:"Les zones",d:"Chaque zone a ses monstres, son butin et son boss. Les suivantes se débloquent avec votre niveau. Passez la souris sur une zone pour voir ce qu'on y trouve."},
+  {sel:"#modeBar",t:"Boss, donjons et tour",d:"Après 10 monstres dans une zone, vous pouvez défier son boss. Il lâche une clé de donjon. La tour infinie est toujours ouverte pour tester votre puissance."},
+  {sel:'[data-a="tab"][data-t="perso"]',tab:"perso",t:"Votre personnage",d:"À chaque niveau, vous gagnez 5 points. Investissez-les en Feu, Eau, Terre ou Air pour choisir votre élément, ou en Vitalité, Sagesse, Agilité. Tous les 5 points, une caractéristique donne un bonus en plus."},
+  {sel:'[data-a="tab"][data-t="inv"]',tab:"inv",t:"L'inventaire",d:"Votre équipement et votre sac. Passez la souris sur n'importe quel objet pour voir son détail, ses statistiques et la comparaison avec ce que vous portez."},
+  {sel:'[data-a="tab"][data-t="atelier"]',tab:"atelier",t:"L'atelier",d:"Chaque monstre a sa panoplie. Farmez son butin, puis fabriquez les pièces. À la forge, frappez au bon moment pour obtenir une meilleure rareté."},
+  {sel:'[data-a="tab"][data-t="metiers"]',tab:"metiers",t:"Les métiers",d:"Lancez un métier de récolte : il tourne en même temps que les combats, et même quand le jeu est fermé (jusqu'à 8 h)."},
+  {sel:'[data-a="tab"][data-t="opts"]',tab:"opts",t:"Options et sauvegarde",d:"Son, affichage, raccourcis clavier… La partie est sauvegardée automatiquement. Vous pouvez revoir ce tutoriel depuis les options. Bonne aventure !"},
+];
+const TIPS=[
+  {id:"pts",c:()=>S.pts>0&&S.lvl>=2,t:"Points de caractéristiques",d:"Vous avez des points à répartir. Choisissez un élément pour faire plus de dégâts aux monstres qui y sont faibles.",tab:"perso"},
+  {id:"pickup",c:()=>!!S.pk,t:"Un objet brillant !",d:"Un objet cliquable vient d'apparaître dans l'arène. Attrapez-le vite (touche E) : écus, XP ou bonus temporaire."},
+  {id:"craft",c:()=>Object.values(ITEMS).some(i=>i.set&&canCraft(i)),t:"Première fabrication possible",d:"Vous avez assez de butin pour fabriquer une pièce d'équipement. Le « ! » vous indique laquelle.",tab:"atelier"},
+  {id:"allies",c:()=>S.ecus>=50,t:"Compagnons",d:"Vous pouvez recruter votre premier compagnon. Il frappe tout seul, même quand vous n'êtes pas là.",tab:"allies"},
+  {id:"quests",c:()=>S.lvl>=3,t:"Quêtes du jour",d:"Trois quêtes chaque jour, avec écus et XP à la clé. Terminez les trois pour gagner un éclat d'âme.",tab:"quests"},
+  {id:"herbo",c:()=>S.lvl>=5,t:"Alchimie",d:"Le métier d'Herboriste permet de cueillir des herbes pour préparer des potions de soin et de bonus à l'Atelier.",tab:"metiers"},
+  {id:"boss",c:()=>(S.zk[S.zone]||0)>=BOSS_KILLS,t:"Un boss vous attend",d:"Vous avez battu assez de monstres : défiez le boss de la zone avant la fin du chrono (touche B). Il lâche la clé du donjon.",tab:"aventure"},
+  {id:"shop",c:()=>S.ecus>=300,t:"Boutique",d:"Vos premiers achats définitifs sont abordables : gants renforcés, clic automatique, sac agrandi…",tab:"shop"},
+  {id:"combo",c:()=>S.combo>=10,t:"Combo !",d:"Cliquer vite fait monter le combo, qui augmente vos dégâts. Il retombe si vous arrêtez de cliquer."},
+  {id:"market",c:()=>Object.keys(S.res).filter(k=>S.res[k]>0).length>=4,t:"Le marché",d:"Les prix changent chaque minute, entre ×0,5 et ×2. Vendez quand le cours est haut !",tab:"market"},
+  {id:"spell2",c:()=>S.lvl>=10,t:"Nouveau sort",d:"Votre deuxième sort est débloqué. Passez la souris dessus pour voir ses effets."},
+  {id:"zone2",c:()=>S.lvl>=ZONES[1].lvl[0],t:"Nouvelle zone",d:"Une nouvelle zone est accessible, avec d'autres monstres, d'autres éléments et de meilleures panoplies."},
+  {id:"key",c:()=>Object.keys(S.res).some(k=>k.startsWith("cle_")&&S.res[k]>0),t:"Donjon débloqué",d:"Vous avez une clé ! Le donjon enchaîne 4 vagues puis le boss, avec un gros coffre à la fin. Attention : un K.O. fait perdre la clé.",tab:"aventure"},
+  {id:"rare",c:()=>Object.values(LOOT).some(L=>L.some(l=>l.p<.06&&!l.item&&seen(l.id))),t:"Butin rare",d:"Vous avez trouvé un objet rare ! Les objets jamais obtenus apparaissent en « ??? » avec leur taux de drop dans le bestiaire.",tab:"coll"},
+  {id:"ach",c:()=>achN()>=1,t:"Succès",d:"Chaque succès donne +1 % de dégâts et d'écus pour toujours. Consultez-les dans la Collection.",tab:"coll"},
+  {id:"event",c:()=>!!S.ev,t:"Événement météo",d:"Pendant 2 minutes, un événement change les règles : bonus d'élément, écus doublés, butin doublé…"},
+  {id:"bag",c:()=>bagWeight()>bagCap()*.8,t:"Sac presque plein",d:"Vendez des ressources à l'Inventaire ou au Marché, sinon vous ne ramasserez plus rien. Une option permet la vente automatique.",tab:"inv"},
+  {id:"tower",c:()=>S.lvl>=15,t:"La tour infinie",d:"Chaque étage record donne +0,5 % de dégâts pour toujours. Montez le plus haut possible !",tab:"aventure"},
+  {id:"prest",c:()=>S.lvl>=PREST_LVL,t:"Oméga : la renaissance",d:"Vous pouvez renaître contre des éclats d'âme, qui débloquent des talents permanents. Vous repartez au niveau 1, mais bien plus fort.",tab:"prest"},
+];
+let tutoI=-1,tipQ=[],tipShown=null;
+function tutoStart(){tutoI=0;paused=true;$("tuto").hidden=false;tutoDraw()}
+function tutoEnd(){tutoI=-1;$("tuto").hidden=true;S.tutoDone=1;paused=false;S.tab="perso";renderPanel();save()}
+function tutoDraw(){const st=TUTO[tutoI];if(!st){tutoEnd();return}if(st.tab&&S.tab!==st.tab){S.tab=st.tab;renderPanel()}
+  const el=document.querySelector(st.sel);if(el)el.scrollIntoView({block:"center",behavior:"instant"});
+  requestAnimationFrame(()=>{const r=el?el.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2,width:0,height:0},sp=$("tspot"),b=$("tbub"),pad=6;
+    sp.style.left=(r.left-pad)+"px";sp.style.top=(r.top-pad)+"px";sp.style.width=(r.width+pad*2)+"px";sp.style.height=(r.height+pad*2)+"px";
+    b.innerHTML=`<span class="tstep">Étape ${tutoI+1} / ${TUTO.length}</span><h3>${st.t}</h3><p>${st.d}</p><div class="row"><button class="btn" data-a="tutoSkip">Passer</button><span class="row" style="gap:6px">${tutoI?`<button class="btn" data-a="tutoPrev">Retour</button>`:""}<button class="btn pri" data-a="tutoNext">${tutoI<TUTO.length-1?"Suivant":"C'est parti !"}</button></span></div>`;
+    const bh=b.offsetHeight,bw=b.offsetWidth;let top=r.bottom+14;if(top+bh>innerHeight-10)top=r.top-bh-14;if(top<10)top=Math.max(10,innerHeight-bh-10);
+    let left=Math.min(Math.max(10,r.left+r.width/2-bw/2),innerWidth-bw-10);b.style.top=top+"px";b.style.left=left+"px";const n=b.querySelector('[data-a="tutoNext"]');if(n)n.focus()})}
+addEventListener("resize",()=>{if(tutoI>=0)tutoDraw()});
+function checkTips(){if(!S||!S.cls||!S.opt.tips||tutoI>=0)return;S.tips=S.tips||{};
+  TIPS.forEach(t=>{if(!S.tips[t.id]&&!tipQ.includes(t)&&tipShown!==t&&t.c()){tipQ.push(t)}});
+  if(!tipShown&&tipQ.length&&$("ov").hidden)showTip(tipQ.shift())}
+function showTip(t){tipShown=t;S.tips[t.id]=1;const c=$("tipcard");c.innerHTML=`<span class="nb">Nouveau !</span><h4>${t.t}</h4><p>${t.d}</p><div class="row" style="justify-content:flex-end;gap:6px">${t.tab?`<button class="btn" data-a="tipGo">Voir</button>`:""}<button class="btn pri" data-a="tipOk">Compris</button></div>${tipQ.length?`<span class="tq">${tipQ.length} autre${tipQ.length>1?"s":""} conseil${tipQ.length>1?"s":""} à suivre</span>`:""}`;c.hidden=false;c.style.animation="none";void c.offsetWidth;c.style.animation=""}
+function closeTip(){tipShown=null;$("tipcard").hidden=true;setTimeout(checkTips,600)}
+
 /* ================= Succès et renaissance ================= */
 function checkAch(){let n=0;ACH.forEach(a=>{if(!S.ach[a.id]&&a.get()>=a.v){S.ach[a.id]=1;n++;log(`Succès débloqué : <b>${a.n}</b> (${a.txt}).`,"g");if(fx)toast(`Succès : ${a.n} · +1 % dégâts et écus`)}});if(n)dirty=true}
 function doPrestige(){
@@ -2114,6 +2180,10 @@ function pOpts(){
     ${sw("confirmPrest","Confirmation avant un passage Oméga","")}
     ${sw("pauseHidden","Pause quand l'onglet est caché","Sinon le jeu continue en arrière-plan.")}
     ${sw("offline","Gains hors ligne","Chasse et récolte pendant que la page est fermée, jusqu'à 8 h.")}
+  </div></div><div class="sec"><h3>Aide aux nouveaux joueurs</h3><div class="olist">
+    ${sw("tips","Conseils « Nouveau ! »","Une petite carte explique chaque fonction au moment où elle se débloque.")}
+    <div class="orow"><div class="ol"><b>Visite guidée</b><span>Présentation de l'écran en ${TUTO.length} étapes.</span></div><div class="oc"><button class="btn pri" data-a="tutoReplay">Revoir la visite</button></div></div>
+    <div class="orow"><div class="ol"><b>Revoir tous les conseils</b><span>Les conseils déjà vus réapparaîtront.</span></div><div class="oc"><button class="btn" data-a="tipsReset">Réinitialiser</button></div></div>
   </div></div>`;
   if(otab==="aff")h+=`<div class="sec"><h3>Affichage</h3><div class="olist">
     ${rng("textSize","Taille de l'interface","",80,130,5)}
@@ -2171,7 +2241,7 @@ document.addEventListener("click",e=>{
   if(a==="auto")return;
   switch(a){
     case"pick":pick=b.dataset.k;S.name=$("heroName").value;showCreate();break;
-    case"start":{S.cls=pick;S.name=($("heroName").value||"Aventurier").trim().slice(0,20)||"Aventurier";S.hp=stats().maxHp;$("ov").hidden=true;log(`Bienvenue, ${esc(S.name)}. La Prairie des Clochettes vous attend.`,"g");boot2();save();break}
+    case"start":{S.cls=pick;S.name=($("heroName").value||"Aventurier").trim().slice(0,20)||"Aventurier";S.hp=stats().maxHp;$("ov").hidden=true;log(`Bienvenue, ${esc(S.name)}. La Prairie des Clochettes vous attend.`,"g");boot2();save();if(!S.tutoDone)setTimeout(tutoStart,400);break}
     case"closeOv":$("ov").hidden=true;break;
     case"pickup":takePk();break;
     case"mode":startMode(b.dataset.m,b.dataset.z!=null?+b.dataset.z:null);renderPanel();break;
@@ -2182,6 +2252,13 @@ document.addEventListener("click",e=>{
     case"talent":{const id=b.dataset.t,T=TAL[id];if(tal(id)>=T.max||(T.prev&&!tal(T.prev)))break;const c=talCost(id);if(S.souls<c)break;S.souls-=c;S.tal[id]=tal(id)+1;S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break}
     case"talReset":{let r=0;for(const id in S.tal){for(let k=0;k<S.tal[id];k++)r+=TAL[id].cost*(k+1)}S.souls+=r;S.tal={};toast(`${r} éclats rendus`);renderPanel();break}
     case"ctab":ctab=b.dataset.t;renderPanel();break;
+    case"tutoNext":tutoI++;tutoDraw();break;
+    case"tutoPrev":tutoI=Math.max(0,tutoI-1);tutoDraw();break;
+    case"tutoSkip":tutoEnd();break;
+    case"tutoReplay":tutoStart();break;
+    case"tipOk":closeTip();break;
+    case"tipGo":{const t=tipShown;if(t&&t.tab){S.tab=t.tab;renderPanel()}closeTip();break}
+    case"tipsReset":S.tips={};tipQ=[];toast("Les conseils réapparaîtront au fil du jeu",1);break;
     case"otab":otab=b.dataset.t;renderPanel();break;
     case"optSet":{const k=b.dataset.k,v=b.dataset.v;S.opt[k]=isNaN(+v)?v:+v;applyOpts();renderPanel();break}
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
@@ -2231,6 +2308,7 @@ document.addEventListener("click",e=>{
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){S.opt[k]=+e.target.value;const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});
 document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="checkbox"){S.opt[k]=e.target.checked;applyOpts();if(k==="music"){audioInit();musicSync()}}});
 document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();
+  if(tutoI>=0){if(k==="escape"){tutoEnd()}else if(k==="arrowright"||k==="enter"){e.preventDefault();tutoI++;tutoDraw()}else if(k==="arrowleft"){tutoI=Math.max(0,tutoI-1);tutoDraw()}if(k!=="tab")e.preventDefault();return}
   if((k==="enter"||k===" ")&&e.target.dataset&&e.target.dataset.a==="atOpen"){e.preventDefault();e.target.click();return}
   if(forge&&!forge.done&&(k===" "||k==="enter")){e.preventDefault();forgeStrike();return}
   if(!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
@@ -2256,7 +2334,7 @@ function loop(){
     if(paused||(S.opt.pauseHidden&&document.hidden))dt=0;
     if(dt>120){if(S.opt.offline){const s=offline(dt);boot2();if(s&&(s.kills||Object.keys(s.res).length))showOffline(s)}}
     else if(dt>0){fx=!document.hidden&&dt<1;const steps=Math.min(600,Math.ceil(dt/.2));for(let i=0;i<steps;i++)tick(dt/steps);fx=true}
-    live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests()}
+    live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests();checkTips()}
     if(dirty&&now-lastPanel>600){lastPanel=now;renderPanel()}
   }
 }
