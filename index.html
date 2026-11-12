@@ -1252,7 +1252,7 @@ const resIcon=r=>r.img?`<img src="${r.img}" alt="">`:r.kind==="g"?`<img class="p
 const kindLabel=r=>r.kind==="d"?"Butin de monstre":r.kind==="k"?"Clé de donjon":r.kind==="p"?"Potion":"Ressource · "+PROFS[r.prof].name;
 const resCol=r=>r.kind==="d"?ZCOL[r.zone]:r.kind==="k"?"#f0c35a":r.kind==="p"?r.col:PCOL[r.prof];
 const xpNeed=l=>Math.floor(40*Math.pow(l,1.75)+60*l);
-const pxNeed=l=>Math.floor(25*Math.pow(l,1.6)+20*l);
+const pxNeed=l=>Math.floor(10*Math.pow(l,1.55)+6*l);
 
 /* ================= État ================= */
 const SAVE_KEY="vallore-save-v1";
@@ -1730,7 +1730,7 @@ function cast(sp,auto){
 }
 function gainGather(pid,rid,quiet){
   const p=S.jobs[pid],r=RES[rid];let n=1+(Math.random()<Math.min(.5,p.lvl/120)+talV("t_double")/100?1:0);
-  n=addRes(rid,n);if(!n)return 0;qProg("gather",rid,n);if(p.lvl<PROF_MAX){p.xp+=Math.round(8*Math.pow(r.tier+1,1.6));
+  n=addRes(rid,n);if(n)qProg("gather",rid,n);if(p.lvl<PROF_MAX){p.xp+=Math.round(14*Math.pow(r.tier+1,1.6)); /* l'XP compte même sac plein */
     while(p.lvl<PROF_MAX&&p.xp>=pxNeed(p.lvl)){p.xp-=pxNeed(p.lvl);p.lvl++;if(!quiet){log(`${PROFS[pid].name} niveau ${p.lvl} !`,"g");const nu=UNLOCK.indexOf(p.lvl);if(nu>=0)log(`Nouvelle ressource : ${PROFS[pid].res[nu][1]}.`,"g")}}}
   return n;
 }
@@ -1792,7 +1792,7 @@ function marketTick(){S.mkPrev={...S.mk};Object.values(RES).forEach(r=>{if(r.kin
 function trend(k){const a=mkOf(k),b=(S.mkPrev&&S.mkPrev[k])||1;return a>b+.005?"▲":a<b-.005?"▼":"="}
 function sellRes(k,n){n=Math.min(n,S.res[k]||0);if(n<=0)return 0;sfx("coin");let g=0;for(let i=0;i<n;i++){g+=priceOf(k);if(RES[k].kind!=="k")S.mk[k]=Math.max(MK_MIN,mkOf(k)-MK_SELL)}S.res[k]-=n;g=gainEcus(g);qProg("sell",null,g);return g}
 function brew(id,n){const r=RES[id];let made=0;while(n-->0){if(S.jobs.herboriste.lvl<r.plvl||!r.recipe.every(([x,q])=>(S.res[x]||0)>=q))break;r.recipe.forEach(([x,q])=>S.res[x]-=q);S.res[id]=(S.res[id]||0)+1;made++;inc("brews");inc("crafts");qProg("craft");
-    const J=S.jobs.herboriste;if(J.lvl<PROF_MAX){J.xp+=Math.round(12*Math.pow(r.tier+1,1.6));while(J.lvl<PROF_MAX&&J.xp>=pxNeed(J.lvl)){J.xp-=pxNeed(J.lvl);J.lvl++;log(`Herboriste niveau ${J.lvl} !`,"g")}}}
+    const J=S.jobs.herboriste;if(J.lvl<PROF_MAX){J.xp+=Math.round(20*Math.pow(r.tier+1,1.6));while(J.lvl<PROF_MAX&&J.xp>=pxNeed(J.lvl)){J.xp-=pxNeed(J.lvl);J.lvl++;log(`Herboriste niveau ${J.lvl} !`,"g")}}}
   if(made)toast(`${made}× ${r.name} préparée${made>1?"s":""}`);dirty=true;return made}
 function drink(id,auto){const r=RES[id];if(!r||r.kind!=="p"||!(S.res[id]>0)||S.ko>0)return;const st=stats();S.res[id]--;inc("potions");
   if(r.fx.heal){const h=Math.round(st.maxHp*r.fx.heal);S.hp=Math.min(st.maxHp,S.hp+h);if(fx)floatNum("+"+fmt(h),"heal")}
