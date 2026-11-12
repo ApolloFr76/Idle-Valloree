@@ -532,6 +532,9 @@ body.dragging #tip{display:none!important}
 .tile.lck img{filter:grayscale(.9) brightness(.7)}
 .tile .rd{position:absolute;top:-7px;right:-7px;width:18px;height:18px;background:var(--sun);color:#4a2606;border:2px solid var(--ink);font:16px/14px var(--display);text-align:center}
 .tile.big{width:64px;height:64px;flex:none;aspect-ratio:auto}.tile.big img{width:48px;height:48px}
+.atpop{position:fixed;inset:0;z-index:60;background:rgba(28,16,32,.6);display:grid;place-items:center;padding:16px;overflow:auto}
+.atpop .pdet{position:relative;max-width:620px;width:100%;max-height:calc(100vh - 32px);overflow:auto}
+.atx{position:absolute;top:6px;right:8px;width:30px;height:30px;border:3px solid var(--ink);background:var(--wood);color:var(--cream);font:inherit;font-size:18px;line-height:1;cursor:pointer}
 .pdet{background:var(--panel);border:4px solid var(--ink);box-shadow:inset 0 0 0 3px var(--wood-l);padding:12px;display:flex;flex-direction:column;gap:8px}
 .pdh{display:flex;gap:12px;align-items:center}
 .fchip .dot{display:inline-block;width:9px;height:9px;background:var(--sun);border:2px solid var(--ink);vertical-align:middle}
@@ -592,7 +595,22 @@ details.set.bossset summary{color:#8a4a08}
 .mon button img{width:160px;height:160px;display:block;animation:pxbob 1s steps(1) infinite}
 .mon button:active img{transform:translateY(4px)}
 .mon.hit button img{animation:pxhit .16s steps(1)}
-.mon.hit .ahero{animation:pxlunge .16s steps(1)}
+.mon.hit .ahero{animation:none}
+.ahero{animation:heroIdle 1.6s steps(2) infinite}
+.ahero.atk{animation:pxlunge .18s steps(2)}.ahero.cast{animation:heroCast .2s steps(2)}
+@keyframes heroIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes heroCast{0%{transform:translateX(-5px) translateY(-2px)}100%{transform:none}}
+.mon .orb,.mon .arrow,.mon .burst,.mon .slash{position:absolute;pointer-events:none;z-index:3;display:block}
+.mon .orb{width:14px;height:14px;margin:-7px 0 0 -7px;background:radial-gradient(circle,#fff 0 25%,#8fd8ff 30% 55%,#3a7bff 60% 80%,transparent 82%);box-shadow:0 0 10px 3px rgba(110,180,255,.75);image-rendering:pixelated}
+.mon .orb.big{width:24px;height:24px;margin:-12px 0 0 -12px;box-shadow:0 0 18px 6px rgba(150,120,255,.8)}
+.mon .arrow{width:30px;height:10px;margin-top:-5px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 15 5' shape-rendering='crispEdges'%3E%3Cpath fill='%231c1020' d='M0 0h3v1H0zM0 4h3v1H0zM12 0h1v5h-1zM13 1h1v3h-1zM14 2h1v1h-1z'/%3E%3Cpath fill='%23f3ecd2' d='M1 1h2v1H1zM1 3h2v1H1z'/%3E%3Cpath fill='%238a5a2b' d='M0 2h12v1H0z'/%3E%3Cpath fill='%23d9dde8' d='M12 1h1v3h-1zM13 2h1v1h-1z'/%3E%3C/svg%3E") center/100% 100% no-repeat;image-rendering:pixelated}
+.mon .arrow.big{width:42px;height:14px;filter:drop-shadow(0 0 4px #ffe27a)}
+.mon .burst{width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;border:3px solid #9fe0ff;animation:burst .3s ease-out forwards}
+.mon .burst.big{border-color:#c9a8ff}
+@keyframes burst{to{transform:scale(5);opacity:0}}
+.mon .slash{width:60px;height:60px;border-top:5px solid #fff6d8;border-radius:50%;transform:rotate(-35deg);animation:slash .26s ease-out forwards;filter:drop-shadow(0 0 3px #ffd36a)}
+.mon .slash.big{width:90px;height:90px;border-top-width:7px}
+@keyframes slash{0%{opacity:0;transform:rotate(-80deg) scale(.6)}30%{opacity:1}100%{opacity:0;transform:rotate(20deg) scale(1.1)}}
 .mon.ko{opacity:1;filter:none}.mon.ko button{opacity:.45;filter:grayscale(1)}.mon.ko .ahero{filter:grayscale(1) brightness(.7);transform:rotate(90deg) translate(30px,10px)}
 @keyframes pxbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes pxhit{0%{transform:translateX(8px);filter:brightness(2.2)}50%{transform:translateX(4px);filter:brightness(1.5)}100%{transform:none}}
@@ -627,6 +645,7 @@ details.set.bossset summary{color:#8a4a08}
 .ac .md{background:#c4a878;border:2px solid var(--ink)}
 .ac.done .md{background:var(--sun);color:#4a2606}
 .ac.done .md svg,.btn.pri svg{filter:none}
+.ac .md svg{width:20px;height:20px}.grow .gic svg{width:18px;height:18px}
 .sec h3,.invL h3,.invR h3{align-self:flex-start;background:#c8402e;color:var(--cream);font-size:16px;padding:3px 14px 6px;border:3px solid var(--ink);
   box-shadow:inset 0 3px 0 #f0806a,inset 0 -4px 0 #8a2418,4px 4px 0 rgba(90,54,32,.3);text-shadow:2px 2px 0 var(--ink)}
 .sec:nth-of-type(2n) h3{background:var(--sky);box-shadow:inset 0 3px 0 #8ad0ff,inset 0 -4px 0 var(--sky-d),4px 4px 0 rgba(90,54,32,.3)}
@@ -797,7 +816,8 @@ kbd{background:var(--cream);color:var(--ink);border:2px solid var(--ink);border-
 .tab.locked:hover{filter:brightness(1.1)!important}
 .goals{margin-top:10px;background:var(--bg2);border:3px solid #a8804e;box-shadow:inset 0 2px 0 rgba(255,255,255,.5);padding:6px 8px;display:flex;flex-direction:column;gap:5px}
 .ghead{display:flex;align-items:center;justify-content:space-between;gap:8px;background:none;border:0;padding:2px;font-family:var(--display);color:var(--gold);font-size:17px;text-align:left;cursor:pointer}
-.grow{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;padding:4px 2px;border-top:2px dotted rgba(140,96,48,.4)}
+.grow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:8px;align-items:center;padding:4px 2px;border-top:2px dotted rgba(140,96,48,.4)}
+.gact{padding:4px 8px;font-size:12px;white-space:nowrap}
 .grow .gic{width:28px;height:28px;display:grid;place-items:center;background:var(--wood);color:var(--cream);border:2px solid var(--ink);font-size:15px;line-height:1}
 .grow.rdy .gic{background:var(--sun);color:#4a2606}
 .gtx{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 8px;align-items:baseline}
@@ -1056,37 +1076,52 @@ const ALLIES=[["ecuyer","Écuyer Bertin",2,50,"#d9a46a"],["chasseuse","Chasseuse
 const UPGS=[
   ["gants1","Gants renforcés","Dégâts de clic ×2",300],["auto1","Clic automatique","2 clics par seconde",3000],["sac1","Sac agrandi","+2 000 de poids",1500],
   ["outils1","Outils affûtés","Récolte 20 % plus rapide",2000],["aimant","Aimant à trésors","Objets cliquables 30 % plus fréquents",8000],["bourse","Bourse de marchand","Ventes +25 %",12000],
-  ["allie1","Entraînement","Compagnons ×2",20000],["sablier","Sablier","+10 s contre les boss et dans la tour",15000],["gants2","Gants de maître","Dégâts de clic ×3",25000],
+  ["allie1","Entraînement","Compagnons ×1,5",20000],["sablier","Sablier","+10 s contre les boss et dans la tour",15000],["gants2","Gants de maître","Dégâts de clic ×3",25000],
   ["rythme","Rythme","Combo maximum 150 au lieu de 100",30000],["sac2","Grand sac","+8 000 de poids",40000],["outils2","Outils de maître","Récolte 20 % plus rapide",60000],
-  ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×2",5e5],["allie3","Bannière de guerre","Compagnons ×3",2e7]];
+  ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×1,5",5e5],["allie3","Bannière de guerre","Compagnons ×2",2e7]];
 const up=id=>!!(S.up&&S.up[id]);
 const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l));
-const allyMult=()=>(up("allie1")?2:1)*(up("allie2")?2:1)*(up("allie3")?3:1)*(1+.2*tal("t_cmd"));
-const allyDpsOf=(i,l)=>l<=0?0:ALLIES[i][2]*l*Math.pow(2,Math.floor(l/25))*allyMult();
+const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100);
+const allyDpsOf=(i,l)=>l<=0?0:ALLIES[i][2]*.4*l*Math.pow(1.5,Math.floor(l/25))*allyMult();
 const allyDps=()=>ALLIES.reduce((a,x,i)=>a+allyDpsOf(i,S.allies[x[0]]||0),0);
-const clickMult=()=>(up("gants1")?2:1)*(up("gants2")?3:1)*(1+.25*tal("t_doigts"));
+const clickMult=()=>(up("gants1")?2:1)*(up("gants2")?3:1)*(1+talV("t_doigts")/100);
 const comboMax=()=>up("rythme")?150:100;
 const inc=(k,n=1)=>{S.st[k]=(S.st[k]||0)+n};
 const mx=(k,v)=>{if(v>(S.st[k]||0))S.st[k]=v};
 const sellMult=()=>up("bourse")?1.25:1;
 const mkOf=k=>(S.mk&&S.mk[k])||1;
 const priceOf=k=>Math.max(1,Math.round(RES[k].price*sellMult()*(RES[k].kind==="k"?1:mkOf(k))));
-function gainEcus(n){n=Math.round(n*(1+.1*tal("t_avar"))*(1+.01*achN()));S.ecus+=n;inc("ecus",n);return n}
+function gainEcus(n){n=Math.round(n*(1+talV("t_avar")/100)*(1+.01*achN()));S.ecus+=n;inc("ecus",n);return n}
 
 /* Renaissance et talents : [id, nom, effet, rangs max, coût de base en éclats] */
 const PREST_LVL=30;
 const TALENTS={
-  "Combat":[["t_force","Force brute","+10 % de dégâts par rang",5,1],["t_prec","Précision","+2 % de critique par rang",5,1],["t_vie","Vitalité ancestrale","+10 % de PV par rang",5,2],["t_elem","Maîtrise élémentaire","Les faiblesses font +10 % de dégâts en plus par rang",3,3]],
-  "Récolte":[["t_mains","Mains agiles","Récolte 8 % plus rapide par rang",5,1],["t_double","Double récolte","+6 % de chance de récolte double par rang",5,1],["t_sac","Poches sans fond","+1 500 de poids par rang",5,2],["t_metier","Héritage des métiers","Les métiers repartent au niveau 5 par rang",4,3]],
-  "Fortune":[["t_avar","Avarice","+10 % d'écus par rang",5,1],["t_pros","Prospecteur","+15 Prospection par rang",5,1],["t_trefle","Chanceux","Objets cliquables 10 % plus fréquents par rang",5,2],["t_depart","Bourse de départ","Recommencer avec 1 000 écus par rang",5,2]],
-  "Clic":[["t_doigts","Doigts de fer","+25 % de dégâts de clic par rang",5,1],["t_combo","Combo durable","Le combo baisse 30 % moins vite par rang",3,1],["t_dore","Frappe dorée","2 % de chance par rang qu'un clic fasse ×10",3,2],["t_cmd","Commandant","+20 % de dégâts des compagnons par rang",5,2]],
+  "Combat":[["t_force","Force brute","+10 % de dégâts",1],["t_prec","Précision","+2 % de critique",1],["t_vie","Vitalité ancestrale","+10 % de PV",2],["t_elem","Maîtrise élémentaire","Les faiblesses font +10 % de dégâts en plus",3]],
+  "Récolte":[["t_mains","Mains agiles","Récolte 8 % plus rapide",1],["t_double","Double récolte","Chance de récolte double",1],["t_sac","Poches sans fond","+1 500 de poids",2],["t_metier","Héritage des métiers","Les métiers repartent plus haut",3]],
+  "Fortune":[["t_avar","Avarice","+10 % d'écus",1],["t_pros","Prospecteur","+15 Prospection",1],["t_trefle","Chanceux","Objets cliquables 10 % plus fréquents",2],["t_depart","Bourse de départ","Recommencer avec des écus",2]],
+  "Clic":[["t_doigts","Doigts de fer","+25 % de dégâts de clic",1],["t_combo","Combo durable","Le combo baisse 30 % moins vite",1],["t_dore","Frappe dorée","Chance qu'un clic fasse ×10",2],["t_cmd","Commandant","+20 % de dégâts des compagnons",2]],
 };
-const TAL={};Object.entries(TALENTS).forEach(([br,l])=>l.forEach((t,i)=>TAL[t[0]]={id:t[0],n:t[1],txt:t[2],max:t[3],cost:t[4],br,i,prev:i?l[i-1][0]:null}));
+const TAL={};Object.entries(TALENTS).forEach(([br,l])=>l.forEach((t,i)=>TAL[t[0]]={id:t[0],n:t[1],txt:t[2],cost:t[3],br,i,prev:i?l[i-1][0]:null}));
 const tal=id=>(S.tal&&S.tal[id])||0;
-const talCost=id=>TAL[id].cost*(tal(id)+1);
+/* Rangs illimités : [valeur du 1er rang, plafond (0 = sans plafond), format]. Sans plafond : 10 rangs pleins puis rendement décroissant. Avec plafond : chaque rang rapproche du plafond. */
+const TALV={t_force:[10,0,"+# % de dégâts"],t_prec:[2,30,"+# % de critique"],t_vie:[10,0,"+# % de PV"],t_elem:[10,50,"+# % sur les faiblesses"],
+  t_mains:[8,60,"Récolte # % plus rapide"],t_double:[6,50,"+# % de récolte double"],t_sac:[1500,0,"+# de poids"],t_metier:[5,60,"Métiers au niveau #"],
+  t_avar:[10,0,"+# % d'écus"],t_pros:[15,0,"+# Prospection"],t_trefle:[10,60,"Objets cliquables # % plus fréquents"],t_depart:[1000,0,"# écus au départ"],
+  t_doigts:[25,0,"+# % de dégâts de clic"],t_combo:[30,90,"Combo baisse # % moins vite"],t_dore:[2,25,"# % de frappe dorée ×10"],t_cmd:[20,0,"+# % de dégâts des compagnons"]};
+const dimR=r=>r<=10?r:10+Math.log(1+.08*(r-10))/.08;
+const talAt=(id,r)=>{const[v,cap]=TALV[id];return r<=0?0:cap?cap*(1-Math.pow(1-v/cap,r)):v*dimR(r)};
+const talV=id=>talAt(id,tal(id));
+const talTxt=(id,r)=>{const x=talAt(id,r),f=TALV[id][2];return f.replace("#",x>=100?fmt(Math.round(x)):(Math.round(x*10)/10).toString().replace(".",","))};
+const talCostAt=(id,r)=>Math.ceil(TAL[id].cost*(r+1)*Math.pow(1.04,r));
+const talCost=id=>talCostAt(id,tal(id));
+const talSpent=id=>{let n=0;for(let k=0;k<tal(id);k++)n+=talCostAt(id,k);return n};
 const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor(Math.pow(S.lvl-20,1.3)/3)+Math.floor((S.st.bossesLife||0)/5);
 /* Succès : chaque succès donne +1 % de dégâts et +1 % d'écus */
 const ROM=["I","II","III","IV","V","VI"];
+/* Icônes des succès : une par série (12×12 pixels) */
+const AICO={"kill":"M3 0h6v1h-6zM2 1h8v1h-8zM1 2h10v1h-10zM1 3h2v1h-2zM5 3h2v1h-2zM9 3h2v1h-2zM1 4h2v1h-2zM5 4h2v1h-2zM9 4h2v1h-2zM1 5h10v1h-10zM2 6h3v1h-3zM7 6h3v1h-3zM3 7h6v1h-6zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h1v1h-1zM3 9h6v1h-6zM4 10h4v1h-4z","lvl":"M5 0h2v1h-2zM4 1h4v1h-4zM3 2h6v1h-6zM2 3h8v1h-8zM1 4h4v1h-4zM7 4h4v1h-4zM4 5h4v1h-4zM4 6h4v1h-4zM4 7h4v1h-4zM4 8h4v1h-4zM2 9h8v1h-8zM2 10h8v1h-8z","ecu":"M3 1h6v1h-6zM2 2h1v1h-1zM9 2h1v1h-1zM2 3h8v1h-8zM3 4h6v1h-6zM2 5h1v1h-1zM9 5h1v1h-1zM2 6h8v1h-8zM3 7h6v1h-6zM2 8h1v1h-1zM9 8h1v1h-1zM2 9h8v1h-8zM3 10h6v1h-6z","boss":"M0 1h1v1h-1zM5 1h2v1h-2zM11 1h1v1h-1zM0 2h2v1h-2zM4 2h4v1h-4zM10 2h2v1h-2zM0 3h3v1h-3zM4 3h4v1h-4zM9 3h3v1h-3zM0 4h12v1h-12zM0 5h12v1h-12zM0 6h2v1h-2zM3 6h2v1h-2zM7 6h2v1h-2zM10 6h2v1h-2zM0 7h12v1h-12zM0 8h12v1h-12zM1 9h10v1h-10z","dg":"M4 0h4v1h-4zM2 1h8v1h-8zM1 2h3v1h-3zM8 2h3v1h-3zM1 3h2v1h-2zM9 3h2v1h-2zM0 4h2v1h-2zM10 4h2v1h-2zM0 5h2v1h-2zM4 5h4v1h-4zM10 5h2v1h-2zM0 6h2v1h-2zM4 6h1v1h-1zM7 6h1v1h-1zM10 6h2v1h-2zM0 7h2v1h-2zM4 7h1v1h-1zM7 7h1v1h-1zM10 7h2v1h-2zM0 8h2v1h-2zM4 8h1v1h-1zM7 8h1v1h-1zM10 8h2v1h-2zM0 9h2v1h-2zM4 9h4v1h-4zM10 9h2v1h-2zM0 10h12v1h-12zM0 11h12v1h-12z","tour":"M0 0h1v1h-1zM2 0h1v1h-1zM4 0h1v1h-1zM7 0h1v1h-1zM9 0h1v1h-1zM11 0h1v1h-1zM0 1h10v1h-10zM0 2h12v1h-12zM1 3h10v1h-10zM1 4h3v1h-3zM5 4h2v1h-2zM8 4h3v1h-3zM1 5h10v1h-10zM1 6h4v1h-4zM7 6h4v1h-4zM1 7h10v1h-10zM1 8h3v1h-3zM5 8h2v1h-2zM8 8h3v1h-3zM1 9h4v1h-4zM7 9h4v1h-4zM1 10h4v1h-4zM7 10h4v1h-4zM0 11h12v1h-12z","pk":"M5 0h1v1h-1zM5 1h1v1h-1zM4 2h3v1h-3zM0 3h11v1h-11zM1 4h9v1h-9zM2 5h7v1h-7zM2 6h7v1h-7zM1 7h4v1h-4zM6 7h4v1h-4zM1 8h3v1h-3zM7 8h3v1h-3zM1 9h1v1h-1zM9 9h1v1h-1zM10 11h1v1h-1z","craft":"M1 0h7v1h-7zM0 1h9v1h-9zM0 2h9v1h-9zM1 3h7v1h-7zM4 4h2v1h-2zM4 5h2v1h-2zM4 6h2v1h-2zM4 7h2v1h-2zM4 8h2v1h-2zM4 9h2v1h-2zM4 10h2v1h-2zM4 11h2v1h-2z","ench":"M5 0h1v1h-1zM4 1h3v1h-3zM3 2h5v1h-5zM2 3h7v1h-7zM1 4h9v1h-9zM0 5h11v1h-11zM1 6h9v1h-9zM2 7h7v1h-7zM3 8h5v1h-5zM4 9h3v1h-3zM5 10h1v1h-1z","combo":"M6 0h4v1h-4zM5 1h4v1h-4zM4 2h4v1h-4zM3 3h4v1h-4zM2 4h7v1h-7zM1 5h7v1h-7zM4 6h4v1h-4zM3 7h4v1h-4zM2 8h4v1h-4zM1 9h3v1h-3zM1 10h1v1h-1z","click":"M0 0h1v1h-1zM0 1h2v1h-2zM0 2h3v1h-3zM0 3h4v1h-4zM0 4h5v1h-5zM0 5h6v1h-6zM0 6h7v1h-7zM0 7h8v1h-8zM0 8h5v1h-5zM0 9h2v1h-2zM3 9h3v1h-3zM0 10h1v1h-1zM4 10h3v1h-3zM5 11h2v1h-2z","ally":"M0 0h2v1h-2zM0 1h10v1h-10zM0 2h12v1h-12zM0 3h12v1h-12zM0 4h10v1h-10zM0 5h12v1h-12zM0 6h10v1h-10zM0 7h2v1h-2zM0 8h2v1h-2zM0 9h2v1h-2zM0 10h2v1h-2zM0 11h4v1h-4z","job":"M2 0h6v1h-6zM1 1h8v1h-8zM0 2h2v1h-2zM7 2h3v1h-3zM7 3h4v1h-4zM7 4h1v1h-1zM9 4h2v1h-2zM6 5h2v1h-2zM10 5h2v1h-2zM5 6h2v1h-2zM4 7h2v1h-2zM3 8h2v1h-2zM2 9h2v1h-2zM1 10h2v1h-2zM0 11h2v1h-2z","quest":"M1 0h10v1h-10zM0 1h12v1h-12zM0 2h2v1h-2zM10 2h2v1h-2zM1 3h1v1h-1zM3 3h6v1h-6zM10 3h1v1h-1zM1 4h1v1h-1zM10 4h1v1h-1zM1 5h1v1h-1zM3 5h6v1h-6zM10 5h1v1h-1zM1 6h1v1h-1zM10 6h1v1h-1zM1 7h1v1h-1zM3 7h4v1h-4zM10 7h1v1h-1zM1 8h1v1h-1zM10 8h1v1h-1zM0 9h12v1h-12zM1 10h10v1h-10z","pot":"M4 0h4v1h-4zM4 1h4v1h-4zM5 2h2v1h-2zM4 3h1v1h-1zM7 3h1v1h-1zM3 4h1v1h-1zM8 4h1v1h-1zM2 5h1v1h-1zM9 5h1v1h-1zM1 6h10v1h-10zM1 7h10v1h-10zM1 8h10v1h-10zM1 9h10v1h-10zM2 10h8v1h-8z","rar":"M0 1h12v1h-12zM0 2h12v1h-12zM1 3h10v1h-10zM2 4h8v1h-8zM4 5h4v1h-4zM4 6h4v1h-4zM4 7h4v1h-4zM3 8h6v1h-6zM2 9h8v1h-8zM1 10h10v1h-10z","prest":"M3 0h6v1h-6zM1 1h10v1h-10zM0 2h3v1h-3zM9 2h3v1h-3zM0 3h2v1h-2zM10 3h2v1h-2zM0 4h2v1h-2zM10 4h2v1h-2zM0 5h2v1h-2zM10 5h2v1h-2zM0 6h3v1h-3zM9 6h3v1h-3zM1 7h3v1h-3zM8 7h3v1h-3zM2 8h2v1h-2zM8 8h2v1h-2zM2 9h2v1h-2zM8 9h2v1h-2zM0 10h4v1h-4zM8 10h4v1h-4zM0 11h4v1h-4zM8 11h4v1h-4z","best":"M4 0h1v1h-1zM7 0h1v1h-1zM3 1h2v1h-2zM7 1h2v1h-2zM3 2h2v1h-2zM7 2h2v1h-2zM0 3h1v1h-1zM11 3h1v1h-1zM0 4h2v1h-2zM9 4h3v1h-3zM0 5h2v1h-2zM4 5h4v1h-4zM10 5h2v1h-2zM3 6h6v1h-6zM2 7h8v1h-8zM2 8h8v1h-8zM2 9h8v1h-8zM3 10h6v1h-6z"};
+const achIcon=k=>`<svg viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" shape-rendering="crispEdges" d="${AICO[k]||AICO.kill}"/></svg>`;
+const achKey=a=>a.id.replace(/\d+$/,"");
 const ACH=[];
 const achSet=(key,name,unit,list,get)=>list.forEach((v,i)=>ACH.push({id:key+i,n:`${name} ${ROM[i]}`,unit,v,get,get txt(){return this.unit(this.v)}}));
 achSet("kill","Chasseur",v=>`Vaincre ${fmt(v)} monstres`,[10,100,1e3,1e4,1e5],()=>S.kills);
@@ -1094,7 +1129,7 @@ achSet("lvl","Aventurier",v=>`Atteindre le niveau ${v}`,[10,25,50,75,100,150,200
 achSet("ecu","Fortuné",v=>`Gagner ${fmt(v)} écus au total`,[1e3,1e5,1e6,1e8,1e10],()=>S.st.ecus||0);
 achSet("boss","Tueur de boss",v=>`Vaincre ${v} boss`,[1,10,100],()=>S.st.bosses||0);
 achSet("dg","Explorateur",v=>`Terminer ${v} donjon${v>1?"s":""}`,[1,10,50],()=>S.st.dungeons||0);
-achSet("tour","Grimpeur",v=>`Atteindre l'étage ${v} de la tour`,[10,25,50,100],()=>S.tower.best);
+achSet("tour","Grimpeur",v=>`Atteindre l'étage ${v} de la tour`,[10,25,50,100],()=>Math.max(S.tower.best,S.st.tower||0));
 achSet("pk","Attrape-tout",v=>`Attraper ${v} objet${v>1?"s":""} cliquable${v>1?"s":""}`,[1,25,100,500],()=>S.pkN||0);
 achSet("craft","Artisan",v=>`Fabriquer ${v} objet${v>1?"s":""}`,[1,10,50],()=>S.st.crafts||0);
 achSet("ench","Enchanteur",v=>`Enchanter un objet à +${v}`,[3,6,10],()=>S.st.enchMax||0);
@@ -1141,6 +1176,8 @@ const FORGE_W=[[90,10,0,0],[80,17,3,0],[70,24,6,0],[55,32,11,2],[40,37,18,5],[25
 const rarOf=i=>RAR[(i&&i.r)||0];
 /* Bonus secondaires des caractéristiques : un palier tous les 5 points (équipement compris) */
 const SEC_STEP=5;
+const PRIM_OK={};const lockA=(k,st)=>!!(SEC[k]?.cap&&!PRIM_OK[k]&&secMax(k,st[k]));
+const secMax=(k,v)=>SEC[k]&&SEC[k].cap&&secN(k,v)>=SEC[k].cap;
 const SEC={vit:{f:n=>`+${n} % de PV max`},sagesse:{cap:30,f:n=>`-${n} % de recharge des sorts`},agi:{cap:40,f:n=>`${n} % de chance d'attaquer deux fois`},
   feu:{f:n=>`+${2*n} % de dégâts critiques`},eau:{f:n=>`+${2*n} Prospection`},terre:{cap:40,f:n=>`-${n} % de dégâts subis`},air:{f:n=>`+${(n/2).toString().replace(".",",")} % de critique`}};
 const secN=(k,v)=>{const n=Math.floor(Math.max(0,v||0)/SEC_STEP);return SEC[k].cap?Math.min(SEC[k].cap,n):n};
@@ -1218,6 +1255,12 @@ let S;
 function fresh(){return{v:1,cls:null,name:"Aventurier",lvl:1,xp:0,pts:0,alloc:{vit:0,agi:0,sagesse:0,feu:0,eau:0,terre:0,air:0},ecus:0,hp:60,zone:0,mon:null,spawnT:0,
   res:{},items:[],equip:{},uid:1,jobs:{bucheron:{lvl:1,xp:0},mineur:{lvl:1,xp:0},paysan:{lvl:1,xp:0},herboriste:{lvl:1,xp:0}},job:null,cds:{},auto:{},buffs:[],dots:[],
   kills:0,pkN:0,seen:{},pkNext:20,pk:null,mode:"zone",zk:{},dg:null,timer:0,tower:{best:0,cur:1},allies:{},up:{},combo:0,comboT:0,best:{},st:{},souls:0,soulsTotal:0,prest:0,tal:{},ach:{},q:null,mk:{},mkPrev:{},mkT:0,autoPot:false,potCd:0,ev:null,evNext:90,opt:{},time:0,atkT:0,monT:0,ko:0,log:[],tab:"perso",last:Date.now()}}
+/* Trophée en double : fusionne avec celui qu'on a déjà (+1 rang). */
+function giveTrophy(id){const own=S.items.filter(x=>x.id===id);if(!own.length){S.items.push({u:S.uid++,id,e:0});return 0}
+  const eq=new Set(Object.values(S.equip)),t=own.find(x=>eq.has(x.u))||own[0];t.e=(t.e||0)+1;mx("trophyRank",t.e);dirty=true;log(`${ITEMS[id].name} fusionné : rang ${t.e+1}.`,"g");return t.e}
+function fuseTrophies(){const by={};S.items.forEach(x=>{if(ITEMS[x.id]?.slot==="trophee")(by[x.id]=by[x.id]||[]).push(x)});const eq=new Set(Object.values(S.equip)),drop=new Set();
+  for(const id in by){const L=by[id];if(L.length<2)continue;const k=L.find(x=>eq.has(x.u))||L[0];L.forEach(x=>{if(x!==k){k.e=(k.e||0)+1+(x.e||0);drop.add(x)}})}
+  if(drop.size){S.items=S.items.filter(x=>!drop.has(x));for(const k in S.equip)if([...drop].some(x=>x.u===S.equip[k]))S.equip[k]=null}}
 function load(){try{const r=localStorage.getItem(SAVE_KEY);if(r)return Object.assign(fresh(),JSON.parse(r))}catch(e){}return null}
 function save(){if(!S)return;S.last=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
 
@@ -1560,13 +1603,13 @@ const ELG={feu:'<path fill="currentColor" stroke="none" shape-rendering="crispEd
   air:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M8 0h2v1h-2zM7 1h5v1h-5zM6 2h3v1h-3zM10 2h2v1h-2zM6 3h2v1h-2zM10 3h2v1h-2zM2 4h10v1h-10zM1 5h10v1h-10zM1 8h13v1h-13zM2 9h13v1h-13zM9 10h2v1h-2zM13 10h2v1h-2zM1 11h6v1h-6zM9 11h6v1h-6zM1 12h6v1h-6zM10 12h4v1h-4zM11 13h2v1h-2z"/>',
   neutre:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M7 2h2v1h-2zM5 3h6v1h-6zM4 4h3v1h-3zM9 4h3v1h-3zM3 5h2v1h-2zM11 5h2v1h-2zM3 6h2v1h-2zM11 6h2v1h-2zM2 7h2v1h-2zM12 7h2v1h-2zM2 8h2v1h-2zM12 8h2v1h-2zM3 9h2v1h-2zM11 9h2v1h-2zM3 10h2v1h-2zM11 10h2v1h-2zM4 11h3v1h-3zM9 11h3v1h-3zM5 12h6v1h-6zM7 13h2v1h-2z"/>'};
 const elChip=(e,txt)=>`<span class="elc" data-tip="el:${e}" style="--c:${ELEMS[e].c}"><svg viewBox="0 0 24 24" aria-hidden="true">${ELG[e]}</svg>${txt??ELEMS[e].n}</span>`;
-function monRes(monEl,atk){if(atk==="neutre")return 0;if(BEATS[atk]===monEl)return RES_WEAK-(S&&S.tal?10*tal("t_elem"):0);if(atk===monEl)return RES_SELF;if(BEATS[monEl]===atk)return RES_STRONG;return 0}
+function monRes(monEl,atk){if(atk==="neutre")return 0;if(BEATS[atk]===monEl)return RES_WEAK-(S&&S.tal?talV("t_elem"):0);if(atk===monEl)return RES_SELF;if(BEATS[monEl]===atk)return RES_STRONG;return 0}
 const weakTo=e=>Object.keys(BEATS).find(k=>BEATS[k]===e);
 function heroSVG(k){return PX.img(PX.hero(k,CLASSES[k].col),"herofig")}
 const emb=(k,size=40)=>`<span class="emb" style="width:${size}px;height:${size}px;background:${shade(CLASSES[k].col,-.55)};color:${CLASSES[k].col}"><svg viewBox="0 0 24 24">${EMB[k]}</svg></span>`;
 
 /* ================= Calculs ================= */
-function itemStats(inst){const it=ITEMS[inst.id],m=(1+.1*(inst.e||0))*rarOf(inst).m,o={};for(const k in it.stats)o[k]=Math.round(it.stats[k]*m);return o}
+function itemStats(inst){const it=ITEMS[inst.id],m=(it.slot==="trophee"?1+.25*dimR(inst.e||0):1+.1*(inst.e||0))*rarOf(inst).m,o={};for(const k in it.stats)o[k]=Math.round(it.stats[k]*m);return o}
 function equipped(){return Object.values(S.equip).map(u=>S.items.find(i=>i.u===u)).filter(Boolean)}
 function setCounts(){const c={};equipped().forEach(i=>{const it=ITEMS[i.id];if(it.noSet||!it.set)return;c[it.set]=(c[it.set]||0)+1});return c}
 function stats(){
@@ -1576,11 +1619,11 @@ function stats(){
   const sc=setCounts();for(const z in sc){const b=SETB(z);setSteps(z).forEach(n=>{if(sc[z]>=n)add(b[n])})}
   s.prospection+=2*secN("eau",s.eau);s.crit+=secN("air",s.air)/2;s.critBonus=.02*secN("feu",s.feu);s.cdRed=secN("sagesse",s.sagesse)/100;s.dbl=secN("agi",s.agi)/100;s.resPct=secN("terre",s.terre)/100;
   let bd=1,bdef=1,bspd=1,bcrit=0,bpros=1,bxp=1;S.buffs.forEach(b=>{if(b.k==="pros")bpros*=b.v;if(b.k==="xp")bxp*=b.v;if(b.k==="dmg")bd*=b.v;if(b.k==="def")bdef*=b.v;if(b.k==="spd")bspd*=b.v;if(b.k==="crit")bcrit+=b.v});
-  s.crit+=2*tal("t_prec");s.prospection+=15*tal("t_pros");
-  s.maxHp=Math.round((50+8*S.lvl+2*s.vit)*C.hpMult*(1+.1*tal("t_vie"))*(1+secN("vit",s.vit)/100));
+  s.crit+=talV("t_prec");s.prospection+=Math.round(talV("t_pros"));
+  s.maxHp=Math.round((50+8*S.lvl+2*s.vit)*C.hpMult*(1+talV("t_vie")/100)*(1+secN("vit",s.vit)/100));
   s.el="neutre";let best=0;["feu","eau","terre","air"].forEach(e=>{if(s[e]>best){best=s[e];s.el=e}});
   s.elPow=(s.el==="neutre"?0:s[s.el])+s.puissance;
-  s.hit=(5+S.lvl*1.5+s.dmg)*(1+s.elPow/100)*bd*C.dmgMult*(1+s.pctDmg/100)*(1+(S.tower?.best||0)*.005)*(1+.1*tal("t_force"))*(1+.02*(S.souls||0))*(1+.01*achN())*(S.ev&&EVENTS.find(e=>e.id===S.ev.id)?.el===s.el?1.3:1);
+  s.hit=(5+S.lvl*1.5+s.dmg)*(1+s.elPow/100)*bd*C.dmgMult*(1+s.pctDmg/100)*(1+towerPct(S.tower?.best||0)/100)*(1+talV("t_force")/100)*(1+.02*(S.souls||0))*(1+.01*achN())*(S.ev&&EVENTS.find(e=>e.id===S.ev.id)?.el===s.el?1.3:1);
   s.critC=Math.min(100,s.crit+bcrit);s.critM=+(C.critMult+s.critBonus).toFixed(2);
   s.interval=Math.max(.3,1.3/(1+s.agi/150))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
@@ -1593,10 +1636,11 @@ const spCd=sp=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-stats().cdRed);
 function monsterStats(lvl){return{hp:Math.round(14+7*Math.pow(lvl,1.45)),atk:Math.round(2+1.5*Math.pow(lvl,1.2)),xp:Math.round(6+5*Math.pow(lvl,1.3)),ecus:Math.round(2+lvl*1.1)}}
 function makeMon(d,lvl,hpM=1,atkM=1,xpM=1,ecM=1){const ms=monsterStats(lvl),hp=Math.round(ms.hp*hpM);S.mon={id:d.id,lvl,hp,max:hp,atk:Math.round(ms.atk*atkM),xp:Math.round(ms.xp*xpM),ecus:Math.round(ms.ecus*ecM)};S.dots=[];S.monT=0;drawMonster()}
 function spawn(){const z=ZONES[S.zone],d=z.mons[rnd(0,2)],lvl=rnd(z.lvl[0],Math.min(z.lvl[1],Math.max(z.lvl[0],S.lvl+2)));makeMon(d,lvl)}
+const towerLvl=f=>Math.round(f*2+Math.pow(f,1.35)*.25),towerRec=f=>Math.round(6*f+.4*f*f),towerPct=b=>.5*dimR(b/2)*2;
 const bossTime=()=>BOSS_TIME+(up("sablier")?10:0),towerTime=()=>TOWER_TIME+(up("sablier")?10:0);
 function nextMon(){
   if(S.mode==="boss")makeMon(MON["boss_"+S.zone],ZONES[S.zone].lvl[1],12,1.3,10,15);
-  else if(S.mode==="tour"){const f=S.tower.cur,zi=Math.min(5,Math.floor((f-1)/14)),z=ZONES[zi],bossF=f%10===0;makeMon(bossF?MON["boss_"+zi]:z.mons[rnd(0,2)],f,bossF?8:2.5,bossF?1.3:1.15,.5,1)}
+  else if(S.mode==="tour"){const f=S.tower.cur,zi=Math.min(5,Math.floor((f-1)/14)),z=ZONES[zi],bossF=f%10===0;makeMon(bossF?MON["boss_"+zi]:z.mons[rnd(0,2)],towerLvl(f),bossF?8:2.5,bossF?1.3:1.15,.3,.4)}
   else if(S.mode==="donjon"){const z=ZONES[S.dg.z],L=z.lvl[1]+2;if(S.dg.wave<DG_WAVES)makeMon(z.mons[rnd(0,2)],L,2,1.1,2,2);else makeMon(MON["boss_"+S.dg.z],L,8,1.4,8,10)}
   else spawn();
 }
@@ -1614,7 +1658,7 @@ function endMode(win,why){
     if(S.mode==="donjon")log(`Donjon raté (${why}). La clé est perdue.`,"r")}
   S.mode="zone";S.dg=null;S.timer=0;S.mon=null;S.spawnT=.6;S.dots=[];drawZones();dirty=true;
 }
-function gatherTime(pid,t){const L=S.jobs[pid].lvl;return(3+t*1.2)*(1-Math.min(.4,(L-UNLOCK[t])*.01))*(up("outils1")?.8:1)*(up("outils2")?.8:1)*(1-.08*tal("t_mains"))}
+function gatherTime(pid,t){const L=S.jobs[pid].lvl;return(3+t*1.2)*(1-Math.min(.4,(L-UNLOCK[t])*.01))*(up("outils1")?.8:1)*(up("outils2")?.8:1)*(1-talV("t_mains")/100)}
 
 /* ================= Actions de jeu ================= */
 function gainXp(x){
@@ -1625,7 +1669,7 @@ function gainXp(x){
   mx("maxLvl",S.lvl);
   if(up){sfx("level");S.hp=stats().maxHp;dirty=true;drawSpells();drawZones();if(fx)toast(`Niveau ${S.lvl} !`)}
 }
-const bagCap=()=>1000+100*S.lvl+(up("sac1")?2000:0)+(up("sac2")?8000:0)+1500*tal("t_sac");
+const bagCap=()=>1000+100*S.lvl+(up("sac1")?2000:0)+(up("sac2")?8000:0)+Math.round(talV("t_sac"));
 function bagWeight(){const eq=new Set(Object.values(S.equip));let w=0;for(const k in S.res)w+=S.res[k]||0;S.items.forEach(i=>{if(!eq.has(i.u))w+=10});return w}
 let fullWarn=0;
 function addRes(id,n){let room=Math.max(0,bagCap()-bagWeight());
@@ -1634,18 +1678,27 @@ function addRes(id,n){let room=Math.max(0,bagCap()-bagWeight());
   if(n<=0){if(S.time-fullWarn>30){fullWarn=S.time;log("Sac plein : vendez des ressources dans l'Inventaire pour continuer à ramasser.","r");if(fx)toast("Sac plein")}return 0}
   S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
 function hitMon(r,kind){
-  if(!S.mon||S.ko>0)return;S.mon.hp-=r.v;inc("dmg",r.v);mx("maxHit",r.v);if(kind==="click"||kind==="spell")sfx(r.crit?"crit":"hit");
+  if(!S.mon||S.ko>0)return;if(fx&&(kind==="click"||kind==="spell"||kind==="auto"))heroAtk(kind==="spell");S.mon.hp-=r.v;inc("dmg",r.v);mx("maxHit",r.v);if(kind==="click"||kind==="spell")sfx(r.crit?"crit":"hit");
   if(fx){floatNum(fmt(r.v)+(r.crit?" !":""),(r.crit?"crit ":"")+(kind==="dot"?"dot ":"")+(r.r<0?"eff":r.r>0?"resi":""));const mb=$("mon");mb.classList.remove("hit");void mb.offsetWidth;mb.classList.add("hit")}
   if(S.mon.hp<=0)kill();
 }
+/* Attaque du héros : projectile pour le mage (orbe) et l'archer (flèche), coup au corps à corps sinon */
+let atkT=0;
+function heroAtk(big){const now=performance.now();if(!big&&now-atkT<110)return;atkT=now;const h=$("ahero"),m=$("monBtn"),box=$("mon");if(!h||h.hidden||!m)return;
+  const ranged=S.cls==="mage"||S.cls==="archer";h.classList.remove("atk","cast");void h.offsetWidth;h.classList.add(ranged?"cast":"atk");
+  if(!ranged){const sl=document.createElement("i");sl.className="slash"+(big?" big":"");sl.style.left=(m.offsetLeft+m.offsetWidth*.3)+"px";sl.style.top=(m.offsetTop+m.offsetHeight*.25)+"px";box.appendChild(sl);setTimeout(()=>sl.remove(),260);return}
+  const p=document.createElement("i");p.className=(S.cls==="mage"?"orb":"arrow")+(big?" big":"");const x0=h.offsetLeft+h.offsetWidth*.75,y0=h.offsetTop+h.offsetHeight*.42,x1=m.offsetLeft+m.offsetWidth*.42,y1=m.offsetTop+m.offsetHeight*.5;
+  p.style.left=x0+"px";p.style.top=y0+"px";box.appendChild(p);const d=S.cls==="mage"?240:170;
+  p.animate([{transform:"translate(0,0) scale(.6)"},{transform:`translate(${(x1-x0)/2}px,${(y1-y0)/2-(S.cls==="archer"?14:6)}px) scale(1)`},{transform:`translate(${x1-x0}px,${y1-y0}px) scale(1)`}],{duration:d,easing:"linear"}).onfinish=()=>{p.remove();
+    if(S.cls==="mage"){const b=document.createElement("i");b.className="burst"+(big?" big":"");b.style.left=x1+"px";b.style.top=y1+"px";box.appendChild(b);setTimeout(()=>b.remove(),300)}}}
 function kill(){
   const m=S.mon,d=MON[m.id],st=stats(),mode=S.mode,xp=Math.round(m.xp*st.xpM),ec=gainEcus(m.ecus*(1+st.pctEcus/100)*(.8+Math.random()*.4)*(1+(st.pros-1)/2)*(evOn("heure")?2:1));
   S.kills++;S.best[m.id]=(S.best[m.id]||0)+1;dirty=true;let dropTxt="";qProg("kill",m.id);qProg("killEl",d.el);
   if(d.boss&&mode!=="tour"){const n=addRes(d.drop[0],1+(Math.random()<(st.pros-1)/4?1:0));if(n)dropTxt=`, ${n>1?n+"× ":""}${d.drop[1]}`;
     {const nb=addRes(d.bres[0],(mode==="donjon"?2:1)+(Math.random()<Math.min(.9,(st.pros-1)/3)?1:0));if(nb)dropTxt+=`, ${nb>1?nb+"× ":""}${d.bres[1]}`}
-    if(Math.random()<.25){S.seen["tb_"+d.zone]=1;S.items.push({u:S.uid++,id:"tb_"+d.zone,e:0});log(`Butin rare : ${ITEMS["tb_"+d.zone].name} !`,"g");if(fx)toast(`Trophée de boss obtenu !`)}}
+    if(Math.random()<.25){S.seen["tb_"+d.zone]=1;giveTrophy("tb_"+d.zone);log(`Butin rare : ${ITEMS["tb_"+d.zone].name} !`,"g");if(fx)toast(`Trophée de boss obtenu !`)}}
   else if(!d.boss){(LOOT[d.id]||[]).forEach(l=>{const ch=lootChance(d.id,l.p);let n=Math.floor(ch)+(Math.random()<ch%1?1:0);if(n<=0)return;
-      if(l.item){const first=!seen(l.id);S.seen[l.id]=1;S.items.push({u:S.uid++,id:l.id,e:0});log(`Butin rare : ${ITEMS[l.id].name} !`,"g");if(fx)toast(`Trophée obtenu : ${d.name}`);return}
+      if(l.item){const first=!seen(l.id);S.seen[l.id]=1;giveTrophy(l.id);log(`Butin rare : ${ITEMS[l.id].name} !`,"g");if(fx)toast(`Trophée obtenu : ${d.name}`);return}
       const first=!seen(l.id);n=addRes(l.id,n);if(!n)return;dropTxt+=`, ${n>1?n+"× ":""}${l.p<.06?`<b style="color:var(--gold)">${l.n}</b>`:l.n}`;
       if(l.p<.06){log(`Butin ${rareLbl(l.p).toLowerCase()} : <b>${l.n}</b> (${Math.round(l.p*1000)/10} %)${first?" · première fois !":""}`,"g");if(fx)toast(`${first?"Découverte":"Butin rare"} : ${l.n}`)}
       else if(first&&fx)toast(`Nouveau butin découvert : ${l.n}`)})}
@@ -1653,10 +1706,10 @@ function kill(){
   S.mon=null;S.spawnT=.5;S.dots=[];sfx(d.boss?"boss":"kill");gainXp(xp);
   if(mode==="zone")S.zk[S.zone]=Math.min(BOSS_KILLS,(S.zk[S.zone]||0)+1);
   if(mode==="boss"){inc("bosses");inc("bossesLife");qProg("boss");S.zk[S.zone]=0;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
-  if(mode==="tour"){const f=S.tower.cur;if(f>S.tower.best){S.tower.best=f;const g=gainEcus(15*f+2*f*f);log(`Tour : nouveau record, étage ${f} ! <span class="g">+${fmt(g)} écus</span>`,"g")}mx("tower",S.tower.best);S.tower.cur++;S.timer=towerTime();S.spawnT=.3}
+  if(mode==="tour"){const f=S.tower.cur;if(f>S.tower.best){S.tower.best=f;const g=gainEcus(towerRec(f));log(`Tour : nouveau record, étage ${f} ! <span class="g">+${fmt(g)} écus</span>`,"g")}mx("tower",S.tower.best);S.tower.cur++;S.timer=towerTime();S.spawnT=.3}
   if(mode==="donjon"){S.dg.wave++;if(S.dg.wave>DG_WAVES){const zi=S.dg.z,z=ZONES[zi],g=gainEcus(farmGold(600)),got=[];
       z.mons.forEach(mm=>{const n=addRes(mm.drop[0],rnd(5,10));if(n)got.push(`${n}× ${mm.drop[1]}`)});
-      if(Math.random()<.4){S.items.push({u:S.uid++,id:"tb_"+zi,e:0});got.push(ITEMS["tb_"+zi].name)}
+      if(Math.random()<.4){giveTrophy("tb_"+zi);got.push(ITEMS["tb_"+zi].name)}
       inc("dungeons");log(`Coffre du donjon ${DUNGEONS[zi]} : <span class="g">+${fmt(g)} écus</span>${got.length?", "+got.join(", "):""}`,"g");if(fx)toast(`Donjon terminé : +${fmt(g)} écus`);endMode(true)}}
 }
 function cast(sp,auto){
@@ -1671,7 +1724,7 @@ function cast(sp,auto){
   if(!auto&&fx)log(`Vous lancez ${sp.name}.`,"w");
 }
 function gainGather(pid,rid,quiet){
-  const p=S.jobs[pid],r=RES[rid];let n=1+(Math.random()<Math.min(.5,p.lvl/120)+.06*tal("t_double")?1:0);
+  const p=S.jobs[pid],r=RES[rid];let n=1+(Math.random()<Math.min(.5,p.lvl/120)+talV("t_double")/100?1:0);
   n=addRes(rid,n);if(!n)return 0;qProg("gather",rid,n);if(p.lvl<PROF_MAX){p.xp+=Math.round(8*Math.pow(r.tier+1,1.6));
     while(p.lvl<PROF_MAX&&p.xp>=pxNeed(p.lvl)){p.xp-=pxNeed(p.lvl);p.lvl++;if(!quiet){log(`${PROFS[pid].name} niveau ${p.lvl} !`,"g");const nu=UNLOCK.indexOf(p.lvl);if(nu>=0)log(`Nouvelle ressource : ${PROFS[pid].res[nu][1]}.`,"g")}}}
   return n;
@@ -1696,7 +1749,7 @@ function drawPk(){const old=$("pk");if(old)old.remove();if(!S.pk)return;const p=
   b.style.left=S.pk.x+"%";b.style.top=S.pk.y+"%";b.style.setProperty("--g",p.g);b.innerHTML=PX.img(PX.pickup(p.id));$("arena").appendChild(b)}
 function pkBuff(k,v,d,n){S.buffs=S.buffs.filter(b=>b.n!==n);S.buffs.push({k,v,until:S.time+d,n})}
 function takePk(){
-  if(!S.pk)return;sfx("pickup");const p=PICKUPS.find(q=>q.id===S.pk.id);S.pk=null;drawPk();S.pkN++;S.pkNext=S.time+(PK_MIN+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-.1*tal("t_trefle"))*(evOn("nuit")?.5:1);inc("pickups");qProg("pickup");
+  if(!S.pk)return;sfx("pickup");const p=PICKUPS.find(q=>q.id===S.pk.id);S.pk=null;drawPk();S.pkN++;S.pkNext=S.time+(PK_MIN+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)*(evOn("nuit")?.5:1);inc("pickups");qProg("pickup");
   let msg="";
   const gold=m=>{const g=gainEcus(farmGold(120)*m);return`+${fmt(g)} écus`};
   const xp=()=>{if(S.lvl>=LVL_MAX)return gold(1);const x=Math.max(5,Math.round(xpNeed(S.lvl)*.06));gainXp(x);return`+${fmt(x)} XP`};
@@ -1824,7 +1877,7 @@ function tipFor(el){
   if(t==="i")return ITEMS[id]?tipItem(ITEMS[id],null):"";
   if(t==="r")return RES[id]?tipRes(id):"";
   if(t==="s"){const B=statBreak()[id],L={hp:"Points de vie",dmg:"Dégâts par coup",agi:"Agilité",crit:"Coups critiques",dodge:"Esquive",prospection:"Prospection",xp:"Bonus d'expérience",dps:"Dégâts par seconde"}[id]||STAT_LBL[id]||id;
-    return TL(L,`<div class="tt">${STAT_INFO[id]||""}</div>${SEC[id]?`<div class="ts">Tous les ${SEC_STEP} points : ${SEC[id].f(1)}${SEC[id].cap?` (max ${SEC[id].f(SEC[id].cap)})`:""}</div><div>Bonus actuel : <b>${secTxt(id,st[id])}</b></div><div class="tt">Prochain palier à ${(Math.floor((st[id]||0)/SEC_STEP)+1)*SEC_STEP} points</div>`:""}${B?sep+`<div>Classe : <b>${fmt(B.base)}</b></div><div>Points investis : <b>${fmt(B.pts)}</b></div><div>Équipement : <b>${fmt(B.eq)}</b></div><div>Panoplies : <b>${fmt(B.set)}</b></div><div class="tg">Total : ${fmt(B.base+B.pts+B.eq+B.set)}</div>`:""}`)}
+    return TL(L,`<div class="tt">${STAT_INFO[id]||""}</div>${SEC[id]?`<div class="ts">Tous les ${SEC_STEP} points : ${SEC[id].f(1)}${SEC[id].cap?` (max ${SEC[id].f(SEC[id].cap)})`:""}</div><div>Bonus actuel : <b>${secTxt(id,st[id])}</b></div><div class="tt">${secMax(id,st[id])?"Bonus secondaire au maximum.":`Prochain palier à ${(Math.floor((st[id]||0)/SEC_STEP)+1)*SEC_STEP} points`}</div>`:""}${B?sep+`<div>Classe : <b>${fmt(B.base)}</b></div><div>Points investis : <b>${fmt(B.pts)}</b></div><div>Équipement : <b>${fmt(B.eq)}</b></div><div>Panoplies : <b>${fmt(B.set)}</b></div><div class="tg">Total : ${fmt(B.base+B.pts+B.eq+B.set)}</div>`:""}`)}
   if(t==="el"){const e=ELEMS[id];if(id==="neutre")return TL("Neutre",`<div class="tt">Aucun élément : ni bonus ni malus. Investissez des points en Feu, Eau, Terre ou Air pour choisir votre élément.</div>`);
     const w=weakTo(id),beat=BEATS[id];return TL(`<span style="color:${e.c}">${e.n}</span>`,`<div>Fort contre : <b>${ELEMS[beat].n}</b> (+${-RES_WEAK} % de dégâts)</div><div>Faible contre : <b>${ELEMS[w].n}</b></div>${sep}<div class="tt">Monstres ${e.n} : ${Object.values(MON).filter(m=>m.el===id&&!m.boss).map(m=>m.name).join(", ")}</div>`)}
   if(t==="sp"){const sp=CLASSES[S.cls].spells.find(x=>x.id===id),C=CLASSES[S.cls];if(!sp)return"";const fx=sp.fx.map(f=>f.t==="hit"?`Dégâts : <b>~${fmt(st.hit*f.m*C.spellMult)}</b>`:f.t==="dot"?`Dégâts sur la durée : <b>~${fmt(st.hit*f.m*C.spellMult)}</b>/s pendant ${f.d} s`:f.t==="heal"?`Soin : <b>${fmt(st.maxHp*f.p)}</b> PV`:`${f.k==="dmg"?"Dégâts":f.k==="spd"?"Vitesse":f.k==="def"?"Dégâts subis":"Critique"} ${f.k==="crit"?"+"+f.v+" %":"×"+String(f.v).replace(".",",")} pendant ${f.d} s`).map(x=>`<div class="ts">${x}</div>`).join("");
@@ -1833,15 +1886,16 @@ function tipFor(el){
   if(t==="b"){const z=ZONES[+id],b=MON["boss_"+id],ms=monsterStats(z.lvl[1]),hp=Math.round(ms.hp*12),res=monRes(b.el,st.el),ef=st.dps*(1-res/100)+allyDps(),tk=hp/Math.max(1,ef);
     return TL(b.name,`<div class="tt">Boss de ${z.name} · niveau ${z.lvl[1]}</div>${sep}<div>PV : <b>${fmt(hp)}</b> · attaque <b>${fmt(ms.atk*1.3)}</b></div><div>Élément : <span style="color:${ELEMS[b.el].c}">${ELEMS[b.el].n}</span> · contre vous : <b>${res>0?"résiste "+res+" %":res<0?"faible ("+(-res)+" %)":"neutre"}</b></div><div class="${tk<=bossTime()?"ts":"tn"}">Temps estimé : ${tk<600?Math.ceil(tk)+" s":"trop long"} (chrono ${bossTime()} s)</div>${sep}<div class="tt">Récompenses : clé du donjon, 10× l'XP, 15× les écus, 25 % de chance d'un trophée de boss.</div>`)}
   if(t==="dg"){const z=ZONES[+id],L=z.lvl[1]+2,ms=monsterStats(L);return TL(DUNGEONS[+id],`<div class="tt">Niveau ${L} · ${DG_WAVES-1} vagues puis le boss</div>${sep}<div>Monstres : <b>${fmt(ms.hp*2)}</b> PV</div><div>Boss : <b>${fmt(ms.hp*8)}</b> PV</div><div>Clés : <b>${S.res["cle_"+id]||0}</b></div>${sep}<div class="tt">Coffre final : ~${fmt(farmGold(600))} écus, 5 à 10 butins de chaque monstre, 40 % de chance d'un trophée de boss. Un K.O. fait perdre la clé.</div>`)}
-  if(t==="tw"){const f=Math.max(1,Math.floor(S.tower.best*.8)),n=S.tower.best+1;return TL("Tour infinie",`<div>Record : <b>étage ${S.tower.best}</b></div><div class="ts">Bonus permanent : +${(S.tower.best*.5).toFixed(1)} % de dégâts</div>${sep}<div>Départ : étage ${f}</div><div>Étage ${n} : ~${fmt(monsterStats(n).hp*(n%10?2.5:8))} PV${n%10?"":" (boss)"}</div><div class="tt">Nouveau record : +${fmt(15*n+2*n*n)} écus</div>`)}
+  if(t==="tw"){const f=Math.max(1,Math.floor(S.tower.best*.8)),n=S.tower.best+1;return TL("Tour infinie",`<div>Record : <b>étage ${S.tower.best}</b></div><div class="ts">Bonus permanent : +${towerPct(S.tower.best).toFixed(1)} % de dégâts</div>${sep}<div>Départ : étage ${f}</div><div>Étage ${n} : monstre niveau <b>${towerLvl(n)}</b>, ~${fmt(monsterStats(towerLvl(n)).hp*(n%10?2.5:8))} PV${n%10?"":" (boss)"}</div><div class="tt">Nouveau record : +${fmt(towerRec(n))} écus</div><div class="tt">Le bonus de dégâts ralentit après l'étage 20.</div>`)}
   if(t==="al"){const i=+id,[aid,n,base,cost]=ALLIES[i],l=S.allies[aid]||0,d=allyDpsOf(i,l),tot=allyDps(),nx=(Math.floor(l/25)+1)*25;let c10=0;for(let k=0;k<10;k++)c10+=allyCost(i,l+k);
-    return TL(n,`<div class="tt">Niveau ${l}</div>${sep}<div>Dégâts : <b>${fmt(d)}</b>/s${tot?` (${Math.round(d/tot*100)} % du groupe)`:""}</div><div>Base : ${fmt(base)}/s par niveau × ${fmt(allyMult())}</div><div class="ts">Niveau ${nx} : dégâts ×2</div>${sep}<div>Prochain niveau : <b>${fmt(allyCost(i,l))}</b> écus</div><div>+10 niveaux : <b>${fmt(c10)}</b> écus</div>`)}
+    return TL(n,`<div class="tt">Niveau ${l}</div>${sep}<div>Dégâts : <b>${fmt(d)}</b>/s${tot?` (${Math.round(d/tot*100)} % du groupe)`:""}</div><div>Base : ${fmt(base*.4)}/s par niveau × ${fmt(allyMult())}</div><div class="ts">Niveau ${nx} : dégâts ×1,5</div>${sep}<div>Prochain niveau : <b>${fmt(allyCost(i,l))}</b> écus</div><div>+10 niveaux : <b>${fmt(c10)}</b> écus</div>`)}
   if(t==="up"){const u=UPGS.find(x=>x[0]===id),own=up(id);return TL(u[1],`<div class="ts">${u[2]}</div>${sep}<div>${own?'<span class="tg">Déjà acheté</span>':`Prix : <b>${fmt(u[3])}</b> écus${S.ecus<u[3]?` <span class="tn">(il manque ${fmt(u[3]-S.ecus)})</span>`:""}`}</div><div class="tt">Achat définitif, perdu au passage Oméga.</div>`)}
-  if(t==="tal"){const T=TAL[id],r=tal(id);let spent=0;for(let k=0;k<r;k++)spent+=T.cost*(k+1);return TL(T.n,`<div class="tt">Branche ${T.br}</div><div class="ts">${T.txt}</div>${sep}<div>Rang : <b>${r}/${T.max}</b></div>${r<T.max?`<div>Rang suivant : <b>${talCost(id)}</b> éclats</div>`:""}<div class="tt">Éclats investis : ${spent}</div>${T.prev&&!tal(T.prev)?`<div class="tn">Demande ${TAL[T.prev].n}</div>`:""}`)}
+  if(t==="tal"){const T=TAL[id],r=tal(id),cap=TALV[id][1];return TL(T.n,`<div class="tt">Branche ${T.br} · rangs illimités</div>${sep}<div>Rang <b>${r}</b> : <b>${r?talTxt(id,r):"aucun effet"}</b></div><div class="ts">Rang ${r+1} : ${talTxt(id,r+1)}</div><div>Coût : <b>${talCost(id)}</b> éclats</div><div class="tt">${cap?`Plafond : ${talTxt(id,1e6)}. Chaque rang vous en rapproche.`:"Pas de plafond : 10 rangs pleins, puis chaque rang rapporte un peu moins."}</div><div class="tt">Éclats investis : ${talSpent(id)}</div>${T.prev&&!tal(T.prev)?`<div class="tn">Demande ${TAL[T.prev].n}</div>`:""}`)}
   if(t==="ach"){const a=ACH.find(x=>x.id===id),d=!!S.ach[id];return TL(a.n,`<div class="tt">${a.txt}</div>${sep}<div>${d?'<span class="tg">Débloqué</span>':`Progression : <b>${fmt(Math.min(a.v,a.get()))} / ${fmt(a.v)}</b>`}</div><div class="ts">Récompense : +1 % de dégâts et d'écus</div>`)}
   if(t==="m"){const m=MON[id],k=S.best[id]||0,known=k>0;if(!known)return TL("???",`<div class="tt">Créature jamais vaincue. Elle vit dans ${ZONES[m.zone].name}.</div>${sep}${lootHTML(id)}`);const tr=bestTier(id),nx=BEST_T[tr];
     return TL(m.name,`<div class="tt">${ZONES[m.zone].name}${m.boss?" · boss":""}</div><div>Élément : <span style="color:${ELEMS[m.el].c}">${ELEMS[m.el].n}</span> · faible à ${ELEMS[weakTo(m.el)].n}</div>${sep}${lootHTML(id)}${sep}<div>Victoires : <b>${fmt(k)}</b>${nx?` · palier suivant à ${fmt(nx)}`:""}</div><div class="ts">Bonus actuel : +${tr*5} % de dégâts, +${tr*10} % de butin</div>`)}
   if(t==="q"){const q=S.q&&S.q.list[+id];if(!q)return"";return TL(q.txt,`<div>Progression : <b>${fmt(q.have)} / ${fmt(q.need)}</b></div>${sep}<div class="ts">+${fmt(q.ecus)} écus${q.xp?` · +${fmt(q.xp)} XP`:""}</div><div class="tt">Les trois quêtes du jour donnent en plus 1 éclat d'âme.</div>`)}
+  if(t==="cl"){const c=CLASSES[id];return TL(c.name,`<div class="ts">${c.desc}</div>${sep}<div class="tt">Sorts : ${c.spells.map(x=>x.name).join(", ")}</div>`)}
   if(t==="lk")return TL("Onglet verrouillé",`<div>Se débloque au <b>niveau ${TAB_LOCK[id]}</b>${id==="prest"?" (ou après une renaissance)":""}.</div><div class="tt">Vous êtes niveau ${S.lvl}.</div>`);
   if(t==="hd"){if(id==="xp"){const need=xpNeed(S.lvl);return TL(`Niveau ${S.lvl}`,`<div>${S.lvl>=LVL_MAX?"Niveau maximum":`<b>${fmt(S.xp)}</b> / ${fmt(need)} XP (${Math.floor(S.xp/need*100)} %)`}</div><div class="tt">Bonus d'XP : ×${st.xpM.toFixed(2)}</div><div class="tt">+${PTS_PER_LVL} points de caractéristiques par niveau</div>`)}
     return TL("Écus",`<div><b>${fmt(S.ecus)}</b> en poche</div><div class="tt">Gagnés au total : ${fmt(S.st.ecus||0)}</div>${sep}<div class="tt">Victoires, objets cliquables, ventes, quêtes et coffres de donjon.</div>`)}
@@ -1858,7 +1912,7 @@ setInterval(()=>{if(tipEl&&!$("tip").hidden){if(!tipEl.isConnected){tipEl=null;$
 /* ================= Onglets verrouillés ================= */
 const TAB_LOCK={atelier:3,metiers:4,aventure:6,allies:8,shop:10,quests:12,market:15,coll:18,prest:PREST_LVL};
 const UNL_TXT={atelier:"Fabriquez les pièces de panoplie avec le butin des monstres, et tentez la forge pour une meilleure rareté.",metiers:"Bûcheron, Mineur, Paysan et Herboriste récoltent pendant que vous combattez, et même quand le jeu est fermé.",
-  aventure:"Boss de zone avec chrono, donjons et tour infinie. La barre au-dessus de l'arène affiche aussi votre progression vers le boss.",allies:"Recrutez des compagnons qui frappent tout seuls. Leurs dégâts doublent tous les 25 niveaux.",
+  aventure:"Boss de zone avec chrono, donjons et tour infinie. La barre au-dessus de l'arène affiche aussi votre progression vers le boss.",allies:"Recrutez des compagnons qui frappent tout seuls. Leurs dégâts augmentent de 50 % tous les 25 niveaux.",
   shop:"Des améliorations définitives payées en écus : clic plus fort, clic automatique, sac agrandi, outils…",quests:"Trois quêtes par jour, avec écus et XP. Terminez les trois pour un éclat d'âme.",
   market:"Les prix des ressources changent chaque minute. Vendez au bon moment !",coll:"Vos succès (chacun +1 % de dégâts et d'écus) et le bestiaire, avec les taux de drop à découvrir.",
   prest:"Oméga : renaissez contre des éclats d'âme et débloquez des talents permanents."};
@@ -1866,12 +1920,12 @@ const UNL_DETAIL={
   atelier:"Chaque monstre a sa panoplie. Ouvrez une panoplie pour voir ses pièces et leur recette. Le « ! » signale ce que vous pouvez fabriquer. À la forge, frappez trois fois au bon moment : plus votre score est haut, plus la rareté est belle (jusqu'à Légendaire, +60 % de statistiques).",
   metiers:"Choisissez une ressource à récolter : la récolte tourne pendant les combats et même jeu fermé. Chaque métier monte en niveau et débloque de nouvelles ressources, indispensables aux recettes de l'atelier.",
   aventure:"Battez 10 monstres d'une zone pour défier son boss avant la fin du chrono. Le boss lâche une clé de donjon : 4 vagues puis le boss, avec un gros coffre. La tour infinie donne +0,5 % de dégâts pour toujours à chaque étage record.",
-  allies:"Les compagnons frappent tout seuls, même pendant les boss et les donjons. Chaque niveau coûte un peu plus cher, et leurs dégâts doublent tous les 25 niveaux. Le bouton « Max » achète autant de niveaux que possible.",
+  allies:"Les compagnons frappent tout seuls, même pendant les boss et les donjons. Chaque niveau coûte un peu plus cher, et leurs dégâts augmentent de 50 % tous les 25 niveaux. Le bouton « Max » achète autant de niveaux que possible.",
   shop:"Des achats définitifs : clic plus fort, clic automatique, sac plus grand, outils plus rapides, compagnons renforcés… Ils sont perdus à la renaissance Oméga, mais les premiers sont vite rentabilisés.",
   quests:"Trois quêtes par jour, renouvelées chaque matin. Récupérez la récompense quand une quête est terminée. Les trois quêtes réussies donnent en plus un éclat d'âme. Vous pouvez changer une quête par jour.",
   market:"Chaque ressource a un cours qui varie toutes les minutes entre ×0,5 et ×2. Vendez quand le cours est haut (en vert). Vendre beaucoup d'un coup fait baisser le cours de cette ressource.",
   coll:"Les succès donnent chacun +1 % de dégâts et d'écus pour toujours. Le bestiaire liste toutes les créatures, leurs paliers de victoires (bonus de dégâts et de butin) et leurs taux de drop, en « ??? » tant que vous n'avez pas obtenu l'objet.",
-  prest:"Oméga vous fait renaître au niveau 1 contre des éclats d'âme. Vous perdez votre niveau, vos objets et vos écus, mais gardez talents, succès, bestiaire et record de la tour. Les éclats s'investissent dans l'arbre de talents et donnent aussi +2 % de dégâts chacun tant qu'ils ne sont pas dépensés."};
+  prest:"Oméga vous fait renaître au niveau 1 contre des éclats d'âme. Vous perdez votre niveau, vos objets et vos écus, mais gardez talents, succès et bestiaire. La tour repart de zéro. Les éclats s'investissent dans l'arbre de talents et donnent aussi +2 % de dégâts chacun tant qu'ils ne sont pas dépensés."};
 const unlTour=t=>[{sel:`[data-a="tab"][data-t="${t}"]`,t:`Nouvel onglet : ${tabName(t)}`,d:UNL_TXT[t]},{tab:t,sel:"#panel",t:tabName(t),d:UNL_DETAIL[t]}];
 const tabOpen=t=>!TAB_LOCK[t]||!!(S&&S.unl&&S.unl[t]);
 const tabName=t=>(TABS.find(x=>x[0]===t)||[t,t])[1];
@@ -1893,20 +1947,22 @@ function nextGoals(){const G=[],lp=n=>Math.min(1,(S.lvl-1+S.xp/xpNeed(S.lvl))/Ma
   if(lt)G.push({ic:"lock",t:`Onglet ${tabName(lt)}`,s:`niveau ${TAB_LOCK[lt]}`,p:lp(TAB_LOCK[lt]),tip:"lk:"+lt});
   const sp=C.spells.find(x=>x.lvl>S.lvl);if(sp)G.push({ic:"sp",t:`Sort : ${sp.name}`,s:`niveau ${sp.lvl}`,p:lp(sp.lvl)});
   const z=ZONES.find(x=>x.lvl[0]>S.lvl);if(z)G.push({ic:"zone",t:z.name,s:`niveau ${z.lvl[0]}`,p:lp(z.lvl[0]),tip:"z:"+z.i});
-  if(tabOpen("aventure")&&S.mode==="zone"){const k=S.zk[S.zone]||0;G.push({ic:"boss",t:k>=BOSS_KILLS?`Boss prêt : ${MON["boss_"+S.zone].name}`:`Boss : ${MON["boss_"+S.zone].name}`,s:k>=BOSS_KILLS?"touche B":`${k}/${BOSS_KILLS} monstres`,p:k/BOSS_KILLS,ready:k>=BOSS_KILLS,tip:"b:"+S.zone})}
-  if(tabOpen("shop")){const u=UPGS.filter(x=>!up(x[0])).sort((a,b)=>a[3]-b[3])[0];if(u)G.push({ic:"shop",t:u[1],s:S.ecus>=u[3]?"à acheter !":`${fmt(u[3]-S.ecus)} écus`,p:S.ecus/u[3],ready:S.ecus>=u[3],tip:"up:"+u[0]})}
+  if(tabOpen("aventure")&&S.mode==="zone"){const k=S.zk[S.zone]||0;G.push({ic:"boss",act:k>=BOSS_KILLS?`data-a="mode" data-m="boss">Défier`:"",t:k>=BOSS_KILLS?`Boss prêt : ${MON["boss_"+S.zone].name}`:`Boss : ${MON["boss_"+S.zone].name}`,s:k>=BOSS_KILLS?"touche B":`${k}/${BOSS_KILLS} monstres`,p:k/BOSS_KILLS,ready:k>=BOSS_KILLS,tip:"b:"+S.zone})}
+  if(tabOpen("shop")){const u=UPGS.filter(x=>!up(x[0])).sort((a,b)=>a[3]-b[3])[0];if(u)G.push({ic:"shop",act:`data-a="buy" data-u="${u[0]}">Acheter`,t:u[1],s:S.ecus>=u[3]?"à acheter !":`${fmt(u[3]-S.ecus)} écus`,p:S.ecus/u[3],ready:S.ecus>=u[3],tip:"up:"+u[0]})}
   if(tabOpen("allies")){let bi=-1,bc=Infinity;ALLIES.forEach((a,i)=>{const l=S.allies[a[0]]||0;if(i>0&&!(S.allies[ALLIES[i-1][0]]>0)&&!l)return;const c=allyCost(i,l);if(c<bc){bc=c;bi=i}});
-    if(bi>=0)G.push({ic:"ally",t:`${ALLIES[bi][1]} niv. ${(S.allies[ALLIES[bi][0]]||0)+1}`,s:S.ecus>=bc?"à recruter !":`${fmt(bc-S.ecus)} écus`,p:S.ecus/bc,ready:S.ecus>=bc,tip:"al:"+bi})}
-  if(S.pts>0)G.push({ic:"pts",t:`${S.pts} point${S.pts>1?"s":""} à répartir`,s:"Personnage",p:1,ready:true});
+    if(bi>=0)G.push({ic:"ally",act:`data-a="ally" data-i="${bi}" data-n="1">Recruter`,t:`${ALLIES[bi][1]} niv. ${(S.allies[ALLIES[bi][0]]||0)+1}`,s:S.ecus>=bc?"à recruter !":`${fmt(bc-S.ecus)} écus`,p:S.ecus/bc,ready:S.ecus>=bc,tip:"al:"+bi})}
+  if(S.pts>0)G.push({ic:"pts",act:`data-a="tab" data-t="perso">Répartir`,t:`${S.pts} point${S.pts>1?"s":""} à répartir`,s:"Personnage",p:1,ready:true});
   if(tabOpen("atelier")){const it=Object.values(ITEMS).filter(i=>i.set&&S.lvl>=i.lvl&&!S.items.some(x=>x.id===i.id)).map(i=>({i,r:i.recipe.reduce((a,[x,q])=>a+Math.min(1,(S.res[x]||0)/q),0)/i.recipe.length})).sort((a,b)=>b.r-a.r)[0];
-    if(it)G.push({ic:"craft",t:it.i.name,s:it.r>=1?"à fabriquer !":`${Math.floor(it.r*100)} % des ressources`,p:it.r,ready:it.r>=1,tip:"i:"+it.i.id})}
-  if(S.lvl<PREST_LVL&&S.lvl>=20)G.push({ic:"omega",t:"Oméga (renaissance)",s:`niveau ${PREST_LVL}`,p:lp(PREST_LVL)});
+    if(it)G.push({ic:"craft",act:`data-a="craft" data-i="${it.i.id}">Forger`,t:it.i.name,s:it.r>=1?"à fabriquer !":`${Math.floor(it.r*100)} % des ressources`,p:it.r,ready:it.r>=1,tip:"i:"+it.i.id})}
+  {const a=ACH.filter(a=>!S.ach[a.id]).map(a=>({a,p:Math.min(1,a.get()/a.v)})).sort((x,y)=>y.p-x.p)[0];if(a)G.push({ic:"ach",svg:achIcon(achKey(a.a)),t:`Succès : ${a.a.n}`,s:`${fmt(Math.min(a.a.v,a.a.get()))} / ${fmt(a.a.v)}`,p:a.p*.98,tip:"ach:"+a.a.id})}
+  if(soulsGain()>0&&tabOpen("prest"))G.push({ic:"omega",act:`data-a="tab" data-t="prest">Ouvrir`,t:"Oméga disponible",s:`+${soulsGain()} éclats`,p:1,ready:true});
+  else if(S.lvl<PREST_LVL&&S.lvl>=20)G.push({ic:"omega",t:"Oméga (renaissance)",s:`niveau ${PREST_LVL}`,p:lp(PREST_LVL)});
   return G.sort((a,b)=>(b.ready?2:0)+b.p-((a.ready?2:0)+a.p)).slice(0,S.opt.goalsN||4)}
 const GIC={lock:"🔒",sp:"✦",zone:"⛰",boss:"♛",shop:"⚒",ally:"⚑",pts:"+",craft:"⚙",omega:"Ω"};
 let goalSig="";
 function drawGoals(){const g=$("goals");if(!g)return;if(!S.opt.goals){if(goalSig!=="off"){goalSig="off";g.innerHTML=""}return}
   const L=nextGoals(),sig=(S.opt.goalsOpen?1:0)+L.map(x=>x.t+x.s+(x.ready?1:0)).join("|");
-  if(sig!==goalSig){goalSig=sig;g.innerHTML=`<button class="ghead" data-a="goalsToggle" aria-expanded="${!!S.opt.goalsOpen}"><b>Prochains objectifs</b><span class="pchev">${S.opt.goalsOpen?"▲":"▼"}</span></button>${S.opt.goalsOpen?L.map((x,i)=>`<div class="grow${x.ready?" rdy":""}"${x.tip?` data-tip="${x.tip}"`:""}><span class="gic">${GIC[x.ic]}</span><div class="gtx"><b>${x.t}</b><span>${x.s}</span><div class="bar"><i id="gb${i}"></i></div></div></div>`).join("")||`<div class="small muted">Rien en vue pour l'instant.</div>`:""}`}
+  if(sig!==goalSig){goalSig=sig;g.innerHTML=`<button class="ghead" data-a="goalsToggle" aria-expanded="${!!S.opt.goalsOpen}"><b>Prochains objectifs</b><span class="pchev">${S.opt.goalsOpen?"▲":"▼"}</span></button>${S.opt.goalsOpen?L.map((x,i)=>`<div class="grow${x.ready?" rdy":""}"${x.tip?` data-tip="${x.tip}"`:""}><span class="gic">${x.svg||GIC[x.ic]}</span><div class="gtx"><b>${x.t}</b><span>${x.s}</span><div class="bar"><i id="gb${i}"></i></div></div>${x.ready&&x.act?`<button class="btn pri gact" ${x.act}</button>`:""}</div>`).join("")||`<div class="small muted">Rien en vue pour l'instant.</div>`:""}`}
   if(S.opt.goalsOpen)L.forEach((x,i)=>{const b=$("gb"+i);if(b)b.style.width=Math.min(100,x.p*100)+"%"})}
 
 /* ================= Ambiance animée par biome (particules pixel derrière l'interface) ================= */
@@ -1969,7 +2025,7 @@ const TIPS=[
   {id:"ach",c:()=>achN()>=1,t:"Succès",d:"Chaque succès donne +1 % de dégâts et d'écus pour toujours. Consultez-les dans la Collection.",tab:"coll"},
   {id:"event",c:()=>!!S.ev,t:"Événement météo",d:"Pendant 2 minutes, un événement change les règles : bonus d'élément, écus doublés, butin doublé…"},
   {id:"bag",c:()=>bagWeight()>bagCap()*.8,t:"Sac presque plein",d:"Vendez des ressources à l'Inventaire ou au Marché, sinon vous ne ramasserez plus rien. Une option permet la vente automatique.",tab:"inv"},
-  {id:"tower",c:()=>S.lvl>=15,t:"La tour infinie",d:"Chaque étage record donne +0,5 % de dégâts pour toujours. Montez le plus haut possible !",tab:"aventure"},
+  {id:"tower",c:()=>S.lvl>=15,t:"La tour infinie",d:"Chaque étage record donne des dégâts jusqu'au prochain Oméga. Les monstres prennent environ 2 niveaux par étage : montez le plus haut possible !",tab:"aventure"},
   {id:"prest",c:()=>S.lvl>=PREST_LVL,t:"Oméga : la renaissance",d:"Vous pouvez renaître contre des éclats d'âme, qui débloquent des talents permanents. Vous repartez au niveau 1, mais bien plus fort.",tab:"prest"},
 ];
 let tutoI=-1,tipQ=[],tipShown=null,TSTEPS=TUTO,tutoKind="main",unlQ=[];
@@ -1993,22 +2049,23 @@ function closeTip(){tipShown=null;$("tipcard").hidden=true;setTimeout(checkTips,
 
 /* ================= Succès et renaissance ================= */
 function checkAch(){let n=0;ACH.forEach(a=>{if(!S.ach[a.id]&&a.get()>=a.v){S.ach[a.id]=1;n++;log(`Succès débloqué : <b>${a.n}</b> (${a.txt}).`,"g");if(fx)toast(`Succès : ${a.n} · +1 % dégâts et écus`)}});if(n)dirty=true}
+const clsCost=()=>5+5*(S.clsSwaps||0);
 function doPrestige(){
   const g=soulsGain();if(g<=0)return;
-  const keep={cls:S.cls,name:S.name,st:S.st,best:S.best,ach:S.ach,tower:{best:S.tower.best,cur:1},souls:S.souls+g,soulsTotal:(S.soulsTotal||0)+g,prest:(S.prest||0)+1,tal:S.tal,unl:S.unl,tips:S.tips,tutoDone:S.tutoDone,pkN:S.pkN,kills:S.kills,uid:S.uid,log:[],tab:"prest",time:S.time,auto:S.auto,opt:S.opt,q:S.q,mk:S.mk,mkPrev:S.mkPrev,autoPot:S.autoPot};
+  const keep={cls:S.cls,name:S.name,st:S.st,best:S.best,ach:S.ach,tower:{best:0,cur:1},souls:S.souls+g,soulsTotal:(S.soulsTotal||0)+g,prest:(S.prest||0)+1,tal:S.tal,unl:S.unl,tips:S.tips,tutoDone:S.tutoDone,pkN:S.pkN,kills:S.kills,uid:S.uid,log:[],tab:"prest",time:S.time,auto:S.auto,opt:S.opt,q:S.q,mk:S.mk,mkPrev:S.mkPrev,autoPot:S.autoPot};
   for(const k in keep)if(keep[k]===undefined)delete keep[k];
-  S=Object.assign(fresh(),keep);S.st.bossesLife=0;S.ecus=1000*tal("t_depart");
-  const jl=Math.max(1,5*tal("t_metier"));Object.values(S.jobs).forEach(j=>j.lvl=jl);
+  S=Object.assign(fresh(),keep);S.st.bossesLife=0;S.ecus=Math.round(talV("t_depart"));
+  const jl=Math.max(1,Math.round(talV("t_metier")));Object.values(S.jobs).forEach(j=>j.lvl=jl);
   S.hp=stats().maxHp;log(`Niveau Oméga ${S.prest} atteint : +${g} éclats Oméga. Une nouvelle vie commence.`,"g");toast(`Oméga ${S.prest} · +${g} éclats`);boot2();save();
 }
 
 /* ================= Boucle ================= */
 let allyAcc=0,allyFT=0,clickAcc=0;
-function doClick(auto){if(!S.cls||!S.mon||S.ko>0)return;if(!auto){S.combo=Math.min(comboMax(),S.combo+1);S.comboT=1.5;inc("clicks");mx("maxCombo",Math.floor(S.combo))}let m=.6*clickMult()*(1+S.combo/50);if(Math.random()<.02*tal("t_dore")){m*=10;if(fx)floatNum("Frappe dorée !","crit")}hitMon(roll(m,stats()),"click")}
+function doClick(auto){if(!S.cls||!S.mon||S.ko>0)return;if(!auto){S.combo=Math.min(comboMax(),S.combo+1);S.comboT=1.5;inc("clicks");mx("maxCombo",Math.floor(S.combo))}let m=.6*clickMult()*(1+S.combo/50);if(Math.random()<talV("t_dore")/100){m*=10;if(fx)floatNum("Frappe dorée !","crit")}hitMon(roll(m,stats()),"click")}
 function tick(dt){
   S.time+=dt;if(!S.cls)return;inc("time",dt);
   const st=stats();
-  if(S.comboT>0)S.comboT-=dt;else if(S.combo>0)S.combo=Math.max(0,S.combo-dt*20*(1-.3*tal("t_combo")));
+  if(S.comboT>0)S.comboT-=dt;else if(S.combo>0)S.combo=Math.max(0,S.combo-dt*20*(1-talV("t_combo")/100));
   if(S.ko>0){S.ko-=dt;if(S.ko<=0){S.ko=0;S.hp=st.maxHp;nextMon()}}
   else{
     S.hp=Math.min(st.maxHp,S.hp+st.maxHp*st.regen*dt);
@@ -2032,7 +2089,7 @@ function tick(dt){
   else if(S.time>=(S.evNext??90)&&!document.hidden)startEvent();
   S.mkT=(S.mkT||0)+dt;if(S.mkT>=MK_STEP){S.mkT=0;marketTick();if(S.tab==="market")dirty=true}
   if(S.potCd>0)S.potCd-=dt;else if(S.autoPot&&S.ko<=0&&S.hp<st.maxHp*S.opt.potThreshold/100){const id=S.res.p_gsoin>0&&S.hp<st.maxHp*.15?"p_gsoin":S.res.p_soin>0?"p_soin":S.res.p_gsoin>0?"p_gsoin":null;if(id){drink(id,true);S.potCd=3}}
-  if(S.pk){if(S.time>S.pk.until){S.pk=null;drawPk();S.pkNext=S.time+(PK_MIN*.6+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-.1*tal("t_trefle"))}}
+  if(S.pk){if(S.time>S.pk.until){S.pk=null;drawPk();S.pkNext=S.time+(PK_MIN*.6+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)}}
   else if(S.time>=(S.pkNext??20)&&S.ko<=0&&!document.hidden)spawnPk();
   if(S.job){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t+=dt;while(S.job.t>=gt){S.job.t-=gt;gainGather(r.prof,r.id)}}
 }
@@ -2173,7 +2230,7 @@ function pPerso(){
       ${row("xp","Bonus d'expérience",`+${st.sagesse} %`)}
       ${row("dps","Dégâts par seconde",fmt(st.dps))}
       <div class="sband">Caractéristiques</div>
-      ${[["vit","Vitalité"],["sagesse","Sagesse"],["agi","Agilité"],["feu","Feu"],["eau","Eau"],["terre","Terre"],["air","Air"]].map(([k,n])=>`<div class="srow" data-tip="s:${k}">${sico(k)}<span>${n} <span class="small muted num">(${S.alloc[k]} investis)</span><br><span class="small" style="color:var(--xp)">${secTxt(k,st[k])} <span class="muted">· prochain palier à ${(Math.floor((st[k]||0)/SEC_STEP)+1)*SEC_STEP}</span></span></span><span class="v num">${fmt(st[k])}</span><div class="row" style="gap:4px;flex-wrap:nowrap"><button class="plus" data-a="alloc" data-k="${k}" data-n="1" ${S.pts<1?"disabled":""} aria-label="Ajouter 1 point en ${n}">+</button><button class="btn" data-a="alloc" data-k="${k}" data-n="10" ${S.pts<1?"disabled":""} style="padding:4px 6px">+10</button></div></div>`).join("")}
+      ${[["vit","Vitalité"],["sagesse","Sagesse"],["agi","Agilité"],["feu","Feu"],["eau","Eau"],["terre","Terre"],["air","Air"]].map(([k,n])=>`<div class="srow" data-tip="s:${k}">${sico(k)}<span>${n} <span class="small muted num">(${S.alloc[k]} investis)</span><br><span class="small" style="color:var(--xp)">${secTxt(k,st[k])}${secMax(k,st[k])?"":` <span class="muted">· prochain palier à ${(Math.floor((st[k]||0)/SEC_STEP)+1)*SEC_STEP}</span>`}</span></span><span class="v num">${fmt(st[k])}</span><div class="row" style="gap:4px;flex-wrap:nowrap"><button class="plus" data-a="alloc" data-k="${k}" data-n="1" ${S.pts<1||lockA(k,st)?"disabled":""} aria-label="Ajouter 1 point en ${n}">+</button><button class="btn" data-a="alloc" data-k="${k}" data-n="10" ${S.pts<1||lockA(k,st)?"disabled":""} style="padding:4px 6px">+10</button></div></div>`).join("")}
     </div>
     <div class="sfoot"><button class="btn" data-a="respec">↺ Réinitialiser</button><span class="ptsbox">Points <b class="num${S.pts?" has":""}">${S.pts}</b></span></div>`;
   }else{
@@ -2256,34 +2313,35 @@ function pAdv(){
   open.map(z=>{const b=MON["boss_"+z.i],k=S.zk[z.i]||0;return`<div class="adv" data-tip="b:${z.i}"><div><b>${b.name}</b> ${elChip(b.el)} <span class="small muted">· ${z.name} · niv. ${z.lvl[1]}</span><div class="bar xp" style="margin-top:5px;height:6px"><i style="width:${k/BOSS_KILLS*100}%"></i></div><span class="small muted num">${k} / ${BOSS_KILLS} monstres</span></div><button class="btn pri" data-a="mode" data-m="boss" data-z="${z.i}" ${k<BOSS_KILLS||S.mode!=="zone"?"disabled":""}>Défier</button></div>`}).join("")+`</div>`;
   h+=`<div class="sec"><h3>Donjons</h3><p class="small muted">${DG_WAVES-1} vagues de monstres renforcés, puis le boss. Pas de chrono, mais un K.O. fait perdre la clé. Coffre final : 10 minutes d'écus, du butin et 40 % de chance d'un trophée de boss.</p>`+
   open.map(z=>{const k=S.res["cle_"+z.i]||0;return`<div class="adv" data-tip="dg:${z.i}"><div><b>${DUNGEONS[z.i]}</b> <span class="small muted">· niv. ${z.lvl[1]+2}</span><div class="small ${k?"":"muted"}">${glyph("cle").replace("<svg",'<svg style="width:14px;height:14px;vertical-align:-2px;color:var(--gold)"')} ${k} clé${k>1?"s":""}</div></div><button class="btn pri" data-a="mode" data-m="donjon" data-z="${z.i}" ${!k||S.mode!=="zone"?"disabled":""}>Entrer</button></div>`}).join("")+`</div>`;
-  h+=`<div class="sec"><h3>Tour infinie</h3><div class="adv" data-tip="tw:0"><div><b>Record : étage ${S.tower.best}</b><div class="small muted">Un monstre par étage, ${towerTime()} s pour le battre. Un boss tous les 10 étages. Chaque nouveau record rapporte des écus, et chaque étage du record donne +0,5 % de dégâts pour toujours (actuellement +${(S.tower.best*.5).toFixed(1)} %).</div></div><button class="btn pri" data-a="mode" data-m="tour" ${S.mode!=="zone"?"disabled":""}>Entrer${S.tower.best>1?` (étage ${Math.max(1,Math.floor(S.tower.best*.8))})`:""}</button></div></div>`;
+  h+=`<div class="sec"><h3>Tour infinie</h3><div class="adv" data-tip="tw:0"><div><b>Record : étage ${S.tower.best}</b><div class="small muted">Un monstre par étage, ${towerTime()} s pour le battre. Un boss tous les 10 étages. Chaque nouveau record rapporte des écus, et chaque étage du record donne des dégâts jusqu'au prochain Oméga, de moins en moins après l'étage 20 (actuellement +${towerPct(S.tower.best).toFixed(1)} %). Les monstres prennent environ 2 niveaux par étage.</div></div><button class="btn pri" data-a="mode" data-m="tour" ${S.mode!=="zone"?"disabled":""}>Entrer${S.tower.best>1?` (étage ${Math.max(1,Math.floor(S.tower.best*.8))})`:""}</button></div></div>`;
   return h;
 }
 function pAllies(){
   const tot=allyDps();
-  return`<div class="sec"><div class="row" style="justify-content:space-between"><h3>Compagnons</h3><span class="small">Total : <b class="num">${fmt(tot)}</b> dégâts/s</span></div><p class="small muted">Ils frappent tout seuls, même pendant les donjons et la tour. Leurs dégâts doublent tous les 25 niveaux.</p><div class="alist">`+
+  return`<div class="sec"><div class="row" style="justify-content:space-between"><h3>Compagnons</h3><span class="small">Total : <b class="num">${fmt(tot)}</b> dégâts/s</span></div><p class="small muted">Ils frappent tout seuls, même pendant les donjons et la tour. Leurs dégâts augmentent de 50 % tous les 25 niveaux.</p><div class="alist">`+
   ALLIES.map(([id,n,base,cost,col],i)=>{const l=S.allies[id]||0,vis=l>0||i===0||(S.allies[ALLIES[i-1][0]]||0)>0||S.ecus>=cost*.5,c=allyCost(i,l);
     if(!vis)return`<div class="ally lock"><div class="av" style="background:#3a4656;color:var(--muted)">?</div><div class="small muted">Compagnon inconnu · ${fmt(cost)} écus</div><span></span></div>`;
     return`<div class="ally" data-tip="al:${i}"><div class="av" style="background:${col}">${n[0]}</div><div style="min-width:0"><b>${n}</b> <span class="small muted num">niv. ${l}</span><div class="small muted num">${fmt(allyDpsOf(i,l))} dégâts/s · prochain niveau +${fmt(allyDpsOf(i,l+1)-allyDpsOf(i,l))}</div></div><div class="btns"><button class="btn pri" data-a="ally" data-i="${i}" data-n="1" ${S.ecus<c?"disabled":""}>${l?"Niveau +1":"Recruter"} · ${fmt(c)}</button><button class="btn" data-a="ally" data-i="${i}" data-n="10" ${S.ecus<c?"disabled":""}>+10</button><button class="btn" data-a="ally" data-i="${i}" data-n="max" ${S.ecus<c?"disabled":""}>Max</button></div></div>`}).join("")+`</div></div>`;
 }
 function pShop(){
-  return`<div class="sec"><h3>Boutique d'améliorations</h3><p class="small muted">Des achats définitifs, payés en écus.</p><div class="shop">`+UPGS.map(([id,n,t,c])=>{const own=up(id);return`<div class="upg${own?" own":""}" data-tip="up:${id}"><b>${n}</b><span class="small muted">${t}</span><div class="row">${own?`<span class="tag">Acheté</span>`:`<button class="btn pri" data-a="buy" data-u="${id}" ${S.ecus<c?"disabled":""}>Acheter · ${fmt(c)} écus</button>`}</div></div>`}).join("")+`</div></div>`;
+  return`<div class="sec"><h3>Boutique d'améliorations</h3><p class="small muted">Des achats définitifs, payés en écus.${UPGS.some(u=>up(u[0]))?` ${UPGS.filter(u=>up(u[0])).length} / ${UPGS.length} déjà achetées.`:""}</p><div class="shop">`+(UPGS.every(u=>up(u[0]))?`<p class="small">Tout est acheté !</p>`:"")+UPGS.filter(u=>!up(u[0])).sort((a,b)=>a[3]-b[3]).map(([id,n,t,c])=>{const own=up(id);return`<div class="upg${own?" own":""}" data-tip="up:${id}"><b>${n}</b><span class="small muted">${t}</span><div class="row">${own?`<span class="tag">Acheté</span>`:`<button class="btn pri" data-a="buy" data-u="${id}" ${S.ecus<c?"disabled":""}>Acheter · ${fmt(c)} écus</button>`}</div></div>`}).join("")+`</div></div>`;
 }
 let prestConfirm=false,ctab="ach";
 function pPrest(){
   const g=soulsGain(),can=g>0;
   let h=`<div class="sec"><div class="prest"><div class="row" style="justify-content:space-between"><div><div class="small muted">Éclats Oméga disponibles</div><div class="big num"><span class="soul"></span> ${fmt(S.souls)}</div></div><div class="small" style="text-align:right">Niveau Oméga : <b>Ω ${S.prest||0}</b><br>Bonus des éclats non dépensés : <b>+${fmt(2*S.souls)} %</b> de dégâts</div></div>
-  <p class="small" style="margin:0">Passer un niveau Oméga vous ramène au niveau 1. Vous perdez votre niveau, vos écus, votre équipement, vos ressources, vos compagnons, vos achats de boutique et vos niveaux de métier. Vous gardez vos éclats, vos talents, vos succès, le bestiaire, le record de la tour et vos statistiques.</p>
+  <p class="small" style="margin:0">Passer un niveau Oméga vous ramène au niveau 1. Vous perdez votre niveau, vos écus, votre équipement, vos ressources, vos compagnons, vos achats de boutique et vos niveaux de métier. Vous gardez vos éclats, vos talents, vos succès, le bestiaire et vos statistiques. La tour repart de l'étage 1.</p>
   <div class="row">${can?(prestConfirm?`<span class="small">Confirmer le passage Oméga contre <b>${g} éclats</b> ?</span><button class="btn pri" data-a="prestYes">Oui, passer Oméga</button><button class="btn" data-a="prestNo">Annuler</button>`:`<button class="btn pri" data-a="prestAsk">Passer Oméga · +${g} éclats</button>`):`<span class="small muted">Disponible au niveau ${PREST_LVL}. Plus votre niveau est haut, plus vous gagnez d'éclats. Chaque série de 5 boss vaincus dans cette vie ajoute 1 éclat.</span>`}</div></div></div>`;
+  {const cc=clsCost();h+=`<div class="sec"><h3>Changer de classe</h3><p class="small muted">Vous gardez votre niveau, vos objets et vos points répartis. Coût : <b>${cc}</b> <span class="soul"></span> éclats, +5 à chaque changement.</p><div class="row" style="flex-wrap:wrap;gap:6px">${Object.entries(CLASSES).map(([k,c])=>k===S.cls?`<span class="tag">${c.name} (actuelle)</span>`:`<button class="btn${S.souls>=cc?" pri":""}" data-a="clsSwap" data-k="${k}" ${S.souls<cc?"disabled":""} data-tip="cl:${k}">${c.name} · ${cc} <span class="soul"></span></button>`).join("")}</div></div>`}
   h+=`<div class="sec"><div class="row" style="justify-content:space-between"><h3>Arbre de talents</h3><button class="btn" data-a="talReset">Rendre tous les éclats</button></div><p class="small muted">Chaque talent demande au moins un rang dans le talent au-dessus.</p><div class="ttree">`+
-  Object.entries(TALENTS).map(([br,l])=>`<div class="tbr"><h4>${br}</h4>`+l.map(t=>{const T=TAL[t[0]],r=tal(T.id),lock=T.prev&&!tal(T.prev),max=r>=T.max,c=talCost(T.id);
-    return`<div class="tal${r?" has":""}${lock?" lock":""}" data-tip="tal:${T.id}"><b>${T.n}</b><span class="small muted">${T.txt}</span><div class="pips">${Array.from({length:T.max},(_,i)=>`<i class="${i<r?"on":""}"></i>`).join("")}</div>${max?`<span class="tag">Maximum</span>`:`<button class="btn ${S.souls>=c&&!lock?"pri":""}" data-a="talent" data-t="${T.id}" ${S.souls<c||lock?"disabled":""}>${r?"Rang +1":"Apprendre"} · ${c} <span class="soul"></span></button>`}</div>`}).join("")+`</div>`).join("")+`</div></div>`;
+  Object.entries(TALENTS).map(([br,l])=>`<div class="tbr"><h4>${br}</h4>`+l.map(t=>{const T=TAL[t[0]],r=tal(T.id),lock=T.prev&&!tal(T.prev),c=talCost(T.id);
+    return`<div class="tal${r?" has":""}${lock?" lock":""}" data-tip="tal:${T.id}"><b>${T.n}</b><span class="small muted">${T.txt}</span><div class="small num">Rang <b>${r}</b>${r?` · ${talTxt(T.id,r)}`:""}</div>${`<button class="btn ${S.souls>=c&&!lock?"pri":""}" data-a="talent" data-t="${T.id}" ${S.souls<c||lock?"disabled":""}>${r?"Rang +1":"Apprendre"} · ${c} <span class="soul"></span></button>`}</div>`}).join("")+`</div>`).join("")+`</div></div>`;
   return h;
 }
 function pColl(){
   let h=`<div class="ptabs" style="grid-template-columns:1fr 1fr;margin-bottom:10px"><button class="ptab${ctab==="ach"?" on":""}" data-a="ctab" data-t="ach">Succès</button><button class="ptab${ctab==="best"?" on":""}" data-a="ctab" data-t="best">Bestiaire</button></div>`;
   if(ctab==="ach"){const n=achN();
-    h+=`<div class="sec"><div class="row" style="justify-content:space-between"><h3>Succès · ${n} / ${ACH.length}</h3><span class="small">Bonus : <b>+${n} %</b> de dégâts et d'écus</span></div><div class="ach">`+ACH.map(a=>{const d=!!S.ach[a.id],v=Math.min(a.v,a.get());return`<div class="ac${d?" done":""}" data-tip="ach:${a.id}"><span class="md">${glyph("trophee")}</span><div style="min-width:0"><b>${a.n}</b><div class="small muted">${a.txt}${d?"":` · <span class="num">${fmt(v)} / ${fmt(a.v)}</span>`}</div></div></div>`}).join("")+`</div></div>`}
+    h+=`<div class="sec"><div class="row" style="justify-content:space-between"><h3>Succès · ${n} / ${ACH.length}</h3><span class="small">Bonus : <b>+${n} %</b> de dégâts et d'écus</span></div><div class="ach">`+ACH.map(a=>{const d=!!S.ach[a.id],v=Math.min(a.v,a.get());return`<div class="ac${d?" done":""}" data-tip="ach:${a.id}"><span class="md">${achIcon(achKey(a))}</span><div style="min-width:0"><b>${a.n}</b><div class="small muted">${a.txt}${d?"":` · <span class="num">${fmt(v)} / ${fmt(a.v)}</span>`}</div></div></div>`}).join("")+`</div></div>`}
   else{h+=`<div class="sec"><h3>Bestiaire</h3><p class="small muted">Paliers à ${BEST_T.map(fmt).join(", ")} victoires. Chaque palier donne +5 % de dégâts et +10 % de butin contre la créature.</p><div class="best">`+
     Object.values(MON).map(m=>{const k=S.best[m.id]||0,t=bestTier(m.id),nx=BEST_T[t],pv=t?BEST_T[t-1]:0,known=k>0;
       return`<div class="bc${known?"":" unk"}" data-tip="m:${m.id}">${monsterSVG(m)}<b class="small">${known?m.name:"???"}</b>${known?elChip(m.el):""}<span class="small muted">${ZONES[m.zone].name}${m.boss?" · boss":""}</span><span class="tierst">${"★".repeat(t)}${"☆".repeat(4-t)}</span><div class="bar xp"><i style="width:${nx?Math.min(100,(k-pv)/(nx-pv)*100):100}%"></i></div><span class="small num muted">${fmt(k)}${nx?" / "+fmt(nx):""}</span><div class="bloot">${(LOOT[m.id]||[]).filter(l=>!l.item).map(l=>`<span class="${seen(l.id)?"":"unk"}${l.p<.06?" lr":""}">${seen(l.id)?l.n:"???"} · ${Math.round(l.p*100)||l.p*100} %</span>`).join("")}</div></div>`}).join("")+`</div></div>`}
@@ -2317,12 +2375,12 @@ function pAtelier(){const sc=setCounts(),zs=ZONES.filter((z,i)=>i===0||S.lvl>=ZO
     <div class="prows">${its.map(it=>`<div class="prow${it.id===atSel?" on":""}">${tile(it)}<div class="pinf"><b>${it.name}</b><span class="small muted">${EQ[it.slot]?.n||it.slot} · niv. ${it.lvl}</span><span class="istats">${statsTxt(it.stats)}</span><div class="req">${S.lvl<it.lvl?`<span class="no">Niveau ${it.lvl}</span>`:""}${req(it)}</div></div><button class="btn pri" data-a="craft" data-i="${it.id}" ${canCraft(it)?"":"disabled"}>Fabriquer</button></div>`).join("")}</div>`:""}</div>`};
   const det=()=>{if(!atSel)return`<div class="setb small">Cliquez sur l'image d'une pièce pour ouvrir sa fiche complète : statistiques par rareté, monstre à farmer, prix et bonus de panoplie. Le « ! » signale une pièce prête à fabriquer.</div>`;
     const it=ITEMS[atSel],T=SETS[it.set],M=MON[T.mon],ks=Object.keys(it.stats);
-    return`<div class="pdet"><div class="pdh"><span class="tile big">${itIcon(it)}</span><div style="min-width:0"><span class="iname">${it.name}</span><div class="small muted">${EQ[it.slot]?.n||it.slot} · niveau ${it.lvl} requis · Panoplie ${T.name} (${T.n} pièces)</div><div class="istats">${statsTxt(it.stats)}</div></div></div>
+    return`<div class="atpop" data-a="atClose"><div class="pdet" data-a="noop" role="dialog" aria-modal="true"><button class="atx" data-a="atClose" aria-label="Fermer">×</button><div class="pdh"><span class="tile big">${itIcon(it)}</span><div style="min-width:0"><span class="iname">${it.name}</span><div class="small muted">${EQ[it.slot]?.n||it.slot} · niveau ${it.lvl} requis · Panoplie ${T.name} (${T.n} pièces)</div><div class="istats">${statsTxt(it.stats)}</div></div></div>
     <div class="pgrid"><div><span class="k">Monstre à farmer</span><b>${M.name}</b> ${elChip(T.el)}</div><div><span class="k">Zone</span><b>${ZONES[T.z].name}</b></div><div><span class="k">En sac</span><b class="num">${own[it.id]||0}</b></div><div><span class="k">Valeur</span><b class="num">${fmt(it.price)} écus</b></div></div>
     <div class="tw"><table class="dtab"><thead><tr><th>Rareté</th>${ks.map(k=>`<th class="r">${k==="crit"?"Critique":STAT_LBL[k].replace(" (tous éléments)","")}</th>`).join("")}</tr></thead><tbody>${RAR.map(r=>`<tr><td><span style="color:${r.c}">${r.n}</span></td>${ks.map(k=>`<td class="r num">+${fmt(Math.round(it.stats[k]*r.m))}${k==="crit"?" %":""}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
     <div class="small muted">La rareté dépend de votre réussite à la forge. Chaque enchantement ajoute ensuite 10 % aux statistiques.</div>
     <div><span class="small muted">Recette</span><div class="req" style="margin-top:4px">${S.lvl<it.lvl?`<span class="no">Niveau ${it.lvl}</span>`:""}${req(it)}</div></div>
-    <div class="row"><button class="btn pri" data-a="craft" data-i="${it.id}" ${canCraft(it)?"":"disabled"}>Fabriquer</button><button class="btn" data-a="atSel" data-i="${it.id}">Fermer</button></div>${setBox(it.set,sc[it.set]||0)}</div>`};
+    <div class="row"><button class="btn pri" data-a="craft" data-i="${it.id}" ${canCraft(it)?"":"disabled"}>Fabriquer</button><button class="btn" data-a="atClose">Fermer</button></div>${setBox(it.set,sc[it.set]||0)}</div></div>`};
   return`<div class="sec"><p class="small muted">Chaque monstre a sa panoplie : farmez-le pour son butin. Les boss lâchent une ressource rare pour la leur. À la forge, frappez au bon moment pour une meilleure rareté : ${RAR.map(r=>`<b style="color:${r.c}">${r.n}</b>`).join(", ")}.</p>
   <div class="filters">${zs.map(z=>{const n=nReady(z);return`<button class="fchip${z.i===atZone?" on":""}" data-a="atZone" data-i="${z.i}">${z.name}${n?` <span class="dot"></span>`:""}</button>`}).join("")}</div>
   <div class="psets">${keys.map(block).join("")}</div>${det()}`+famSec()+alchSec()+`</div>`;
@@ -2442,9 +2500,10 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;
     case"prestNo":prestConfirm=false;renderPanel();break;
     case"prestYes":prestConfirm=false;doPrestige();break;
-    case"talent":{const id=b.dataset.t,T=TAL[id];if(tal(id)>=T.max||(T.prev&&!tal(T.prev)))break;const c=talCost(id);if(S.souls<c)break;S.souls-=c;S.tal[id]=tal(id)+1;S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break}
-    case"talReset":{let r=0;for(const id in S.tal){for(let k=0;k<S.tal[id];k++)r+=TAL[id].cost*(k+1)}S.souls+=r;S.tal={};toast(`${r} éclats rendus`);renderPanel();break}
+    case"talent":{const id=b.dataset.t,T=TAL[id];if(T.prev&&!tal(T.prev))break;const c=talCost(id);if(S.souls<c)break;S.souls-=c;S.tal[id]=tal(id)+1;S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break}
+    case"talReset":{let r=0;for(const id in S.tal)if(TAL[id])r+=talSpent(id);S.souls+=r;S.tal={};toast(`${r} éclats rendus`);renderPanel();break}
     case"ctab":ctab=b.dataset.t;renderPanel();break;
+    case"clsSwap":{const k=b.dataset.k,c=clsCost();if(!CLASSES[k]||k===S.cls||S.souls<c)break;S.souls-=c;S.clsSwaps=(S.clsSwaps||0)+1;S.cls=k;S.cds={};S.buffs=[];S.hp=Math.min(S.hp,stats().maxHp);drawHero();drawSpells();mbSig="";log(`Vous devenez ${CLASSES[k].name}.`,"g");toast(`Nouvelle classe : ${CLASSES[k].name}`);renderPanel(true);break}
     case"goalsToggle":S.opt.goalsOpen=!S.opt.goalsOpen;goalSig="";drawGoals();break;
     case"tutoNext":tutoI++;tutoDraw();break;
     case"tutoPrev":tutoI=Math.max(0,tutoI-1);tutoDraw();break;
@@ -2477,14 +2536,16 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"ptab":ptab=b.dataset.t;renderPanel();break;
     case"tabLocked":toast(`Onglet verrouillé : il se débloque au niveau ${TAB_LOCK[b.dataset.t]}`,1);break;
     case"tab":if(!tabOpen(b.dataset.t))break;S.tab=b.dataset.t;confirmReset=false;dirty=true;renderPanel();break;
-    case"alloc":{const n=Math.min(S.pts,+b.dataset.n);S.alloc[b.dataset.k]+=n;S.pts-=n;dirty=true;renderPanel();break}
+    case"alloc":{const k=b.dataset.k;let n=Math.min(S.pts,+b.dataset.n);if(SEC[k]?.cap&&!PRIM_OK[k]){const room=SEC[k].cap*SEC_STEP-(stats()[k]||0);n=Math.min(n,room);if(n<=0){toast("Bonus secondaire déjà au maximum");break}}S.alloc[b.dataset.k]+=n;S.pts-=n;dirty=true;renderPanel();break}
     case"respec":ALLOC.forEach(k=>{S.pts+=S.alloc[k];S.alloc[k]=0});S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
     case"sell":{const k=b.dataset.r,n=b.dataset.n==="all"?S.res[k]:Math.min(+b.dataset.n,S.res[k]);if(n>0){const g=sellRes(k,n);if(n>1)toast(`${fmt(n)}× ${RES[k].name} vendus : +${fmt(g)} écus`)}renderPanel();break}
     case"mtab":mtab=b.dataset.p;renderPanel();break;
     case"atZone":atZone=+b.dataset.i;atSel=null;atOpen=null;renderPanel();break;
     case"atOpen":atOpen=atOpen===b.dataset.k?null:b.dataset.k;renderPanel();if(atOpen){const el=document.querySelector(".pset.open");if(el)el.scrollIntoView({block:"nearest"})}break;
+    case"atClose":atSel=null;renderPanel(true);break;
+    case"noop":break;
     case"atSel":atSel=atSel===b.dataset.i?null:b.dataset.i;renderPanel();break;
-    case"craft":{const it=ITEMS[b.dataset.i];if(!canCraft(it))break;it.recipe.forEach(([r,q])=>S.res[r]-=q);startForge(it);break}
+    case"craft":{const it=ITEMS[b.dataset.i];if(!canCraft(it))break;if(atSel){atSel=null;renderPanel(true)}it.recipe.forEach(([r,q])=>S.res[r]-=q);startForge(it);break}
     case"equip":equipItem(+b.dataset.u,selSlot);renderPanel();break;
     case"selSlot":{const now=performance.now(),dbl=lastSel.v==="s:"+b.dataset.s&&now-lastSel.t<450;lastSel={v:"s:"+b.dataset.s,t:now};selSlot=b.dataset.s;selLast="slot";if(dbl&&S.equip[selSlot]){delete S.equip[selSlot];S.hp=Math.min(S.hp,stats().maxHp);toast("Objet retiré",1);lastSel={v:null,t:0}}renderPanel();break}
     case"selInv":{const v=b.dataset.v,now=performance.now(),dbl=lastSel.v===v&&now-lastSel.t<450;lastSel={v,t:now};selInv=v;selLast="inv";
@@ -2507,7 +2568,7 @@ document.addEventListener("click",e=>{ptrDown=false;
 });
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){S.opt[k]=+e.target.value;const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});
 document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="checkbox"){S.opt[k]=e.target.checked;applyOpts();if(k==="music"){audioInit();musicSync()}}});
-document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();
+document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="escape"&&atSel&&!forge){atSel=null;renderPanel(true);return}
   if(tutoI>=0){if(k==="escape"){tutoEnd()}else if(k==="arrowright"||k==="enter"){e.preventDefault();tutoI++;tutoDraw()}else if(k==="arrowleft"){tutoI=Math.max(0,tutoI-1);tutoDraw()}if(k!=="tab")e.preventDefault();return}
   if((k==="enter"||k===" ")&&e.target.dataset&&e.target.dataset.a==="atOpen"){e.preventDefault();e.target.click();return}
   if(forge&&!forge.done&&(k===" "||k==="enter")){e.preventDefault();forgeStrike();return}
@@ -2527,7 +2588,7 @@ window.addEventListener("pagehide",save);
 
 /* ================= Démarrage ================= */
 let lastT=performance.now(),lastPanel=0,lastAch=0,lastSave=Date.now(),paused=false,started=false;
-function boot2(){mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+function boot2(){fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
 function loop(){
   const now=performance.now();let dt=(now-lastT)/1000;lastT=now;
   if(S&&S.cls){
