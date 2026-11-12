@@ -1,0 +1,19 @@
+# Anciennes versions et sauvegardes du jeu
+index-*.html
+index.avant-*.html
+*.bak
+*.old
+
+# Aperçus et fichiers générés par les outils
+Claude outputs/
+*.png.tmp
+
+# Fichiers système
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Éditeurs
+.vscode/
+.idea/
+*.swp
