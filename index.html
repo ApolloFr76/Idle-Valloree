@@ -903,7 +903,23 @@ html.rm .omegafx i,html.rm .fx.pt{display:none}
 /* ===== Grand écran : mise en page des onglets en largeur ===== */
 @media (min-width:1500px){
   .wrap{max-width:1840px}
-  .main{grid-template-columns:minmax(0,560px) minmax(0,1fr)}
+  /* 3 colonnes à pleine hauteur : combat | onglet | objectifs et journal */
+  body{padding-block:10px;margin:0}
+  #panelCard>.tabs{flex-wrap:nowrap;gap:4px;margin-bottom:10px}
+  #panelCard>.tabs .tab{padding:5px 4px 8px;font-size:12.5px;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .wrap{height:calc(100vh - 20px);gap:10px}
+  .top{padding:8px 14px;flex-wrap:nowrap}
+  .main{flex:1;min-height:0;grid-template-columns:minmax(0,500px) minmax(0,1fr) minmax(0,330px);align-items:stretch;gap:12px}
+  .main>.card{min-height:0;overflow:auto;scrollbar-width:thin}
+  #panelCard{display:flex;flex-direction:column;overflow:hidden}
+  #panelCard>.tabs{flex:none}
+  #panel{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding-right:4px}
+  #sideCard{display:flex;flex-direction:column;gap:10px}
+  #sideCard .goals{margin-top:0;flex:none}
+  #sideCard #pots{margin-top:0!important}
+  #sideCard #pots:empty{display:none}
+  #sideCard .log{margin-top:0;flex:1;min-height:0;overflow:auto}
+  #panel[data-tab=market] .tw{max-height:none;overflow:visible}
   /* Personnage : statistiques | caractéristiques */
   #panel[data-tab=perso] .sheet{max-width:none}
   #panel[data-tab=perso][data-sub=resume] .slist{columns:2;column-gap:0;column-rule:3px solid var(--ink)}
@@ -978,6 +994,7 @@ html.rm .omegafx i,html.rm .fx.pt{display:none}
       <nav class="tabs" id="tabs"></nav>
       <div id="panel"></div>
     </section>
+    <section class="card" id="sideCard" hidden></section>
   </div>
 </div>
 <div class="ov" id="ov" hidden></div>
@@ -2724,7 +2741,14 @@ window.addEventListener("pagehide",save);
 
 /* ================= Démarrage ================= */
 let lastT=performance.now(),lastPanel=0,lastAch=0,lastSave=Date.now(),paused=false,started=false;
-function boot2(){fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+
+/* Grand écran : objectifs, potions et journal passent dans une 3e colonne */
+const WIDE=matchMedia("(min-width:1500px) and (min-height:650px)");
+function placeSide(){const side=$("sideCard"),cb=$("combat"),w=WIDE.matches;side.hidden=!w;
+  const els=["pots","goals","log"].map(id=>$(id));if(w)els.forEach(e=>side.appendChild(e));else els.forEach(e=>cb.appendChild(e))}
+WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
+placeSide();
+function boot2(){placeSide();fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
 function loop(){
   const now=performance.now();let dt=(now-lastT)/1000;lastT=now;
   if(S&&S.cls){
