@@ -40,6 +40,7 @@ h1,h2,h3{font-family:var(--display);font-weight:600;margin:0;text-wrap:balance}
 .xpbox .lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
 .bar{height:10px;border-radius:99px;background:#121922;overflow:hidden;border:1px solid #0d131a}
 .bar>i{display:block;height:100%;width:0;border-radius:99px;transition:width .15s linear}
+.bar.gp>i{transition:none}
 .bar.xp>i{background:linear-gradient(90deg,#5fa94a,var(--xp))}
 .bar.hp>i{background:linear-gradient(90deg,#b9473c,var(--hp))}
 .bar.gp>i{background:linear-gradient(90deg,#3f87b6,var(--mana))}
@@ -2405,7 +2406,7 @@ function pMetiers(){
   <div class="mcur">${cur?`${PX.img(PX.res(cur.prof,cur.tier),"mci")}<div style="min-width:0;flex:1"><b>${PROFS[cur.prof].verb} : ${cur.name}</b><div class="small muted num">${gatherTime(cur.prof,cur.tier).toFixed(1)} s par récolte · stock ${fmt(S.res[cur.id]||0)}</div></div><button class="btn dng" data-a="job" data-r="${cur.id}">Arrêter</button>`:`<span class="small muted">Aucune récolte en cours. Choisissez une ressource ci-dessous.</span>`}</div>
   <div class="prof"><div class="ph"><h3>${p.name}</h3><span class="small muted num">Niv. ${J.lvl}${J.lvl<PROF_MAX?` · ${fmt(J.xp)}/${fmt(pxNeed(J.lvl))} XP`:" · max"}</span></div><div class="bar gp"><i style="width:${J.lvl<PROF_MAX?J.xp/pxNeed(J.lvl)*100:100}%"></i></div>
   <div class="mres">`+p.res.map(([rid,name],t)=>{const lock=J.lvl<UNLOCK[t],on=S.job&&S.job.r===rid;
-      return`<button class="mr${on?" on":""}${lock?" lck":""}" data-a="job" data-r="${rid}" data-tip="r:${rid}" ${lock?"disabled":""}>${PX.img(PX.res(mtab,t),"mri")}<b>${name}</b><span class="small num">${lock?`Niveau ${UNLOCK[t]}`:`${gatherTime(mtab,t).toFixed(1)} s`}</span>${lock?"":`<span class="mq num">${fmt(S.res[rid]||0)}</span>`}${on?`<span class="bar gp"><i id="gp-${rid}"></i></span>`:""}</button>`}).join("")+`</div>
+      return`<button class="mr${on?" on":""}${lock?" lck":""}" data-a="job" data-r="${rid}" data-tip="r:${rid}" ${lock?"disabled":""}>${PX.img(PX.res(mtab,t),"mri")}<b>${name}</b><span class="small num">${lock?`Niveau ${UNLOCK[t]}`:`${gatherTime(mtab,t).toFixed(1)} s`}</span>${lock?"":`<span class="mq num">${fmt(S.res[rid]||0)}</span>`}${on?`<span class="bar gp"><i id="gp-${rid}" style="width:${S.job&&S.job.r===rid?Math.min(100,S.job.t/gatherTime(RES[rid].prof,RES[rid].tier)*100):0}%"></i></span>`:""}</button>`}).join("")+`</div>
   <div class="small muted">Cliquez sur une ressource pour ${p.verb.toLowerCase()} ; recliquez pour arrêter. Le nombre en haut à droite est votre stock.</div></div></div>`;
 }
 let confirmReset=false;
