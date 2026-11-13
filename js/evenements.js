@@ -85,6 +85,8 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"sellItem":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u),it=ITEMS[i.id],v=Math.round(it.price*(1+.2*(i.e||0))*sellMult()*rarOf(i).m);S.items=S.items.filter(x=>x.u!==u);gainEcus(v);nextInStack(stackKey(i));toast(`${it.name} vendu : +${fmt(v)} écus`);renderPanel();break}
     case"ench":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u),it=ITEMS[i.id],e=i.e||0,cost=Math.round(25*(it.z+1)*Math.pow(e+1,2));if(S.ecus<cost||e>=10)break;S.ecus-=cost;
       if(Math.random()<Math.max(.2,.9-.07*e)){i.e=e+1;inc("enchOk");mx("enchMax",i.e);toast(`Réussite ! ${it.name} +${i.e}`);log(`Enchantement réussi : ${it.name} +${i.e}.`,"g")}else{toast("L'enchantement a échoué. Les écus sont perdus.");inc("enchKo")}renderPanel();break}
+    case"ouvHire":{OUV.hire(b.dataset.p);renderPanel();break}
+    case"ouvFire":{OUV.fire(+b.dataset.i);renderPanel();break}
     case"job":{const r=b.dataset.r;S.job=S.job&&S.job.r===r?null:{r,t:0};renderPanel();break}
     case"copy":{const t=$("exportBox");const done=()=>toast("Code copié");try{navigator.clipboard.writeText(t.value).then(done,()=>{t.select();toast("Sélectionné : copiez avec Ctrl+C")})}catch(err){t.select();toast("Sélectionné : copiez avec Ctrl+C")}break}
     case"import":{try{const d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))));if(!d||!d.cls)throw 0;S=Object.assign(fresh(),d);save();boot2();toast("Partie chargée")}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.")}break}
@@ -113,7 +115,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
 function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$("pauseBtn").classList.toggle("pri",v);$("pauseOv").hidden=!v;if(v)save()}
 function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
 document.addEventListener("input",e=>{if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
-document.addEventListener("change",e=>{if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
+document.addEventListener("change",e=>{if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 window.addEventListener("pagehide",save);

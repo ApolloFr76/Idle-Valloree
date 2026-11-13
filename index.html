@@ -6,12 +6,28 @@
 <title>Les Terres de Vallorée</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="style/style.css">
+<link rel="stylesheet" href="style/monde.css">
 </head>
 <body>
+<!-- La prairie continue sous le bandeau, derrière les menus (js/monde.js) -->
+<canvas class="wbg" id="wbg" aria-hidden="true"></canvas>
 
-<!-- ===== Application ===== -->
-<div class="wrap" id="app">
-  <!-- En-tête : nom, héros, XP, écus, aide, pause -->
+<!-- ===== Monde en bandeau : le combat se joue dans le paysage, l'interface est posée dessus (js/monde.js) ===== -->
+<div class="world" id="world">
+  <div class="arena" id="arena">
+    <canvas class="wcv" id="wcv" aria-hidden="true"></canvas>
+    <div class="sky" id="sky" aria-hidden="true"></div><div class="deco" id="deco" aria-hidden="true" hidden></div>
+    <div class="mon" id="mon"><div class="pals" id="pals" aria-hidden="true"></div><div class="queue" id="queue" aria-hidden="true"></div><img class="px afam" id="afam" alt="" hidden>
+      <div class="hslot"><div class="htag" aria-label="Vos points de vie"><div class="bar hp"><i class="lag" id="pHpLag"></i><i id="pHpBar"></i></div><span class="num" id="pHpTxt"></span></div><img class="px ahero" id="ahero" alt="" hidden></div>
+      <div class="mslot"><div class="mtag"><div class="mhead"><h3 id="mName">…</h3><span class="mlvl num" id="mLvl"></span></div><div class="mel" id="mEl"></div><div class="bar mhp"><i class="lag" id="mHpLag"></i><i id="mHpBar"></i></div><span class="num mhptxt" id="mHpTxt"></span></div><button id="monBtn" data-tip="cur:mon" aria-label="Frapper le monstre"></button><div class="mdots" id="mdots" aria-hidden="true"></div></div></div>
+    <div class="weather" id="weather"></div>
+    <div class="bossbar" id="bossBar" hidden><b id="bbName"></b><div class="bar mhp"><i class="lag" id="bbLag"></i><i id="bbFill"></i></div><span class="num" id="bbTxt"></span></div>
+    <div class="letterbox" id="letterbox" aria-hidden="true"></div>
+    <div class="combo" id="combo" hidden><b class="num" id="comboN"></b><div class="bar"><i id="comboBar"></i></div></div>
+    <div class="kostate" id="pauseOv" hidden>En pause</div>
+    <div class="kostate" id="ko" hidden>K.O. · retour dans <span class="num" id="koT"></span> s</div>
+  </div>
+  <!-- En-tête : nom, héros, XP, écus, aide, pause (posé sur le ciel) -->
   <header class="top">
     <div class="brand">Vallorée</div>
     <button class="btn" id="helpBtn" data-a="help" title="Aide" style="order:8">?</button>
@@ -23,41 +39,29 @@
     </div>
     <div class="ecus num" data-tip="hd:ecus"><span class="coin"></span><span id="ecusTxt">0</span></div>
   </header>
+  <!-- Haut gauche : monde, boss/donjon/tour, élément et effets -->
+  <div class="hudl" id="combat">
+    <div class="zones" id="zones"></div>
+    <div class="modebar" id="modeBar"></div>
+    <div class="buffs" id="buffs"></div>
+    <div class="hint" id="hint">Cliquez sur le monstre pour frapper. Le combat continue tout seul.</div>
+  </div>
+  <!-- Bas : barre d'action (sorts et potions) -->
+  <div class="hudb">
+    <div class="abar"><div class="spells" id="spells"></div><div class="row pots" id="pots"></div></div>
+  </div>
+</div>
 
+<!-- ===== Application ===== -->
+<div class="wrap" id="app">
   <div class="main">
-    <!-- Colonne combat : zones, arène, sorts (objectifs et journal sur petit écran) -->
-    <section class="card" id="combat">
-      <div class="zones" id="zones"></div>
-      <div class="modebar" id="modeBar"></div>
-      <div class="arena" id="arena">
-        <div class="sky" id="sky" aria-hidden="true"></div><div class="layfar" id="layFar" aria-hidden="true"></div><div class="deco" id="deco" aria-hidden="true"></div>
-        <div class="mhead"><h3 id="mName">…</h3><span class="mlvl num" id="mLvl"></span></div>
-        <div class="mel" id="mEl"></div>
-        <div class="mon" id="mon"><div class="pals" id="pals" aria-hidden="true"></div><div class="queue" id="queue" aria-hidden="true"></div><div class="layfront" id="layFront" aria-hidden="true"></div><img class="px afam" id="afam" alt="" hidden><img class="px ahero" id="ahero" alt="" hidden><button id="monBtn" data-tip="cur:mon" aria-label="Frapper le monstre"></button><div class="mdots" id="mdots" aria-hidden="true"></div></div>
-        <div class="bars">
-          <div><div class="blbl"><span>Monstre</span><span class="num" id="mHpTxt"></span></div><div class="bar mhp"><i class="lag" id="mHpLag"></i><i id="mHpBar"></i></div></div>
-          <div><div class="blbl"><span>Vous</span><span class="num" id="pHpTxt"></span></div><div class="bar hp"><i class="lag" id="pHpLag"></i><i id="pHpBar"></i></div></div>
-        </div>
-        <div class="buffs" id="buffs"></div>
-        <div class="weather" id="weather"></div>
-        <div class="combo" id="combo" hidden><b class="num" id="comboN"></b><div class="bar"><i id="comboBar"></i></div></div>
-        <div class="kostate" id="pauseOv" hidden>En pause</div>
-        <div class="kostate" id="ko" hidden>K.O. · retour dans <span class="num" id="koT"></span> s</div>
-      </div>
-      <div class="hint" id="hint">Cliquez sur le monstre pour frapper. Le combat continue tout seul.</div>
-      <div class="spells" id="spells"></div>
-      <div class="row" id="pots" style="margin-top:8px;gap:6px"></div>
-      <div class="goals" id="goals"></div>
-      <div class="log" id="log"></div>
-    </section>
-
     <!-- Colonne onglets : barre d'onglets + contenu (rempli par js/onglets/*.js) -->
     <section class="card" id="panelCard">
       <nav class="tabs" id="tabs"></nav>
       <div id="panel"></div>
     </section>
-    <!-- 3e colonne (grand écran) : objectifs, potions, journal, déplacés par placeSide() -->
-    <section class="card" id="sideCard" hidden></section>
+    <!-- Colonne de droite : objectifs, statistiques en direct (grand écran), journal -->
+    <section class="card" id="sideCard"><div class="goals" id="goals"></div><div class="log" id="log"></div></section>
   </div>
 </div>
 <!-- ===== Couches flottantes : fenêtres, info-bulles, bulles ===== -->
@@ -88,6 +92,8 @@
 <script src="js/vie.js"></script>
 <script src="js/anim.js"></script>
 <script src="js/scene.js"></script>
+<script src="js/monde.js"></script>
+<script src="js/ouvriers.js"></script>
 <script src="js/onglets/personnage.js"></script>
 <script src="js/onglets/inventaire.js"></script>
 <script src="js/onglets/aventure.js"></script>

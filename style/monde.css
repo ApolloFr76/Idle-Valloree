@@ -1,0 +1,151 @@
+/* Monde en bandeau (js/monde.js) : le combat se joue dans le paysage, sans cadre, et l'interface
+   de combat est posée dessus. Sous le monde, la terre en coupe sert de fond aux panneaux.
+   Chargé après style.css, dont il remplace la mise en page de la colonne de combat. */
+:root{--wh:clamp(420px,52vh,580px)}
+html,body{overflow-x:clip}
+body{padding:0!important;margin:0;background-image:none!important}
+/* prairie sous le bandeau (canvas en fond de page), la suite exacte du sol du monde */
+.wbg{position:absolute;left:0;top:0;z-index:0;pointer-events:none;image-rendering:pixelated}
+.wrap{position:relative;z-index:1}
+.wrap{max-width:1840px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 32px max(16px,env(safe-area-inset-left,0px))}
+.main{grid-template-columns:minmax(0,1fr) minmax(0,320px)}
+@media (max-width:900px){.main{grid-template-columns:minmax(0,1fr)}#sideCard .log{max-height:320px;overflow:auto}}
+@media (min-width:1500px){
+  .wrap{height:calc(100vh - var(--wh));padding-top:10px;padding-bottom:10px}
+  .main{grid-template-columns:minmax(0,1fr) minmax(0,340px)}
+}
+
+/* ---------- Le monde ---------- */
+.world{position:relative;height:var(--wh);z-index:1;container-type:inline-size;color:var(--cream)}
+.world .arena{position:absolute;inset:0;margin:0;padding:0;border:0;border-radius:0;box-shadow:none!important;background:none!important;overflow:hidden}
+.wcv{position:absolute;left:0;top:0;z-index:0;pointer-events:none;image-rendering:pixelated}
+.world .arena>.sky{display:none}
+.world .weather{z-index:1}
+/* scène : l'équipe à gauche, le monstre à droite, les pieds sur le chemin */
+.world .mon{position:absolute;left:50%;bottom:var(--feet,104px);transform:translateX(-50%);width:min(720px,calc(100% - 24px));height:auto;margin:0;padding:0;z-index:2;
+  display:flex;align-items:flex-end;justify-content:center;gap:clamp(36px,9%,110px)}
+.world .mon.haspals{padding-left:min(170px,30%)}
+.world .pals{bottom:0}
+.world .queue{bottom:0;right:-40px}
+.hslot,.mslot{position:relative;flex:none;display:flex;align-items:flex-end}
+.world .mon button{display:block}
+/* étiquettes au-dessus des têtes */
+.htag,.mtag{position:absolute;left:50%;bottom:calc(100% - 6px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;z-index:3;white-space:nowrap}
+.htag{bottom:calc(100% - 12px)}
+.htag .bar{width:84px;height:10px}
+.htag .num,.mhptxt{font-size:13px;line-height:1;color:var(--cream);text-shadow:1px 1px 0 var(--ink),-1px 0 0 var(--ink),0 -1px 0 var(--ink)}
+.mtag .mhead{display:flex;align-items:center;gap:8px;background:rgba(28,16,32,.72);border:2px solid var(--ink);box-shadow:none;padding:1px 8px 2px}
+.mtag .mhead h3{font-size:17px;margin:0}
+.mtag .mlvl{font-size:13px;padding:0 6px}
+.mtag .mel{display:flex;gap:6px;align-items:center;background:rgba(28,16,32,.6);border:0;padding:1px 6px;margin:0;font-size:13px}
+.mtag .mel .small{font-size:13px}
+.mtag .mel .elc,.mtag .mel .chip{font-size:13px;padding:0 5px}
+.mtag .bar{width:170px;height:12px}
+.world .mdots{top:auto;bottom:100%;right:-30px;margin-bottom:64px}
+/* en marche : petits pas de toute l'équipe */
+.arena.walking .ahero{animation:heroWalk .26s steps(2) infinite}
+.arena.walking .pal{animation-duration:.32s}
+@keyframes heroWalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.world .arena .visitor:not(.bird):not(.ghost){bottom:var(--feet,104px)!important}
+.world .arena.special{box-shadow:none!important}
+.world .float{z-index:6}
+
+/* ---------- Interface posée sur le monde ---------- */
+.world .top{position:absolute;left:0;right:0;top:0;z-index:10;margin:0;border:0;border-bottom:3px solid var(--ink);border-radius:0;
+  background:linear-gradient(rgba(42,23,18,.86),rgba(42,23,18,.66));box-shadow:none;padding:6px max(16px,env(safe-area-inset-right,0px)) 7px max(16px,env(safe-area-inset-left,0px));flex-wrap:nowrap;gap:8px 18px;backdrop-filter:blur(2px)}
+.world .top::before,.world .top::after{display:none}
+.world .brand{font-size:24px}
+.world .ecus{font-size:20px;padding:2px 10px 3px}
+.hudl{position:absolute;left:16px;top:64px;z-index:9;width:min(360px,42%);display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.hudl .zones{width:100%;padding:0!important;margin:0}
+.hudl .zsel>span{display:none}
+.hudl .zsel select{padding:5px 10px;font-size:15px}
+.hudl .modebar{margin:0;width:100%;background:rgba(28,16,32,.62);border:2px solid var(--ink);padding:4px 8px;gap:6px}
+.hudl .modebar:empty{display:none}
+.hudl .buffs{margin:0;min-height:0}
+.world .combo{right:20px;top:72px;left:auto;z-index:9}
+.hudb{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:9;display:flex;flex-direction:column;align-items:center;gap:4px;max-width:calc(100% - 24px)}
+.hudl .hint{margin:0;font-size:13px;line-height:1.25;color:var(--cream);text-shadow:1px 1px 0 var(--ink);background:rgba(28,16,32,.45);padding:1px 8px;white-space:normal;text-align:left}
+.abar{display:flex;gap:10px;align-items:stretch;background:rgba(28,16,32,.58);border:3px solid var(--ink);padding:6px}
+.hudb .spells{display:flex;gap:8px;margin:0}
+.hudb .spellwrap{position:relative;width:156px}
+.hudb .spell{min-height:0;height:100%;padding:6px 10px 7px;justify-content:center}
+.hudb .spell b{font-size:16px;line-height:1.1}
+.hudb .spell small{display:none}
+.hudb .spell.lock small{display:block;font-size:12px}
+.hudb .autot{position:absolute;right:6px;top:5px;margin:0;gap:4px;font-size:12px;color:var(--cream);text-shadow:1px 1px 0 var(--ink)}
+.hudb .autot input{width:13px;height:13px;border-width:2px}
+.hudb .pots{margin:0!important;display:flex;flex-direction:column;gap:4px;justify-content:center}
+.hudb .pots:empty{display:none}
+.hudb .pots .btn{font-size:13px;padding:3px 8px}
+.hudb .pots .autot{position:static;font-size:0;gap:0}
+.hudb .pots .autot::after{content:"Auto";font-size:12px;margin-left:4px}
+
+/* ---------- Boss : barre en haut, bandes noires à l'entrée, assombrissement ---------- */
+.bossbar{position:absolute;left:50%;top:66px;transform:translateX(-50%);z-index:8;width:min(560px,56%);display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none}
+.bossbar b{font-family:var(--display);font-size:24px;color:var(--sun);text-shadow:2px 2px 0 var(--ink),0 0 12px rgba(255,80,60,.6);letter-spacing:1px}
+.bossbar .bar{width:100%;height:18px}
+.bossbar .num{font-size:14px;text-shadow:1px 1px 0 var(--ink)}
+.arena.bossmode::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 70%,transparent 35%,rgba(50,0,20,.55))}
+.arena.bossmode .mtag{display:none}
+.arena.bossmode #monBtn{transform:scale(1.3);transform-origin:50% 100%}
+.letterbox{position:absolute;inset:0;z-index:7;pointer-events:none}
+.letterbox::before,.letterbox::after{content:"";position:absolute;left:0;right:0;height:0;background:#0b0710;transition:height .45s ease-out}
+.letterbox::before{top:0}.letterbox::after{bottom:0}
+.letterbox.on::before,.letterbox.on::after{height:12%}
+
+/* ---------- Butin au sol, ramassé en marchant ---------- */
+.gdrops{position:absolute;inset:0;z-index:1;pointer-events:none}
+.gdrop{position:absolute;width:0;height:0}
+.gdrop>*{position:absolute;display:grid;place-items:center}
+.gdrop.coin>span{left:-9px;top:-18px;width:18px;height:18px;display:block}
+.gdrop.item>span{left:-15px;top:-30px;width:30px;height:30px;filter:drop-shadow(0 3px 0 rgba(28,16,32,.35))}
+.gdrop.item>span>*{max-width:28px;max-height:28px}
+.gdrop.rare>span{animation:dropGlow .9s ease-in-out infinite alternate}
+@keyframes dropGlow{from{filter:drop-shadow(0 0 2px #ffe27a)}to{filter:drop-shadow(0 0 9px #ffd36a)}}
+.gdrop.fly{position:fixed;z-index:150;width:auto;height:auto}
+.gdrop.fly>*{position:static}
+
+/* ---------- Petit monde (moins de 640 px de large) : pixels ×3 ---------- */
+@container (max-width:639px){
+  .ahero{width:96px;height:96px}
+  .mon button,.mon button img{width:120px;height:120px}
+  .pal{width:39px;height:39px}.pal.beast{width:30px;height:30px}
+  .afam{width:54px;height:54px}.afam.mount{width:78px;height:78px}
+  .world .mon.haspals{padding-left:min(120px,30%)}
+  .mtag .bar{width:130px}
+  .world .mon{gap:20px;width:calc(100% - 12px)}
+  .mtag .mel .small{display:none}
+  .world .mon.haspals{padding-left:84px}
+  .world .queue{display:none}
+}
+/* Téléphone : l'en-tête, les réglages et la barre d'action passent au-dessus et au-dessous du monde */
+@media (max-width:700px){
+  .world{height:auto;display:flex;flex-direction:column;background:#2a1712}
+  .world .top{position:relative;order:0;flex-wrap:wrap}
+  .hudl{position:relative;left:auto;top:auto;width:auto;order:1;padding:8px 12px;background:#2a1712}
+  .world .arena{position:relative;inset:auto;height:330px;order:2}
+  .hudb{position:relative;left:auto;bottom:auto;transform:none;order:3;max-width:none;padding:8px 12px;background:#2a1712}
+  .abar{flex-wrap:wrap}
+  .hudb .spells{flex-wrap:wrap;flex:1 1 100%}
+  .hudb .spellwrap{width:auto;flex:1 1 100px}
+  .world .combo,.bossbar{top:12px}
+}
+
+/* ---------- Onglet Métiers : chantier et ouvriers ---------- */
+.site{position:relative;margin:10px 0;border:4px solid var(--ink);background:#5aa8ec}
+.site canvas{display:block;width:100%;height:auto;aspect-ratio:256/84;image-rendering:pixelated}
+.sitecap{position:absolute;left:0;top:0;display:flex;gap:10px;align-items:baseline;background:rgba(28,16,32,.7);color:var(--cream);padding:2px 10px 3px;font-size:15px}
+.sitecap b{color:var(--sun)}
+.siteempty{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;background:rgba(28,16,32,.6);color:var(--cream);font-size:17px;padding:4px 10px;text-shadow:1px 1px 0 var(--ink)}
+.sitepop{position:absolute;transform:translate(-50%,-100%);color:#fff6d8;font-size:18px;text-shadow:2px 2px 0 var(--ink);pointer-events:none;animation:sitepop 1.1s ease-out forwards}
+@keyframes sitepop{to{transform:translate(-50%,-100%) translateY(-28px);opacity:0}}
+.ouv{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.ouvh{display:flex;gap:12px;align-items:center;justify-content:space-between}
+.ouvl{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.ouvc{display:flex;gap:8px;align-items:center;background:var(--bg2);border:3px solid #a8804e;padding:6px 8px}
+.ouvc.on{border-color:var(--sun-d);box-shadow:inset 0 0 0 2px var(--sun)}
+.ouvc img{width:80px;height:80px;flex:none;image-rendering:pixelated;margin:-16px -14px -10px}
+.ouvn{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ouvn select{width:100%;padding:2px 6px;font-size:14px}
+.ouvc .btn{flex:none;font-size:12px;padding:3px 7px}

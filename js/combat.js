@@ -62,7 +62,7 @@ const FX=(()=>{
       const cx=m.x+m.w/2,cy=m.y+m.h/2;parts(cx,cy,boss?26:12,boss?["#ffd36a","#fff","#ff8a3c","#c9a8ff"]:["#fff6d8","#c4a878","#ffffff"],boss?120:70,boss?900:550,boss?5:4);add("poof",cx,cy,500);
       for(let i=0;i<(boss?8:3);i++){const c=add("coin",cx,cy,800);const dx=(Math.random()-.5)*90,dy=-40-Math.random()*40;c.animate([{transform:"translate(-50%,-50%)"},{transform:`translate(calc(-50% + ${dx/2}px),calc(-50% + ${dy}px))`,offset:.45},{transform:`translate(calc(-50% + ${dx}px),calc(-50% + 30px))`,opacity:0}],{duration:780,easing:"ease-out",fill:"forwards"})}
       if(boss){shake(true);banner("Victoire !","","win",1300)}},
-    loot(icon,rare){if(!fx)return;const m=monBox();if(!m)return;const e=add("loot"+(rare?" rare":""),m.x+m.w*(.25+Math.random()*.5),m.y+m.h*.45,rare?1500:1000,icon);if(rare){parts(m.x+m.w/2,m.y+m.h/2,14,["#ffd36a","#fff","#b98cff"],80,800);shake(false)}},
+    loot(icon,rare){if(!fx)return;const m=monBox();if(!m)return;if(MONDE.drop(icon,rare)){if(rare)parts(m.x+m.w/2,m.y+m.h/2,14,["#ffd36a","#fff","#b98cff"],80,800);return}const e=add("loot"+(rare?" rare":""),m.x+m.w*(.25+Math.random()*.5),m.y+m.h*.45,rare?1500:1000,icon);if(rare){parts(m.x+m.w/2,m.y+m.h/2,14,["#ffd36a","#fff","#b98cff"],80,800);shake(false)}},
     ko(){if(!fx)return;replayCls(A(),"kofx");banner("K.O.","","ko",2000);const hb=heroBox();if(hb)parts(hb.x+hb.w/2,hb.y+hb.h/2,14,["#ff5a4a","#6a2030","#fff"],70,800);shake(true)},
     lvl(n){if(!fx)return;const hb=heroBox();if(hb){add("pillar",hb.x+hb.w/2,0,1100);parts(hb.x+hb.w/2,hb.y+hb.h*.6,20,["#ffd36a","#fff6d8","#ffb03c"],90,1000)}banner("Niveau "+n+" !","+"+PTS_PER_LVL+" points","lvl",1500)},
     flash(col){if(!fx)return;const e=add("flash",0,0,500);e.style.background=col},
@@ -73,7 +73,7 @@ const FX=(()=>{
       const m=monBox(),b=rel(p);if(m)setTimeout(()=>parts(m.x+m.w*.3,m.y+m.h*.55,4,["#bfe3ff","#fff"],24,300,3),140)}
   }})();
 function kill(){
-  if(fx){FX.death(MON[S.mon.id].boss);VIE.coinFly();if(MON[S.mon.id].boss)VIE.cheer()}
+  if(fx){FX.death(MON[S.mon.id].boss);if(!MONDE.coins(MON[S.mon.id].boss?10:1+(Math.random()*3|0)))VIE.coinFly();if(MON[S.mon.id].boss)VIE.cheer()}
   if(S.mon.shiny){inc("shinies");log(`Monstre brillant vaincu : ${MON[S.mon.id].name} !`,"g")}
   const m=S.mon,d=MON[m.id],st=stats(),mode=S.mode,xp=Math.round(m.xp*st.xpM),ec=gainEcus(m.ecus*(1+st.pctEcus/100)*(.8+Math.random()*.4)*(1+(st.pros-1)/2)*(evOn("heure")?2:1));
   S.kills++;S.best[m.id]=(S.best[m.id]||0)+1;dirty=true;let dropTxt="";qProg("kill",m.id);qProg("killEl",d.el);

@@ -37,9 +37,10 @@ const PX=(()=>{
     shadow(cx,cy,rx,ry){this.sh.push([cx,cy,rx,ry]);return this}
     outline(col=INK){const w=this.w,h=this.h,add=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(!this.p[y*w+x]&&(this.get(x+1,y)||this.get(x-1,y)||this.get(x,y+1)||this.get(x,y-1)))add.push(y*w+x);const c=rgb(col);add.forEach(i=>this.p[i]=c);return this}
     blit(s,ox,oy){for(let y=0;y<s.h;y++)for(let x=0;x<s.w;x++){const c=s.p[y*s.w+x];if(c)this.set(ox+x,oy+y,c)}return this}
-    url(){const c=document.createElement("canvas");c.width=this.w;c.height=this.h;const x=c.getContext("2d"),I=x.createImageData(this.w,this.h),D=I.data;
+    cvs(){const c=document.createElement("canvas");c.width=this.w;c.height=this.h;const x=c.getContext("2d"),I=x.createImageData(this.w,this.h),D=I.data;
       this.sh.forEach(([cx,cy,rx,ry])=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let xx=Math.floor(cx-rx);xx<=cx+rx;xx++){const dx=(xx-cx)/(rx+.35),dy=(y-cy)/(ry+.35);if(dx*dx+dy*dy<=1&&xx>=0&&y>=0&&xx<this.w&&y<this.h){const i=(y*this.w+xx)*4;D[i]=30;D[i+1]=14;D[i+2]=40;D[i+3]=95}}});
-      this.p.forEach((q,i)=>{if(q){D[i*4]=q[0];D[i*4+1]=q[1];D[i*4+2]=q[2];D[i*4+3]=255}});x.putImageData(I,0,0);return c.toDataURL()}
+      this.p.forEach((q,i)=>{if(q){D[i*4]=q[0];D[i*4+1]=q[1];D[i*4+2]=q[2];D[i*4+3]=255}});x.putImageData(I,0,0);return c}
+    url(){return this.cvs().toDataURL()}
   }
 
   /* ---------- Monstres (40×40) ---------- */
@@ -530,7 +531,9 @@ const PX=(()=>{
       if(P.open)s.part(gl,q=>q.px(18+x,20+y-a),{flat:1})}
     s.outline();s.shadow(12,22,6,1.2);return cache[k]=s.url()}
   const beastFrames=(id,col,anim)=>{const k="bfs:"+id+col+anim;return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>beastF(id,col,anim,f)))};
-  return{plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
+  /* outils de dessin pour le monde en bandeau (js/monde.js) */
+  const kit={Spr,prop,rng,rgb,mix,TH,LIGHT,DARK,INK};
+  return{kit,plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
 })();
 
 document.body.style.backgroundImage=`url(${PX.tile()})`;

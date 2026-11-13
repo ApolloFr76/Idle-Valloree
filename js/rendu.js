@@ -1,15 +1,17 @@
 /* Rendu commun : arène, barres, sorts, journal, liste des onglets, glisser-déposer, renderPanel. */
 /* ================= Rendu ================= */
-function floatNum(txt,cls){const dn=S.opt&&S.opt.dmgNums;if(dn==="none"||dn==="crit"&&!/crit|heal/.test(cls))return;const e=document.createElement("div");e.className="float "+cls;e.textContent=txt;e.style.left=(cls==="hurt"?22+Math.random()*10:50+Math.random()*22)+"%";$("arena").appendChild(e);setTimeout(()=>e.remove(),950)}
+function floatNum(txt,cls){const dn=S.opt&&S.opt.dmgNums;if(dn==="none"||dn==="crit"&&!/crit|heal/.test(cls))return;const e=document.createElement("div");e.className="float "+cls;e.textContent=txt;
+  /* au-dessus du monstre (ou du héros quand il est touché), où qu'ils soient dans le monde */
+  const a=$("arena"),tg=$(/hurt/.test(cls)?"ahero":"monBtn");if(tg&&a&&tg.getBoundingClientRect().width){const ar=a.getBoundingClientRect(),r=tg.getBoundingClientRect();e.style.left=(r.left-ar.left+r.width*(.25+Math.random()*.5))+"px";e.style.top=(r.top-ar.top+r.height*(.1+Math.random()*.3))+"px";e.style.bottom="auto"}else e.style.left=(cls==="hurt"?22+Math.random()*10:50+Math.random()*22)+"%";a.appendChild(e);setTimeout(()=>e.remove(),950)}
 function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)a.src=PX.hero(S.cls,C.col)}$("heroBox").innerHTML=C?`${emb(S.cls)}<div><div class="nm">${esc(S.name)}</div><div class="sub">${C.name}</div></div>`:""}
 /* Choix du monde : une liste déroulante (les mondes débloqués + le prochain, grisé) pour ne pas faire défiler la colonne */
 /* Couleur de chaque monde (mêmes teintes que les anciennes cases) */
 const ZBG=["#57b04a","#1f9a78","#8a9a2e","#8a6ac8","#f0962c","#3d9fe0","#6a86b8","#2fa84a","#1fb0c8","#e2502c","#a88ae0","#5a3f96"];
 function drawZones(){const opts=ZONES.map((z,i)=>i>1&&S.lvl<ZONES[i-1].lvl[0]?"":`<option value="${i}" style="background:${S.lvl<z.lvl[0]?"#a8977e":ZBG[i]};color:#fff8e6"${i===S.zone?" selected":""}${S.lvl<z.lvl[0]?" disabled":""}>${z.name} · Niv. ${z.lvl[0]}–${z.lvl[1]}${S.lvl<z.lvl[0]?" · verrouillée":""}</option>`).join("");
   $("zones").innerHTML=`<label class="zsel"><span>Monde</span><select id="zoneSel" style="--zb:${ZBG[S.zone]}" data-tip="z:${S.zone}" aria-label="Choisir le monde">${opts}</select></label>`;
-  const z=ZONES[S.zone];const A=$("arena");A.style.backgroundImage=`url(${PX.scene(z.id)})`;A.style.backgroundColor=PX.ground(z.id);setBiome(z.id);VIE.deco(z.id);SCENE.layers(z.id)}
+  const z=ZONES[S.zone];setBiome(z.id);MONDE.zone(z.id)}
 function drawMonster(){const b=$("monBtn");if(!S.mon){b.innerHTML="";$("mName").textContent="…";$("mLvl").textContent="";$("mEl").innerHTML="";return}const d=MON[S.mon.id];b.innerHTML=monsterSVG(d);$("mName").textContent=(S.mon.shiny?"✦ ":"")+d.name;$("mon").classList.toggle("shiny",!!S.mon.shiny);$("mLvl").textContent="Niv. "+S.mon.lvl;$("mEl").innerHTML=elChip(d.el)+`<span class="small">Faible : ${ELEMS[weakTo(d.el)].n} · Résiste : ${ELEMS[d.el].n}, ${ELEMS[BEATS[d.el]].n}</span>`}
-function drawSpells(){if(!S.cls)return;$("spells").innerHTML=CLASSES[S.cls].spells.map(sp=>{const lock=S.lvl<sp.lvl;return`<div class="spellwrap"><button class="spell${lock?" lock":""}" data-a="cast" data-tip="sp:${sp.id}" id="sp-${sp.id}" data-sp="${sp.id}" ${lock?"disabled":""}><b>${sp.name}</b><small>${lock?"Débloqué au niveau "+sp.lvl:sp.txt+" · "+(+spCd(sp).toFixed(1))+" s"}</small><span class="cd" id="cd-${sp.id}"></span></button>${lock?"":`<label class="autot"><input type="checkbox" id="auto-${sp.id}" data-a="auto" data-s="${sp.id}" ${S.auto[sp.id]?"checked":""}> Lancer automatiquement</label>`}</div>`}).join("")}
+function drawSpells(){if(!S.cls)return;$("spells").innerHTML=CLASSES[S.cls].spells.map(sp=>{const lock=S.lvl<sp.lvl;return`<div class="spellwrap"><button class="spell${lock?" lock":""}" data-a="cast" data-tip="sp:${sp.id}" id="sp-${sp.id}" data-sp="${sp.id}" ${lock?"disabled":""}><b>${sp.name}</b><small>${lock?"Débloqué au niveau "+sp.lvl:sp.txt+" · "+(+spCd(sp).toFixed(1))+" s"}</small><span class="cd" id="cd-${sp.id}"></span></button>${lock?"":`<label class="autot"><input type="checkbox" id="auto-${sp.id}" data-a="auto" data-s="${sp.id}" ${S.auto[sp.id]?"checked":""}> Auto</label>`}</div>`}).join("")}
 let mbSig="";
 function drawModeBar(){
   if(!tabOpen("aventure")){if(mbSig!=="lock"){mbSig="lock";$("modeBar").innerHTML=`<span class="info">Boss, donjons et tour : niveau ${TAB_LOCK.aventure}</span>`}return}
@@ -40,6 +42,7 @@ function live(){
   buffs.innerHTML=elTxt+(S.ev?(e=>`<span class="chip evchip" style="color:${e.c};border-color:${e.c}" title="${e.txt}">${e.n} · ${Math.ceil(S.ev.until-S.time)} s</span>`)(EVENTS.find(e=>e.id===S.ev.id)):"")+(ad>0?`<span class="chip">Compagnons · ${fmt(ad)}/s</span>`:"")+S.buffs.map(b=>`<span class="chip">${b.n} · ${Math.ceil(b.until-S.time)} s</span>`).join("")+(S.dots.length?`<span class="chip">Brûlure · ${Math.ceil(Math.max(...S.dots.map(d=>d.until))-S.time)} s</span>`:"")+(S.job?`<span class="chip">${PROFS[RES[S.job.r].prof].name} : ${RES[S.job.r].name}</span>`:"")+(bagWeight()>=bagCap()?`<span class="chip" style="color:var(--hp)">Sac plein</span>`:"");
   CLASSES[S.cls].spells.forEach(sp=>{const b=$("sp-"+sp.id),c=$("cd-"+sp.id);if(!b||!c)return;const rem=Math.max(0,(S.cds[sp.id]||0)-S.time);c.style.width=(rem/spCd(sp,st)*100)+"%";b.classList.toggle("wait",rem>0)});
   if(S.job){const r=RES[S.job.r],e=$("gp-"+r.id);if(e)e.style.width=(S.job.t/gatherTime(r.prof,r.tier)*100)+"%"}
+  if(S.tab==="metiers")OUV.list().forEach((w,i)=>{const e=$("ouvp-"+i);if(e&&RES[w.r])e.style.width=Math.min(100,w.t/OUV.time(w)*100)+"%"});
 }
 
 /* --- Onglets --- */

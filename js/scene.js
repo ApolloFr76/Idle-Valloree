@@ -61,10 +61,9 @@ const SCENE=(()=>{
     i.animate([{transform:"translate(110px,0) scale(.72)",opacity:.6},{transform:"translate(80px,-6px) scale(.8)",offset:.2},{transform:"translate(55px,0) scale(.86)",offset:.4},{transform:"translate(30px,-6px) scale(.92)",offset:.6},{transform:"translate(10px,0) scale(.97)",offset:.8},{transform:"translate(0,0) scale(1)",opacity:1}],{duration:420,easing:"linear"});
     const q=$("queue");if(q)q.animate([{transform:"translateX(40px)"},{transform:"translateX(0)"}],{duration:420,easing:"ease-out"})}
 
-  /* ---------- Décor en couches ---------- */
-  let scroll=0;
-  function layers(zid){const f=$("layFar"),r=$("layFront");if(f)f.style.backgroundImage=`url(${PX.strip(zid,"far")})`;if(r)r.style.backgroundImage=`url(${PX.strip(zid,"front")})`}
-  function advance(){if(calm())return;scroll++;const f=$("layFar"),r=$("layFront");if(f)f.style.backgroundPositionX=(-scroll*18)+"px";if(r)r.style.backgroundPositionX=(-scroll*90)+"px";const a=A();if(a)a.style.setProperty("--scroll",scroll)}
+  /* ---------- Décor ---------- */
+  /* le paysage est peint et défile dans js/monde.js : l'équipe avance jusqu'au monstre suivant */
+  function advance(){MONDE.walk()}
 
   /* ---------- Jauges : la partie perdue reste un instant en clair puis descend ---------- */
   const lagW={};
@@ -92,7 +91,7 @@ const SCENE=(()=>{
     init(){requestAnimationFrame(loop)},
     hero(anim,hold=0){play(hero,anim,anim==="cast"?26:30,hold);if(famA.id&&anim==="atk"&&Math.random()<.5)play(famA,"atk",30)},
     monHurt(){play(mon,"hurt",36)},
-    drawPals,nextWave,drawQueue,walkIn,layers,advance,lag};
+    drawPals,nextWave,drawQueue,walkIn,advance,lag};
 })();
 
 /* Portrait d'un compagnon (onglet Compagnons) : première image de son animation */

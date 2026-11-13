@@ -2,9 +2,9 @@
 /* ================= Onboarding ================= */
 const TUTO=[
   {sel:null,t:"Bienvenue dans les Terres de Vallorée !",d:"Un jeu de grind où votre héros combat tout seul, même quand vous ne faites rien. Votre but : devenir de plus en plus fort, découvrir toutes les zones, fabriquer les meilleures panoplies et vaincre les boss. Cette visite vous présente l'écran en quelques étapes."},
-  {sel:"#arena",t:"L'arène",d:"Votre héros affronte un monstre à la fois. Quand il est vaincu, vous gagnez de l'XP, des écus et parfois du butin, puis un autre arrive."},
+  {sel:"#arena",t:"Le monde",d:"Votre héros parcourt la Prairie et affronte un monstre à la fois. Quand il est vaincu, vous gagnez de l'XP, des écus et parfois du butin, puis un autre arrive."},
   {sel:"#monBtn",t:"Cliquez pour frapper",d:"Cliquez sur le monstre (ou appuyez sur Espace) pour ajouter vos coups à ceux de votre héros. Cliquer vite fait monter un combo qui augmente vos dégâts. Passez la souris sur le monstre pour voir ses PV, son élément et son butin."},
-  {sel:".bars",t:"Les points de vie",d:"La barre orange est celle du monstre, la rouge la vôtre. Si vous tombez à 0, vous êtes K.O. 5 secondes. Vos PV remontent tout seuls entre les coups."},
+  {sel:".mtag",t:"Les points de vie",d:"La barre au-dessus du monstre montre ses PV, celle au-dessus de votre héros les vôtres. Si vous tombez à 0, vous êtes K.O. 5 secondes. Vos PV remontent tout seuls entre les coups."},
   {sel:"#buffs",t:"Votre élément",d:"Feu, Eau, Terre ou Air : chaque monstre est faible à un élément et en résiste à d'autres. Le badge vous dit si votre élément est efficace contre le monstre actuel."},
   {sel:"#spells",t:"Vos sorts",d:"Lancez-les d'un clic ou avec les touches 1, 2 et 3. Cochez « Lancer automatiquement » pour qu'ils partent seuls. Deux autres sorts se débloquent aux niveaux 10 et 25."},
   {sel:"#goals",t:"Prochains objectifs",d:"Ce panneau, toujours visible, montre ce qui vous attend : prochain onglet, prochain sort, prochaine zone, achats et fabrications. Ce qui est faisable tout de suite passe en tête, en doré."},

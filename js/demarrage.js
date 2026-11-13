@@ -2,15 +2,16 @@
 /* ================= Démarrage ================= */
 let lastT=performance.now(),lastPanel=0,lastAch=0,lastSave=Date.now(),paused=false,started=false;
 
-/* Grand écran : objectifs, potions et journal passent dans une 3e colonne */
+/* Colonne de droite : objectifs et journal, plus les statistiques en direct sur grand écran.
+   Les potions restent dans la barre d'action du monde (index.html). */
 const WIDE=matchMedia("(min-width:1500px) and (min-height:650px)");
-function placeSide(){const side=$("sideCard"),cb=$("combat"),w=WIDE.matches;side.hidden=!w;
-  if(!$("lstats")){const d=document.createElement("div");d.id="lstats";d.className="lstats";d.hidden=true;document.body.appendChild(d)}$("lstats").hidden=!w;
-  const els=["pots","goals","lstats","log"].map(id=>$(id));if(w)els.forEach(e=>side.appendChild(e));else els.forEach(e=>cb.appendChild(e));if(S&&S.log)renderLog()}
+function placeSide(){const side=$("sideCard"),w=WIDE.matches;
+  if(!$("lstats")){const d=document.createElement("div");d.id="lstats";d.className="lstats";side.insertBefore(d,$("log"))}$("lstats").hidden=!w;
+  if(S&&S.log)renderLog()}
 WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
 placeSide();
 let sceneOn=false;
-function boot2(){placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init()}fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+function boot2(){placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
 function loop(){
   const now=performance.now();let dt=(now-lastT)/1000;lastT=now;
   if(S&&S.cls){
@@ -27,7 +28,7 @@ function start(data){
   if(S.cls&&OLD_CLS[S.cls]){S.cls=OLD_CLS[S.cls];let r=0;for(const k in S.alloc)r+=S.alloc[k]||0;S.pts+=r;S.alloc=fresh().alloc;S.cds={};S.auto={};S.buffs=[];S.dots=[];
     setTimeout(()=>{log("Nouveau système d'éléments : votre classe a été convertie et vos points vous ont été rendus.","g");toast("Vos points de caractéristiques vous ont été rendus")},300)}
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});
-  Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});
+  Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});if(!Array.isArray(S.workers))S.workers=[];
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}
   S.opt=fixOpts(S.opt);applyOpts();checkUnlocks(true);
   if(!S.cls){showCreate();}
