@@ -157,12 +157,10 @@ const PX=(()=>{
     if(cls==="chrono"){s.part(col,q=>q.poly([[5,4],[11,-1],[17,4]]));s.part("#f2d94a",q=>q.rect(4,7,15,1),{flat:1});s.part("#f2d94a",q=>{q.rect(10,3,3,1);q.rect(11,4,1,1);q.rect(10,5,3,1)},{flat:1})}   /* capuche et sablier */
     if(cls==="invoc"){s.part(mix(col,DARK,.25),q=>{q.ell(11,5,8,4);q.clear(0,8,24,8)});s.part("#c9a8ff",q=>{q.px(6,6);q.px(11,3);q.px(16,6)},{flat:1})}   /* capuche à runes */
     if(cls==="berserk"){s.part("#8a6a45",q=>q.rect(4,5,15,3),{lt:.5});s.part("#f1e4bf",q=>{q.poly([[4,6],[1,0],[3,0],[6,5]]);q.poly([[18,6],[21,0],[19,0],[16,5]])})}   /* fourrure à cornes */
-    if(cls==="peste"){s.part("#2a2430",q=>{q.rect(2,4,19,2);q.ell(11,1.5,5,3.4)});s.part("#6a5a3a",q=>q.rect(6,3,10,1),{flat:1});   /* chapeau à large bord */
-      s.part("#e8dcc0",q=>{q.poly([[12,10],[22,13],[12,14]])},{lt:.5});s.part("#b8ac90",q=>q.line(13,13,21,13),{flat:1});}            /* masque à bec */
+    if(cls==="peste"){s.part("#2a2430",q=>{q.rect(2,4,19,2);q.ell(11,1.5,5,3.4)});s.part("#6a5a3a",q=>q.rect(6,3,10,1),{flat:1});   /* chapeau à large bord */}
     const B="#1c1020";s.set(8,10,B);s.set(8,11,B);s.set(13,10,B);s.set(13,11,B);s.set(9,10,"#fff");s.set(14,10,"#fff");
     if(pose==="blink"){[8,9,13,14].forEach(x=>{s.set(x,10,skin);s.set(x,11,B)})}   /* yeux fermés */
     if(cls==="berserk")[[7,12],[8,13],[15,12],[14,13]].forEach(([x,y])=>s.set(x,y,"#c8302a"));   /* peinture de guerre */
-    if(cls==="peste"){[[8,10],[13,10]].forEach(([x,y])=>{s.set(x,y,"#c8483a");s.set(x+1,y,"#c8483a");s.set(x,y+1,"#8a2a2a");s.set(x+1,y+1,"#8a2a2a")})}   /* lunettes rouges */
     s.set(6,12,"#f29a8e");s.set(7,12,"#f29a8e");s.set(15,12,"#f29a8e");s.set(16,12,"#f29a8e");s.set(10,13,"#b06a55");s.set(11,13,"#b06a55");
     if(cls==="guerrier"&&U){s.part("#dfe5ec",q=>q.rect(16,0,2,10));s.part("#f7c948",q=>q.rect(14,10,6,1),{flat:1})}   /* épée levée */
     else if(cls==="guerrier"&&A){s.part("#dfe5ec",q=>{q.rect(14,13,9,2)});s.part("#f7c948",q=>q.rect(20,12,1,4),{flat:1})}   /* épée pointée */
@@ -465,12 +463,10 @@ const PX=(()=>{
     if(cls==="chrono"){s.part(col,q=>q.poly([[5,4],[11,-1],[17,4]]));s.part("#f2d94a",q=>q.rect(4,7,15,1),{flat:1});s.part("#f2d94a",q=>{q.rect(10,3,3,1);q.rect(11,4,1,1);q.rect(10,5,3,1)},{flat:1})}   /* capuche et sablier */
     if(cls==="invoc"){s.part(mix(col,DARK,.25),q=>{q.ell(11,5,8,4);q.clear(0,8,24,8)});s.part("#c9a8ff",q=>{q.px(6,6);q.px(11,3);q.px(16,6)},{flat:1})}   /* capuche à runes */
     if(cls==="berserk"){s.part("#8a6a45",q=>q.rect(4,5,15,3),{lt:.5});s.part("#f1e4bf",q=>{q.poly([[4,6],[1,0],[3,0],[6,5]]);q.poly([[18,6],[21,0],[19,0],[16,5]])})}   /* fourrure à cornes */
-    if(cls==="peste"){s.part("#2a2430",q=>{q.rect(2,4,19,2);q.ell(11,1.5,5,3.4)});s.part("#6a5a3a",q=>q.rect(6,3,10,1),{flat:1});   /* chapeau à large bord */
-      s.part("#e8dcc0",q=>{q.poly([[12,10],[22,13],[12,14]])},{lt:.5});s.part("#b8ac90",q=>q.line(13,13,21,13),{flat:1});}            /* masque à bec */
+    if(cls==="peste"){s.part("#2a2430",q=>{q.rect(2,4,19,2);q.ell(11,1.5,5,3.4)});s.part("#6a5a3a",q=>q.rect(6,3,10,1),{flat:1});   /* chapeau à large bord */}
     s.set(8,10,B);s.set(8,11,B);s.set(13,10,B);s.set(13,11,B);s.set(9,10,"#fff");s.set(14,10,"#fff");
     if(blink)[8,9,13,14].forEach(x=>{s.set(x,10,skin);s.set(x,11,B)});
     if(cls==="berserk")[[7,12],[8,13],[15,12],[14,13]].forEach(([x,y])=>s.set(x,y,"#c8302a"));
-    if(cls==="peste"){[[8,10],[13,10]].forEach(([x,y])=>{s.set(x,y,"#c8483a");s.set(x+1,y,"#c8483a");s.set(x,y+1,"#8a2a2a");s.set(x+1,y+1,"#8a2a2a")})}
     s.set(6,12,"#f29a8e");s.set(7,12,"#f29a8e");s.set(15,12,"#f29a8e");s.set(16,12,"#f29a8e");s.set(10,13,"#b06a55");s.set(11,13,"#b06a55");
     if(!behind)rightArm();
     s.outline(ink);
