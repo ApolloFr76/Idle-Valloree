@@ -2,9 +2,9 @@
 let atZone=null,atSel=null,atOpen=null;
 function pAtelier(){const sc=setCounts(),zs=ZONES.filter((z,i)=>i===0||S.lvl>=ZONES[i-1].lvl[0]);
   if(atZone==null||!zs.some(z=>z.i===atZone))atZone=zs.some(z=>z.i===S.zone)?S.zone:0;
-  const Z=ZONES[atZone],keys=[...Z.mons.filter(m=>!m.extra).map(m=>m.id),"boss_"+Z.i],own={};S.items.forEach(i=>own[i.id]=(own[i.id]||0)+1);
+  const Z=ZONES[atZone],keys=[...Z.mons.map(m=>m.id),"boss_"+Z.i],own={};S.items.forEach(i=>own[i.id]=(own[i.id]||0)+1);
   const itemsOf=key=>SLOTS.filter(sl=>SETS[key].ids[sl.id]).map(sl=>ITEMS[SETS[key].ids[sl.id]]);
-  const nReady=z=>[...z.mons.filter(m=>!m.extra).map(m=>m.id),"boss_"+z.i].reduce((a,k)=>a+itemsOf(k).filter(canCraft).length,0);
+  const nReady=z=>[...z.mons.map(m=>m.id),"boss_"+z.i].reduce((a,k)=>a+itemsOf(k).filter(canCraft).length,0);
   if(atSel&&!keys.includes(ITEMS[atSel]?.set))atSel=null;
   const tile=it=>`<button class="tile at${it.id===atSel?" on":""}${canCraft(it)?" rdy":""}${S.lvl<it.lvl?" lck":""}" data-a="atSel" data-i="${it.id}" data-tip="i:${it.id}" aria-label="${esc(it.name)}">${itIcon(it)}${own[it.id]?`<span class="q num">×${own[it.id]}</span>`:""}${canCraft(it)?`<span class="rd">!</span>`:""}</button>`;
   const req=it=>it.recipe.map(([r,q])=>{const have=S.res[r]||0;return`<span data-tip="r:${r}" class="${have>=q?"ok":"no"}">${RES[r].name} ${fmt(Math.min(have,q))}/${q}</span>`}).join("");
