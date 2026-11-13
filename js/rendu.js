@@ -68,13 +68,27 @@ document.addEventListener("pointerup",dragEnd);document.addEventListener("pointe
 document.addEventListener("click",e=>{if(Date.now()-DRAG.skip<350){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener("dragstart",e=>{if(e.target.closest&&e.target.closest("#panel"))e.preventDefault()});
 let lastTabAnim="";
+/* setHTML : met à jour un bloc sans tout recréer. Seuls les nœuds qui changent sont modifiés, donc les images
+   déjà affichées ne sont pas rechargées (évite le clignotement blanc et les sauts du panneau central). */
+const morphTpl=document.createElement("template");
+function morph(a,b){
+  if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName){a.replaceWith(b);return}
+  if(a.nodeType===3||a.nodeType===8){if(a.nodeValue!==b.nodeValue)a.nodeValue=b.nodeValue;return}
+  for(const at of [...a.attributes])if(!b.hasAttribute(at.name))a.removeAttribute(at.name);
+  for(const at of b.attributes)if(a.getAttribute(at.name)!==at.value)a.setAttribute(at.name,at.value);
+  if(a.nodeName==="INPUT"){if(a.value!==b.value)a.value=b.value;if(a.checked!==b.checked)a.checked=b.checked}
+  morphKids(a,b);if(a.nodeName==="SELECT"&&a.value!==b.value)a.value=b.value}
+function morphKids(a,b){const A=[...a.childNodes],B=[...b.childNodes];
+  for(let i=0;i<B.length;i++){if(i<A.length)morph(A[i],B[i]);else a.appendChild(B[i])}
+  for(let i=B.length;i<A.length;i++)A[i].remove()}
+function setHTML(el,html){if(el._html===html)return;el._html=html;morphTpl.innerHTML=html;morphKids(el,morphTpl.content)}
 function renderPanel(force){if(DRAG.on){dirty=true;return}
   if(!S.cls)return;if(ptrDown&&!force){dirty=true;return}dirty=false;
   const anyCraft=Object.values(ITEMS).some(canCraft);
   if(!tabOpen(S.tab))S.tab="perso";
-  $("tabs").innerHTML=TABS.map(([k,n])=>!tabOpen(k)?`<button class="tab locked" data-a="tabLocked" data-t="${k}" data-tip="lk:${k}" aria-label="Onglet verrouillé, niveau ${TAB_LOCK[k]}">${LOCK_SVG}</button>`:`<button class="tab${S.tab===k?" on":""}" data-a="tab" data-t="${k}">${n}${k==="perso"&&S.pts>0||k==="atelier"&&anyCraft||k==="aventure"&&(S.zk[S.zone]||0)>=BOSS_KILLS||k==="prest"&&soulsGain()>0&&!S.prest||k==="quests"&&S.q&&S.q.list.some(q=>q.done&&!q.claimed)?'<span class="dot"></span>':""}</button>`).join("");
+  setHTML($("tabs"),TABS.map(([k,n])=>!tabOpen(k)?`<button class="tab locked" data-a="tabLocked" data-t="${k}" data-tip="lk:${k}" aria-label="Onglet verrouillé, niveau ${TAB_LOCK[k]}">${LOCK_SVG}</button>`:`<button class="tab${S.tab===k?" on":""}" data-a="tab" data-t="${k}">${n}${k==="perso"&&S.pts>0||k==="atelier"&&anyCraft||k==="aventure"&&(S.zk[S.zone]||0)>=BOSS_KILLS||k==="prest"&&soulsGain()>0&&!S.prest||k==="quests"&&S.q&&S.q.list.some(q=>q.done&&!q.claimed)?'<span class="dot"></span>':""}</button>`).join(""));
   const sy=$("panel").scrollTop, open=[...document.querySelectorAll("details.set[open]")].map(d=>d.dataset.z);
-  $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";$("panel").innerHTML=(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,opts:pOpts})[S.tab]||pPerso)();if(S.tab!==lastTabAnim){if(lastTabAnim)replayCls($("panel"),"tabin");lastTabAnim=S.tab}
+  $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";setHTML($("panel"),(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,opts:pOpts})[S.tab]||pPerso)());if(S.tab!==lastTabAnim){if(lastTabAnim)replayCls($("panel"),"tabin");lastTabAnim=S.tab}
   open.forEach(z=>{const d=document.querySelector(`details.set[data-z="${z}"]`);if(d)d.open=true});
   $("panel").scrollTop=sy;
 }
