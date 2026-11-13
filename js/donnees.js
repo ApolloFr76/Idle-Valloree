@@ -102,7 +102,7 @@ const ZONES = [
     {id:"neantille",el:"air",name:"Néantille",c:"#7a6a9a",shape:"snake",ft:"crystal",drop:["neant","Écaille du néant"]}]},
 ];
 /* Monstres en plus (5 par zone) : ils apparaissent une fois sur deux, donnent ressources, trophées et entrées de bestiaire,
-   mais n'ont pas de panoplie (marqués extra) */
+   et une panoplie de 2 à 6 pièces (marqués extra) */
 const MONS_X=[
   [{id:"trefloche",el:"terre",name:"Tréfloche",c:"#7cc46a",shape:"plant",ft:"leaf",drop:["x_trefloche","Trèfle porte-bonheur"]},{id:"bourdonnet",el:"air",name:"Bourdonnet",c:"#f2c94e",shape:"bat",ft:"antenna",drop:["x_bourdonnet","Goutte de miel"]},{id:"limaconne",el:"eau",name:"Limaçonne",c:"#c9a87a",shape:"slime",ft:"antenna",drop:["x_limaconne","Coquille spiralée"]},{id:"coquelor",el:"feu",name:"Coquelor",c:"#e85a3a",shape:"bird",ft:"none",drop:["x_coquelor","Crête de Coquelor"]},{id:"mulotin",el:"terre",name:"Mulotin",c:"#a88a6a",shape:"quad",ft:"ears",drop:["x_mulotin","Moustache de mulot"]}],
   [{id:"hiboulet",el:"air",name:"Hiboulet",c:"#8a7a5a",shape:"bird",ft:"ears",drop:["x_hiboulet","Plume de chouette"]},{id:"glandouille",el:"terre",name:"Glandouille",c:"#9a7040",shape:"blob",ft:"leaf",drop:["x_glandouille","Gland doré"]},{id:"mousseron",el:"eau",name:"Mousseron",c:"#c9b8a0",shape:"cap",ft:"none",drop:["x_mousseron","Pied de mousseron"]},{id:"sylvelin",el:"air",name:"Sylvelin",c:"#9fe0b0",shape:"ghost",ft:"leaf",drop:["x_sylvelin","Brume sylvestre"]},{id:"herissoc",el:"terre",name:"Hérissoc",c:"#7a5a40",shape:"spiky",ft:"ears",drop:["x_herissoc","Piquant de hérisson"]}],
@@ -116,7 +116,9 @@ const MONS_X=[
   [{id:"salamandrin",el:"feu",name:"Salamandrin",c:"#f05a2a",shape:"snake",ft:"flame",drop:["x_salamandrin","Queue de salamandre"]},{id:"obsidien",el:"terre",name:"Obsidien",c:"#2a2030",shape:"golem",ft:"crystal",drop:["x_obsidien","Éclat d'obsidienne"]},{id:"fumerol",el:"air",name:"Fumerol",c:"#807070",shape:"ghost",ft:"none",drop:["x_fumerol","Panache de fumée"]},{id:"braisillon",el:"feu",name:"Braisillon",c:"#ff8a3a",shape:"blob",ft:"flame",drop:["x_braisillon","Braise vive"]},{id:"vapeurin",el:"eau",name:"Vapeurin",c:"#e0d0d0",shape:"jelly",ft:"none",drop:["x_vapeurin","Vapeur soufrée"]}],
   [{id:"statuel",el:"terre",name:"Statuel",c:"#b0aab8",shape:"golem",ft:"none",drop:["x_statuel","Fragment de statue"]},{id:"grimoireau",el:"air",name:"Grimoireau",c:"#d8c8a0",shape:"bat",ft:"antenna",drop:["x_grimoireau","Page ancienne"]},{id:"astrolin",el:"air",name:"Astrolin",c:"#c0b0ff",shape:"jelly",ft:"crystal",drop:["x_astrolin","Poussière d'étoile"]},{id:"sphinxou",el:"feu",name:"Sphinxou",c:"#d8b060",shape:"quad",ft:"horns",drop:["x_sphinxou","Énigme gravée"]},{id:"lunaril",el:"eau",name:"Lunaril",c:"#9ad0ff",shape:"eye",ft:"none",drop:["x_lunaril","Éclat lunaire"]}],
   [{id:"abyssal",el:"eau",name:"Abyssal",c:"#2a3a8a",shape:"jelly",ft:"antenna",drop:["x_abyssal","Lueur abyssale"]},{id:"videgueule",el:"feu",name:"Videgueule",c:"#6a2a4a",shape:"crab",ft:"none",drop:["x_videgueule","Mâchoire du vide"]},{id:"spectrombre",el:"air",name:"Spectrombre",c:"#4a3a6a",shape:"ghost",ft:"horns",drop:["x_spectrombre","Cri spectral"]},{id:"cauchemire",el:"feu",name:"Cauchemire",c:"#8a2a6a",shape:"spiky",ft:"crystal",drop:["x_cauchemire","Fragment de cauchemar"]},{id:"baudrillon",el:"eau",name:"Baudrillon",c:"#3a2a5a",shape:"blob",ft:"antenna",drop:["x_baudrillon","Leurre abyssal"]}]];
-ZONES.forEach((z,i)=>(MONS_X[i]||[]).forEach(m=>z.mons.push({...m,extra:1})));
+/* Panoplie des monstres en plus : de 2 à 6 pièces, tirées au hasard une fois pour toutes (d'après le nom du monstre) */
+const idRnd=(s,k)=>{let h=2166136261^k;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return((h>>>0)%1000)/1000};
+ZONES.forEach((z,i)=>(MONS_X[i]||[]).forEach(m=>z.mons.push({...m,extra:1,setN:2+Math.floor(idRnd(m.id,1)*5),setL:.15+idRnd(m.id,2)*.65})));
 /* Tirage d'un monstre de zone : une chance sur deux pour les monstres d'origine (matériaux de panoplie) */
 const pickMon=z=>{const b=z.mons.filter(m=>!m.extra),x=z.mons.filter(m=>m.extra),L=x.length&&Math.random()<.5?x:b;return L[Math.floor(Math.random()*L.length)]};
 const PROFS = {
@@ -209,7 +211,7 @@ const SET_BONUS=z=>{const f=budget(z)/budget(0),p=1+z/4;return{2:{vit:6*f},3:{sa
 /* Panoplies : une par monstre (8, 4 ou 2 pièces) et une par boss (4 pièces). SETS[clé] = {name,z,n,lvl,el,boss,ids,mon} */
 const SETS={};
 /* Paliers d'une panoplie : les petites panoplies reprennent les paliers forts du tableau */
-const SET_MAP={8:{2:2,3:3,4:4,5:5,6:6,7:7,8:8},4:{2:2,3:4,4:6},2:{2:4}},SET_MAP_BOSS={2:3,3:6,4:8};
+const SET_MAP={8:{2:2,3:3,4:4,5:5,6:6,7:7,8:8},6:{2:2,3:3,4:4,5:6,6:7},5:{2:2,3:4,4:5,5:7},4:{2:2,3:4,4:6},3:{2:3,3:5},2:{2:4}},SET_MAP_BOSS={2:3,3:6,4:8};
 const SETB_C={},SETB=key=>SETB_C[key]||(SETB_C[key]=SETB0(key)),SETB0=key=>{const t=SETS[key],b=SET_BONUS(t.z+(t.boss?.5:0)),mp=t.boss?SET_MAP_BOSS:SET_MAP[t.n],o={};for(const k in mp){o[k]={};for(const x in b[mp[k]])o[k][x]=Math.round(b[mp[k]][x])}return o};
 const setSteps=key=>SETS[key].steps||(SETS[key].steps=Object.keys(SETB(key)).map(Number));
 function setBox(z,n,compact){const T=SETS[z],b=SETB(z),N=T.n,ST=setSteps(z),c=Math.min(N,n||0),nx=ST.find(k=>k>c);
@@ -228,8 +230,8 @@ ZONES.forEach((z,zi)=>{const [bn,bi,bc,br]=BOSSES[zi],base=z.mons[bi];
   RES["cle_"+zi]={id:"cle_"+zi,name:"Clé : "+DUNGEONS[zi],kind:"k",zone:zi,price:30*(zi+1)};
   RES[br[0]]={id:br[0],name:br[1],kind:"d",zone:zi,boss:true,price:25+zi*20};});
 /* Article devant le nom du monstre pour nommer sa panoplie (« du » par défaut) */
-const ART={ecorcin:"de l'",renardine:"de la ",crabouille:"de la ",meduline:"de la ",oursinet:"de l'",magmoule:"de la ",ombrelin:"de l'",neantille:"de la ",boss_2:"de la ",boss_6:"de l'",boss_7:"de la "};
-const SET_SLOTS={8:SLOTS.map(s=>s.id),4:["coiffe","cape","bottes","ceinture"],2:["amulette","anneau"],boss:["arme","bouclier","amulette","anneau"]};
+const ART={ecorcin:"de l'",renardine:"de la ",crabouille:"de la ",meduline:"de la ",oursinet:"de l'",magmoule:"de la ",ombrelin:"de l'",neantille:"de la ",boss_2:"de la ",boss_6:"de l'",boss_7:"de la ",limaconne:"de la ",glandouille:"de la ",roseline:"de la ",libellune:"de la ",grisouille:"de la ",cactoche:"de la ",tortecaille:"de la ",cauchemire:"de la ",hiboulet:"de l'",herissoc:"de l'",anacondor:"de l'",albatrombe:"de l'",aurorin:"de l'",etincelot:"de l'",obsidien:"de l'",hippocampin:"de l'",anemonix:"de l'",astrolin:"de l'",abyssal:"de l'"};
+const SET_SLOTS={8:SLOTS.map(s=>s.id),6:["coiffe","cape","amulette","anneau","bottes","ceinture"],5:["coiffe","cape","amulette","bottes","ceinture"],4:["coiffe","cape","bottes","ceinture"],3:["coiffe","amulette","bottes"],2:["amulette","anneau"],boss:["arme","bouclier","amulette","anneau"]};
 ZONES.forEach((z,zi)=>{
   const drops=z.mons.filter(m=>!m.extra).map(m=>m.drop[0]),span=z.lvl[1]-z.lvl[0],main=z.mons.find(m=>m.el===z.el)||z.mons[0];let o=0;
   const mk=(key,m,n,lvl,mult,boss)=>{
@@ -241,7 +243,7 @@ ZONES.forEach((z,zi)=>{
       const recipe=boss?[[m.bres[0],2],[drops[si%3],3+2*zi],[PROFS[sl.g].res[zi][0],5+3*zi]]:[[m.drop[0],4+3*zi],[PROFS[sl.g].res[zi][0],4+3*zi]];
       T.ids[sl.id]=id;ITEMS[id]={id,z:zi,set:key,slot:sl.id,name:`${sl.name} ${T.name}`,stats,recipe,lvl,price:Math.round(12*Math.pow(1+lvl/8,2)*mult)};
     })};
-  z.mons.forEach(m=>{if(m.extra)return;if(m===main)mk(m.id,m,8,z.lvl[0],1);else{o++;mk(m.id,m,o===1?4:2,z.lvl[0]+Math.round(span*(o===1?.3:.55)),o===1?1.12:1.2)}});
+  z.mons.forEach(m=>{if(m.extra){mk(m.id,m,m.setN,z.lvl[0]+Math.round(span*m.setL),1.1);return}if(m===main)mk(m.id,m,8,z.lvl[0],1);else{o++;mk(m.id,m,o===1?4:2,z.lvl[0]+Math.round(span*(o===1?.3:.55)),o===1?1.12:1.2)}});
   mk("boss_"+zi,MON["boss_"+zi],4,z.lvl[0]+Math.round(span*.8),1.35,true);
 });
 /* Compagnons : [id, nom, dégâts/s par niveau, coût de base, couleur] */
