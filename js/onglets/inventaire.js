@@ -55,7 +55,7 @@ function pInv(){
     <div class="pager"><button class="btn" data-a="page" data-d="-1" ${invP<=0?"disabled":""} aria-label="Page précédente">◀</button><span class="num">${invP+1} / ${pages}</span><button class="btn" data-a="page" data-d="1" ${invP>=pages-1?"disabled":""} aria-label="Page suivante">▶</button></div>
     <div class="wallet">
       <div class="wrow"><span class="muted">Écus</span><b class="num">${fmt(S.ecus)} <span class="coin"></span></b></div>
-      <div><div class="wrow"><span class="muted">Niveau ${S.lvl}</span><span class="num muted">${S.lvl>=LVL_MAX?"max":`${fmt(S.xp)} / ${fmt(need)} XP`}</span></div><div class="bar xp" style="margin-top:4px"><i style="width:${S.lvl>=LVL_MAX?100:S.xp/need*100}%"></i></div></div>
+      <div><div class="wrow"><span class="muted">Niveau ${S.lvl}</span><span class="num muted">${S.lvl>=lvlMax()?"max":`${fmt(S.xp)} / ${fmt(need)} XP`}</span></div><div class="bar xp" style="margin-top:4px"><i style="width:${S.lvl>=lvlMax()?100:S.xp/need*100}%"></i></div></div>
       <div><div class="wrow"><span class="muted">Poids</span><span class="num ${w>=cap?"":"muted"}" ${w>=cap?'style="color:var(--hp)"':""}>${fmt(w)} / ${fmt(cap)}</span></div><div class="bar wt${w>=cap?" full":""}" style="margin-top:4px"><i style="width:${Math.min(100,w/cap*100)}%"></i></div></div>
     </div></div>`;
   return`<div class="invsplit">${L}${R}</div>`;

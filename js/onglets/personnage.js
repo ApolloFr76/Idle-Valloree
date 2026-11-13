@@ -11,7 +11,7 @@ function pPerso(){
   if(ptab==="resume"){
     const row=(k,n,v)=>`<div class="srow" data-tip="s:${k}">${sico(k)}<span>${n}</span><span class="v num" style="grid-column:3/5">${v}</span></div>`;
     h+=`<div class="slist">
-      <div class="srow">${sico("xp")}<span>Expérience</span><div class="xpbar"><div class="bar xp" title="${fmt(S.xp)} / ${fmt(need)} XP"><i style="width:${S.lvl>=LVL_MAX?100:S.xp/need*100}%"></i></div><div class="small muted num" style="text-align:right;margin-top:2px">${S.lvl>=LVL_MAX?"Niveau maximum":`${fmt(S.xp)} / ${fmt(need)}`}</div></div></div>
+      <div class="srow">${sico("xp")}<span>Expérience</span><div class="xpbar"><div class="bar xp" title="${fmt(S.xp)} / ${fmt(need)} XP"><i style="width:${S.lvl>=lvlMax()?100:S.xp/need*100}%"></i></div><div class="small muted num" style="text-align:right;margin-top:2px">${S.lvl>=lvlMax()?"Niveau maximum":`${fmt(S.xp)} / ${fmt(need)}`}</div></div></div>
       <div class="srow" data-tip="el:${st.el}"><span class="sico" style="--c:${ELEMS[st.el].c}"><svg viewBox="0 0 24 24" aria-hidden="true">${ELG[st.el]}</svg></span><span>Élément d'attaque</span><span class="v num" style="grid-column:3/5;text-decoration:underline ${ELEMS[st.el].c} 3px;text-underline-offset:3px">${ELEMS[st.el].n}${st.el==="neutre"?"":` · +${fmt(st.elPow)} %`}</span></div>
       ${row("hp","Points de vie",`${fmt(S.hp)} / ${fmt(st.maxHp)}`)}
       ${row("dmg","Dégâts par coup",fmt(st.hit))}
