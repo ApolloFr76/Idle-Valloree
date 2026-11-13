@@ -191,7 +191,7 @@ const PX=(()=>{
     s.outline();return cache[k]=s.url()}
 
   /* ---------- Ressources de métier (16×16), une teinte par palier ---------- */
-  const RC={bucheron:["#c9a36a","#a8743e","#8a5a34","#b8864a","#d0703a","#7a8a4a","#e8dcc0","#b8503a","#9a7a5a","#c8b08a","#4a3a3a","#a84a2e"],
+  const RC={pecheur:["#c8b08a","#8fb06a","#6fa35a","#b0643a","#e2b66a","#8fc7e0","#f2d94a","#5fae4a","#e8684a","#f0622c","#a8e8e0","#5a4fa8"],bucheron:["#c9a36a","#a8743e","#8a5a34","#b8864a","#d0703a","#7a8a4a","#e8dcc0","#b8503a","#9a7a5a","#c8b08a","#4a3a3a","#a84a2e"],
     mineur:["#b8bcc6","#e08a4a","#d0d6dc","#eef2f6","#ffd24a","#3f6fd0","#9ab0b8","#b06a8a","#d87a5a","#e8f0ff","#7ae0d0","#5a3f8a"],
     paysan:["#f0d060","#e0c070","#f0e0a0","#b8d060","#c8a060","#a0b8e0","#ffd24a","#e8c890","#fff4e0","#b08a6a","#d8b070","#f0a0a0"],
     herboriste:["#5fae4a","#8ab89a","#4fd08a","#a8e06a","#f4f8ff","#b06ad0","#b08af0","#7fc04e","#7a4fb0","#e0c080","#ff8ad0","#ff9ac8"]};
@@ -201,6 +201,7 @@ const PX=(()=>{
       const d=mix(c,DARK,.4);[[4,8],[5,8],[8,9],[9,9],[6,10]].forEach(([x,y])=>s.set(x,y,d));s.part("#5fae4a",q=>{q.px(5,4);q.px(6,5);q.px(4,5)},{flat:1})}
     if(prof==="mineur"){s.part("#8a8494",q=>q.poly([[2,13],[3,7],[7,3],[12,5],[14,10],[12,13]]));s.part(c,q=>{q.rect(4,6,4,4);q.rect(9,7,4,4);q.rect(6,10,3,2)},{lt:.6});s.set(4,6,"#ffffff");s.set(9,7,"#ffffff")}
     if(prof==="paysan"){s.part("#b8904a",q=>{q.line(8,15,8,7);q.line(8,13,5,9);q.line(8,13,11,9)},{flat:1});s.part(c,q=>{[[8,2],[7,4],[9,4],[7,6],[9,6],[4,6],[5,8],[12,6],[11,8]].forEach(([x,y])=>q.rect(x,y,2,2))});s.part("#c8483a",q=>q.rect(7,12,3,1),{flat:1})}
+    if(prof==="pecheur")return cache[k]=fish(c,0,t);
     if(prof==="herboriste"){s.part("#3f8a3a",q=>q.line(8,15,8,6),{flat:1});s.part("#5fb04a",q=>{q.ell(5,11,2.6,1.6);q.ell(11,9,2.6,1.6)});s.part(c,q=>{q.ell(8,4.5,3.4,3.4)},{lt:.5});s.set(8,4,"#fff2a8");s.set(8,5,"#fff2a8")}
     s.outline();return cache[k]=s.url()}
 
@@ -272,6 +273,19 @@ const PX=(()=>{
       s.part(c2,q=>{q.line(8,10,11,13);q.line(11,13,8,15);q.px(14,11)},{flat:1});s.outline(ink);s.set(17,4,c2);s.set(18,4,c2)}
     return cache[k]=s.url(),SPR[k]=s,cache[k]}
   function famFrames(id,anim){const k="fa:"+id;if(!SPR[k])fam(id);return framesOf(k,SPR[k],anim,true)}
+
+  /* Poisson vu de côté (16×16). rk : 0 commun, 1 rare (rayures, éclat), 2 légendaire (plus grand, contour doré) */
+  function fish(col,rk=0,t=0){const k="fi:"+col+rk+t;if(cache[k])return cache[k];const s=new Spr(16,16),dk=mix(col,DARK,.35),lt=mix(col,"#ffffff",.55),big=rk===2;
+    const tl=t%3;/* trois silhouettes selon le palier */
+    s.part(dk,q=>q.poly(tl===1?[[0,4],[4,8],[0,12]]:[[0,5],[4,8],[0,11],[2,8]]));
+    s.part(col,q=>{if(tl===2){q.ell(8,8,6,2.6)}else q.ell(8.5,8,big?6:5.5,big?4:3.4)});
+    s.part(dk,q=>{q.poly([[6,big?4:5],[9,big?1:2],[11,big?4:5]]);q.poly([[7,big?11:10],[9,big?14:13],[10,big?11:10]])});
+    s.part(lt,q=>q.ell(9,10,3,1),{flat:1});
+    if(rk>=1)s.part(mix(col,DARK,.5),q=>{q.line(6,6,6,10);q.line(9,5,9,11)},{flat:1});
+    s.outline(rk===2?"#8a5a08":INK);s.set(12,7,"#ffffff");s.set(12,8,"#1c1020");
+    if(rk>=1){const g=rk===2?"#ffd84a":"#ffffff";s.set(14,2,g);s.set(13,2,g);s.set(15,2,g);s.set(14,1,g);s.set(14,3,g)}
+    if(rk===2)["#ffd84a","#fff2a8","#ffd84a"].forEach((c,i)=>s.set(6+i*2,0,c));
+    return cache[k]=s.url()}
 
   /* ---------- Accessoires de décor ---------- */
   const prop={
@@ -496,7 +510,7 @@ const PX=(()=>{
       if(P.open)s.part(gl,q=>q.px(18+x,20+y-a),{flat:1})}
     s.outline();s.shadow(12,22,6,1.2);return cache[k]=s.url()}
   const beastFrames=(id,col,anim)=>{const k="bfs:"+id+col+anim;return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>beastF(id,col,anim,f)))};
-  return{monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
+  return{fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
 })();
 
 document.body.style.backgroundImage=`url(${PX.tile()})`;

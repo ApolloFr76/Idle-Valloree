@@ -78,6 +78,7 @@ const PROFS = {
   mineur:{name:"Mineur",verb:"Miner",res:[["fer","Fer"],["cuivre","Cuivre"],["etain","Étain"],["argent","Argent"],["or","Or"],["cobalt","Cobalt"],["zinc","Zinc"],["manganese","Manganèse"],["bauxite","Bauxite"],["platine","Platine"],["mithril","Mithril"],["obsidienne","Obsidienne"]]},
   paysan:{name:"Paysan",verb:"Faucher",res:[["ble","Blé"],["orge","Orge"],["avoine","Avoine"],["houblon","Houblon"],["seigle","Seigle"],["lin","Lin"],["mais","Maïs"],["millet","Millet"],["riz","Riz"],["sarrasin","Sarrasin"],["epeautre","Épeautre"],["quinoa","Quinoa"]]},
   herboriste:{name:"Herboriste",verb:"Cueillir",res:[["ortie","Ortie"],["sauge","Sauge"],["menthe","Menthe"],["melisse","Mélisse"],["edelweiss","Edelweiss"],["mandragore","Mandragore"],["lavande","Lavande"],["thym","Thym"],["belladone","Belladone"],["ginseng","Ginseng"],["orchidee","Orchidée"],["lotus","Lotus"]]},
+  pecheur:{name:"Pêcheur",verb:"Pêcher",res:[["p_goujon","Goujon des prés"],["p_ablette","Ablette moussue"],["p_perche","Perche des marais"],["p_chabot","Chabot des galeries"],["p_carpe","Carpe ambrée"],["p_truite","Truite de givre"],["p_vairon","Vairon d'orage"],["p_piranha","Piranha émeraude"],["p_clown","Poisson-clown corail"],["p_anguille","Anguille de braise"],["p_silure","Silure astral"],["p_lanterne","Lanterne abyssale"]]},
 };
 const UNLOCK=[1,10,20,30,40,50,60,70,80,90,100,110], PROF_MAX=120, LVL_MAX=200, PTS_PER_LVL=5;
 const SLOTS=[
@@ -96,6 +97,24 @@ const ALLOC=["vit","sagesse","agi","feu","eau","terre","air"];
 /* ================= Registres dérivés ================= */
 const RES={}, ITEMS={}, MON={};
 Object.entries(PROFS).forEach(([pid,p])=>p.res.forEach(([id,name],t)=>RES[id]={id,name,kind:"g",prof:pid,tier:t,price:1+t*3}));
+/* ---------- Poissons : communs (récolte du Pêcheur), rares et légendaires (seulement au mini-jeu de pêche) ----------
+   Chaque poisson se mange pour un boost temporaire (S.buffs). Le Poissonnédia compte les espèces attrapées (+1 % d'XP chacune). */
+const FISH_RARE=[["pr_brochet","Brochet clochette"],["pr_saumon","Saumon de mousse"],["pr_esturgeon","Esturgeon glouglou"],["pr_lampe","Poisson-lampe cuivré"],["pr_merou","Mérou des mirages"],["pr_omble","Omble polaire"],["pr_raie","Raie-tonnerre"],["pr_arapaima","Arapaïma lianeux"],["pr_lune","Poisson-lune corail"],["pr_dragon","Poisson-dragon de lave"],["pr_koi","Koï astrale"],["pr_baudroie","Baudroie du néant"]];
+const FISH_LEG=[[2,"pl_roi","Roi Glouglou"],[5,"pl_leviathan","Léviathan de givre"],[8,"pl_kraken","Kraken de corail"],[11,"pl_coela","Cœlacanthe du néant"]];
+const FISH_COL=["#c8b08a","#8fb06a","#6fa35a","#b0643a","#e2b66a","#8fc7e0","#f2d94a","#5fae4a","#e8684a","#f0622c","#a8e8e0","#5a4fa8"];
+const FISH_K=[["xp","d'XP"],["pros","de prospection"],["dmg","de dégâts"],["spd","de vitesse d'attaque"],["crit","de critique"],["def","de dégâts subis"]];
+const FISH_V={xp:[.1,.25,.6],pros:[.15,.35,.8],dmg:[.1,.25,.5],spd:[.08,.18,.35],crit:[5,12,25],def:[.1,.2,.4]};
+const FISH=[];
+PROFS.pecheur.res.forEach(([id],t)=>FISH.push({id,t,rk:0}));
+FISH_RARE.forEach(([id,name],t)=>{RES[id]={id,name,kind:"g",prof:"pecheur",tier:t,price:6+t*12,rare:1};FISH.push({id,t,rk:1})});
+FISH_LEG.forEach(([t,id,name])=>{RES[id]={id,name,kind:"g",prof:"pecheur",tier:t,price:60+t*60,rare:2};FISH.push({id,t,rk:2})});
+FISH.forEach((f,i)=>{const r=RES[f.id],[k,lbl]=FISH_K[(f.t+f.rk*2)%6],b=FISH_V[k][f.rk]*(1+f.t/11),d=[120,300,600][f.rk];
+  f.k=k;f.d=d;f.v=k==="crit"?Math.round(b):k==="def"?+(1-Math.min(.6,b)).toFixed(2):+(1+b).toFixed(2);f.col=FISH_COL[f.t];f.cm=[18,40,120][f.rk]*(1+f.t/8);
+  f.txt=k==="crit"?`+${f.v} % ${lbl}`:k==="def"?`−${Math.round((1-f.v)*100)} % ${lbl}`:`+${Math.round((f.v-1)*100)} % ${lbl}`;
+  r.fish=f;Object.defineProperty(r,"img",{get(){return PX.fish(f.col,f.rk,f.t)},configurable:true})});
+const FISHBY={};FISH.forEach(f=>FISHBY[f.id]=f);
+const fdex=()=>S.fdex||(S.fdex={});
+const fishN=()=>Object.keys(fdex()).length;
 ZONES.forEach((z,zi)=>{z.i=zi;z.mons.forEach(m=>{m.zone=zi;MON[m.id]=m;RES[m.drop[0]]={id:m.drop[0],name:m.drop[1],kind:"d",zone:zi,price:3+zi*5}});});
 /* Tables de butin : [ressource secondaire, chance], [ressource rare, chance] — le butin principal tombe à 70 % */
 const LOOT_MAIN=.7;
@@ -253,6 +272,7 @@ achSet("job","Travailleur",v=>`Monter un métier au niveau ${v}`,[10,30,60],()=>
 achSet("quest","Serviable",v=>`Terminer ${v} quête${v>1?"s":""}`,[1,10,50,200],()=>S.st.quests||0);
 achSet("pot","Alchimiste",v=>`Préparer ${v} potion${v>1?"s":""}`,[1,25,100],()=>S.st.brews||0);
 achSet("rar","Maître forgeron",v=>`Forger un objet ${RAR[v].n.toLowerCase()}`,[1,2,3],()=>S.st.bestRar||0);
+achSet("peche","Poissonnédia",v=>`Découvrir ${v} espèce${v>1?"s":""} de poissons`,[1,5,12,20,28],()=>fishN());
 achSet("prest","Phénix",v=>`Atteindre le niveau Oméga ${v}`,[1,3,10,25,50],()=>S.prest||0);
 achSet("best","Naturaliste",v=>`Atteindre le palier 2 du bestiaire pour ${v} créatures`,[6,18],()=>Object.keys(MON).filter(id=>bestTier(id)>=2).length);
 const achN=()=>S.ach?Object.keys(S.ach).length:0;

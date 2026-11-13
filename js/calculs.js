@@ -18,7 +18,7 @@ function stats(){
   s.critC=Math.min(100,s.crit+bcrit);s.critM=+(C.critMult+s.critBonus).toFixed(2);
   s.interval=Math.max(.3,1.3/(1+s.agi/150))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
-  s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*bxp*(evOn("nuit")?1.5:1);s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
+  s.pctXp+=fishN();s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*bxp*(evOn("nuit")?1.5:1);s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
   s.dps=s.hit*(1+s.critC/100*(s.critM-1))*(1+s.dbl)/s.interval;
   return s;
 }
@@ -50,7 +50,7 @@ function nextMon(){
 }
 function startMode(m,zi){
   if(S.ko>0){toast("Attendez d'être remis sur pied");return}
-  if(m==="boss"){if(zi!=null)S.zone=zi;if((S.zk[S.zone]||0)<BOSS_KILLS)return;S.mode="boss";S.timer=bossTime();S.hp=stats().maxHp;if(fx)FX.heal();log(`Le combat contre ${MON["boss_"+S.zone].name} commence : ${bossTime()} s !`,"g")}
+  if(m==="boss"){if(zi!=null)S.zone=zi;if((S.zk[S.zone]||0)<BOSS_KILLS)return;S.mode="boss";S.timer=bossTime();log(`Le combat contre ${MON["boss_"+S.zone].name} commence : ${bossTime()} s !`,"g")}
   if(m==="donjon"){const z=ZONES[zi],k="cle_"+zi;if(S.lvl<z.lvl[0]||(S.res[k]||0)<1){toast("Il vous faut la clé de ce donjon");return}S.res[k]--;S.zone=zi;S.dg={z:zi,wave:1};S.mode="donjon";S.timer=0;log(`Vous entrez dans le donjon ${DUNGEONS[zi]}.`,"g")}
   if(m==="tour"){S.mode="tour";S.tower.cur=towerStart();S.timer=towerTime();log(`Vous entrez dans la tour à l'étage ${S.tower.cur}.`,"g")}
   S.mon=null;S.spawnT=.3;S.dots=[];drawZones();drawMonster();dirty=true;

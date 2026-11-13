@@ -1,6 +1,11 @@
 /* Événements : clics (data-a), clavier, souris. */
 /* ================= Événements ================= */
-document.addEventListener("pointerdown",e=>{if(forge&&!forge.done&&e.button===0&&e.target.closest('[data-a="forgeHit"]')){e.preventDefault();forgeStrike()}},true);
+document.addEventListener("pointerdown",e=>{if(forge&&!forge.done&&e.button===0&&e.target.closest('[data-a="forgeHit"]')){e.preventDefault();forgeStrike()}
+  /* mini-jeux : bûcheron (coup), pêche (ferrer puis maintenir) */
+  if(mg&&!mg.done&&e.button===0){if(mg.pid==="bucheron"&&e.target.closest('[data-a="mgHit"]')){e.preventDefault();logHit()}
+    if(mg.pid==="pecheur"&&e.target.closest(".fishw")){e.preventDefault();if(mg.st==="reel")fishHold(true);else fishHook()}}},true);
+document.addEventListener("pointerup",()=>fishHold(false));document.addEventListener("pointercancel",()=>fishHold(false));
+document.addEventListener("keyup",e=>{if(e.key===" ")fishHold(false)});
 document.addEventListener("click",e=>{ptrDown=false;
   const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a;
   if(a==="auto")return;
@@ -34,6 +39,13 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"saveNow":save();lastSave=Date.now();toast("Partie enregistrée",1);break;
     case"pause":setPause(!paused);break;
     case"forgeHit":break; /* géré au pointerdown, plus précis */
+    case"mgStart":case"mgAgain":if(mg&&mg.done)mg=null;mgStart(b.dataset.p);if(!mg){$("ov").hidden=true;toast(`Encore ${mgCdLeft(b.dataset.p)} s avant de rejouer`,1);renderPanel()}break;
+    case"mgClose":mgClose();break;
+    case"mgQuit":mgClose();break;
+    case"mgCell":mgCell(+b.dataset.i);break;
+    case"mgHit":case"mgHold":break; /* gérés au pointerdown */
+    case"fishDex":mg=null;$("ov").hidden=true;S.tab="coll";ctab="fish";renderPanel();break;
+    case"eatFish":eatFish(b.dataset.r);break;
     case"forgeSkip":forgeFinish(true);break;
     case"forgeClose":$("ov").hidden=true;forge=null;renderPanel();break;
     case"drink":drink(b.dataset.r,false);renderPanel();break;
@@ -86,7 +98,9 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(tutoI>=0){if(k==="escape"){tutoEnd()}else if(k==="arrowright"||k==="enter"){e.preventDefault();tutoI++;tutoDraw()}else if(k==="arrowleft"){tutoI=Math.max(0,tutoI-1);tutoDraw()}if(k!=="tab")e.preventDefault();return}
   if((k==="enter"||k===" ")&&e.target.dataset&&e.target.dataset.a==="atOpen"){e.preventDefault();e.target.click();return}
   if(forge&&!forge.done&&(k===" "||k==="enter")){e.preventDefault();if(!e.repeat)forgeStrike();return}
-  if(!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+  if(mg&&!mg.done&&k===" "){e.preventDefault();if(mg.pid==="bucheron"&&!e.repeat)logHit();if(mg.pid==="pecheur"){if(mg.st==="reel")fishHold(true);else if(!e.repeat)fishHook()}return}
+  if(mg&&k==="escape"){mgClose();return}
+  if(!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge||mg)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
   if(k==="p"){setPause(!paused);e.preventDefault();return}if(paused)return;
   if(k===" "||k==="a"){e.preventDefault();doClick(false);return}
   if(["1","2","3"].includes(k)){const sp=CLASSES[S.cls].spells[+k-1];if(sp)cast(sp,false);return}

@@ -1,6 +1,7 @@
 /* Onglet Collection (succès, bestiaire). */
 function pColl(){
-  let h=`<div class="ptabs" style="grid-template-columns:1fr 1fr;margin-bottom:10px"><button class="ptab${ctab==="ach"?" on":""}" data-a="ctab" data-t="ach">Succès</button><button class="ptab${ctab==="best"?" on":""}" data-a="ctab" data-t="best">Bestiaire</button></div>`;
+  let h=`<div class="ptabs" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:10px"><button class="ptab${ctab==="ach"?" on":""}" data-a="ctab" data-t="ach">Succès</button><button class="ptab${ctab==="best"?" on":""}" data-a="ctab" data-t="best">Bestiaire</button><button class="ptab${ctab==="fish"?" on":""}" data-a="ctab" data-t="fish">Poissonnédia</button></div>`;
+  if(ctab==="fish")return h+fishDexHTML();
   if(ctab==="ach"){const n=achN();
     h+=`<div class="sec"><div class="row" style="justify-content:space-between"><h3>Succès · ${n} / ${ACH.length}</h3><span class="small">Bonus : <b>+${n} %</b> de dégâts et d'écus</span></div><div class="ach">`+ACH.map(a=>{const d=!!S.ach[a.id],v=Math.min(a.v,a.get());return`<div class="ac${d?" done":""}" data-tip="ach:${a.id}"><span class="md">${achIcon(achKey(a))}</span><div style="min-width:0"><b>${a.n}</b><div class="small muted">${a.txt}${d?"":` · <span class="num">${fmt(v)} / ${fmt(a.v)}</span>`}</div></div></div>`}).join("")+`</div></div>`}
   else{h+=`<div class="sec"><h3>Bestiaire</h3><p class="small muted">Paliers à ${BEST_T.map(fmt).join(", ")} victoires. Chaque palier donne +5 % de dégâts et +10 % de butin contre la créature.</p><div class="best">`+
