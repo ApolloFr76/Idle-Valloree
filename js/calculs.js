@@ -50,7 +50,7 @@ function nextMon(){
 }
 function startMode(m,zi){
   if(S.ko>0){toast("Attendez d'être remis sur pied");return}
-  if(m==="boss"){if(zi!=null)S.zone=zi;if((S.zk[S.zone]||0)<BOSS_KILLS)return;S.mode="boss";S.timer=bossTime();log(`Le combat contre ${MON["boss_"+S.zone].name} commence : ${bossTime()} s !`,"g")}
+  if(m==="boss"){if(zi!=null)S.zone=zi;if((S.zk[S.zone]||0)<BOSS_KILLS)return;S.mode="boss";S.timer=bossTime();S.hp=stats().maxHp;if(fx)FX.heal();log(`Le combat contre ${MON["boss_"+S.zone].name} commence : ${bossTime()} s !`,"g")}
   if(m==="donjon"){const z=ZONES[zi],k="cle_"+zi;if(S.lvl<z.lvl[0]||(S.res[k]||0)<1){toast("Il vous faut la clé de ce donjon");return}S.res[k]--;S.zone=zi;S.dg={z:zi,wave:1};S.mode="donjon";S.timer=0;log(`Vous entrez dans le donjon ${DUNGEONS[zi]}.`,"g")}
   if(m==="tour"){S.mode="tour";S.tower.cur=towerStart();S.timer=towerTime();log(`Vous entrez dans la tour à l'étage ${S.tower.cur}.`,"g")}
   S.mon=null;S.spawnT=.3;S.dots=[];drawZones();drawMonster();dirty=true;
