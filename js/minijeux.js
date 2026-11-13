@@ -69,17 +69,18 @@ function mgCell(i){if(!mg||mg.done)return;const t=mgNow(),p=mg.pid;
 
 /* ---------- Pêche ---------- */
 function fishPick(){const L=S.jobs.pecheur.lvl,tier=Math.max(0,UNLOCK.filter(u=>u<=L).length-1),t=rnd(Math.max(0,tier-2),tier);
-  const leg=FISH.filter(f=>f.rk===2&&f.t<=tier),r=Math.random(),pl=.03+L/4000,pr=.18+L/1000;
+  const leg=FISH.filter(f=>f.rk===2&&f.t<=tier),r=Math.random(),pl=.03+L/4000,pr=.18+L/1000,pm=.003+L/60000;
+  if(Math.random()<pm)return FISHBY.pm_prisma;
   if(leg.length&&r<pl)return leg[rnd(0,leg.length-1)];if(r<pl+pr)return FISH.find(f=>f.rk===1&&f.t===t);return FISH.find(f=>f.rk===0&&f.t===t)}
 function fishTick(t){const m=mg;
   if(m.st==="wait"&&t>=m.bite){m.st="bite";m.biteEnd=t+.75;const b=$("mgBob");if(b)b.classList.add("bite");const g=$("mgMsg");if(g)g.textContent="Ça mord ! Cliquez !";sfx("hit")}
   else if(m.st==="bite"&&t>=m.biteEnd){mgEnd(0,"Le poisson s'est échappé : il fallait ferrer plus vite.");return}
-  else if(m.st==="reel"){const dt=Math.min(.05,t-(m.last||t));m.last=t;const f=m.fish,sp=[.45,.7,1][f.rk]*(1+f.t/30),zw=[.2,.16,.13][f.rk];
+  else if(m.st==="reel"){const dt=Math.min(.05,t-(m.last||t));m.last=t;const f=m.fish,sp=[.35,.5,.65,.8][f.rk]*(1+f.t/30),zw=[.2,.16,.13,.11][f.rk];
     if(t>=m.end){mgEnd(0,`${RES[f.id].name} s'est décroché : temps écoulé.`);return}
     /* curseur : maintenir = vers la droite, relâcher = vers la gauche */
-    m.v+=(m.hold?2.4:-2.4)*dt;m.v=Math.max(-1.1,Math.min(1.1,m.v));m.z+=m.v*dt;if(m.z<0){m.z=0;m.v=Math.max(0,-m.v*.3)}if(m.z>1-zw){m.z=1-zw;m.v=Math.min(0,-m.v*.3)}
+    m.v+=(m.hold?3:-3)*dt;m.v=Math.max(-1.4,Math.min(1.4,m.v));m.z+=m.v*dt;if(m.z<0){m.z=0;m.v=Math.max(0,-m.v*.3)}if(m.z>1-zw){m.z=1-zw;m.v=Math.min(0,-m.v*.3)}
     /* le poisson change de cap régulièrement */
-    if(t>=m.fnext){m.ft=.04+Math.random()*.92;m.fnext=t+(.6+Math.random()*(1.3-f.rk*.35))}m.fy+=Math.sign(m.ft-m.fy)*Math.min(Math.abs(m.ft-m.fy),sp*dt);
+    if(t>=m.fnext){m.ft=.04+Math.random()*.92;m.fnext=t+(.6+Math.random()*(1.3-Math.min(2,f.rk)*.35))}m.fy+=Math.sign(m.ft-m.fy)*Math.min(Math.abs(m.ft-m.fy),sp*dt);
     const inZ=m.fy>=m.z&&m.fy<=m.z+zw;m.on=Math.max(0,m.on+(inZ?dt:-dt*.35));
     const Z=$("mgZone"),F=$("mgFish"),P=$("mgProg"),H=$("mgHits"),T=$("mgTime");
     if(Z){Z.style.left=m.z*100+"%";Z.style.width=zw*100+"%";Z.classList.toggle("in",inZ)}if(F){F.style.left=`calc(${m.fy*100}% - 16px)`;F.classList.toggle("flip",m.ft<m.fy)}
@@ -87,7 +88,7 @@ function fishTick(t){const m=mg;
     if(m.on>=3){mgEnd(1);return}}}
 function fishHook(){const m=mg;if(!m||m.pid!=="pecheur"||m.done)return;
   if(m.st==="wait"){mgEnd(0,"Trop tôt ! Le poisson a eu peur.");return}
-  if(m.st==="bite"){m.st="reel";m.fish=fishPick();m.last=mgNow();m.end=mgNow()+15;m.on=0;m.z=.4;m.fy=.5;const F=$("mgFish");if(F)F.src=PX.fish(m.fish.col,m.fish.rk,m.fish.t);const g=$("mgMsg");if(g)g.textContent=m.fish.rk===2?"Un poisson légendaire !":m.fish.rk===1?"Un poisson rare !":"Ferré !";
+  if(m.st==="bite"){m.st="reel";m.fish=fishPick();m.last=mgNow();m.end=mgNow()+15;m.on=0;m.z=.4;m.fy=.5;const F=$("mgFish");if(F)F.src=PX.fish(m.fish.col,m.fish.rk,m.fish.t);const g=$("mgMsg");if(g)g.textContent=m.fish.rk===3?"✦ UN POISSON MYTHIQUE ✦":m.fish.rk===2?"Un poisson légendaire !":m.fish.rk===1?"Un poisson rare !":"Ferré !";
     const b=$("mgBob");if(b)b.classList.remove("bite");$("mgReel").classList.add("on")}}
 function fishHold(on){if(mg&&mg.pid==="pecheur")mg.hold=on}
 
@@ -95,9 +96,9 @@ function fishHold(on){if(mg&&mg.pid==="pecheur")mg.hold=on}
 function mgEnd(score,why){const m=mg;if(!m||m.done)return;m.done=true;score=Math.max(0,Math.min(1,score));S.mgCd=S.mgCd||{};S.mgCd[m.pid]=S.time+MG_CD;inc("minigames");
   const pid=m.pid,J=S.jobs[pid];let html="",col="var(--gold)";
   if(pid==="pecheur"){if(score>=1&&m.fish){const f=m.fish,r=RES[f.id],cm=Math.round(f.cm*(.7+Math.random()*.6)),d=fdex(),e=d[f.id]||(d[f.id]={n:0,cm:0}),first=!e.n;e.n++;e.cm=Math.max(e.cm,cm);
-      const n=addRes(f.id,1);gainProfXp(pid,[30,90,300][f.rk]*Math.pow(f.t+1,1.4));if(f.rk)inc("fishRare");inc("fish");
-      col=["var(--gold)","#8ad4ff","#ffd84a"][f.rk];log(`Pêche : ${r.name} (${cm} cm)${first?" · nouvelle espèce au Poissonnédia !":""}`,"g");if(f.rk===2){sfx("level");FX.flash("#ffd84a")}else sfx("coin");
-      html=`<img class="px mgres" src="${PX.fish(f.col,f.rk,f.t)}" alt=""><h2 style="color:${col}">${r.name}</h2><span class="small">${["Commun","Rare","Légendaire"][f.rk]} · ${cm} cm${first?" · <b>nouvelle espèce !</b>":""}</span><span class="small muted">Se mange pour ${f.txt} pendant ${Math.round(f.d/60)} min.${n?"":" Sac plein : poisson relâché."}</span>`}
+      const n=addRes(f.id,1);gainProfXp(pid,[30,90,300,1500][f.rk]*Math.pow(f.t+1,1.4));if(f.rk)inc("fishRare");inc("fish");
+      col=["var(--gold)","#8ad4ff","#ffd84a","#ff8ab0"][f.rk];log(`Pêche : ${r.name} (${cm} cm)${first?" · nouvelle espèce au Poissonnédia !":""}`,"g");if(f.rk===3){sfx("level");FX.flash("#ff8ab0");setTimeout(()=>FX.flash("#8ad4ff"),250);setTimeout(()=>FX.flash("#ffd84a"),500);toast("Poisson MYTHIQUE pêché : "+r.name+" !",1);inc("fishMyth")}else if(f.rk===2){sfx("level");FX.flash("#ffd84a")}else sfx("coin");
+      html=`<img class="px mgres" src="${PX.fish(f.col,f.rk,f.t)}" alt=""><h2 style="color:${col}">${r.name}</h2><span class="small">${["Commun","Rare","Légendaire","✦ Mythique ✦"][f.rk]} · ${cm} cm${first?" · <b>nouvelle espèce !</b>":""}</span><span class="small muted">Se mange pour ${f.txt} pendant ${Math.round(f.d/60)} min.${n?"":" Sac plein : poisson relâché."}</span>`}
     else html=`<h2>Raté</h2><span class="small muted">${why||"Le poisson s'est échappé."}</span>`}
   else{const L=J.lvl,tier=Math.max(0,UNLOCK.filter(u=>u<=L).length-1),rid=S.job&&RES[S.job.r].prof===pid?S.job.r:PROFS[pid].res[tier][0];let n=Math.round(2+10*score);if(score>=.95)n=Math.round(n*1.5);
     let got=0;for(let i=0;i<n;i++)got+=gainGather(pid,rid,true);sfx(score>=.6?"coin":"anvilBad");log(`${MG_INFO[pid].n} : ${got}× ${RES[rid].name} (score ${Math.round(score*100)} %).`,"g");
@@ -108,12 +109,13 @@ function gainProfXp(pid,x){const p=S.jobs[pid];if(p.lvl>=PROF_MAX)return;p.xp+=M
 function mgClose(){mg=null;$("ov").hidden=true;renderPanel()}
 
 /* Manger un poisson : boost temporaire */
-function eatFish(id){const f=FISHBY[id];if(!f||!(S.res[id]>0))return;S.res[id]--;pkBuff(f.k,f.v,f.d,RES[id].name);log(`Vous mangez : ${RES[id].name} (${f.txt}, ${Math.round(f.d/60)} min).`,"w");sfx("coin");dirty=true;renderPanel()}
+function eatFish(id){const f=FISHBY[id];if(!f||!(S.res[id]>0))return;S.res[id]--;
+  if(f.all){f.all.forEach(b=>pkBuff(b.k,b.v,f.d,RES[id].name+" · "+b.k));if(fx)FX.flash("#ff8ab0")}else pkBuff(f.k,f.v,f.d,RES[id].name);log(`Vous mangez : ${RES[id].name} (${f.txt}, ${Math.round(f.d/60)} min).`,"w");sfx("coin");dirty=true;renderPanel()}
 
 /* Poissonnédia (onglet Collection) */
 function fishDexHTML(){const d=fdex(),n=fishN();
   return`<div class="sec"><div class="row" style="justify-content:space-between"><h3>Poissonnédia · ${n} / ${FISH.length}</h3><span class="small">Bonus : <b>+${n} %</b> d'XP</span></div>
   <p class="small muted">Chaque espèce attrapée au mini-jeu de pêche donne +1 % d'XP. Les poissons rares et légendaires ne se pêchent qu'au mini-jeu. Mangez un poisson pour un boost temporaire.</p><div class="best fdex">`+
   FISH.map(f=>{const r=RES[f.id],e=d[f.id],k=!!e,q=S.res[f.id]||0;return`<div class="bc${k?"":" unk"} rk${f.rk}" data-tip="r:${f.id}"><img class="px" src="${PX.fish(f.col,f.rk,f.t)}" alt="" style="${k?"":"filter:brightness(0) opacity(.35)"}">
-    <b class="small">${k?r.name:"???"}</b><span class="small muted">${ZONES[f.t].name} · ${["commun","rare","légendaire"][f.rk]}</span><span class="small">${f.txt} · ${Math.round(f.d/60)} min</span>
+    <b class="small">${k?r.name:"???"}</b><span class="small muted">${f.rk===3?"N'importe quel monde":ZONES[f.t].name} · ${["commun","rare","légendaire","mythique"][f.rk]}</span><span class="small">${f.txt} · ${Math.round(f.d/60)} min</span>
     <span class="small muted">${k?`${e.n} pêché${e.n>1?"s":""} · record ${e.cm} cm`:"Jamais pêché"}</span>${q>0?`<button class="btn pri" data-a="eatFish" data-r="${f.id}">Manger (${fmt(q)})</button>`:""}</div>`}).join("")+`</div></div>`}

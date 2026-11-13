@@ -1230,3 +1230,5 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .fdex .bc.rk1{box-shadow:inset 0 0 0 2px #8ad4ff}.fdex .bc.rk2{box-shadow:inset 0 0 0 2px #ffd84a}
 .fdex .bc img{width:48px;height:48px;image-rendering:pixelated}
 @container (max-width:560px){.mprofs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.fdex .bc.rk3{box-shadow:inset 0 0 0 3px #ff8ab0,0 0 12px rgba(255,138,176,.6);background:linear-gradient(135deg,#fff0f6,#eef6ff,#fffbe0)}

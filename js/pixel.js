@@ -285,6 +285,9 @@ const PX=(()=>{
     s.outline(rk===2?"#8a5a08":INK);s.set(12,7,"#ffffff");s.set(12,8,"#1c1020");
     if(rk>=1){const g=rk===2?"#ffd84a":"#ffffff";s.set(14,2,g);s.set(13,2,g);s.set(15,2,g);s.set(14,1,g);s.set(14,3,g)}
     if(rk===2)["#ffd84a","#fff2a8","#ffd84a"].forEach((c,i)=>s.set(6+i*2,0,c));
+    if(rk===3){/* mythique : écailles arc-en-ciel, nageoires dorées, étincelles */const RB=["#ff5a5a","#ffa04a","#ffe04a","#6ad86a","#5ab0ff","#a87aff"];
+      for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=s.p[y*16+x];if(c&&x>=3&&x<=13&&y>=4&&y<=12&&!(x===12&&(y===7||y===8)))s.p[y*16+x]=rgb(RB[Math.min(5,Math.max(0,Math.floor((x-3)/1.9)))])}
+      s.outline("#8a3a6a");s.set(12,7,"#ffffff");s.set(12,8,"#1c1020");[[1,1],[14,1],[15,13],[0,14],[8,0]].forEach(([x,y])=>s.set(x,y,"#fff8e6"))}
     return cache[k]=s.url()}
 
   /* ---------- Accessoires de décor ---------- */

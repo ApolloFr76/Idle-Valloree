@@ -108,10 +108,15 @@ const FISH=[];
 PROFS.pecheur.res.forEach(([id],t)=>FISH.push({id,t,rk:0}));
 FISH_RARE.forEach(([id,name],t)=>{RES[id]={id,name,kind:"g",prof:"pecheur",tier:t,price:6+t*12,rare:1};FISH.push({id,t,rk:1})});
 FISH_LEG.forEach(([t,id,name])=>{RES[id]={id,name,kind:"g",prof:"pecheur",tier:t,price:60+t*60,rare:2};FISH.push({id,t,rk:2})});
-FISH.forEach((f,i)=>{const r=RES[f.id],[k,lbl]=FISH_K[(f.t+f.rk*2)%6],b=FISH_V[k][f.rk]*(1+f.t/11),d=[120,300,600][f.rk];
+/* Poisson mythique : 1 seule espèce, ultra rare (≈ 0,3 % des prises au mini-jeu), donne TOUS les boosts à la fois */
+RES.pm_prisma={id:"pm_prisma",name:"Prismaride, l'Arc-en-ciel",kind:"g",prof:"pecheur",tier:11,price:5000,rare:3};
+FISH.forEach((f,i)=>{if(f.rk===3)return;const r=RES[f.id],[k,lbl]=FISH_K[(f.t+f.rk*2)%6],b=FISH_V[k][f.rk]*(1+f.t/11),d=[120,300,600][f.rk];
   f.k=k;f.d=d;f.v=k==="crit"?Math.round(b):k==="def"?+(1-Math.min(.6,b)).toFixed(2):+(1+b).toFixed(2);f.col=FISH_COL[f.t];f.cm=[18,40,120][f.rk]*(1+f.t/8);
   f.txt=k==="crit"?`+${f.v} % ${lbl}`:k==="def"?`−${Math.round((1-f.v)*100)} % ${lbl}`:`+${Math.round((f.v-1)*100)} % ${lbl}`;
   r.fish=f;Object.defineProperty(r,"img",{get(){return PX.fish(f.col,f.rk,f.t)},configurable:true})});
+{const f={id:"pm_prisma",t:11,rk:3,col:"#ff8ab0",cm:300,d:900,all:FISH_K.map(([k])=>{const b=FISH_V[k][2]*1.5;return{k,v:k==="crit"?Math.round(b):k==="def"?+(1-Math.min(.7,b)).toFixed(2):+(1+b).toFixed(2)}})};
+  f.k="all";f.txt="TOUS les boosts à la fois (+90 % d'XP, +120 % de prospection, +75 % de dégâts, +53 % de vitesse, +38 % de critique, −60 % de dégâts subis)";
+  FISH.push(f);RES.pm_prisma.fish=f;Object.defineProperty(RES.pm_prisma,"img",{get(){return PX.fish(f.col,3,11)},configurable:true})}
 const FISHBY={};FISH.forEach(f=>FISHBY[f.id]=f);
 const fdex=()=>S.fdex||(S.fdex={});
 const fishN=()=>Object.keys(fdex()).length;
@@ -406,7 +411,7 @@ const xpNeed=l=>Math.floor(40*Math.pow(l,1.75)+60*l);
 const pxNeed=l=>Math.floor(6*Math.pow(l,1.5)+5*l);
 
 
-/* ---------- Codes (Options > Sauvegarde > Code) ----------
+/* ---------- Codes cadeaux (Options > Sauvegarde > Code cadeau) ----------
    Ajouter un code : "NOM":{txt:"ce que fait le code", once:true si utilisable une seule fois, go:()=>{ ... }}
    Le nom se tape sans tenir compte des majuscules ni des espaces. go() peut renvoyer un texte affiché au joueur. */
 const CODES={
