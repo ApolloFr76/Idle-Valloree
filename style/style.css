@@ -1287,3 +1287,7 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
    (les sprites ne dépassent jamais le haut de leur case), le nom ne passe jamais à la ligne. */
 .world .mtag{top:-53px;bottom:auto}
 .mtag .mhead h3{white-space:nowrap}
+/* Largeur fixe aussi : prévue pour le nom le plus long ; un nom encore plus long est coupé (…). */
+.world .mtag .mhead{width:236px;box-sizing:border-box;justify-content:flex-start}
+.world .mtag .mhead h3{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.world .mtag .mlvl{flex:none}
