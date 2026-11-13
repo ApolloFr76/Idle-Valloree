@@ -25,9 +25,9 @@ function stats(){
 function roll(mult,st){if(S.mon)mult*=1+.05*bestTier(S.mon.id);const r=S.mon?monRes(MON[S.mon.id].el,st.el):0;let v=st.hit*mult*(1-r/100)*(.9+Math.random()*.2),crit=Math.random()*100<st.critC;if(crit)v*=st.critM;return{v:Math.max(1,Math.round(v)),crit,r}}
 const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed);
 /* Puissance des monstres : courbe de base, puis un multiplicateur qui grimpe de façon exponentielle au-delà du
-   niveau 25 (×1,6 au niv. 50, ×4 au niv. 100, ×10 au niv. 150, ×25 au niv. 200) pour suivre la puissance du joueur
-   en fin de jeu (dégâts des monstres ×2,6 au niv. 200). Les gains (XP, écus) suivent en partie pour que les combats plus longs restent rentables. */
-const monPow=lvl=>Math.exp(.0184*Math.max(0,lvl-25));
+   niveau 25 (×2 au niv. 50, ×10 au niv. 100, ×44 au niv. 150, ×200 au niv. 200) pour suivre la puissance du joueur
+   en fin de jeu (dégâts des monstres ×5 au niv. 200). Les gains (XP, écus) suivent en partie pour que les combats plus longs restent rentables. */
+const monPow=lvl=>Math.exp(.0303*Math.max(0,lvl-25));
 function monsterStats(lvl){const m=monPow(lvl);return{hp:Math.round((14+7*Math.pow(lvl,1.45))*m),atk:Math.round((2+1.5*Math.pow(lvl,1.2))*Math.pow(m,.3)),xp:Math.round((6+5*Math.pow(lvl,1.3))*Math.pow(m,.4)),ecus:Math.round((2+lvl*1.1)*Math.pow(m,.4))}}
 function makeMon(d,lvl,hpM=1,atkM=1,xpM=1,ecM=1){const ms=monsterStats(lvl),hp=Math.round(ms.hp*hpM);S.mon={id:d.id,lvl,hp,max:hp,atk:Math.round(ms.atk*atkM),xp:Math.round(ms.xp*xpM),ecus:Math.round(ms.ecus*ecM)};S.dots=[];S.monT=0;makeShiny();drawMonster();if(fx){FX.spawn(!!d.boss);VIE.monSpawn(!!d.boss);SCENE.drawQueue();if(S.mode==="zone"&&!d.boss){SCENE.walkIn();SCENE.advance()}}}
 function spawn(){const z=ZONES[S.zone],d=SCENE.nextWave(z),lvl=rnd(z.lvl[0],Math.min(z.lvl[1],Math.max(z.lvl[0],S.lvl+2)));makeMon(d,lvl)}
