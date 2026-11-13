@@ -28,7 +28,7 @@ function purgeDots(m){if(!S.mon||!S.mdot)return 0;const st=stats();let v=0;for(c
   if(v>0)hitMon({v:Math.round(v),crit:false,r:0},"spell");return v}
 function hitMon(r,kind){
   if(!S.mon||S.ko>0)return;dotProcs(r,kind);if(fx&&(kind==="click"||kind==="auto"))heroAtk();S.mon.hp-=r.v;inc("dmg",r.v);mx("maxHit",r.v);if(kind==="click"||kind==="spell")sfx(r.crit?"crit":"hit");
-  if(fx){floatNum(fmt(r.v)+(r.crit?" !":""),(r.crit?"crit ":"")+(kind==="dot"?"dot ":"")+(r.r<0?"eff":r.r>0?"resi":""));replayCls($("mon"),"hit");if((r.crit||r.v>S.mon.max*.2)&&kind!=="dot")VIE.ouch();if(r.crit&&(kind==="click"||kind==="spell")&&performance.now()-(hitMon.ct||0)>250){hitMon.ct=performance.now();FX.crit()}}
+  if(fx){floatNum((r.sup?"SUPER ":"")+fmt(r.v)+(r.crit?" !":""),(r.sup?"crit super ":r.crit?"crit ":"")+(kind==="dot"?"dot ":"")+(r.r<0?"eff":r.r>0?"resi":""));replayCls($("mon"),"hit");if((r.crit||r.v>S.mon.max*.2)&&kind!=="dot")VIE.ouch();if(r.crit&&(kind==="click"||kind==="spell")&&performance.now()-(hitMon.ct||0)>250){hitMon.ct=performance.now();FX.crit()}}
   if(S.mon.hp<=0)kill();
 }
 /* Attaque de base du héros : animation propre à chaque classe (voir js/anim.js) */

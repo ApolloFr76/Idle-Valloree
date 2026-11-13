@@ -18,23 +18,26 @@ function stats(){
   /* DoT : chance d'en poser à chaque coup (stat / (stat + 400), 50 % max) et dégâts par charge et par seconde */
   s.dotC={};s.dotPer={};for(const k in DOTS){const v=s[k]||0;s.dotC[k]=Math.min(.5,v/(v+400));if(C.autoDot===k)s.dotC[k]=1;
     s.dotPer[k]=(s.hit*.15*(1+Math.sqrt(v)/20)*(C.dotMult||1)+allyDps()*.02)*DOTS[k].k*bdot}   /* racine : la stat compte sans exploser à haut niveau */
-  s.critC=Math.min(100,s.crit+bcrit);s.critM=+(C.critMult+s.critBonus).toFixed(2);
+  s.critC=Math.min(100,s.crit+bcrit);
+  /* Super critique : la chance de critique au-delà de 100 % (jusqu'à 200 %) devient la chance qu'un critique soit « super » (dégâts critiques ×2) */
+  s.superC=Math.max(0,Math.min(100,s.crit+bcrit-100));s.critM=+(C.critMult+s.critBonus).toFixed(2);
   s.interval=Math.max(.3,1.3/(1+s.agi/150))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
   s.pctXp+=fishN();s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*bxp*(evOn("nuit")?1.5:1);s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
-  s.dps=s.hit*(1+s.critC/100*(s.critM-1))*(1+s.dbl)/s.interval;
+  s.dps=s.hit*(1+s.critC/100*(s.critM*(1+s.superC/100)-1))*(1+s.dbl)/s.interval;
   /* estimation des DoT en continu (charges moyennes entretenues par les coups) ajoutée aux dégâts/s */
   {const hps=(1+s.dbl)/s.interval;s.dotDps=0;for(const k in DOTS){const n=Math.min(DOTS[k].max,s.dotC[k]*hps*DOTS[k].d);s.dotDps+=n*s.dotPer[k]}s.dps+=s.dotDps}
   return s;
 }
-function roll(mult,st){if(S.mon)mult*=1+.05*bestTier(S.mon.id);const r=S.mon?monRes(MON[S.mon.id].el,st.el):0;let v=st.hit*mult*(1-r/100)*(.9+Math.random()*.2),crit=Math.random()*100<st.critC;if(crit)v*=st.critM;return{v:Math.max(1,Math.round(v)),crit,r}}
+function roll(mult,st){if(S.mon)mult*=1+.05*bestTier(S.mon.id);const r=S.mon?monRes(MON[S.mon.id].el,st.el):0;let v=st.hit*mult*(1-r/100)*(.9+Math.random()*.2),crit=Math.random()*100<st.critC,sup=crit&&Math.random()*100<(st.superC||0);if(crit)v*=st.critM*(sup?2:1);return{v:Math.max(1,Math.round(v)),crit,sup,r}}
 const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed);
 /* Puissance des monstres : courbe de base, puis un multiplicateur qui grimpe de façon exponentielle au-delà du
    niveau 25 (×2,7 au niv. 50, ×19 au niv. 100, ×140 au niv. 150, ×1000 au niv. 200) pour suivre la puissance du joueur
    en fin de jeu (dégâts des monstres ×8 au niv. 200). Les gains (XP, écus) suivent en partie pour que les combats plus longs restent rentables. */
 /* Au-delà du niveau 200 (étages hauts de la tour), la croissance devient polynomiale pour éviter des nombres absurdes. */
 const monPow=lvl=>Math.exp(.0395*(Math.min(200,Math.max(25,lvl))-25))*(lvl>200?Math.pow(lvl/200,3):1);
-function monsterStats(lvl){const m=monPow(lvl);return{hp:Math.round((14+7*Math.pow(lvl,1.45))*m),atk:Math.round((2+1.5*Math.pow(lvl,1.2))*Math.pow(m,.3)),xp:Math.round((6+5*Math.pow(lvl,1.3))*Math.pow(m,.4)),ecus:Math.round((2+lvl*1.1)*Math.pow(m,.4))}}
+const MON_BOOST=1.15;   /* tous les monstres +15 % de PV et de dégâts */
+function monsterStats(lvl){const m=monPow(lvl);return{hp:Math.round((14+7*Math.pow(lvl,1.45))*m*MON_BOOST),atk:Math.round((2+1.5*Math.pow(lvl,1.2))*Math.pow(m,.3)*MON_BOOST),xp:Math.round((6+5*Math.pow(lvl,1.3))*Math.pow(m,.4)),ecus:Math.round((2+lvl*1.1)*Math.pow(m,.4))}}
 function makeMon(d,lvl,hpM=1,atkM=1,xpM=1,ecM=1){const ms=monsterStats(lvl),hp=Math.round(ms.hp*hpM);S.mon={id:d.id,lvl,hp,max:hp,atk:Math.round(ms.atk*atkM),xp:Math.round(ms.xp*xpM),ecus:Math.round(ms.ecus*ecM)};S.dots=[];S.mdot={};S.monT=0;makeShiny();drawMonster();if(fx){FX.spawn(!!d.boss);VIE.monSpawn(!!d.boss);SCENE.drawQueue();if(S.mode==="zone"&&!d.boss){SCENE.walkIn();SCENE.advance()}}}
 /* Dernière zone : au-delà de son niveau max, les monstres suivent le héros avec 50 niveaux de moins
    (niveaux 40 à 50 sous le héros), pour rester tuables après le niveau 200. */
