@@ -17,3 +17,6 @@ Desktop.ini
 .vscode/
 .idea/
 *.swp
+
+# Notes de projet pour Claude (gardées en local)
+CLAUDE.md
