@@ -63,7 +63,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"ptab":ptab=b.dataset.t;renderPanel();break;
     case"tabLocked":toast(`Onglet verrouillé : il se débloque au niveau ${TAB_LOCK[b.dataset.t]}`,1);break;
     case"tab":if(!tabOpen(b.dataset.t))break;S.tab=b.dataset.t;confirmReset=false;dirty=true;renderPanel();break;
-    case"alloc":{const k=b.dataset.k;let n=Math.min(S.pts,+b.dataset.n);if(SEC[k]?.cap&&!PRIM_OK[k]){const room=SEC[k].cap*SEC_STEP-(stats()[k]||0);n=Math.min(n,room);if(n<=0){toast("Bonus secondaire déjà au maximum");break}}S.alloc[b.dataset.k]+=n;S.pts-=n;dirty=true;renderPanel();break}
+    case"alloc":{const k=b.dataset.k;let n=Math.min(S.pts,b.dataset.n==="custom"?allocN:+b.dataset.n);if(SEC[k]?.cap&&!PRIM_OK[k]){const room=SEC[k].cap*SEC_STEP-(stats()[k]||0);n=Math.min(n,room);if(n<=0){toast("Bonus secondaire déjà au maximum");break}}S.alloc[b.dataset.k]+=n;S.pts-=n;dirty=true;renderPanel();break}
     case"respec":ALLOC.forEach(k=>{S.pts+=S.alloc[k];S.alloc[k]=0});S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
     case"sell":{const k=b.dataset.r,n=b.dataset.n==="all"?S.res[k]:Math.min(+b.dataset.n,S.res[k]);if(n>0){const g=sellRes(k,n);if(n>1)toast(`${fmt(n)}× ${RES[k].name} vendus : +${fmt(g)} écus`)}renderPanel();break}
     case"mtab":mtab=b.dataset.p;renderPanel();break;
@@ -112,6 +112,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   const tk={c:"perso",i:"inv",v:"aventure",f:"atelier",o:"opts"}[k];if(tk&&tabOpen(tk)){S.tab=tk;renderPanel()}});
 function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$("pauseBtn").classList.toggle("pri",v);$("pauseOv").hidden=!v;if(v)save()}
 function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
+document.addEventListener("input",e=>{if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
 document.addEventListener("change",e=>{if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
