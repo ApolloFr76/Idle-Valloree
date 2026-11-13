@@ -27,11 +27,16 @@ const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed);
 /* Puissance des monstres : courbe de base, puis un multiplicateur qui grimpe de façon exponentielle au-delà du
    niveau 25 (×2,7 au niv. 50, ×19 au niv. 100, ×140 au niv. 150, ×1000 au niv. 200) pour suivre la puissance du joueur
    en fin de jeu (dégâts des monstres ×8 au niv. 200). Les gains (XP, écus) suivent en partie pour que les combats plus longs restent rentables. */
-const monPow=lvl=>Math.exp(.0395*Math.max(0,lvl-25));
+/* Au-delà du niveau 200 (étages hauts de la tour), la croissance devient polynomiale pour éviter des nombres absurdes. */
+const monPow=lvl=>Math.exp(.0395*(Math.min(200,Math.max(25,lvl))-25))*(lvl>200?Math.pow(lvl/200,3):1);
 function monsterStats(lvl){const m=monPow(lvl);return{hp:Math.round((14+7*Math.pow(lvl,1.45))*m),atk:Math.round((2+1.5*Math.pow(lvl,1.2))*Math.pow(m,.3)),xp:Math.round((6+5*Math.pow(lvl,1.3))*Math.pow(m,.4)),ecus:Math.round((2+lvl*1.1)*Math.pow(m,.4))}}
 function makeMon(d,lvl,hpM=1,atkM=1,xpM=1,ecM=1){const ms=monsterStats(lvl),hp=Math.round(ms.hp*hpM);S.mon={id:d.id,lvl,hp,max:hp,atk:Math.round(ms.atk*atkM),xp:Math.round(ms.xp*xpM),ecus:Math.round(ms.ecus*ecM)};S.dots=[];S.monT=0;makeShiny();drawMonster();if(fx){FX.spawn(!!d.boss);VIE.monSpawn(!!d.boss);SCENE.drawQueue();if(S.mode==="zone"&&!d.boss){SCENE.walkIn();SCENE.advance()}}}
 function spawn(){const z=ZONES[S.zone],d=SCENE.nextWave(z),lvl=rnd(z.lvl[0],Math.min(z.lvl[1],Math.max(z.lvl[0],S.lvl+2)));makeMon(d,lvl)}
 const towerLvl=f=>Math.round(f*2+Math.pow(f,1.35)*.25),towerRec=f=>Math.round(6*f+.4*f*f),towerPct=b=>.5*dimR(b/2)*2;
+/* Étage de départ de la tour : 80 % du record, mais jamais un étage où le monstre tiendrait plus de 10 s
+   face aux dégâts actuels (héros + compagnons). */
+function towerStart(){const ef=Math.max(1,stats().dps+allyDps());let f=Math.max(1,Math.floor(S.tower.best*.8));
+  while(f>1&&monsterStats(towerLvl(f)).hp*(f%10?2.5:8)/ef>10)f=f>60?Math.floor(f*.97):f-1;return f}
 const bossTime=()=>BOSS_TIME+(up("sablier")?10:0),towerTime=()=>TOWER_TIME+(up("sablier")?10:0);
 function nextMon(){
   if(S.mode==="boss")makeMon(MON["boss_"+S.zone],ZONES[S.zone].lvl[1],12,1.3,10,15);
@@ -43,7 +48,7 @@ function startMode(m,zi){
   if(S.ko>0){toast("Attendez d'être remis sur pied");return}
   if(m==="boss"){if(zi!=null)S.zone=zi;if((S.zk[S.zone]||0)<BOSS_KILLS)return;S.mode="boss";S.timer=bossTime();log(`Le combat contre ${MON["boss_"+S.zone].name} commence : ${bossTime()} s !`,"g")}
   if(m==="donjon"){const z=ZONES[zi],k="cle_"+zi;if(S.lvl<z.lvl[0]||(S.res[k]||0)<1){toast("Il vous faut la clé de ce donjon");return}S.res[k]--;S.zone=zi;S.dg={z:zi,wave:1};S.mode="donjon";S.timer=0;log(`Vous entrez dans le donjon ${DUNGEONS[zi]}.`,"g")}
-  if(m==="tour"){S.mode="tour";S.tower.cur=Math.max(1,Math.floor(S.tower.best*.8));S.timer=towerTime();log(`Vous entrez dans la tour à l'étage ${S.tower.cur}.`,"g")}
+  if(m==="tour"){S.mode="tour";S.tower.cur=towerStart();S.timer=towerTime();log(`Vous entrez dans la tour à l'étage ${S.tower.cur}.`,"g")}
   S.mon=null;S.spawnT=.3;S.dots=[];drawZones();drawMonster();dirty=true;
 }
 function endMode(win,why){
