@@ -1278,3 +1278,8 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 @keyframes spiritFloat{50%{transform:translateY(-8px)}}
 @media (min-width:761px){.classes{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
 .ovc:has(.classes){max-width:1100px}
+
+/* Nom du monstre : icône d'élément (détails au survol) */
+.mico{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-right:6px;vertical-align:-3px;pointer-events:auto;border-radius:50%;background:var(--c);border:2px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.4);cursor:help}
+.mico svg{width:13px;height:13px;color:#fff}
+.mel:empty,.mtag .mel:empty{display:none}
