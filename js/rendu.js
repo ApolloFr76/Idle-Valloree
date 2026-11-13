@@ -120,3 +120,16 @@ function statBreak(){
   const sc=setCounts();for(const z in sc){const b=SETB(z);setSteps(z).forEach(n=>{if(sc[z]>=n)for(const k in b[n])if(o[k])o[k].set+=b[n][k]})}
   return o;
 }
+
+/* ---------- Statistiques en direct (3e colonne en grand écran) : moyennes sur les 2 dernières minutes ---------- */
+const LS={q:[]};
+function liveStats(){const e=$("lstats");if(!S||!S.cls)return;const now=Date.now(),T=S.st;
+  LS.q.push({t:now,xp:T.xp||0,ec:T.ecus||0,k:S.kills||0,d:T.dmg||0});while(LS.q.length>121)LS.q.shift();
+  if(!e||e.hidden)return;const a=LS.q[0],b=LS.q[LS.q.length-1],dt=Math.max(1,(b.t-a.t)/1000);
+  const xph=(b.xp-a.xp)/dt*3600,ech=(b.ec-a.ec)/dt*3600,kpm=(b.k-a.k)/dt*60,dps=(b.d-a.d)/dt,need=xpNeed(S.lvl)-S.xp,xps=xph/3600;
+  const eta=S.lvl>=lvlMax()?"Niveau maximum":xps>0?dur(need/xps):"—";
+  const row=(ic,n,v)=>`<div class="lsr">${ic==="ecus"?'<span class="coin lscoin"></span>':sico(ic)}<span>${n}</span><b class="num">${v}</b></div>`;
+  e.innerHTML=`<div class="lsh"><b>Statistiques en direct</b><span class="small muted">${dt<110?`sur ${Math.round(dt)} s`:"sur 2 min"}</span></div>`+
+    row("xp","XP / heure",fmt(xph))+row("ecus","Écus / heure",fmt(ech))+row("kills","Monstres / minute",kpm.toFixed(1).replace(".",","))+
+    row("dps","Dégâts réels / s",fmt(dps))+row("xp","Prochain niveau",eta)+row("crit","Plus gros coup",fmt(T.maxHit||0))}
+const dur=s=>{s=Math.round(s);if(s<60)return s+" s";if(s<3600)return Math.floor(s/60)+" min "+String(s%60).padStart(2,"0");if(s<86400)return Math.floor(s/3600)+" h "+String(Math.floor(s%3600/60)).padStart(2,"0");return Math.floor(s/86400)+" j "+Math.floor(s%86400/3600)+" h"};

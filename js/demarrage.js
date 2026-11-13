@@ -5,7 +5,8 @@ let lastT=performance.now(),lastPanel=0,lastAch=0,lastSave=Date.now(),paused=fal
 /* Grand écran : objectifs, potions et journal passent dans une 3e colonne */
 const WIDE=matchMedia("(min-width:1500px) and (min-height:650px)");
 function placeSide(){const side=$("sideCard"),cb=$("combat"),w=WIDE.matches;side.hidden=!w;
-  const els=["pots","goals","log"].map(id=>$(id));if(w)els.forEach(e=>side.appendChild(e));else els.forEach(e=>cb.appendChild(e));if(S&&S.log)renderLog()}
+  if(!$("lstats")){const d=document.createElement("div");d.id="lstats";d.className="lstats";d.hidden=true;document.body.appendChild(d)}$("lstats").hidden=!w;
+  const els=["pots","goals","lstats","log"].map(id=>$(id));if(w)els.forEach(e=>side.appendChild(e));else els.forEach(e=>cb.appendChild(e));if(S&&S.log)renderLog()}
 WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
 placeSide();
 let sceneOn=false;
@@ -16,7 +17,7 @@ function loop(){
     if(paused||(S.opt.pauseHidden&&document.hidden))dt=0;
     if(dt>120){if(S.opt.offline){const s=offline(dt);boot2();if(s&&(s.kills||Object.keys(s.res).length))showOffline(s)}}
     else if(dt>0){fx=!document.hidden&&dt<1;const steps=Math.min(600,Math.ceil(dt/.2));for(let i=0;i<steps;i++)tick(dt/steps);fx=true}
-    live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests();checkTips()}
+    live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests();checkTips();liveStats()}
     if(dirty&&now-lastPanel>600){lastPanel=now;renderPanel()}
   }
 }
