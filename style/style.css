@@ -1292,3 +1292,5 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .world .mtag .mhead h3{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .world .mtag .mlvl{flex:none}
 .mhead>.mico{flex:none;margin-right:-2px}
+/* États du monstre (poison, brûlure…) : une rangée fixe juste sous son étiquette, qui s'étend vers le bas */
+.world .mslot .mdots{top:10px;bottom:auto;left:50%;right:auto;transform:translateX(-50%);margin:0;width:236px;max-width:none;justify-content:center;flex-wrap:wrap}
