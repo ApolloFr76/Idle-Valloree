@@ -113,7 +113,7 @@ const SI={vit:'<path fill="currentColor" stroke="none" shape-rendering="crispEdg
 const SC={vit:"#e8675a",hp:"#e8675a",puissance:"#f0a35a",dmg:"#f0a35a",agi:"#8fd16a",dodge:"#8fd16a",sagesse:"#a99ee0",xp:"#a99ee0",crit:"#f0c35a",prospection:"#6bb8e8",dps:"#ef7d4a",kills:"#9fb0c3"};
 const sico=k=>ELG[k]?`<span class="sico" style="--c:${ELEMS[k].c}"><svg viewBox="0 0 24 24" aria-hidden="true">${ELG[k]}</svg></span>`:`<span class="sico" style="--c:${SC[k]}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SI[k]}</svg></span>`;
 function statBreak(){
-  const C=CLASSES[S.cls],K=["vit","puissance","agi","sagesse","crit","prospection","dmg","feu","eau","terre","air","pctXp","pctEcus","pctDmg"],o={};K.forEach(k=>o[k]={base:0,pts:0,eq:0,set:0});
+  const C=CLASSES[S.cls],K=["vit","puissance","agi","sagesse","crit","prospection","dmg","feu","eau","terre","air","pctXp","pctEcus","pctDmg","poison","brulure","gelure","saignement"],o={};K.forEach(k=>o[k]={base:0,pts:0,eq:0,set:0});
   o.crit.base=5;o.prospection.base=100;for(const k in C.base)o[k].base+=C.base[k];for(const k in S.alloc)o[k].pts=S.alloc[k];
   equipped().forEach(i=>{const st=itemStats(i);for(const k in st)o[k].eq+=st[k]});
   const sc=setCounts();for(const z in sc){const b=SETB(z);setSteps(z).forEach(n=>{if(sc[z]>=n)for(const k in b[n])if(o[k])o[k].set+=b[n][k]})}

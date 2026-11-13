@@ -16,7 +16,10 @@ function tick(dt){VIE.tick(dt);
       {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1){floatNum(fmt(allyAcc),"ally");FX.palAtk()}allyAcc=0;allyFT=0}if(S.mon.hp<=0)kill()}}
       {const rate=(up("auto1")?2:0)+(up("auto2")?4:0);if(rate&&S.mon){clickAcc+=dt*rate;while(clickAcc>=1&&S.mon){clickAcc-=1;doClick(true)}}}
       S.dots=S.dots.filter(d=>d.until>S.time);S.dots.forEach(d=>{d.acc+=dt;while(d.acc>=1&&S.mon){d.acc-=1;hitMon(roll(d.m,st),"dot")}});
-      if(S.mon){S.monT+=dt;if(S.monT>=2){S.monT-=2;
+      /* compagnons empoisonneurs, puis dégâts des DoT élémentaires */
+      if(S.mon){S.allyDotAcc=S.allyDotAcc||{};for(const id in ALLY_DOT){const l=S.allies[id]||0;if(!l)continue;const[k,r]=ALLY_DOT[id];S.allyDotAcc[k]=(S.allyDotAcc[k]||0)+r*dt;const n=Math.floor(S.allyDotAcc[k]);if(n>0){S.allyDotAcc[k]-=n;addDot(k,n)}}}
+      dotTick(dt,st);
+      if(S.mon){S.monT+=dt;const mA=2*(1+(S.mdot&&S.mdot.gelure?S.mdot.gelure.n*DOTS.gelure.slow:0));if(S.monT>=mA){S.monT-=mA;
         if(Math.random()<st.dodge){if(fx){floatNum("Esquive","heal hurt");FX.dodge()}}
         else{const dmg=Math.max(1,Math.round(S.mon.atk*st.def*(.85+Math.random()*.3)));S.hp-=dmg;if(fx){floatNum("-"+fmt(dmg),"hurt");FX.monAtk()}
           if(S.hp<=0){S.hp=0;S.ko=5;S.buffs=[];S.dots=[];inc("deaths");if(fx)FX.ko();if(S.mode!=="zone"){endMode(false,"K.O.")}else{log(`${MON[S.mon.id].name} vous a mis K.O. Essayez une zone plus facile ou améliorez votre équipement.`,"r");S.mon.hp=S.mon.max;if(S.opt.koRetreat&&S.zone>0){S.zone--;S.mon=null;drawZones();log(`Retour automatique : ${ZONES[S.zone].name}.`,"w")}}}}}}

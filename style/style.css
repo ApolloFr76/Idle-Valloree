@@ -1116,7 +1116,7 @@ html.rm .ahero,html.rm .mon button img,html.rm .pal{animation:none}
 .spell.castflash{animation:castflash .35s ease-out}
 @keyframes castflash{0%{filter:brightness(2.2)}100%{filter:none}}
 /* formes rondes pour les effets de sorts (le thème pixel met les coins carrés partout) */
-.arena .an.ringwave,.arena .an.spin,.arena .an.burst2,.arena .an.orb2,.arena .an.rune,.arena .an.aim,.arena .an.mcircle,.arena .an.flashw,.arena .an.darkbub,.arena .an.ting,.arena .an.puff2,.arena .an.trail,.arena .an.lynx,.arena .an.slash3{border-radius:50%!important}
+.arena .an.ringwave,.arena .an.spin,.arena .an.burst2,.arena .an.orb2,.arena .an.rune,.arena .an.aim,.arena .an.mcircle,.arena .an.flashw,.arena .an.darkbub,.arena .an.ting,.arena .an.puff2,.arena .an.trail,.arena .an.lynx,.arena .an.slash3,.arena .an.toxbub,.arena .an.toxcloud{border-radius:50%!important}
 
 /* Soin : lueurs vertes rondes et douces + petites étoiles (remplace les « + ») */
 .arena .healorb{position:absolute;pointer-events:none;z-index:6;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%!important;background:radial-gradient(circle,#f4fff0 0 25%,#9bf08a 45%,rgba(120,230,120,0) 70%);box-shadow:0 0 10px 4px rgba(140,240,140,.45);animation:healrise 1.2s ease-out both}
@@ -1232,3 +1232,23 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 @container (max-width:560px){.mprofs{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 .fdex .bc.rk3{box-shadow:inset 0 0 0 3px #ff8ab0,0 0 12px rgba(255,138,176,.6);background:linear-gradient(135deg,#fff0f6,#eef6ff,#fffbe0)}
+
+/* ---------- DoT élémentaires (js/combat.js : addDot, js/scene.js : drawDots) ---------- */
+.mdots{position:absolute;right:4%;top:2px;display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:60%;pointer-events:none;z-index:3}
+.dchip{font-size:12px;font-weight:700;padding:1px 6px;background:rgba(28,16,32,.82);color:var(--c);border:2px solid var(--c);text-shadow:none}
+.dchip b{color:#fff8e6}
+.mon.d-poison #monBtn img{filter:drop-shadow(0 0 4px #7ad04a)}
+.mon.d-brulure #monBtn img{filter:drop-shadow(0 0 4px #ff7a2c)}
+.mon.d-gelure #monBtn img{filter:drop-shadow(0 0 4px #8fd6ff) saturate(.8)}
+.mon.d-saignement #monBtn img{filter:drop-shadow(0 0 4px #e04848)}
+.fx.banner.tox b{color:#9be07a}
+.an.flask{width:12px;height:16px;margin:-8px 0 0 -6px;background:linear-gradient(#e8dcc0 0 25%,#7ad04a 25%);border:2px solid #1c1020;box-shadow:0 0 8px rgba(122,208,74,.7)}
+.an.flask.big{width:16px;height:22px;margin:-11px 0 0 -8px}
+.an.toxbub{width:8px;height:8px;background:#7ad04a;box-shadow:0 0 0 1px #2f5a1a;animation:dpRise .9s ease-out both}
+.an.toxcloud{width:90px;height:60px;margin:-30px 0 0 -45px;background:radial-gradient(circle,rgba(122,208,74,.55),rgba(122,208,74,0) 70%);animation:toxCloud 1.3s ease-out both}
+@keyframes toxCloud{0%{transform:scale(.4);opacity:0}30%{opacity:1}100%{transform:scale(1.4) translateY(-12px);opacity:0}}
+.arena.miasma{box-shadow:inset 0 0 60px rgba(122,208,74,.35)}
+.float.dot,.fnum.dot{color:#9be07a!important}
+/* 5 classes sur une ligne (Médecin de la peste) */
+@media (min-width:761px){.classes{grid-template-columns:repeat(5,minmax(0,1fr))!important}}
+.ovc:has(.classes){max-width:1100px}

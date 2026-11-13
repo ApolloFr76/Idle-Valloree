@@ -22,6 +22,19 @@ const CLASSES = {
             {id:"d2",name:"Soin",lvl:10,cd:18,txt:"Rend 40 % des PV",fx:[{t:"heal",p:.4}]},
             {id:"d3",name:"Rempart",lvl:25,cd:30,txt:"Dégâts subis ÷2 10 s, soigne 15 %",fx:[{t:"buff",k:"def",v:.5,d:10},{t:"heal",p:.15}]}]},
 };
+/* Médecin de la peste : chaque attaque empoisonne. Ses dégâts directs sont faibles, ses dégâts sur la durée (DoT) ×1,6. */
+CLASSES.peste={name:"Médecin de la peste",col:"#4f7a4a",desc:"Empoisonne à chaque coup : faibles coups directs, énormes dégâts sur la durée.",base:{sagesse:10,poison:20},critMult:1.6,def:.95,regen:.012,hpMult:1,dodgeMult:1,dmgMult:.75,spellMult:1,cdMult:1,dotMult:1.6,autoDot:"poison",
+  spells:[{id:"p1",name:"Fiole toxique",lvl:1,cd:6,txt:"Frappe à 120 % et ajoute 3 charges de poison",fx:[{t:"hit",m:1.2},{t:"dot",k:"poison",n:3}]},
+          {id:"p2",name:"Miasme",lvl:10,cd:18,txt:"Dégâts sur la durée ×2 pendant 8 s",fx:[{t:"buff",k:"dot",v:2,d:8}]},
+          {id:"p3",name:"Purge",lvl:25,cd:30,txt:"Fait exploser toutes les charges (poison, brûlure, gelure, saignement) d'un coup",fx:[{t:"purge",m:1.5}]}]};
+/* ---------- Dégâts sur la durée (DoT) : un par élément ----------
+   Chaque charge fait des dégâts chaque seconde. La stat du même nom (sur l'équipement de l'élément) donne une chance
+   d'en poser à chaque coup et augmente leurs dégâts. max = charges max, k = force d'une charge, d = durée (s). */
+const DOTS={poison:{n:"Poison",el:"air",c:"#7ad04a",max:10,k:1,d:6,txt:"s'empile jusqu'à 10"},
+  brulure:{n:"Brûlure",el:"feu",c:"#ff7a2c",max:5,k:2,d:4,txt:"5 charges max, mais 2× plus fortes"},
+  gelure:{n:"Gelure",el:"eau",c:"#8fd6ff",max:10,k:.7,d:6,slow:.04,txt:"ralentit les attaques du monstre de 4 % par charge"},
+  saignement:{n:"Saignement",el:"terre",c:"#e04848",max:10,k:1.2,d:5,txt:"un coup critique ajoute une charge de plus"}};
+const EL_DOT={air:"poison",feu:"brulure",eau:"gelure",terre:"saignement"};
 const OLD_CLS={brasier:"mage",maree:"gardien",roc:"guerrier",bourrasque:"archer"};
 const ZONES = [
   {id:"prairie",el:"terre",name:"Prairie des Clochettes",lvl:[1,10],set:"de la Prairie",zt:"#3d5f3a",zb:"#243a25",mons:[
@@ -91,7 +104,7 @@ const SLOTS=[
   {id:"ceinture",name:"Ceinture",st:{vit:.5,puissance:.3},g:"mineur"},
   {id:"bouclier",name:"Bouclier",st:{vit:.7,agi:.2},g:"bucheron"},
 ];
-const STAT_LBL={feu:"Feu",eau:"Eau",terre:"Terre",air:"Air",vit:"Vitalité",puissance:"Puissance (tous éléments)",agi:"Agilité",sagesse:"Sagesse",crit:"% Critique",prospection:"Prospection",dmg:"Dégâts",pctXp:"% d'XP",pctEcus:"% d'écus",pctDmg:"% de dégâts"};
+const STAT_LBL={feu:"Feu",eau:"Eau",terre:"Terre",air:"Air",vit:"Vitalité",puissance:"Puissance (tous éléments)",agi:"Agilité",sagesse:"Sagesse",crit:"% Critique",poison:"Poison",brulure:"Brûlure",gelure:"Gelure",saignement:"Saignement",prospection:"Prospection",dmg:"Dégâts",pctXp:"% d'XP",pctEcus:"% d'écus",pctDmg:"% de dégâts"};
 const ALLOC=["vit","sagesse","agi","feu","eau","terre","air"];
 
 /* ================= Registres dérivés ================= */
@@ -191,6 +204,7 @@ ZONES.forEach((z,zi)=>{
     SLOTS.filter(sl=>SET_SLOTS[boss?"boss":n].includes(sl.id)).forEach(sl=>{const si=SLOTS.indexOf(sl),stats={};
       const id=key===main.id?`z${zi}_${sl.id}`:`s_${key}_${sl.id}`;
       Object.entries(sl.st).forEach(([k0,w])=>{const k=k0==="EL"?m.el:k0;stats[k]=k==="crit"?Math.round(lvlCrit(lvl)*mult):Math.max(1,Math.round(lvlBudget(lvl)*w*mult))});
+      if(EL_DOT[m.el])stats[EL_DOT[m.el]]=Math.max(1,Math.round(lvlBudget(lvl)*.25*mult));   /* DoT de l'élément de la panoplie */
       const recipe=boss?[[m.bres[0],2],[drops[si%3],3+2*zi],[PROFS[sl.g].res[zi][0],5+3*zi]]:[[m.drop[0],4+3*zi],[PROFS[sl.g].res[zi][0],4+3*zi]];
       T.ids[sl.id]=id;ITEMS[id]={id,z:zi,set:key,slot:sl.id,name:`${sl.name} ${T.name}`,stats,recipe,lvl,price:Math.round(12*Math.pow(1+lvl/8,2)*mult)};
     })};
@@ -198,8 +212,10 @@ ZONES.forEach((z,zi)=>{
   mk("boss_"+zi,MON["boss_"+zi],4,z.lvl[0]+Math.round(span*.8),1.35,true);
 });
 /* Compagnons : [id, nom, dégâts/s par niveau, coût de base, couleur] */
-const ALLIES=[["ecuyer","Écuyer Bertin",2,50,"#d9a46a"],["chasseuse","Chasseuse Lina",9,400,"#8fd16a"],["moine","Moine Tao",40,3000,"#f0c35a"],["sorciere","Sorcière Mirabelle",180,25000,"#a99ee0"],
-  ["golem","Golem de pierre",850,2e5,"#aab6c4"],["dragonnet","Dragonnet Ambre",4000,1.6e6,"#ef7d4a"],["phenix","Phénix d'aube",2e4,1.5e7,"#ff8ab0"]];
+const ALLIES=[["ecuyer","Écuyer Bertin",2,50,"#d9a46a"],["chasseuse","Chasseuse Lina",9,400,"#8fd16a"],["rat","Rat pestilent",20,1500,"#8a8478"],["moine","Moine Tao",40,3000,"#f0c35a"],["sorciere","Sorcière Mirabelle",180,25000,"#a99ee0"],
+  ["apothicaire","Apothicaire Mortimer",420,8e4,"#4f7a4a"],["golem","Golem de pierre",850,2e5,"#aab6c4"],["dragonnet","Dragonnet Ambre",4000,1.6e6,"#ef7d4a"],["serpent","Serpent d'émeraude",9000,5e6,"#3fae5a"],["phenix","Phénix d'aube",2e4,1.5e7,"#ff8ab0"]];
+/* Compagnons qui posent des DoT : [type, charges par seconde] (en plus de leurs dégâts) */
+const ALLY_DOT={rat:["poison",1],apothicaire:["poison",2],serpent:["poison",3],sorciere:["gelure",.5],golem:["saignement",.5],dragonnet:["brulure",.5],phenix:["brulure",1]};
 /* Boutique d'améliorations */
 const UPGS=[
   ["gants1","Gants renforcés","Dégâts de clic ×2",300],["auto1","Clic automatique","2 clics par seconde",3000],["sac1","Sac agrandi","+2 000 de poids",1500],

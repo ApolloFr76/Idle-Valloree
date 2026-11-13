@@ -16,8 +16,18 @@ function addRes(id,n){let room=Math.max(0,bagCap()-bagWeight());
   n=Math.min(n,room);
   if(n<=0){if(S.time-fullWarn>30){fullWarn=S.time;log("Sac plein : vendez des ressources dans l'Inventaire pour continuer à ramasser.","r");if(fx)toast("Sac plein")}return 0}
   S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
+/* ---------- DoT élémentaires (poison, brûlure, gelure, saignement) : S.mdot[type] = {n charges, until} ---------- */
+function addDot(k,n){if(!S.mon||!DOTS[k]||n<=0)return;S.mdot=S.mdot||{};const D=DOTS[k],e=S.mdot[k]||(S.mdot[k]={n:0,until:0,acc:0});e.n=Math.min(D.max,e.n+n);e.until=S.time+D.d;inc("dotStacks",n)}
+function dotProcs(r,kind){if(kind!=="click"&&kind!=="auto"&&kind!=="spell")return;const t=performance.now();if(!dotProcs.st||t-dotProcs.t>250){dotProcs.t=t;dotProcs.st=stats()}const st=dotProcs.st;
+  for(const k in st.dotC){const c=st.dotC[k];if(c>0&&Math.random()<c)addDot(k,1+(k==="saignement"&&r.crit?1:0))}}
+function dotTick(dt,st){if(!S.mon||!S.mdot)return;let tot=0;
+  for(const k in S.mdot){const e=S.mdot[k];if(e.until<=S.time||e.n<=0){delete S.mdot[k];continue}e.acc+=dt;while(e.acc>=1){e.acc-=1;tot+=e.n*st.dotPer[k]}}
+  if(tot>0)hitMon({v:Math.max(1,Math.round(tot)),crit:false,r:0},"dot")}
+/* Purge : toutes les charges explosent (dégâts restants × m) */
+function purgeDots(m){if(!S.mon||!S.mdot)return 0;const st=stats();let v=0;for(const k in S.mdot){const e=S.mdot[k];v+=e.n*st.dotPer[k]*Math.max(1,e.until-S.time)*m}S.mdot={};
+  if(v>0)hitMon({v:Math.round(v),crit:false,r:0},"spell");return v}
 function hitMon(r,kind){
-  if(!S.mon||S.ko>0)return;if(fx&&(kind==="click"||kind==="auto"))heroAtk();S.mon.hp-=r.v;inc("dmg",r.v);mx("maxHit",r.v);if(kind==="click"||kind==="spell")sfx(r.crit?"crit":"hit");
+  if(!S.mon||S.ko>0)return;dotProcs(r,kind);if(fx&&(kind==="click"||kind==="auto"))heroAtk();S.mon.hp-=r.v;inc("dmg",r.v);mx("maxHit",r.v);if(kind==="click"||kind==="spell")sfx(r.crit?"crit":"hit");
   if(fx){floatNum(fmt(r.v)+(r.crit?" !":""),(r.crit?"crit ":"")+(kind==="dot"?"dot ":"")+(r.r<0?"eff":r.r>0?"resi":""));replayCls($("mon"),"hit");if((r.crit||r.v>S.mon.max*.2)&&kind!=="dot")VIE.ouch();if(r.crit&&(kind==="click"||kind==="spell")&&performance.now()-(hitMon.ct||0)>250){hitMon.ct=performance.now();FX.crit()}}
   if(S.mon.hp<=0)kill();
 }
@@ -91,7 +101,9 @@ function cast(sp,auto){
   if(fx)ANIM.spell(sp.id);const dl=ANIM.delay(sp.id);
   sp.fx.forEach(f=>{
     if(f.t==="hit"){const r=roll(f.m*C.spellMult,st);if(dl)setTimeout(()=>{if(S.mon&&S.ko<=0)hitMon(r,"spell")},dl);else hitMon(r,"spell")}
-    if(f.t==="dot")S.dots.push({m:f.m*C.spellMult,until:S.time+f.d,acc:0});
+    if(f.t==="dot"&&f.k){const n=f.n;if(dl)setTimeout(()=>addDot(f.k,n),dl);else addDot(f.k,n)}
+    else if(f.t==="dot")S.dots.push({m:f.m*C.spellMult,until:S.time+f.d,acc:0});
+    if(f.t==="purge"){const go=()=>{const v=purgeDots(f.m);if(fx&&v>0)floatNum("Purge !","crit")};if(dl)setTimeout(go,dl);else go()}
     if(f.t==="heal"){const h=Math.round(st.maxHp*f.p);S.hp=Math.min(st.maxHp,S.hp+h);if(fx){floatNum("+"+fmt(h),"heal");FX.heal()}}
     if(f.t==="buff")pkBuff(f.k,f.v,f.d,sp.name);
   });
