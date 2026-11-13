@@ -22,11 +22,26 @@ const CLASSES = {
             {id:"d2",name:"Soin",lvl:10,cd:18,txt:"Rend 40 % des PV",fx:[{t:"heal",p:.4}]},
             {id:"d3",name:"Rempart",lvl:25,cd:30,txt:"Dégâts subis ÷2 10 s, soigne 15 %",fx:[{t:"buff",k:"def",v:.5,d:10},{t:"heal",p:.15}]}]},
 };
-/* Médecin de la peste : chaque attaque empoisonne. Ses dégâts directs sont faibles, ses dégâts sur la durée (DoT) ×1,6. */
-CLASSES.peste={name:"Médecin de la peste",col:"#4f7a4a",desc:"Empoisonne à chaque coup : faibles coups directs, énormes dégâts sur la durée.",base:{sagesse:10,poison:20},critMult:1.6,def:.95,regen:.012,hpMult:1,dodgeMult:1,dmgMult:.75,spellMult:1,cdMult:1,dotMult:1.6,autoDot:"poison",
+/* Druide (clé « peste » gardée pour les sauvegardes) : chaque attaque empoisonne. Ses dégâts directs sont faibles, ses dégâts sur la durée (DoT) ×1,6. */
+CLASSES.peste={name:"Druide",col:"#4f7a4a",desc:"Empoisonne à chaque coup : faibles coups directs, énormes dégâts sur la durée.",base:{sagesse:10,poison:20},critMult:1.6,def:.95,regen:.012,hpMult:1,dodgeMult:1,dmgMult:.75,spellMult:1,cdMult:1,dotMult:1.6,autoDot:"poison",
   spells:[{id:"p1",name:"Fiole toxique",lvl:1,cd:6,txt:"Frappe à 120 % et ajoute 3 charges de poison",fx:[{t:"hit",m:1.2},{t:"dot",k:"poison",n:3}]},
           {id:"p2",name:"Miasme",lvl:10,cd:18,txt:"Dégâts sur la durée ×2 pendant 8 s",fx:[{t:"buff",k:"dot",v:2,d:8}]},
           {id:"p3",name:"Purge",lvl:25,cd:30,txt:"Fait exploser toutes les charges (poison, brûlure, gelure, saignement) d'un coup",fx:[{t:"purge",m:1.5}]}]};
+/* Chronomancien : recharges −30 %, chaque coup pose de la Gelure, sorts autour du temps */
+CLASSES.chrono={name:"Chronomancien",col:"#3a5aa8",desc:"Maître du temps : sorts 30 % plus rapides à recharger, chaque coup pose de la Gelure.",base:{sagesse:20,gelure:20},critMult:1.7,def:1,regen:.012,hpMult:.95,dodgeMult:1,dmgMult:.95,spellMult:1.2,cdMult:.7,autoDot:"gelure",
+  spells:[{id:"c1",name:"Faille",lvl:1,cd:5,txt:"Frappe à 200 % et ajoute 3 charges de gelure",fx:[{t:"hit",m:2},{t:"dot",k:"gelure",n:3}]},
+          {id:"c2",name:"Accélération",lvl:10,cd:20,txt:"Vitesse ×2 et recharges ÷2 pendant 8 s",fx:[{t:"buff",k:"spd",v:2,d:8},{t:"buff",k:"cdr",v:.5,d:8}]},
+          {id:"c3",name:"Écho",lvl:25,cd:30,txt:"Rejoue d'un coup tous les dégâts infligés pendant les 5 dernières secondes",fx:[{t:"echo",s:5}]}]};
+/* Berserker : plus il perd de PV, plus il frappe fort (jusqu'à ×3), se soigne en frappant, pose du saignement */
+CLASSES.berserk={name:"Berserker",col:"#a8442a",desc:"Plus il est blessé, plus il frappe fort (jusqu'à ×3). Se soigne à chaque coup et fait saigner.",base:{vit:25,saignement:60},critMult:1.8,def:1.05,regen:.008,hpMult:1.25,dodgeMult:.8,dmgMult:1.05,spellMult:1,cdMult:1,rage:2,leech:.015,
+  spells:[{id:"b1",name:"Entaille",lvl:1,cd:5,txt:"Frappe à 250 % et ajoute 2 charges de saignement",fx:[{t:"hit",m:2.5},{t:"dot",k:"saignement",n:2}]},
+          {id:"b2",name:"Rage",lvl:10,cd:20,txt:"Dégâts ×2 mais dégâts subis ×1,5 pendant 10 s",fx:[{t:"buff",k:"dmg",v:2,d:10},{t:"buff",k:"def",v:1.5,d:10}]},
+          {id:"b3",name:"Massacre",lvl:25,cd:30,txt:"6 coups à 150 % en 2 secondes",fx:[{t:"multi",n:6,m:1.5,gap:330}]}]};
+/* Invocateur : coups faibles, compagnons +50 % et 20 % moins chers, invoque des esprits temporaires */
+CLASSES.invoc={name:"Invocateur",col:"#8a4ac8",desc:"Classe des compagnons : ils font +50 % de dégâts et coûtent 20 % moins cher. Invoque des esprits.",base:{sagesse:15},critMult:1.6,def:1,regen:.012,hpMult:.95,dodgeMult:1,dmgMult:.7,spellMult:1,cdMult:1,allyBonus:1.5,allyCost:.8,
+  spells:[{id:"i1",name:"Esprit lié",lvl:1,cd:8,txt:"Invoque un esprit qui frappe à 300 %/s pendant 8 s",fx:[{t:"summon",n:1,m:3,d:8}]},
+          {id:"i2",name:"Pacte",lvl:10,cd:20,txt:"Compagnons ×2 pendant 10 s",fx:[{t:"buff",k:"ally",v:2,d:10}]},
+          {id:"i3",name:"Armée spectrale",lvl:25,cd:35,txt:"Invoque 5 esprits (300 %/s chacun) pendant 12 s",fx:[{t:"summon",n:5,m:3,d:12}]}]};
 /* ---------- Dégâts sur la durée (DoT) : un par élément ----------
    Chaque charge fait des dégâts chaque seconde. La stat du même nom (sur l'équipement de l'élément) donne une chance
    d'en poser à chaque coup et augmente leurs dégâts. max = charges max, k = force d'une charge, d = durée (s). */
@@ -224,8 +239,8 @@ const UPGS=[
   ["rythme","Rythme","Combo maximum 150 au lieu de 100",30000],["sac2","Grand sac","+8 000 de poids",40000],["outils2","Outils de maître","Récolte 20 % plus rapide",60000],
   ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×1,5",5e5],["allie3","Bannière de guerre","Compagnons ×2",2e7]];
 const up=id=>!!(S.up&&S.up[id]);
-const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l));
-const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100);
+const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l)*(CLASSES[S.cls]?.allyCost||1));
+const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100)*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
 const allyDpsOf=(i,l,m=allyMult())=>l<=0?0:ALLIES[i][2]*.4*l*Math.pow(1.5,Math.floor(l/25))*m;
 const allyDps=()=>{const m=allyMult();return ALLIES.reduce((a,x,i)=>a+allyDpsOf(i,S.allies[x[0]]||0,m),0)};
 const clickMult=()=>(up("gants1")?2:1)*(up("gants2")?3:1)*(1+talV("t_doigts")/100);

@@ -14,6 +14,7 @@ function stats(){
   s.maxHp=Math.round((50+8*S.lvl+2*s.vit)*C.hpMult*(1+talV("t_vie")/100)*(1+secN("vit",s.vit)/100));
   s.el="neutre";let best=0;["feu","eau","terre","air"].forEach(e=>{if(s[e]>best){best=s[e];s.el=e}});
   s.elPow=(s.el==="neutre"?0:s[s.el])+s.puissance;
+  if(C.rage&&s.maxHp>0)bd*=1+C.rage*Math.max(0,Math.min(1,1-S.hp/s.maxHp));   /* Berserker : ×(1 + 2 × PV perdus) */
   s.hit=(5+S.lvl*1.5+s.dmg)*(1+s.elPow/100)*bd*C.dmgMult*(1+s.pctDmg/100)*(1+towerPct(S.tower?.best||0)/100)*(1+talV("t_force")/100)*(1+soulBonus()/100)*(1+.01*achN())*(S.ev&&EVENTS.find(e=>e.id===S.ev.id)?.el===s.el?1.3:1);
   /* DoT : chance d'en poser à chaque coup (stat / (stat + 400), 50 % max) et dégâts par charge et par seconde */
   s.dotC={};s.dotPer={};for(const k in DOTS){const v=s[k]||0;s.dotC[k]=Math.min(.5,v/(v+400));if(C.autoDot===k)s.dotC[k]=1;
@@ -30,7 +31,7 @@ function stats(){
   return s;
 }
 function roll(mult,st){if(S.mon)mult*=1+.05*bestTier(S.mon.id);const r=S.mon?monRes(MON[S.mon.id].el,st.el):0;let v=st.hit*mult*(1-r/100)*(.9+Math.random()*.2),crit=Math.random()*100<st.critC,sup=crit&&Math.random()*100<(st.superC||0);if(crit)v*=st.critM*(sup?2:1);return{v:Math.max(1,Math.round(v)),crit,sup,r}}
-const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed);
+const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed)*S.buffs.filter(b=>b.k==="cdr").reduce((a,b)=>a*b.v,1);
 /* Puissance des monstres : courbe de base, puis un multiplicateur qui grimpe de façon exponentielle au-delà du
    niveau 25 (×2,7 au niv. 50, ×19 au niv. 100, ×140 au niv. 150, ×1000 au niv. 200) pour suivre la puissance du joueur
    en fin de jeu (dégâts des monstres ×8 au niv. 200). Les gains (XP, écus) suivent en partie pour que les combats plus longs restent rentables. */

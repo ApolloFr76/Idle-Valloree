@@ -19,6 +19,8 @@ function tick(dt){VIE.tick(dt);
       /* compagnons empoisonneurs, puis dégâts des DoT élémentaires */
       if(S.mon){S.allyDotAcc=S.allyDotAcc||{};for(const id in ALLY_DOT){const l=S.allies[id]||0;if(!l)continue;const[k,r]=ALLY_DOT[id];S.allyDotAcc[k]=(S.allyDotAcc[k]||0)+r*dt;const n=Math.floor(S.allyDotAcc[k]);if(n>0){S.allyDotAcc[k]-=n;addDot(k,n)}}}
       dotTick(dt,st);
+      /* esprits invoqués (Invocateur) : un coup par seconde chacun */
+      if(S.summ&&S.summ.length&&S.mon){S.summ=S.summ.filter(x=>x.until>S.time);S.summAcc=(S.summAcc||0)+dt;if(S.summAcc>=1){S.summAcc-=1;const v=S.summ.reduce((a,x)=>a+x.m,0)*st.hit;if(v>0)hitMon({v:Math.round(v),crit:false,r:0},"summon")}}
       if(S.mon){S.monT+=dt;const mA=2*(1+(S.mdot&&S.mdot.gelure?S.mdot.gelure.n*DOTS.gelure.slow:0));if(S.monT>=mA){S.monT-=mA;
         if(Math.random()<st.dodge){if(fx){floatNum("Esquive","heal hurt");FX.dodge()}}
         else{const dmg=Math.max(1,Math.round(S.mon.atk*st.def*(.85+Math.random()*.3)));S.hp-=dmg;if(fx){floatNum("-"+fmt(dmg),"hurt");FX.monAtk()}
@@ -35,7 +37,6 @@ function tick(dt){VIE.tick(dt);
   if(S.pk){if(S.time>S.pk.until){S.pk=null;drawPk();S.pkNext=S.time+(PK_MIN*.6+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)}}
   else if(S.time>=(S.pkNext??20)&&S.ko<=0&&!document.hidden)spawnPk();
   if(S.job){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t+=dt;while(S.job.t>=gt){S.job.t-=gt;gainGather(r.prof,r.id)}}
-  OUV.tick(dt);
 }
 function offline(sec){
   if(!S.cls)return null;
@@ -48,7 +49,6 @@ function offline(sec){
     const dr=Math.floor(kills*.35*st.pros);z.mons.forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){addRes(m.drop[0],n);sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+n}});
     fx=false;gainXp(sum.xp);fx=true}
   if(S.job){const r=RES[S.job.r];let t=sec+S.job.t,tot=0,guard=0;while(guard++<20000){const gt=gatherTime(r.prof,r.tier);if(t<gt)break;t-=gt;tot+=gainGather(r.prof,r.id,true)}S.job.t=t;if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
-  OUV.offline(sec,sum);
   sum.danger=danger;return sum;
 }
 

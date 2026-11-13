@@ -33,7 +33,7 @@ const ANIM=(()=>{
 
   /* ---------- Attaques de base ---------- */
   function basic(){const h=H(),m=M();if(!h||h.hidden||!m)return;const hb=box(h),mb=box(m);
-    if(S.cls==="guerrier"){pose("atk",170);move([{transform:"translateX(0)"},{transform:"translateX(18px)",offset:.4},{transform:"translateX(0)"}],200);flip=!flip;
+    if(S.cls==="guerrier"||S.cls==="berserk"){pose("atk",170);move([{transform:"translateX(0)"},{transform:"translateX(18px)",offset:.4},{transform:"translateX(0)"}],200);flip=!flip;
       setTimeout(()=>{add("slash3"+(flip?" rev":""),mb.x+mb.w*.3,mb.y+mb.h*.2,280);parts(mb.x+mb.w*.4,mb.cy,5,["#fff","#ffe27a","#c9ced6"],34,300,3)},70)}
     else if(S.cls==="gardien"){pose("atk",190);move([{transform:"translateX(0)"},{transform:"translateX(24px)",offset:.35},{transform:"translateX(0)"}],220);
       setTimeout(()=>{add("shieldhit",mb.x+mb.w*.3,mb.cy,300);add("shockline",mb.x+mb.w*.25,mb.cy,300);knock(8,200)},80)}
@@ -47,7 +47,7 @@ const ANIM=(()=>{
 
   /* ---------- Sorts ---------- */
   /* délai avant l'impact (ms) : les dégâts du sort sont appliqués à ce moment-là */
-  const DELAY={g1:420,g3:520,a1:330,s1:330,s3:820,d1:300,p1:380,p3:620};
+  const DELAY={g1:420,g3:520,a1:330,s1:330,s3:820,d1:300,p1:380,p3:620,c1:330,c3:700,b1:300};
   const SP={
     /* Guerrier */
     g1(){const g=gap(),mb=box(M());pose("up",260);const h=H();replayCls(h,"charge");
@@ -75,6 +75,24 @@ const ANIM=(()=>{
     s3(){const mb=box(M());banner("Déferlement !","mag");pose("up",820);A().classList.add("dim");setTimeout(()=>A().classList.remove("dim"),900);
       add("mcircle",mb.cx,mb.y+mb.h*.92,1000);setTimeout(()=>add("column",mb.cx,0,600),380);
       setTimeout(()=>{add("flashw big",mb.cx,mb.cy,300);parts(mb.cx,mb.cy,26,["#fff","#c9a8ff","#8fd8ff","#ffe27a"],120,800,5);knock(20,320);shake(true)},800)},
+    /* Chronomancien */
+    c1(){const hb=box(H()),mb=box(M()),tip={x:hb.x+hb.w*.92,y:hb.y+hb.h*.12},C=["#8fd6ff","#f2d94a","#ffffff"];pose("up",250);banner("Faille !","chr");
+      setTimeout(()=>shoot("orb2",tip.x,tip.y,mb.x+mb.w*.42,mb.cy,200,0,"#8fd6ff",()=>{const b=add("burst2 big",mb.x+mb.w*.42,mb.cy,420);b.style.setProperty("--c","#8fd6ff");parts(mb.x+mb.w*.42,mb.cy,14,C,70,500,4);add("mcircle chr",mb.cx,mb.y+mb.h*.92,700)}),100)},
+    c2(){pose("up",400);const h=H(),hb=box(h);h.classList.add("haste");setTimeout(()=>h.classList.remove("haste"),8000);VIE.say(h,"Plus vite !","",1000);for(let i=0;i<3;i++)setTimeout(()=>add("ringwave chr",hb.cx,hb.cy,700),i*150)},
+    c3(){const mb=box(M());banner("Écho !","chr");pose("up",700);A().classList.add("dim");setTimeout(()=>A().classList.remove("dim"),800);
+      add("mcircle chr",mb.cx,mb.y+mb.h*.92,1000);for(let i=0;i<4;i++)setTimeout(()=>add("ringwave chr",mb.cx,mb.cy,600),i*140);
+      setTimeout(()=>{add("flashw big",mb.cx,mb.cy,300);parts(mb.cx,mb.cy,24,["#8fd6ff","#f2d94a","#fff"],120,700,5);knock(18,300);shake(true)},680)},
+    /* Berserker */
+    b1(){const g=gap(),mb=box(M());pose("atk",300);move([{transform:"translateX(0)"},{transform:`translateX(${g*.6}px)`,offset:.45},{transform:`translateX(${g*.6}px)`,offset:.6},{transform:"translateX(0)"}],420,"ease-out");
+      setTimeout(()=>{add("slash3",mb.x+mb.w*.3,mb.y+mb.h*.2,300);parts(mb.x+mb.w*.4,mb.cy,10,["#e04848","#a8242a","#fff"],60,450,4);knock(14,240)},300)},
+    b2(){pose("up",500);const h=H(),hb=box(h);VIE.say(h,"RAAAH !","bang",1100);shake(true);for(let i=0;i<3;i++)setTimeout(()=>add("ringwave",hb.cx,hb.cy,700),i*140);
+      const els=[h];els.forEach(e=>e.classList.add("aura-red"));setTimeout(()=>els.forEach(e=>e.classList.remove("aura-red")),10000)},
+    b3(){const g=gap(),mb=box(M());banner("Massacre !","war");for(let k=0;k<6;k++)setTimeout(()=>{pose("atk",180);move([{transform:"translateX(0)"},{transform:`translateX(${g*.5}px)`,offset:.5},{transform:"translateX(0)"}],300);
+      setTimeout(()=>{add("slash3"+(k%2?" rev":""),mb.x+mb.w*.3,mb.y+mb.h*.2,260);parts(mb.x+mb.w*.4,mb.cy,6,["#e04848","#fff"],50,350,3);knock(8,180)},120)},k*330)},
+    /* Invocateur */
+    i1(){pose("up",350);const hb=box(H());add("rune big",hb.x+hb.w*.9,hb.y+hb.h*.1,500).style.setProperty("--c","#c9a8ff")},
+    i2(){pose("up",450);const els=[H(),...document.querySelectorAll("#pals .pal")];VIE.say(H(),"Par le pacte !","",1100);els.forEach(e=>e&&e.classList.add("aura-red"));setTimeout(()=>els.forEach(e=>e&&e.classList.remove("aura-red")),10000)},
+    i3(){banner("Armée spectrale !","inv");pose("up",600);A().classList.add("dim");setTimeout(()=>A().classList.remove("dim"),700)},
     /* Médecin de la peste */
     p1(){const hb=box(H()),mb=box(M()),tip={x:hb.x+hb.w*.92,y:hb.y+hb.h*.12},G=["#7ad04a","#b8f08a","#3f7a2a"];pose("up",300);banner("Fiole toxique !","tox");
       setTimeout(()=>shoot("flask big",tip.x,tip.y,mb.x+mb.w*.42,mb.cy,280,40,"",()=>{const b=add("burst2 big",mb.x+mb.w*.42,mb.cy,450);b.style.setProperty("--c",G[0]);parts(mb.x+mb.w*.42,mb.cy,16,G,70,600,4);
@@ -94,6 +112,9 @@ const ANIM=(()=>{
 
   return{
     basic(){if(!fx)return;basic()},
+    /* esprits invoqués : petits fantômes qui flottent près du héros et tirent sur le monstre */
+    summon(n,d){if(!fx||calm())return;const hb=box(H());if(!hb)return;for(let k=0;k<n;k++){const e=add("spirit",hb.x-10-k*18,hb.y+hb.h*(.15+(k%2)*.25),d*1000);e.style.animationDelay=(-k*.3)+"s";
+      for(let t=1;t<d;t++)setTimeout(()=>{const mb=box(M()),b=e.getBoundingClientRect(),a=A().getBoundingClientRect();if(!mb||!e.isConnected)return;shoot("orb2",b.left-a.left+10,b.top-a.top+10,mb.x+mb.w*.4,mb.cy,220,10,"#c9a8ff")},t*1000+k*90)}},
     spell(id){if(!fx)return;const b=$("sp-"+id);if(b)replayCls(b,"castflash");const f=SP[id];if(f)f()},
     delay(id){return fx&&!calm()?DELAY[id]||0:0},
     lynx(){return now()<lynxUntil},
