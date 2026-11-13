@@ -5,7 +5,7 @@ let lastT=performance.now(),lastPanel=0,lastAch=0,lastSave=Date.now(),paused=fal
 /* Grand écran : objectifs, potions et journal passent dans une 3e colonne */
 const WIDE=matchMedia("(min-width:1500px) and (min-height:650px)");
 function placeSide(){const side=$("sideCard"),cb=$("combat"),w=WIDE.matches;side.hidden=!w;
-  const els=["pots","goals","log"].map(id=>$(id));if(w)els.forEach(e=>side.appendChild(e));else els.forEach(e=>cb.appendChild(e))}
+  const els=["pots","goals","log"].map(id=>$(id));if(w)els.forEach(e=>side.appendChild(e));else els.forEach(e=>cb.appendChild(e));if(S&&S.log)renderLog()}
 WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
 placeSide();
 let sceneOn=false;

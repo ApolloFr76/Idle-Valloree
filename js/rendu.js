@@ -22,7 +22,8 @@ function drawModeBar(){
     $("modeBar").innerHTML=h;$("arena").classList.toggle("special",m!=="zone")}
   if(m==="boss"||m==="tour"){const tot=m==="boss"?bossTime():towerTime(),f=$("mtFill");if(f){f.style.width=Math.max(0,S.timer/tot*100)+"%";$("mtBar").classList.toggle("low",S.timer<8);$("mtTxt").textContent=Math.max(0,Math.ceil(S.timer))+" s"}}
 }
-function renderLog(){const L=S.opt?S.opt.logLines:8,now=Date.now();$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${l.c}${l.t&&now-l.t<700?" new":""}">${logIcon(l)}<span>${l.h}</span></div>`).join("")}
+/* Journal : en grand écran (3e colonne) il remplit toute la hauteur disponible, sinon le nombre de lignes choisi dans les options */
+function renderLog(){const e=$("log"),side=e&&e.parentElement&&e.parentElement.id==="sideCard",L0=S.opt?S.opt.logLines:8,L=side&&L0>0?LOG_MAX:L0,now=Date.now();$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${l.c}${l.t&&now-l.t<700?" new":""}">${logIcon(l)}<span>${l.h}</span></div>`).join("")}
 /* Compagnons : voir SCENE.drawPals() dans js/scene.js (équipe en formation) */
 function live(){
   if(!S.cls)return;const st=stats(),need=xpNeed(S.lvl),maxed=S.lvl>=lvlMax();SCENE.drawPals();
