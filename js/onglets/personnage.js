@@ -17,8 +17,7 @@ function pPerso(){
       ${row("hp","Points de vie",`${fmt(S.hp)} / ${fmt(st.maxHp)}`)}
       ${row("dmg","Dégâts par coup",fmt(st.hit))}
       ${row("agi","Vitesse d'attaque",`${(1/st.interval).toFixed(2)} coups/s`)}
-      ${row("crit","Coups critiques",`${st.critC} % (×${st.critM})`)}
-      ${row("crit","Super critiques",st.superC>0?`${Math.round(st.superC)} % des critiques (×${+(st.critM*2).toFixed(2)})`:`<span class="muted">au-delà de 100 % de critique</span>`)}
+      ${row("crit","Coups critiques",`${Math.round(st.critShow)} % (×${st.critM}${st.superC>0?` · super ×${+(st.critM*2).toFixed(2)}`:""})`)}
       ${row("dodge","Esquive",`${Math.round(st.dodge*100)} %`)}
       ${row("prospection","Prospection",fmt(st.prospection))}
       ${row("xp","Bonus d'expérience",`+${st.sagesse} %`)}
