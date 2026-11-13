@@ -7,13 +7,13 @@ const PX=(()=>{
   const LIGHT="#fff2c2",DARK="#2b1842",INK="#1c1020";
   function rng(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
   class Spr{
-    constructor(w,h){this.w=w;this.h=h;this.p=new Array(w*h).fill(null);this.sh=[]}
-    set(x,y,c){x|=0;y|=0;if(x>=0&&y>=0&&x<this.w&&y<this.h)this.p[y*this.w+x]=rgb(c)}
+    constructor(w,h,ox=0,oy=0){this.w=w;this.h=h;this.ox=ox;this.oy=oy;this.p=new Array(w*h).fill(null);this.sh=[]}
+    set(x,y,c){x=(x|0)+this.ox;y=(y|0)+this.oy;if(x>=0&&y>=0&&x<this.w&&y<this.h)this.p[y*this.w+x]=rgb(c)}
     get(x,y){return x>=0&&y>=0&&x<this.w&&y<this.h?this.p[y*this.w+x]:null}
     /* part(couleur, m=>{…formes…}, {flat}) : dessine un masque puis l'ombre en 3 tons */
     part(col,fn,o={}){
       const w=this.w,h=this.h,M=new Uint8Array(w*h);
-      const put=(x,y,v=1)=>{x=Math.round(x);y=Math.round(y);if(x>=0&&y>=0&&x<w&&y<h)M[y*w+x]=v};
+      const ox=this.ox,oy=this.oy,put=(x,y,v=1)=>{x=Math.round(x)+ox;y=Math.round(y)+oy;if(x>=0&&y>=0&&x<w&&y<h)M[y*w+x]=v};
       const m={px:put,
         rect:(x,y,rw,rh)=>{for(let j=0;j<rh;j++)for(let i=0;i<rw;i++)put(x+i,y+j)},
         ell:(cx,cy,rx,ry)=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++){const dx=(x-cx)/(rx+.35),dy=(y-cy)/(ry+.35);if(dx*dx+dy*dy<=1)put(x,y)}},
@@ -221,11 +221,11 @@ const PX=(()=>{
   function potion(col){const k="po:"+col;if(cache[k])return cache[k];const s=new Spr(16,16);s.part("#dfeef5",q=>{q.rect(7,3,3,4);q.ell(8.5,10,4.6,4.4)},{lt:.6});s.part(col,q=>{q.ell(8.5,10.5,3.6,3.4);q.clear(0,0,16,9)});s.part(col,q=>q.rect(5,9,7,1),{flat:1});s.part("#8a5a34",q=>q.rect(6,1,5,2));s.set(6,8,"#ffffff");s.set(6,9,"#ffffff");s.outline();return cache[k]=s.url()}
   function pet(col){const k="pe:"+col;if(cache[k])return cache[k];const s=new Spr(16,16);s.part(col,q=>{q.poly([[3,7],[4,2],[7,5]]);q.poly([[13,7],[12,2],[9,5]])});s.part(col,q=>{q.ell(8,9,5.4,4.6);q.rect(4,11,9,3)},{lt:.5});s.set(6,8,"#1c1020");s.set(10,8,"#1c1020");s.set(6,9,"#1c1020");s.set(10,9,"#1c1020");s.set(8,11,"#1c1020");s.set(4,11,"#ff8a9a");s.set(12,11,"#ff8a9a");s.outline();SPR[k]=s;return cache[k]=s.url()}
 
-  /* ---------- Familiers et montures (24×24, tournés vers la droite) : apparence décrite dans ITEMS[id].look ---------- */
-  function fam(id){const k="fa:"+id;if(cache[k])return cache[k];const L=(ITEMS[id]&&ITEMS[id].look)||{t:"quad",c:"#f08aa8"},s=new Spr(24,24),c=L.c,c2=L.c2||mix(c,"#ffffff",.5),ink=mix(c,INK,.78),B="#1c1020",dk=mix(c,DARK,.3);
+  /* ---------- Familiers et montures (dessin 24×24 dans un cadre 28×28, tournés vers la droite) : apparence décrite dans ITEMS[id].look ---------- */
+  function fam(id){const k="fa:"+id;if(cache[k])return cache[k];const L=(ITEMS[id]&&ITEMS[id].look)||{t:"quad",c:"#f08aa8"},s=new Spr(28,28,2,2),c=L.c,c2=L.c2||mix(c,"#ffffff",.5),ink=mix(c,INK,.78),B="#1c1020",dk=mix(c,DARK,.3);
     const eye=(x,y)=>{s.set(x,y,B);s.set(x,y-1,B)};
-    if(!L.vol)s.shadow(12,22,8,1.4);
-    if(L.t==="quad"){const low=L.x==="bas",by=low?16:14,m=L.m;
+    if(!L.vol)s.shadow(14,24,8,1.4);
+    if(L.t==="quad"){const low=L.x==="bas",by=low?16:15,m=L.m;
       /* queue */
       if(L.q==="touffe")s.part(c,q=>{q.ell(4,by-3,3,2.6);q.ell(3,by-6,2,2)},{lt:.5});
       if(L.q==="fine")s.part(dk,q=>{q.line(5,by,2,by-4,2);q.line(2,by-4,3,by-8)},{flat:1});
@@ -383,10 +383,13 @@ const PX=(()=>{
     cast:{arm:[90,50,10,-30,-60,-80,-88,-90,-90,-90],dx:[0,0,0,0,0,0,0,0,0,0],dy:[0,0,1,0,-1,-1,-1,-1,-1,-1],w:[-90,-70,-60,-75,-85,-90,-90,-90,-90,-90],left:1}};
   /* animation d'attaque propre à chaque classe */
   const ATK={guerrier:"atk",gardien:"bash",archer:"shoot",mage:"staff"};
-  function heroF(cls,col,anim,f,blink){
+  /* Héros (32 px de dessin) rendu dans un cadre de 64 px (marge de 16 px) : l'arme ne sort plus du cadre.
+     tight = cadre 32 px d'origine (portraits). */
+  const HP=16;
+  function heroF(cls,col,anim,f,blink,tight){
     if(anim==="atk")anim=ATK[cls]||"atk";
-    const k="hf:"+cls+col+anim+f+(blink?"b":"");if(cache[k])return cache[k];const T=HA[anim]||HA.idle;
-    const s=new Spr(32,32),dk=mix(col,DARK,.45),lt=mix(col,"#ffffff",.4),skin="#f6cfa6",ink=mix(col,INK,.82),B="#1c1020";
+    const k="hf:"+cls+col+anim+f+(blink?"b":"")+(tight?"t":"");if(cache[k])return cache[k];const T=HA[anim]||HA.idle;
+    const s=new Spr(32+2*HP,32+2*HP,HP,HP),dk=mix(col,DARK,.45),lt=mix(col,"#ffffff",.4),skin="#f6cfa6",ink=mix(col,INK,.82),B="#1c1020";
     const R=Math.PI/180,a=T.arm[f]*R,sx=16.5,sy=15.5,hx=sx+Math.cos(a)*5,hy=sy+Math.sin(a)*5,wa=(T.w[f]??-90)*R;
     const la=T.left?(180-T.arm[f])*R:(92+(T.arm[f]-90)*-.15)*R,lsx=4.5,lsy=15.5,lhx=lsx+Math.cos(la)*5,lhy=lsy+Math.sin(la)*5;
     /* arme tenue derrière le corps (bâton du mage au repos) */
@@ -424,9 +427,9 @@ const PX=(()=>{
     if(!behind)rightArm();
     s.outline(ink);
     /* décalage du corps (+4 pour centrer dans le cadre 32 px) */
-    const o=new Spr(32,32),ox=4+T.dx[f],oy=T.dy[f];o.shadow(15,30,8,1.6);for(let y=0;y<32;y++)for(let x=0;x<32;x++){const c=s.p[y*32+x];if(c)o.set(x+ox,y+oy,c)}
+    const W=s.w,P=tight?0:HP,N=32+2*P,o=new Spr(N,N),ox=4+T.dx[f]-HP+P,oy=T.dy[f]-HP+P;o.shadow(15+P,30+P,8,1.6);for(let y=0;y<W;y++)for(let x=0;x<W;x++){const c=s.p[y*W+x];if(c){const X=x+ox,Y=y+oy;if(X>=0&&Y>=0&&X<N&&Y<N)o.p[Y*N+X]=c}}
     return cache[k]=o.url()}
-  const heroFrames=(cls,col,anim,blink)=>{const k="hfs:"+cls+col+anim+(blink?1:0);return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>heroF(cls,col,anim,f,blink&&f===5)))};
+  const heroFrames=(cls,col,anim,blink)=>{const k="hfs:"+cls+col+anim+(blink?1:0);return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>heroF(cls,col,anim,f,blink&&f===5)),cache[k].sc=((32+2*HP)/32).toFixed(3),cache[k])};
 
   /* Monstres et bêtes : 10 images obtenues en redessinant le sprite pixel par pixel (écrasement, étirement, inclinaison) */
   /* XP : marge transparente autour de l'image pour que l'élan, l'inclinaison et l'étirement ne soient jamais coupés

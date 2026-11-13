@@ -89,4 +89,4 @@ const SCENE=(()=>{
 })();
 
 /* Portrait d'un compagnon (onglet Compagnons) : première image de son animation */
-function allyPortrait(id,col){const look={ecuyer:"guerrier",chasseuse:"archer",moine:"gardien",sorciere:"mage"}[id];return look?PX.heroF(look,col,"idle",0):PX.beastF(id,col,"idle",0)}
+function allyPortrait(id,col){const look={ecuyer:"guerrier",chasseuse:"archer",moine:"gardien",sorciere:"mage"}[id];return look?PX.heroF(look,col,"idle",0,0,1):PX.beastF(id,col,"idle",0)}
