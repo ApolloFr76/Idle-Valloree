@@ -39,7 +39,7 @@ function takePk(){
 /* ================= Quêtes, marché, potions ================= */
 const today=()=>new Date().toLocaleDateString("fr-CA");
 function makeQuest(){
-  const open=ZONES.filter(z=>S.lvl>=z.lvl[0]),z=open[rnd(0,open.length-1)],t=Q_TYPES[rnd(0,Q_TYPES.length-1)],m=z.mons[rnd(0,2)];
+  const open=ZONES.filter(z=>S.lvl>=z.lvl[0]),z=open[rnd(0,open.length-1)],t=Q_TYPES[rnd(0,Q_TYPES.length-1)],m=pickMon(z);
   const q={type:t,have:0,done:false,claimed:false};
   if(t==="kill"){q.key=m.id;q.need=rnd(15,40);q.txt=`Vaincre ${q.need} ${m.name}`}
   if(t==="killEl"){q.key=["feu","eau","terre","air"][rnd(0,3)];q.need=rnd(30,60);q.txt=`Vaincre ${q.need} monstres ${ELEMS[q.key].n}`}

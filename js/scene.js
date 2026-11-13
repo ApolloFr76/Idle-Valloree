@@ -52,7 +52,7 @@ const SCENE=(()=>{
 
   /* ---------- Vagues d'ennemis : 2 monstres attendent derrière ---------- */
   let waveQ=[],waveZone=-1;
-  function nextWave(z){if(waveZone!==z.i){waveQ=[];waveZone=z.i}while(waveQ.length<3)waveQ.push(z.mons[rnd(0,2)]);const d=waveQ.shift();waveQ.push(z.mons[rnd(0,2)]);drawQueue();return d}
+  function nextWave(z){if(waveZone!==z.i){waveQ=[];waveZone=z.i}while(waveQ.length<3)waveQ.push(pickMon(z));const d=waveQ.shift();waveQ.push(pickMon(z));drawQueue();return d}
   function drawQueue(){const q=$("queue");if(!q)return;const show=S.mode==="zone"&&fx;q.hidden=!show;if(!show){queue=[];return}
     q.innerHTML=waveQ.slice(0,2).map((d,i)=>`<img class="px qmon q${i}" alt="">`).join("");const imgs=[...q.querySelectorAll("img")];
     queue=waveQ.slice(0,2).map((d,i)=>({el:imgs[i],cur:"idle",period:2000+i*300,off:i*500,sets:{idle:()=>PX.monFrames(d,"idle")}}))}

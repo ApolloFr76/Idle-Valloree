@@ -53,8 +53,8 @@ function towerStart(){const ef=Math.max(1,stats().dps+allyDps());let f=Math.max(
 const bossTime=()=>BOSS_TIME+(up("sablier")?10:0),towerTime=()=>TOWER_TIME+(up("sablier")?10:0);
 function nextMon(){
   if(S.mode==="boss")makeMon(MON["boss_"+S.zone],ZONES[S.zone].lvl[1],12,1.3,10,15);
-  else if(S.mode==="tour"){const f=S.tower.cur,zi=Math.min(5,Math.floor((f-1)/14)),z=ZONES[zi],bossF=f%10===0;makeMon(bossF?MON["boss_"+zi]:z.mons[rnd(0,2)],towerLvl(f),bossF?8:2.5,bossF?1.3:1.15,.3,.4)}
-  else if(S.mode==="donjon"){const z=ZONES[S.dg.z],L=z.lvl[1]+2;if(S.dg.wave<DG_WAVES)makeMon(z.mons[rnd(0,2)],L,2,1.1,2,2);else makeMon(MON["boss_"+S.dg.z],L,8,1.4,8,10)}
+  else if(S.mode==="tour"){const f=S.tower.cur,zi=Math.min(5,Math.floor((f-1)/14)),z=ZONES[zi],bossF=f%10===0;makeMon(bossF?MON["boss_"+zi]:pickMon(z),towerLvl(f),bossF?8:2.5,bossF?1.3:1.15,.3,.4)}
+  else if(S.mode==="donjon"){const z=ZONES[S.dg.z],L=z.lvl[1]+2;if(S.dg.wave<DG_WAVES)makeMon(pickMon(z),L,2,1.1,2,2);else makeMon(MON["boss_"+S.dg.z],L,8,1.4,8,10)}
   else spawn();
 }
 function startMode(m,zi){
