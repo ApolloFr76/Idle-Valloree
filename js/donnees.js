@@ -431,7 +431,7 @@ const pxNeed=l=>Math.floor(6*Math.pow(l,1.5)+5*l);
    Les codes ne sont PAS écrits ici : chaque clé est l'empreinte (codeHash) du code, pour qu'on ne puisse pas les lire dans le code source.
    Ajouter un code : ouvrir le jeu, console du navigateur (F12), taper codeHash("MONCODE") et copier le résultat comme clé :
    "résultat":{txt:"ce que fait le code", once:true si utilisable une seule fois, go:()=>{ ... }}
-   Majuscules, espaces et tirets ne comptent pas. go() peut renvoyer un texte affiché au joueur. La liste en clair est dans CLAUDE.md (local). */
+   once:true = une seule fois par vie (le compteur repart à zéro à chaque Oméga). Majuscules, espaces et tirets ne comptent pas. go() peut renvoyer un texte affiché au joueur. La liste en clair est dans CLAUDE.md (local). */
 const codeHash=s=>{s="vallore:"+String(s||"").toUpperCase().replace(/[\s-]+/g,"");let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
   h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(h2>>>0).toString(36)+(h1>>>0).toString(36)};
 
@@ -442,7 +442,7 @@ const CODES={
   "12izboq19x7p4s":{txt:"+10 niveaux dans chaque métier (test)",go:()=>{for(const p in S.jobs){S.jobs[p].lvl=Math.min(PROF_MAX,S.jobs[p].lvl+10);S.jobs[p].xp=0}}},
   "b7byz07vpdkf":{txt:"PV au maximum",go:()=>{S.hp=stats().maxHp}},
   /* panoplies du Dévoreil + du Seigneur du Néant (2 anneaux) + Raie du néant légendaires +10, 6 trophées +100, le tout équipé */
-  "fkrtolxmz1jh":{txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
+  "fkrtolxmz1jh":{once:true,txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
     const L=[["s_devoreil_coiffe","coiffe"],["s_devoreil_cape","cape"],["s_devoreil_bottes","bottes"],["s_devoreil_ceinture","ceinture"],
       ["s_boss_11_amulette","amulette"],["s_boss_11_anneau","anneau"],["s_boss_11_anneau","anneau2"],["s_boss_11_arme","arme"],["s_boss_11_bouclier","bouclier"],["mont_raie","familier"]];
     L.forEach(([id,slot])=>{if(!ITEMS[id])return;const u=S.uid++;S.items.push({u,id,e:10,r:3});S.equip[slot]=u;S.seen[id]=1});
@@ -450,7 +450,9 @@ const CODES={
     ["tr_devoreil","tr_ombrelin","tr_neantille","tr_gargouillon","tb_10","tb_11"].forEach((id,i)=>{if(!ITEMS[id])return;let t=S.items.find(x=>x.id===id);
       if(t)t.e=Math.max(t.e||0,100);else{t={u:S.uid++,id,e:100};S.items.push(t)}S.seen[id]=1;for(const k in S.equip)if(S.equip[k]===t.u&&k!=="trophee"+i)S.equip[k]=null;S.equip["trophee"+i]=t.u});
     S.hp=stats().maxHp;return"10 objets légendaires +10 et 6 trophées +100 équipés"}},
-  "fe8x7v1vuagpg":{txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
+  /* code de bienvenue : 1 potion de sagesse (XP) + 1 potion de fortune (prospection) */
+  "mtgscjd4hf15":{once:true,txt:"1 Potion de sagesse et 1 Potion de fortune",go:()=>{S.res.p_sagesse=(S.res.p_sagesse||0)+1;S.res.p_fortune=(S.res.p_fortune||0)+1;if(typeof drawPots==="function"){potSig="";drawPots()}}},
+  "fe8x7v1vuagpg":{once:true,txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
 };
 function useCode(raw){if(!String(raw||"").trim())return;const k=codeHash(raw),c=CODES[k];
   if(!c){toast("Code inconnu",1);return}S.codes=S.codes||{};if(c.once&&S.codes[k]){toast("Code déjà utilisé",1);return}
