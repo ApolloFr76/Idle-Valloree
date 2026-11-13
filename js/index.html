@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Les Terres de Vallorée</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="style/style.css">
+<link rel="stylesheet" href="style/monde.css">
+</head>
+<body>
+<!-- La prairie continue sous le bandeau, derrière les menus (js/monde.js) -->
+<canvas class="wbg" id="wbg" aria-hidden="true"></canvas>
+
+<!-- ===== Monde en bandeau : le combat se joue dans le paysage, l'interface est posée dessus (js/monde.js) ===== -->
+<div class="world" id="world">
+  <div class="arena" id="arena">
+    <canvas class="wcv" id="wcv" aria-hidden="true"></canvas>
+    <div class="sky" id="sky" aria-hidden="true"></div><div class="deco" id="deco" aria-hidden="true" hidden></div>
+    <div class="mon" id="mon"><div class="pals" id="pals" aria-hidden="true"></div><div class="queue" id="queue" aria-hidden="true"></div><img class="px afam" id="afam" alt="" hidden>
+      <div class="hslot"><div class="htag" aria-label="Vos points de vie"><div class="bar hp"><i class="lag" id="pHpLag"></i><i id="pHpBar"></i></div><span class="num" id="pHpTxt"></span></div><img class="px ahero" id="ahero" alt="" hidden></div>
+      <div class="mslot"><div class="mtag"><div class="mhead"><h3 id="mName">…</h3><span class="mlvl num" id="mLvl"></span></div><div class="mel" id="mEl"></div><div class="bar mhp"><i class="lag" id="mHpLag"></i><i id="mHpBar"></i></div><span class="num mhptxt" id="mHpTxt"></span></div><button id="monBtn" data-tip="cur:mon" aria-label="Frapper le monstre"></button><div class="mdots" id="mdots" aria-hidden="true"></div></div></div>
+    <div class="weather" id="weather"></div>
+    <div class="bossbar" id="bossBar" hidden><b id="bbName"></b><div class="bar mhp"><i class="lag" id="bbLag"></i><i id="bbFill"></i></div><span class="num" id="bbTxt"></span></div>
+    <div class="letterbox" id="letterbox" aria-hidden="true"></div>
+    <div class="combo" id="combo" hidden><b class="num" id="comboN"></b><div class="bar"><i id="comboBar"></i></div></div>
+    <div class="kostate" id="pauseOv" hidden>En pause</div>
+    <div class="kostate" id="ko" hidden>K.O. · retour dans <span class="num" id="koT"></span> s</div>
+  </div>
+  <!-- En-tête : nom, héros, XP, écus, aide, pause (posé sur le ciel) -->
+  <header class="top">
+    <div class="brand">Vallorée</div>
+    <button class="btn" id="helpBtn" data-a="help" title="Aide" style="order:8">?</button>
+    <button class="btn" id="pauseBtn" data-a="pause" title="Pause (touche P)" style="order:9">Pause</button>
+    <div class="hero" id="heroBox"></div>
+    <div class="xpbox" data-tip="hd:xp">
+      <div class="lbl"><span id="lvlTxt">Niveau 1</span><span class="num" id="xpTxt">0 / 0 XP</span></div>
+      <div class="bar xp"><i id="xpBar"></i></div>
+    </div>
+    <div class="ecus num" data-tip="hd:ecus"><span class="coin"></span><span id="ecusTxt">0</span></div>
+  </header>
+  <!-- Haut gauche : monde, boss/donjon/tour, élément et effets -->
+  <div class="hudl" id="combat">
+    <div class="zones" id="zones"></div>
+    <div class="modebar" id="modeBar"></div>
+    <div class="buffs" id="buffs"></div>
+    <div class="hint" id="hint">Cliquez sur le monstre pour frapper. Le combat continue tout seul.</div>
+  </div>
+  <!-- Bas : barre d'action (sorts et potions) -->
+  <div class="hudb">
+    <div class="abar"><div class="spells" id="spells"></div><div class="row pots" id="pots"></div></div>
+  </div>
+</div>
+
+<!-- ===== Application ===== -->
+<div class="wrap" id="app">
+  <div class="main">
+    <!-- Colonne onglets : barre d'onglets + contenu (rempli par js/onglets/*.js) -->
+    <section class="card" id="panelCard">
+      <nav class="tabs" id="tabs"></nav>
+      <div id="panel"></div>
+    </section>
+    <!-- Colonne de droite : objectifs, statistiques en direct (grand écran), journal -->
+    <section class="card" id="sideCard"><div class="goals" id="goals"></div><div class="log" id="log"></div></section>
+  </div>
+</div>
+<!-- ===== Couches flottantes : fenêtres, info-bulles, bulles ===== -->
+<div class="ov" id="ov" hidden></div>
+<canvas id="amb" aria-hidden="true"></canvas>
+<div class="toast" id="toast" hidden></div>
+<div id="tuto" hidden><div class="tspot" id="tspot"></div><div class="tbub" id="tbub" role="dialog" aria-live="polite"></div></div>
+<div class="tipcard" id="tipcard" hidden role="status"></div>
+<div id="tip" role="tooltip" hidden></div>
+
+<!-- ===== Scripts du jeu (dans l'ordre de chargement, voir CLAUDE.md) ===== -->
+<script src="js/donnees.js"></script>
+<script src="js/etat.js"></script>
+<script src="js/pixel.js"></script>
+<script src="js/calculs.js"></script>
+<script src="js/combat.js"></script>
+<script src="js/systemes.js"></script>
+<script src="js/sons.js"></script>
+<script src="js/forge.js"></script>
+<script src="js/minijeux.js"></script>
+<script src="js/infobulles.js"></script>
+<script src="js/progression.js"></script>
+<script src="js/ambiance.js"></script>
+<script src="js/tutoriel.js"></script>
+<script src="js/succes.js"></script>
+<script src="js/boucle.js"></script>
+<script src="js/rendu.js"></script>
+<script src="js/vie.js"></script>
+<script src="js/anim.js"></script>
+<script src="js/scene.js"></script>
+<script src="js/monde.js"></script>
+<script src="js/ouvriers.js"></script>
+<script src="js/onglets/personnage.js"></script>
+<script src="js/onglets/inventaire.js"></script>
+<script src="js/onglets/aventure.js"></script>
+<script src="js/onglets/compagnons.js"></script>
+<script src="js/onglets/boutique.js"></script>
+<script src="js/onglets/omega.js"></script>
+<script src="js/onglets/collection.js"></script>
+<script src="js/onglets/quetes.js"></script>
+<script src="js/onglets/marche.js"></script>
+<script src="js/onglets/atelier.js"></script>
+<script src="js/onglets/metiers.js"></script>
+<script src="js/onglets/options.js"></script>
+<script src="js/ecrans.js"></script>
+<script src="js/evenements.js"></script>
+<script src="js/demarrage.js"></script>
+</body>
+</html>

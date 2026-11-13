@@ -1,0 +1,8 @@
+/* Onglet Marché. */
+function pMarket(){
+  const ids=Object.keys(RES).filter(k=>RES[k].kind!=="k"),own=ids.filter(k=>S.res[k]>0);
+  const row=k=>{const r=RES[k],m=mkOf(k),t=trend(k);return`<tr data-tip="r:${k}"><td><span style="color:${resCol(r)}">${resIcon(r).replace("<svg",'<svg style="width:16px;height:16px;vertical-align:-3px"')}</span> ${r.name}</td><td class="r num">${fmt(S.res[k]||0)}</td><td class="r num" style="color:${m>=1.2?"var(--ok)":m<=.8?"var(--bad)":"var(--fg)"}">×${m.toFixed(2)} ${t}</td><td class="r num">${priceOf(k)}</td><td class="r">${S.res[k]>0?`<div class="row" style="justify-content:flex-end;gap:4px;flex-wrap:nowrap"><button class="btn" data-a="mkSell" data-r="${k}" data-n="10">10</button><button class="btn pri" data-a="mkSell" data-r="${k}" data-n="all">Tout</button></div>`:""}</td></tr>`};
+  const best=ids.filter(k=>mkOf(k)>=1.4).sort((a,b)=>mkOf(b)-mkOf(a)).slice(0,6);
+  return`<div class="sec"><h3>Marché</h3><p class="small muted">Les cours changent toutes les minutes, entre ×0,5 et ×2. Vendre beaucoup d'un coup fait baisser le cours de cette ressource. Prochaine mise à jour dans ${Math.ceil(MK_STEP-(S.mkT||0))} s.</p>
+  ${best.length?`<div class="setb"><b>Bonnes affaires</b> · ${best.map(k=>`${RES[k].name} ×${mkOf(k).toFixed(2)}`).join(" · ")}</div>`:""}
+  <h3>Votre stock</h3>${own.length?`<div class="tw"><table><thead><tr><th>Ressource</th><th class="r">Qté</th><th class="r">Cours</th><th class="r">Prix</th><th class="r">Vendre</th></tr></thead><tbody>${own.sort((a,b)=>mkOf(b)-mkOf(a)).map(row).join("")}</tbody></table></div>`:`<p class="small muted">Vous n'avez rien à vendre.</p>`}</div>`}
