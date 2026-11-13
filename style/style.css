@@ -1291,3 +1291,4 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .world .mtag .mhead{width:236px;box-sizing:border-box;justify-content:flex-start}
 .world .mtag .mhead h3{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .world .mtag .mlvl{flex:none}
+.mhead>.mico{flex:none;margin-right:-2px}
