@@ -428,17 +428,21 @@ const pxNeed=l=>Math.floor(6*Math.pow(l,1.5)+5*l);
 
 
 /* ---------- Codes cadeaux (Options > Sauvegarde > Code cadeau) ----------
-   Ajouter un code : "NOM":{txt:"ce que fait le code", once:true si utilisable une seule fois, go:()=>{ ... }}
-   Le nom se tape sans tenir compte des majuscules, des espaces ni des tirets (écrire la clé sans tirets). go() peut renvoyer un texte affiché au joueur. */
+   Les codes ne sont PAS écrits ici : chaque clé est l'empreinte (codeHash) du code, pour qu'on ne puisse pas les lire dans le code source.
+   Ajouter un code : ouvrir le jeu, console du navigateur (F12), taper codeHash("MONCODE") et copier le résultat comme clé :
+   "résultat":{txt:"ce que fait le code", once:true si utilisable une seule fois, go:()=>{ ... }}
+   Majuscules, espaces et tirets ne comptent pas. go() peut renvoyer un texte affiché au joueur. La liste en clair est dans CLAUDE.md (local). */
+const codeHash=s=>{s="vallore:"+String(s||"").toUpperCase().replace(/[\s-]+/g,"");let h1=0xdeadbeef,h2=0x41c6ce57;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);h1=Math.imul(h1^c,2654435761);h2=Math.imul(h2^c,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(h2>>>0).toString(36)+(h1>>>0).toString(36)};
+
 const CODES={
-  "ECUS":{txt:"+1 000 000 écus (test)",go:()=>{gainEcus(1e6)}},
-  "NIVEAU":{txt:"+10 niveaux (test)",go:()=>{for(let i=0;i<10&&S.lvl<lvlMax();i++)gainXp(xpNeed(S.lvl)-S.xp)}},
-  "ECLATS":{txt:"+100 éclats Oméga (test)",go:()=>{S.souls+=100;S.soulsTotal=(S.soulsTotal||0)+100}},
-  "METIERS":{txt:"+10 niveaux dans chaque métier (test)",go:()=>{for(const p in S.jobs){S.jobs[p].lvl=Math.min(PROF_MAX,S.jobs[p].lvl+10);S.jobs[p].xp=0}}},
-  "SOIN":{txt:"PV au maximum",go:()=>{S.hp=stats().maxHp}},
-  /* WW9F-7VPP-Q7RQ-SSZF : panoplies du Dévoreil + du Seigneur du Néant (avec 2 anneaux) + Raie du néant, légendaires +10,
-     et 6 trophées +100 (Dévoreil, Ombrelin, Néantille, Gargouillon, Gardien Stellaire, Seigneur du Néant), le tout équipé */
-  "WW9F7VPPQ7RQSSZF":{txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
+  "12hb6ys1tnj8uo":{txt:"+1 000 000 écus (test)",go:()=>{gainEcus(1e6)}},
+  "2qgxid19lgcha":{txt:"+10 niveaux (test)",go:()=>{for(let i=0;i<10&&S.lvl<lvlMax();i++)gainXp(xpNeed(S.lvl)-S.xp)}},
+  "1q2wskuqrz5l8":{txt:"+100 éclats Oméga (test)",go:()=>{S.souls+=100;S.soulsTotal=(S.soulsTotal||0)+100}},
+  "12izboq19x7p4s":{txt:"+10 niveaux dans chaque métier (test)",go:()=>{for(const p in S.jobs){S.jobs[p].lvl=Math.min(PROF_MAX,S.jobs[p].lvl+10);S.jobs[p].xp=0}}},
+  "b7byz07vpdkf":{txt:"PV au maximum",go:()=>{S.hp=stats().maxHp}},
+  /* panoplies du Dévoreil + du Seigneur du Néant (2 anneaux) + Raie du néant légendaires +10, 6 trophées +100, le tout équipé */
+  "fkrtolxmz1jh":{txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
     const L=[["s_devoreil_coiffe","coiffe"],["s_devoreil_cape","cape"],["s_devoreil_bottes","bottes"],["s_devoreil_ceinture","ceinture"],
       ["s_boss_11_amulette","amulette"],["s_boss_11_anneau","anneau"],["s_boss_11_anneau","anneau2"],["s_boss_11_arme","arme"],["s_boss_11_bouclier","bouclier"],["mont_raie","familier"]];
     L.forEach(([id,slot])=>{if(!ITEMS[id])return;const u=S.uid++;S.items.push({u,id,e:10,r:3});S.equip[slot]=u;S.seen[id]=1});
@@ -446,8 +450,8 @@ const CODES={
     ["tr_devoreil","tr_ombrelin","tr_neantille","tr_gargouillon","tb_10","tb_11"].forEach((id,i)=>{if(!ITEMS[id])return;let t=S.items.find(x=>x.id===id);
       if(t)t.e=Math.max(t.e||0,100);else{t={u:S.uid++,id,e:100};S.items.push(t)}S.seen[id]=1;for(const k in S.equip)if(S.equip[k]===t.u&&k!=="trophee"+i)S.equip[k]=null;S.equip["trophee"+i]=t.u});
     S.hp=stats().maxHp;return"10 objets légendaires +10 et 6 trophées +100 équipés"}},
-  "GM2TAMRSGM2DA":{txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
+  "fe8x7v1vuagpg":{txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
 };
-function useCode(raw){const k=String(raw||"").toUpperCase().replace(/[\s-]+/g,""),c=CODES[k];if(!k)return;
+function useCode(raw){if(!String(raw||"").trim())return;const k=codeHash(raw),c=CODES[k];
   if(!c){toast("Code inconnu",1);return}S.codes=S.codes||{};if(c.once&&S.codes[k]){toast("Code déjà utilisé",1);return}
-  const r=c.go();S.codes[k]=(S.codes[k]||0)+1;log(`Code ${k} : ${r||c.txt}.`,"g");toast(`Code ${k} : ${r||c.txt}`,1);dirty=true;save()}
+  const r=c.go();S.codes[k]=(S.codes[k]||0)+1;log(`Code cadeau : ${r||c.txt}.`,"g");toast(`Code cadeau : ${r||c.txt}`,1);dirty=true;save()}
