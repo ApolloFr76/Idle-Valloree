@@ -37,6 +37,7 @@ function tick(dt){VIE.tick(dt);
   if(S.pk){if(S.time>S.pk.until){S.pk=null;drawPk();S.pkNext=S.time+(PK_MIN*.6+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)}}
   else if(S.time>=(S.pkNext??20)&&S.ko<=0&&!document.hidden)spawnPk();
   if(S.job){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t+=dt;while(S.job.t>=gt){S.job.t-=gt;gainGather(r.prof,r.id)}}
+  OUV.tick(dt);
 }
 function offline(sec){
   if(!S.cls)return null;
@@ -49,6 +50,7 @@ function offline(sec){
     const dr=Math.floor(kills*.35*st.pros);z.mons.forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){addRes(m.drop[0],n);sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+n}});
     fx=false;gainXp(sum.xp);fx=true}
   if(S.job){const r=RES[S.job.r];let t=sec+S.job.t,tot=0,guard=0;while(guard++<20000){const gt=gatherTime(r.prof,r.tier);if(t<gt)break;t-=gt;tot+=gainGather(r.prof,r.id,true)}S.job.t=t;if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
+  OUV.offline(sec,sum);
   sum.danger=danger;return sum;
 }
 

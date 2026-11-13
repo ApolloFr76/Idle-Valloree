@@ -37,9 +37,10 @@ const PX=(()=>{
     shadow(cx,cy,rx,ry){this.sh.push([cx,cy,rx,ry]);return this}
     outline(col=INK){const w=this.w,h=this.h,add=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(!this.p[y*w+x]&&(this.get(x+1,y)||this.get(x-1,y)||this.get(x,y+1)||this.get(x,y-1)))add.push(y*w+x);const c=rgb(col);add.forEach(i=>this.p[i]=c);return this}
     blit(s,ox,oy){for(let y=0;y<s.h;y++)for(let x=0;x<s.w;x++){const c=s.p[y*s.w+x];if(c)this.set(ox+x,oy+y,c)}return this}
-    url(){const c=document.createElement("canvas");c.width=this.w;c.height=this.h;const x=c.getContext("2d"),I=x.createImageData(this.w,this.h),D=I.data;
+    cvs(){const c=document.createElement("canvas");c.width=this.w;c.height=this.h;const x=c.getContext("2d"),I=x.createImageData(this.w,this.h),D=I.data;
       this.sh.forEach(([cx,cy,rx,ry])=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let xx=Math.floor(cx-rx);xx<=cx+rx;xx++){const dx=(xx-cx)/(rx+.35),dy=(y-cy)/(ry+.35);if(dx*dx+dy*dy<=1&&xx>=0&&y>=0&&xx<this.w&&y<this.h){const i=(y*this.w+xx)*4;D[i]=30;D[i+1]=14;D[i+2]=40;D[i+3]=95}}});
-      this.p.forEach((q,i)=>{if(q){D[i*4]=q[0];D[i*4+1]=q[1];D[i*4+2]=q[2];D[i*4+3]=255}});x.putImageData(I,0,0);return c.toDataURL()}
+      this.p.forEach((q,i)=>{if(q){D[i*4]=q[0];D[i*4+1]=q[1];D[i*4+2]=q[2];D[i*4+3]=255}});x.putImageData(I,0,0);return c}
+    url(){return this.cvs().toDataURL()}
   }
 
   /* ---------- Monstres (40×40) ---------- */
@@ -157,7 +158,7 @@ const PX=(()=>{
     if(cls==="chrono"){s.part(col,q=>q.poly([[5,4],[11,-1],[17,4]]));s.part("#f2d94a",q=>q.rect(4,7,15,1),{flat:1});s.part("#f2d94a",q=>{q.rect(10,3,3,1);q.rect(11,4,1,1);q.rect(10,5,3,1)},{flat:1})}   /* capuche et sablier */
     if(cls==="invoc"){s.part(mix(col,DARK,.25),q=>{q.ell(11,5,8,4);q.clear(0,8,24,8)});s.part("#c9a8ff",q=>{q.px(6,6);q.px(11,3);q.px(16,6)},{flat:1})}   /* capuche à runes */
     if(cls==="berserk"){s.part("#8a6a45",q=>q.rect(4,5,15,3),{lt:.5});s.part("#f1e4bf",q=>{q.poly([[4,6],[1,0],[3,0],[6,5]]);q.poly([[18,6],[21,0],[19,0],[16,5]])})}   /* fourrure à cornes */
-    if(cls==="peste"){s.part("#2a2430",q=>{q.rect(2,4,19,2);q.ell(11,1.5,5,3.4)});s.part("#6a5a3a",q=>q.rect(6,3,10,1),{flat:1});   /* chapeau à large bord */}
+    if(cls==="peste"){s.part("#4a2e1a",q=>q.rect(4,6,15,1),{flat:1});s.part("#8fd84a",q=>{q.ell(5,5.5,1.6,1.2);q.ell(11,4,1.4,2);q.ell(17,5.5,1.6,1.2)});s.part("#d2f07a",q=>{q.ell(8,4.6,1.6,1.3);q.ell(14,4.6,1.6,1.3)});s.part("#c94a5a",q=>q.rect(11,6,1,1),{flat:1})}   /* couronne de feuilles (et une baie) */
     const B="#1c1020";s.set(8,10,B);s.set(8,11,B);s.set(13,10,B);s.set(13,11,B);s.set(9,10,"#fff");s.set(14,10,"#fff");
     if(pose==="blink"){[8,9,13,14].forEach(x=>{s.set(x,10,skin);s.set(x,11,B)})}   /* yeux fermés */
     if(cls==="berserk")[[7,12],[8,13],[15,12],[14,13]].forEach(([x,y])=>s.set(x,y,"#c8302a"));   /* peinture de guerre */
@@ -463,7 +464,7 @@ const PX=(()=>{
     if(cls==="chrono"){s.part(col,q=>q.poly([[5,4],[11,-1],[17,4]]));s.part("#f2d94a",q=>q.rect(4,7,15,1),{flat:1});s.part("#f2d94a",q=>{q.rect(10,3,3,1);q.rect(11,4,1,1);q.rect(10,5,3,1)},{flat:1})}   /* capuche et sablier */
     if(cls==="invoc"){s.part(mix(col,DARK,.25),q=>{q.ell(11,5,8,4);q.clear(0,8,24,8)});s.part("#c9a8ff",q=>{q.px(6,6);q.px(11,3);q.px(16,6)},{flat:1})}   /* capuche à runes */
     if(cls==="berserk"){s.part("#8a6a45",q=>q.rect(4,5,15,3),{lt:.5});s.part("#f1e4bf",q=>{q.poly([[4,6],[1,0],[3,0],[6,5]]);q.poly([[18,6],[21,0],[19,0],[16,5]])})}   /* fourrure à cornes */
-    if(cls==="peste"){s.part("#2a2430",q=>{q.rect(2,4,19,2);q.ell(11,1.5,5,3.4)});s.part("#6a5a3a",q=>q.rect(6,3,10,1),{flat:1});   /* chapeau à large bord */}
+    if(cls==="peste"){s.part("#4a2e1a",q=>q.rect(4,6,15,1),{flat:1});s.part("#8fd84a",q=>{q.ell(5,5.5,1.6,1.2);q.ell(11,4,1.4,2);q.ell(17,5.5,1.6,1.2)});s.part("#d2f07a",q=>{q.ell(8,4.6,1.6,1.3);q.ell(14,4.6,1.6,1.3)});s.part("#c94a5a",q=>q.rect(11,6,1,1),{flat:1})}   /* couronne de feuilles (et une baie) */
     s.set(8,10,B);s.set(8,11,B);s.set(13,10,B);s.set(13,11,B);s.set(9,10,"#fff");s.set(14,10,"#fff");
     if(blink)[8,9,13,14].forEach(x=>{s.set(x,10,skin);s.set(x,11,B)});
     if(cls==="berserk")[[7,12],[8,13],[15,12],[14,13]].forEach(([x,y])=>s.set(x,y,"#c8302a"));
@@ -540,7 +541,9 @@ const PX=(()=>{
       if(P.open)s.part(gl,q=>q.px(18+x,20+y-a),{flat:1})}
     s.outline();s.shadow(12,22,6,1.2);return cache[k]=s.url()}
   const beastFrames=(id,col,anim)=>{const k="bfs:"+id+col+anim;return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>beastF(id,col,anim,f)))};
-  return{plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
+  /* outils de dessin pour le monde en bandeau (js/monde.js) */
+  const kit={Spr,prop,rng,rgb,mix,TH,LIGHT,DARK,INK};
+  return{kit,plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
 })();
 
 document.body.style.backgroundImage=`url(${PX.tile()})`;
