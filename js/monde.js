@@ -1021,10 +1021,85 @@ const MONDE=(()=>{
     const sc=mix(G[3],DARK,.3);items.sort((a,b)=>a[2]+a[0].h-b[2]-b[0].h).forEach(([sp,x,y])=>{for(let i=1;i<sp.w-1;i++)wset(s,x+i,y+sp.h-1,sc);wblit(s,sp,x,y)});
     return s.cvs()}
 
+  /* ================= Abîme de Nuitombre ================= */
+  /* au bord du gouffre : ciel de néant aux nébuleuses violettes, faille lumineuse déchirée dans le ciel,
+     falaises noires liserées de violet, flèches torses à pointe de cristal, grands cristaux, racines
+     tordues et chaînes brisées ; des yeux qui clignent dans le noir, brume violette, débris qui montent */
+  const ABY={rock:"#2a2040",rockL:"#4a3a6a",rim:"#9a6aff",cry:["#c06aff","#ff6ab0","#7ae0d0"],void:"#b83ad0",voidL:"#ff9af0",voidD:"#5a1a7a",root:"#1e1630",chain:"#5a5470",bone:"#cfc6e0",haze:"#3a2a5a"};
+  Object.assign(deco,{
+    /* grande grappe de cristaux du néant */
+    vcluster(r,h){const c=ABY.cry[r()<.6?0:r()<.5?1:2];h=h||14+(r()*14|0);const w=Math.round(h*.9),s=new Spr(w,h);s.part(c,q=>{q.poly([[w*.1,h-1],[w*.25,h*.35],[w*.38,h-1]]);q.poly([[w*.3,h-1],[w*.5,0],[w*.66,h-1]]);q.poly([[w*.6,h-1],[w*.8,h*.45],[w*.92,h-1]])},{lt:.6,dk:.3});
+      s.set(Math.round(w*.5),2,"#ffffff");s.set(Math.round(w*.25),Math.round(h*.4),mix(c,"#ffffff",.6));s.c=c;return s.outline(mix(c,INK,.75))},
+    /* racine tordue qui sort du sol, comme un tentacule */
+    tendril(r){const h=18+(r()*16|0),s=new Spr(14,h),ph=r()*6;s.part(ABY.root,q=>{for(let y=0;y<h;y++){const x=6+Math.sin(y/5+ph)*3*(1-y/h),w=Math.max(1,Math.round(1+(y/h)*3));q.rect(Math.round(x),y,w,1)}},{flat:1});
+      for(let y=2;y<h;y+=4){const x=Math.round(6+Math.sin(y/5+ph)*3*(1-y/h));s.set(x,y,ABY.rockL)}return s.outline("#0c0814")},
+    /* chaîne brisée qui pend */
+    chain(r){const l=8+(r()*14|0),s=new Spr(4,l);for(let y=0;y<l;y++){const k=y%3;if(k===0){s.set(1,y,ABY.chain);s.set(2,y,ABY.chain)}else{s.set(k===1?0:3,y,ABY.chain);s.set(k===1?3:0,y,mix(ABY.chain,DARK,.4))}}return s},
+    /* pierre runique */
+    runestone(r){const s=new Spr(9,13);s.part(ABY.rockL,q=>q.poly([[1,12],[1,3],[4,0],[8,3],[8,12]]),{lt:.3,dk:.4});[[4,4],[3,5],[5,5],[4,6],[4,8],[3,9],[5,9]].forEach(([x,y])=>s.set(x,y,ABY.voidL));s.c=ABY.void;return s.outline("#0c0814")},
+    vbone(r){const s=prop.bone(r);for(let i=0;i<s.p.length;i++)if(s.p[i]&&s.p[i][0]>200)s.p[i]=rgb(ABY.bone);return s},
+  });
+  BIOME.abime=function(zid){
+    const T=TH.abime,G=T.g.map(rgb),fl=T.fl,r=rng(zid.length*1013+zid.charCodeAt(0)*7),meta={mills:[],houses:[],ponds:[],glow:[],rays:[],lava:[],eyes:[]},hz=ABY.haze;
+    /* falaises noires du gouffre, liserées de violet */
+    const far=new Spr(480,FARH);{const W=480,c=mix(ABY.rock,hz,.3),rim=mix(ABY.rim,hz,.35),h=crowns(W,r,9,10,24,.8);
+      for(let x=0;x<W;x++){const top=Math.round(FARH-h[x]);for(let y=Math.max(0,top);y<FARH;y++)far.set(x,y,y===top?rim:(y===top+1&&x%2)?rim:c)}
+      for(let i=0;i<8;i++){const x=r()*W|0,y=10+(r()*30|0);if(far.get(x,y)){far.set(x,y,mix(ABY.cry[r()*3|0],hz,.2))}}}
+    /* flèches torses à pointe de cristal, mare de néant */
+    const mid=new Spr(640,MIDH);{const W=640,c=mix(ABY.rock,hz,.15),cl=mix(ABY.rim,hz,.3);
+      for(let x=0;x<W;x++){const top=MIDH-10+Math.round(wave(x,W,[[7,2,1],[13,1.2,2]]));for(let y=top;y<MIDH;y++)mid.set(x,y,y===top?cl:c)}
+      for(let i=0;i<14;i++){const x0=r()*W|0,h=16+(r()*26|0),ph=r()*6,bend=(r()-.5)*8;for(let y=0;y<h;y++){const f=y/h,x=Math.round(x0+Math.sin(f*3+ph)*2+bend*f),w=Math.max(1,Math.round((1-f)*4));for(let q=0;q<w;q++)wset(mid,x+q,MIDH-9-y,q===0?cl:c)}
+        const tx=Math.round(x0+Math.sin(3+ph)*2+bend),ty=MIDH-9-h,cc=ABY.cry[r()*3|0];wset(mid,tx,ty,cc);wset(mid,tx,ty-1,cc);wset(mid,tx,ty-2,mix(cc,"#ffffff",.5));meta.glow.push({x:tx,y:ty,c:cc,ph:r()*6,f:.22})}
+      const px=r()*W|0;ellipse(px,MIDH-5,22,2.5,(x,y)=>wset(mid,x,y,y<MIDH-5?ABY.voidL:ABY.void));meta.glow.push({x:px,y:MIDH-5,c:ABY.void,ph:0,f:.22,s:1.6})}
+    /* premier rang : grands cristaux, racines tordues, chaînes, rochers ; des yeux dans l'ombre */
+    const WH=64,wall=new Spr(512,WH);{const W=512,rc=rgb(ABY.rock),rl=rgb(ABY.rockL),rim=rgb(ABY.rim);
+      const h=x=>WH-14-wave(x,W,[[4,5,.7],[9,3,1.9],[17,1.5,0]]);
+      /* masses rocheuses sombres au fond, avec des creux où brillent des yeux */
+      for(let x=0;x<W;x++){const top=Math.round(h(x)-14-wave(x,W,[[6,6,1],[3,6,2]]));for(let y=Math.max(0,top);y<WH;y++)wset(wall,x,y,y===top?mix(rim,rc,.5):mix(rc,DARK,.25))}
+      for(let i=0;i<9;i++)meta.eyes.push({x:r()*W|0,y:WH-34+(r()*14|0),ph:r(),per:4+r()*6,c:r()<.5?"255,220,90":"255,110,200",f:.5});
+      const items=[];for(let x=r()*20;x<W-10;x+=18+r()*30){const k=r();items.push([k<.45?deco.vcluster(r,22+(r()*16|0)):k<.75?deco.tendril(r):deco.runestone(r),x|0])}
+      items.forEach(([sp,x])=>{const y=Math.round(h(x+sp.w/2))+4-sp.h;wblit(wall,sp,x,y);if(sp.c)meta.glow.push({x:x+(sp.w>>1),y:y+(sp.h>>2)+2,c:sp.c,ph:r()*6,f:.5})});
+      for(let x=0;x<W;x++){const top=Math.round(h(x));for(let y=top;y<WH;y++)wset(wall,x,y,y===top?rim:y===top+1&&x%2?mix(rim,rc,.5):(x*3+y*7)%11===0?rl:rc)}
+      for(let i=0;i<10;i++){const ch=deco.chain(r),x=r()*W|0;let y=0;while(y<WH-1&&!wget(wall,x+1,y))y++;wblit(wall,ch,x,Math.max(0,y-ch.h-((r()*6)|0)))}}
+    /* sol : roche violette, veines qui luisent, mares de néant, allée runique */
+    const W=768,ground=new Spr(W,TM+GH),ph=[r()*6,r()*6,r()*6];
+    for(let y=TM;y<TM+GH;y++)for(let x=0;x<W;x++)ground.p[y*W+x]=G[0];
+    for(let i=0;i<140;i++){const rx=6+r()*20,ry=2+r()*6,cx=r()*W,cy=TM+ry+1+r()*(GH-2*ry-2),c=G[1+(i%3)];ellipse(cx,cy,rx,ry,(x,y,d)=>{if(y>=TM&&(d<.7||(x+y)%2===0))wset(ground,x,y,c)})}
+    for(let x=0;x<W;x++){wset(ground,x,TM,mix(ABY.rim,G[0],.4));wset(ground,x,TM+1,mix(G[3],DARK,.15))}
+    for(let i=0;i<900;i++){const x=r()*W|0,y=TM+3+(r()*(GH-4)|0);wset(ground,x,y,r()<.5?G[2]:mix(G[1],"#ffffff",.06))}
+    const cracks=[];for(let i=0;i<30;i++){let x=r()*W,y=TM+5+r()*(GH-10);const n=6+(r()*14|0);for(let j=0;j<n;j++){x+=1;y+=(r()-.5)*1.6;if(y>TM+2&&y<TM+GH-2){wset(ground,x,y|0,j%4===0?ABY.voidL:ABY.voidD);cracks.push([((x|0)%W+W)%W,y|0])}}}
+    const vv=rgb(ABY.void),vl=rgb(ABY.voidL),vd=rgb(ABY.voidD),cr=rgb("#1a1028");
+    for(let k=0;k<2;k++){const cx=(k*W/2+80+r()*200)|0,cy=TM+19,rx=18+(r()*8|0),ry=5;meta.lava.push({x:cx,y:cy,rx,ry});meta.glow.push({x:cx,y:cy,c:ABY.void,ph:r()*6,s:1.8});
+      ellipse(cx,cy,rx+2.5,ry+2,(x,y)=>wset(ground,x,y,cr));ellipse(cx,cy,rx,ry,(x,y,d)=>{let c=vv;if(d>.7&&(x+y)%2)c=vd;else if(d<.25||((x*5+y*3)%13===0))c=vl;wset(ground,x,y,c)})}
+    const P0=rgb(T.path),pl=mix(P0,"#ffffff",.12),pd=mix(P0,DARK,.25),ed=mix(G[3],DARK,.3);
+    const pc=x=>PY-1+Math.round(wave(x,W,[[2,2,ph[0]],[5,1,ph[1]]])),phw=x=>6+Math.round(wave(x,W,[[3,1.2,ph[2]]]));
+    for(let x=0;x<W;x++){const c=pc(x),h=phw(x);for(let y=c-h-1;y<=c+h+1;y++){const e=Math.abs(y-c);if(e>h){if((x+y)%2===0)wset(ground,x,y,ed)}else if(e===h){if((x+y)%2===0)wset(ground,x,y,P0)}else wset(ground,x,y,P0)}}
+    for(let i=0;i<400;i++){const x=r()*W|0,c=pc(x),h=phw(x)-1,y=c-h+(r()*h*2|0);wset(ground,x,y,r()<.4?pl:pd)}
+    const runes=[];for(let x=8;x<W;x+=24){const c=pc(x),k=(x/24|0)%4;const pts=[[[0,-1],[0,0],[0,1],[-1,-1],[1,1]],[[-1,0],[0,0],[1,0],[0,-1]],[[-1,-1],[0,0],[1,1],[1,-1],[-1,1]],[[0,-1],[-1,0],[1,0],[0,1]]][k];pts.forEach(([dx,dy])=>{wset(ground,x+dx,c+dy,ABY.voidL);runes.push([x+dx,c+dy])})}
+    const items=[];const put=(cnt,mk,y0,y1)=>{for(let i=0;i<cnt;i++){const sp=mk();let x,y,t=0;do{x=r()*W|0;y=(y0+r()*(y1-y0))|0;t++}while(t<30&&meta.lava.some(p=>Math.abs(x+sp.w/2-p.x)<p.rx+sp.w/2+4&&y>p.y-p.ry-4&&y-sp.h<p.y+p.ry+2));items.push([sp,x,y-sp.h]);if(sp.c)meta.glow.push({x:x+(sp.w>>1),y:y-sp.h+5,c:sp.c,ph:r()*6})}};
+    put(6,()=>deco.vcluster(r),TM+12,PY-9);put(4,()=>deco.tendril(r),TM+22,PY-9);put(3,()=>deco.runestone(r),TM+14,PY-9);put(6,()=>prop.rock(r,ABY.rockL),TM+8,PY-9);put(3,()=>deco.vbone(r),TM+8,PY-9);
+    put(4,()=>deco.vcluster(r),PY+14,TM+GH-6);put(2,()=>deco.tendril(r),PY+24,TM+GH-6);put(5,()=>prop.rock(r,ABY.rockL),PY+12,TM+GH-6);put(3,()=>deco.vbone(r),PY+12,TM+GH-6);put(1,()=>deco.runestone(r),PY+16,TM+GH-6);
+    const sc=mix(G[3],DARK,.4);
+    items.sort((a,b)=>a[2]+a[0].h-b[2]-b[0].h).forEach(([sp,x,y])=>{for(let i=1;i<sp.w-1;i++){wset(ground,x+i,y+sp.h-1,sc);if(i>1&&i<sp.w-2)wset(ground,x+i,y+sp.h,sc)}wblit(ground,sp,x,y)});
+    /* nébuleuse (ciel), dessinée en transparence */
+    const NW=420,NH=70,neb=new Spr(NW,NH);for(let i=0;i<26;i++){const cx=r()*NW,cy=10+r()*(NH-20),rx=14+r()*30,ry=5+r()*10,c=["#6a2a9a","#2a4a9a","#9a2a7a"][i%3];ellipse(cx,cy,rx,ry,(x,y,d)=>{if(y>=0&&y<NH&&(d<.35||(d<.75&&(x+y)%2===0)||(x*3+y)%5===0&&d<1))wset(neb,x,y,c)})}
+    const low=abimeLow(T,G,r,W);
+    return{far:far.cvs(),mid:mid.cvs(),wall:wall.cvs(),ground:ground.cvs(),low,gW:W,meta,tufts:[],cracks,runes,neb:neb.cvs(),clouds:[],G,fl,abyss:1,dark:1,mist:1,mistC:"150,90,220",flyC:["#c9b8ff","#ff8ad0","#8ad0ff"],motes:1,dayFlies:8,nightFlies:12,nightC:"122,224,208",
+      sky:{day:["#160c2a","#40285e"],dawn:["#1a0c2a","#5a2a5a"],dusk:["#120a24","#3a1a4e"],night:["#08040f","#22143a"]},tint:{day:null,dawn:null,dusk:"rgba(40,10,60,.15)",night:"rgba(10,4,24,.35)"}};
+  };
+  function abimeLow(T,G,r,W){const LH=200,s=new Spr(W,LH);for(let i=0;i<W*LH;i++)s.p[i]=G[0];
+    for(let i=0;i<200;i++){const rx=6+r()*22,ry=2+r()*7,cx=r()*W,cy=ry+1+r()*(LH-2*ry-2),c=G[1+(i%3)];ellipse(cx,cy,rx,ry,(x,y,d)=>{if(d<.7||(x+y)%2===0)wset(s,x,y,c)})}
+    for(let i=0;i<1600;i++){const x=r()*W|0,y=1+(r()*(LH-2)|0);wset(s,x,y,r()<.5?G[2]:mix(G[1],"#ffffff",.06))}
+    for(let i=0;i<46;i++){let x=r()*W,y=4+r()*(LH-8);const n=6+(r()*14|0);for(let j=0;j<n;j++){x+=1;y+=(r()-.5)*1.6;if(y>1&&y<LH-2)wset(s,x,y|0,j%4===0?ABY.voidL:ABY.voidD)}}
+    const items=[],put=(n,mk)=>{for(let i=0;i<n;i++){const sp=mk();items.push([sp,r()*W|0,2+(r()*(LH-sp.h-5)|0)])}};
+    put(12,()=>deco.vcluster(r));put(6,()=>deco.tendril(r));put(5,()=>deco.runestone(r));put(14,()=>prop.rock(r,ABY.rockL));put(8,()=>deco.vbone(r));
+    const sc=mix(G[3],DARK,.4);items.sort((a,b)=>a[2]+a[0].h-b[2]-b[0].h).forEach(([sp,x,y])=>{for(let i=1;i<sp.w-1;i++)wset(s,x+i,y+sp.h-1,sc);wblit(s,sp,x,y)});
+    return s.cvs()}
+
   /* ---------- État ---------- */
   let cv=null,ctx=null,wc=null,wx=null,P=4,W=0,H=0,FY=0,GT=0,CT=0,zid=null,L=null,ro=null,lastT=0,skyKey="",skyCv=null;
   let cam=0,camFrom=0,camTo=0,walkT0=0,walkMs=0;
-  let birds=[],flies=[],shadows=[],puffs=[],tumbles=[],gusts=[],flakes=[],gulls=[],bolt=null,schools=[],jellies=[],plume=[],bombs=[],erupt=4,bossOn=false,lbT=0;
+  let birds=[],flies=[],shadows=[],puffs=[],tumbles=[],gusts=[],flakes=[],gulls=[],bolt=null,schools=[],jellies=[],plume=[],bombs=[],erupt=4,debris=[],bossOn=false,lbT=0;
   let lc=null,lx=null,lw=null,lwx=null,LT=0,LHt=0,lowSh=[];   /* prairie du dessous : canvas, contexte, hauteur en pixels logiques */
   const drops=[];
 
@@ -1054,7 +1129,7 @@ const MONDE=(()=>{
   function spawnBird(x){const bc=L&&L.birdC;birds.push({x,y:FY-R(10,30),st:"sol",t:R(0,3000),vx:0,vy:0,c:bc?bc[Math.random()*bc.length|0]:Math.random()<.5?"#7a5a40":"#5a6a7a"})}
   function updLife(dt,t,ph){
     /* oiseaux posés devant ; ils s'envolent quand l'équipe approche */
-    const stageR=(W*P/2+80)/P;while(!L.cave&&!L.under&&!L.volcano&&!L.astral&&birds.filter(b=>b.st==="sol").length<3)spawnBird(cam+W+R(20,260));
+    const stageR=(W*P/2+80)/P;while(!L.cave&&!L.under&&!L.volcano&&!L.astral&&!L.abyss&&birds.filter(b=>b.st==="sol").length<3)spawnBird(cam+W+R(20,260));
     birds.forEach(b=>{const sx=b.x-cam;if(b.st==="sol"&&(sx<stageR||bossOn)){b.st="vol";b.vx=R(-14,30);b.vy=R(-34,-22)}if(b.st==="vol"){b.x+=b.vx*dt;b.y+=b.vy*dt;b.vy-=6*dt}});
     birds=birds.filter(b=>b.y>-10&&b.x-cam>-20);
     /* papillons le jour, lucioles la nuit */
@@ -1087,6 +1162,8 @@ const MONDE=(()=>{
     if(L&&L.volcano&&L.meta.crater){if(Math.random()<dt*6)plume.push({dx:R(-2,2),dy:0,vx:R(.5,2.5),vy:-R(3,6),t:0,life:R(6,10)});plume.forEach(p=>{p.t+=dt;p.dx+=p.vx*dt;p.dy+=p.vy*dt;p.vy*=.995});plume=plume.filter(p=>p.t<p.life);
       erupt-=dt;if(erupt<=0){erupt=R(9,15);for(let i=0;i<14;i++)bombs.push({dx:0,dy:0,vx:R(-14,14),vy:-R(16,30),t:0});for(let i=0;i<10;i++)plume.push({dx:R(-3,3),dy:0,vx:R(-1,3),vy:-R(8,14),t:0,life:R(4,7),big:1})}
       bombs.forEach(b=>{b.t+=dt;b.dx+=b.vx*dt;b.dy+=b.vy*dt;b.vy+=22*dt});bombs=bombs.filter(b=>b.dy<20)}
+    /* débris de roche qui remontent vers la faille */
+    if(L&&L.abyss){if(debris.length<6&&Math.random()<dt*.6)debris.push({x:cam*.6+R(0,W),y:FY+20,v:R(3,8),ph:R(0,TAU),s:Math.random()<.4?2:1});debris.forEach(d=>{d.y-=d.v*dt;d.ph+=dt});debris=debris.filter(d=>d.y>CT-6)}
     /* rafales : traînées de sable au ras du sol */
     if(L&&L.wind){if(gusts.length<(L.storm?9:6)&&Math.random()<dt*2)gusts.push({x:R(-40,W),y:L.storm&&Math.random()<.5?R(CT+8,GT-10):R(GT+4,FY+16),l:R(6,18),v:R(60,110),t:0});gusts.forEach(s=>{s.x+=s.v*dt;s.t+=dt});gusts=gusts.filter(s=>s.t<1.4&&s.x<W+30)}}
   function drawLife(g,t,ph){
@@ -1166,9 +1243,28 @@ const MONDE=(()=>{
   /* éclats de cristal en suspens au-dessus des ruines du premier rang */
   function shards(g,t,moving){const w=L.wall.width,o=((Math.round(cam*.5)%w)+w)%w,y0=GT-L.wall.height+3;L.meta.shards.forEach(s=>{for(let m=-1;m<=Math.ceil(W/w);m++){const x=s.x+m*w-o;if(x<-6||x>W+6)continue;const y=y0+s.y+Math.round(moving?Math.sin(t/900+s.ph)*2:0);
       g.fillStyle=AST.cry;g.fillRect(x,y-2,1,5);g.fillRect(x-1,y-1,3,3);g.fillStyle=AST.cryL;g.fillRect(x,y-1,1,2);if(s.s>1){g.fillStyle=AST.cry;g.fillRect(x+3,y+2,1,3);g.fillStyle=AST.cryL;g.fillRect(x+3,y+2,1,1)}}})}
+  /* ciel de néant : nébuleuse en transparence, étoiles rares, faille lumineuse qui pulse */
+  function voidsky(g,t,moving){const tt=moving?t:0,top=CT+2,hz=Math.max(top+10,GT-20),rs=rng(17);
+    const nw=L.neb.width,o=((Math.round(cam*.03+tt*.002)%nw)+nw)%nw;g.globalAlpha=.42;for(let x=-o;x<W;x+=nw)g.drawImage(L.neb,x,top+4);g.globalAlpha=1;
+    for(let i=0;i<40;i++){const x=rs()*W|0,y=top+(rs()*(hz-top)|0),a=.25+.35*Math.max(0,Math.sin(tt/(700+i*17)+i));g.fillStyle=`rgba(230,210,255,${a.toFixed(3)})`;g.fillRect(x,y,1,1)}
+    /* la faille : ligne brisée verticale, cœur clair, halo magenta, particules aspirées */
+    const fx=Math.round(W*.34-cam*.02%W),pr=rng(23),pts=[],yEnd=Math.max(top+16,hz-6);let x=fx,y=top+4;while(y<yEnd){pts.push([x,y]);y+=3+(pr()*4|0);x+=Math.round((pr()-.5)*5)}pts.push([x,yEnd]);
+    const pu=.6+.4*Math.sin(tt/700);for(let i=1;i<pts.length;i++){const[a,b]=[pts[i-1],pts[i]],n=Math.max(1,b[1]-a[1]),wd=Math.round(1+2*Math.sin(Math.PI*i/pts.length));for(let k=0;k<n;k++){const xx=Math.round(a[0]+(b[0]-a[0])*k/n),yy=a[1]+k;
+      g.fillStyle=`rgba(184,58,208,${(.18*pu).toFixed(3)})`;g.fillRect(xx-wd-3,yy,wd*2+7,1);g.fillStyle=`rgba(255,154,240,${(.7*pu).toFixed(3)})`;g.fillRect(xx-wd,yy,wd*2+1,1);g.fillStyle="#fff0ff";g.fillRect(xx,yy,1,1)}}
+    for(let k=0;k<10;k++){const p=((tt/3000+k/10)%1+1)%1,pi=pts[(k*3)%pts.length],ang=k*2.4,d=(1-p)*26;g.fillStyle=`rgba(255,180,250,${(.8*p).toFixed(3)})`;g.fillRect(Math.round(pi[0]+Math.cos(ang)*d),Math.round(pi[1]+Math.sin(ang)*d*.6),1,1)}}
+  /* vie de l'abîme : veines et runes qui pulsent, bulles du néant, yeux qui clignent, débris qui montent */
+  function voidLife(g,t,moving){const gw=L.gW,o=((Math.round(cam)%gw)+gw)%gw,gy=GT-TM,tt=moving?t:0;
+    for(let i=0;i<L.cracks.length;i+=2){const[cx,cy]=L.cracks[i],a=.2+.25*Math.sin(tt/650+cx*.05);for(let m=-1;m<=Math.ceil(W/gw);m++){const x=cx+m*gw-o;if(x<-2||x>W+2)continue;g.fillStyle=`rgba(255,140,240,${a.toFixed(3)})`;g.fillRect(x,gy+cy,1,1)}}
+    L.runes.forEach(([rx,ry],i)=>{const a=.3+.3*Math.sin(tt/900+(rx>>3));for(let m=-1;m<=Math.ceil(W/gw);m++){const x=rx+m*gw-o;if(x<-2||x>W+2)continue;g.fillStyle=`rgba(255,170,250,${a.toFixed(3)})`;g.fillRect(x,gy+ry,1,1)}});
+    L.meta.lava.forEach((p,i)=>{const per=1300+(i%3)*400,cy=Math.floor(tt/per),k=(tt%per)/per,a=Math.sin(cy*12.9898+i*7.1)*43758.5,fr=a-Math.floor(a),b=Math.sin(cy*78.233+i)*12345.6,fy=b-Math.floor(b);
+      for(let m=-1;m<=Math.ceil(W/gw);m++){const x=Math.round(p.x+m*gw-o+(fr-.5)*p.rx*1.2),y=Math.round(gy+p.y+(fy-.5)*p.ry);if(x<-4||x>W+4)continue;if(k<.45){const s=k<.2?1:2;g.fillStyle="#ffd0ff";g.fillRect(x,y-s+1,s,s)}else if(k<.6){g.fillStyle="rgba(255,160,250,.8)";g.fillRect(x-2,y,1,1);g.fillRect(x+2,y,1,1);g.fillRect(x,y-2,1,1)}}});
+    /* yeux dans les creux du premier rang */
+    const ww=L.wall.width,ow=((Math.round(cam*.5)%ww)+ww)%ww,wy=GT-L.wall.height+3;L.meta.eyes.forEach(e=>{const p=((tt/1000/e.per+e.ph)%1+1)%1;if(p>.35)return;const lid=p<.03||p>.32||(p>.17&&p<.19);
+      for(let m=-1;m<=Math.ceil(W/ww);m++){const x=e.x+m*ww-ow;if(x<-6||x>W+6)continue;const y=wy+e.y;g.fillStyle=`rgba(${e.c},.25)`;g.fillRect(x-2,y-1,10,3);g.fillStyle=`rgba(${e.c},1)`;if(lid){g.fillRect(x,y,2,1);g.fillRect(x+4,y,2,1)}else{g.fillRect(x,y-1,2,2);g.fillRect(x+4,y-1,2,2);g.fillStyle="#1c0c20";g.fillRect(x+1,y-1,1,2);g.fillRect(x+5,y-1,1,2)}}});
+    debris.forEach(d=>{const x=Math.round(d.x-cam*.6+Math.sin(d.ph)*2),y=Math.round(d.y);g.fillStyle="#2a2040";g.fillRect(x,y,2+d.s,1+d.s);g.fillStyle="#9a6aff";g.fillRect(x,y,2+d.s,1)})}
   /* brume du marais : bandes douces au ras de l'eau, qui dérivent lentement (pas de flou : des lignes de pixels) */
   const MIST=[[0,.55,.2,40],[1,.8,.15,30],[2,1,.12,44],[3,1.1,.1,34]];
-  function mist(g,t,ph,moving){const col=ph==="night"?"170,190,230":ph==="day"?"235,245,240":"240,220,215",dr=moving?t*.004:0;
+  function mist(g,t,ph,moving){const col=L.mistC?L.mistC:ph==="night"?"170,190,230":ph==="day"?"235,245,240":"240,220,215",dr=moving?t*.004:0;
     MIST.forEach(([i,f,a0,len])=>{const y=Math.round(GT-6+i*9+(i>1?(FY-GT-24)*(i-1)*.5:0)),per=260+i*70,off=((cam*f+dr*(1+i*.3))%per+per)%per;
       for(let x0=-off;x0<W;x0+=per)for(let b=0;b<3;b++){const bx=Math.round(x0+b*per/3+i*31),bl=len*W/320+b*10;for(let j=-3;j<=3;j++){const wv=Math.round(bl*(1-Math.abs(j)*.2)),a=a0*(1-Math.abs(j)*.25);g.fillStyle=`rgba(${col},${a.toFixed(3)})`;g.fillRect(bx-wv,y+j,wv*2,1)}}})}
   /* rayons de lumière entre les arbres : ils défilent avec le premier rang (vitesse 0,5) */
@@ -1193,6 +1289,7 @@ const MONDE=(()=>{
     else if(L.under)surface(ctx,t,ph,moving);
     else if(L.volcano){}
     else if(L.astral)starsky(ctx,t,ph,moving);
+    else if(L.abyss)voidsky(ctx,t,moving);
     else if(ph==="night"){const r=rng(5);for(let i=0;i<46;i++){const x=r()*W|0,y=r()*Math.max(10,GT-30)|0,tw=Math.sin(t/600+i*1.7)>.6;ctx.fillStyle=tw?"#ffffff":"rgba(210,225,255,.7)";ctx.fillRect(x,y,1,1)}
       const mx=Math.round(W*.8),my=24;ctx.fillStyle="#f6f0d6";ctx.fillRect(mx-3,my-4,7,9);ctx.fillRect(mx-4,my-3,9,7);ctx.fillStyle="#d8d0b0";ctx.fillRect(mx-1,my-1,2,2);ctx.fillRect(mx+2,my+1,1,1)}
     else{const sx=Math.round(W*(ph==="dawn"?.14:ph==="dusk"?.86:.8)),sy=ph==="day"?24:Math.max(24,GT-44);ctx.fillStyle="rgba(255,240,170,.25)";ctx.fillRect(sx-7,sy-5,15,11);ctx.fillRect(sx-5,sy-7,11,15);
@@ -1226,6 +1323,7 @@ const MONDE=(()=>{
     const TN=L.tint&&L.tint[ph]!==undefined?L.tint[ph]:TINT[ph];if(TN||bossOn||L.under){g.globalCompositeOperation="source-atop";if(L.under){g.fillStyle="rgba(30,110,180,.2)";g.fillRect(0,0,W,H)}if(TN){g.fillStyle=TN;g.fillRect(0,0,W,H)}if(bossOn){g.fillStyle="rgba(70,0,30,.28)";g.fillRect(0,0,W,H)}g.globalCompositeOperation="source-over"}
     if(L.meta.glow.length)glow(g,t,ph);
     if(L.volcano)lavaLife(g,t,moving);
+    if(L.abyss)voidLife(g,t,moving);
     ctx.drawImage(wc,0,0);
     if(ZAP){ctx.fillStyle="rgba(235,240,255,.16)";ctx.fillRect(0,0,W,H)}
     drawLow(t,ph,moving,dt);
@@ -1280,7 +1378,7 @@ const MONDE=(()=>{
       const rs=()=>{resize();lowResize()};
       if(window.ResizeObserver){ro=new ResizeObserver(rs);ro.observe($("arena"));ro.observe($("app"))}addEventListener("resize",rs);rs();requestAnimationFrame(loop)},
     /* changement de zone : nouveaux plans ; la prairie du dessous remplace le motif de fond de page */
-    zone(id){if(id===zid&&L)return;zid=id;L=makeLayers(id);birds=[];shadows=[];puffs=[];tumbles=[];gusts=[];flies=[];flakes=[];gulls=[];bolt=null;schools=[];jellies=[];plume=[];bombs=[];erupt=4;lowSh=[];drops.splice(0).forEach(d=>d.e.remove());
+    zone(id){if(id===zid&&L)return;zid=id;L=makeLayers(id);birds=[];shadows=[];puffs=[];tumbles=[];gusts=[];flies=[];flakes=[];gulls=[];bolt=null;schools=[];jellies=[];plume=[];bombs=[];erupt=4;debris=[];lowSh=[];drops.splice(0).forEach(d=>d.e.remove());
       const c=css(L.G[0]);document.body.style.backgroundImage="none";document.body.style.backgroundColor=c;document.documentElement.style.backgroundColor=c;lowResize()},
     /* l'équipe avance jusqu'à l'endroit où se tenait le monstre */
     walk(){const h=$("ahero"),m=$("monBtn");let step=60;if(h&&m&&!h.hidden){const a=h.getBoundingClientRect(),b=m.getBoundingClientRect();if(a.width&&b.width)step=Math.max(30,(b.left+b.width/2-a.left-a.width/2)/P)}

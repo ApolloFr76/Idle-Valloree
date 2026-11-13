@@ -676,7 +676,7 @@ details.set summary{color:var(--roof-d);font-size:16px}
 .eslot .lb{color:#d9c4a0}
 .tile .q{color:var(--cream);font-family:var(--display);font-size:12px;text-shadow:1px 1px 0 var(--ink),-1px 0 0 var(--ink)}
 .badge{color:var(--sun);text-shadow:1px 1px 0 var(--ink)}
-.herofig{width:96px;max-width:96px;height:128px}
+.herofig{width:120px;max-width:120px;height:132px}
 .dmid{background:none}
 .bc>img{width:80px;height:80px}
 .bc.unk>img{filter:brightness(0) opacity(.3)}
@@ -1015,12 +1015,12 @@ html.rm .ahero,html.rm .mon button img,html.rm .pal{animation:none}
 .arena.ev-brume .mon button img{opacity:.8}
 .arena.ev-heure .mon button img{filter:sepia(.25) brightness(1.08)}
 /* Visiteurs */
-.arena .visitor{position:absolute;left:-60px;z-index:5;width:48px;height:64px;cursor:pointer;image-rendering:pixelated;animation:visit 11s linear forwards;filter:drop-shadow(0 2px 0 rgba(28,16,32,.4))}
+.arena .visitor{position:absolute;left:-84px;z-index:5;width:80px;height:88px;cursor:pointer;image-rendering:pixelated;animation:visit 11s linear forwards;filter:drop-shadow(0 2px 0 rgba(28,16,32,.4))}
 .arena .visitor.bird{width:34px;height:34px;animation:visitFly 9s linear forwards}
 .arena .visitor.ghost{width:40px;height:40px;opacity:.75;animation:visitFloat 11s ease-in-out forwards}
 .arena .visitor:hover{filter:drop-shadow(0 0 6px #ffe27a)}
 .arena .visitor.gone{animation:visitGone .4s ease-out forwards}
-@keyframes visit{0%{left:-60px;transform:translateY(0)}100%{left:calc(100% + 10px);transform:translateY(0)}}
+@keyframes visit{0%{left:-84px;transform:translateY(0)}100%{left:calc(100% + 10px);transform:translateY(0)}}
 @keyframes visitFly{0%{left:-40px;transform:translateY(0)}25%{transform:translateY(-14px)}50%{transform:translateY(6px)}75%{transform:translateY(-10px)}100%{left:calc(100% + 10px);transform:translateY(0)}}
 @keyframes visitFloat{0%{left:-50px;transform:translateY(0)}50%{transform:translateY(-18px)}100%{left:calc(100% + 10px);transform:translateY(0)}}
 @keyframes visitGone{to{transform:scale(1.6) translateY(-20px);opacity:0}}
