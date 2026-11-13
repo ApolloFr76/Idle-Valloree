@@ -17,7 +17,7 @@ function stats(){
   s.hit=(5+S.lvl*1.5+s.dmg)*(1+s.elPow/100)*bd*C.dmgMult*(1+s.pctDmg/100)*(1+towerPct(S.tower?.best||0)/100)*(1+talV("t_force")/100)*(1+soulBonus()/100)*(1+.01*achN())*(S.ev&&EVENTS.find(e=>e.id===S.ev.id)?.el===s.el?1.3:1);
   /* DoT : chance d'en poser à chaque coup (stat / (stat + 400), 50 % max) et dégâts par charge et par seconde */
   s.dotC={};s.dotPer={};for(const k in DOTS){const v=s[k]||0;s.dotC[k]=Math.min(.5,v/(v+400));if(C.autoDot===k)s.dotC[k]=1;
-    s.dotPer[k]=(s.hit*.1*(1+v/100)*(C.dotMult||1)+allyDps()*.02)*DOTS[k].k*bdot}
+    s.dotPer[k]=(s.hit*.15*(1+Math.sqrt(v)/20)*(C.dotMult||1)+allyDps()*.02)*DOTS[k].k*bdot}   /* racine : la stat compte sans exploser à haut niveau */
   s.critC=Math.min(100,s.crit+bcrit);s.critM=+(C.critMult+s.critBonus).toFixed(2);
   s.interval=Math.max(.3,1.3/(1+s.agi/150))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
