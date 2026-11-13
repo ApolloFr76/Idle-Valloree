@@ -437,13 +437,13 @@ const CODES={
   "METIERS":{txt:"+10 niveaux dans chaque métier (test)",go:()=>{for(const p in S.jobs){S.jobs[p].lvl=Math.min(PROF_MAX,S.jobs[p].lvl+10);S.jobs[p].xp=0}}},
   "SOIN":{txt:"PV au maximum",go:()=>{S.hp=stats().maxHp}},
   /* WW9F-7VPP-Q7RQ-SSZF : panoplies du Dévoreil + du Seigneur du Néant (avec 2 anneaux) + Raie du néant, légendaires +10,
-     et 6 trophées +100 (Dévoreil, Ombrelin, Néantille, Gargouillon, Spectrelin, Seigneur du Néant), le tout équipé */
+     et 6 trophées +100 (Dévoreil, Ombrelin, Néantille, Gargouillon, Gardien Stellaire, Seigneur du Néant), le tout équipé */
   "WW9F7VPPQ7RQSSZF":{txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
     const L=[["s_devoreil_coiffe","coiffe"],["s_devoreil_cape","cape"],["s_devoreil_bottes","bottes"],["s_devoreil_ceinture","ceinture"],
       ["s_boss_11_amulette","amulette"],["s_boss_11_anneau","anneau"],["s_boss_11_anneau","anneau2"],["s_boss_11_arme","arme"],["s_boss_11_bouclier","bouclier"],["mont_raie","familier"]];
     L.forEach(([id,slot])=>{if(!ITEMS[id])return;const u=S.uid++;S.items.push({u,id,e:10,r:3});S.equip[slot]=u;S.seen[id]=1});
     /* trophées +100 (si déjà possédé : on garde le rang le plus haut), équipés dans les 6 emplacements */
-    ["tr_devoreil","tr_ombrelin","tr_neantille","tr_gargouillon","tr_spectrelin","tb_11"].forEach((id,i)=>{if(!ITEMS[id])return;let t=S.items.find(x=>x.id===id);
+    ["tr_devoreil","tr_ombrelin","tr_neantille","tr_gargouillon","tb_10","tb_11"].forEach((id,i)=>{if(!ITEMS[id])return;let t=S.items.find(x=>x.id===id);
       if(t)t.e=Math.max(t.e||0,100);else{t={u:S.uid++,id,e:100};S.items.push(t)}S.seen[id]=1;for(const k in S.equip)if(S.equip[k]===t.u&&k!=="trophee"+i)S.equip[k]=null;S.equip["trophee"+i]=t.u});
     S.hp=stats().maxHp;return"10 objets légendaires +10 et 6 trophées +100 équipés"}},
   "GM2TAMRSGM2DA":{txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
