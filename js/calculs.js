@@ -14,11 +14,11 @@ function stats(){
   s.maxHp=Math.round((50+8*S.lvl+2*s.vit)*C.hpMult*(1+talV("t_vie")/100)*(1+secN("vit",s.vit)/100));
   s.el="neutre";let best=0;["feu","eau","terre","air"].forEach(e=>{if(s[e]>best){best=s[e];s.el=e}});
   s.elPow=(s.el==="neutre"?0:s[s.el])+s.puissance;
-  s.hit=(5+S.lvl*1.5+s.dmg)*(1+s.elPow/100)*bd*C.dmgMult*(1+s.pctDmg/100)*(1+towerPct(S.tower?.best||0)/100)*(1+talV("t_force")/100)*(1+.02*(S.souls||0))*(1+.01*achN())*(S.ev&&EVENTS.find(e=>e.id===S.ev.id)?.el===s.el?1.3:1);
+  s.hit=(5+S.lvl*1.5+s.dmg)*(1+s.elPow/100)*bd*C.dmgMult*(1+s.pctDmg/100)*(1+towerPct(S.tower?.best||0)/100)*(1+talV("t_force")/100)*(1+soulBonus()/100)*(1+.01*achN())*(S.ev&&EVENTS.find(e=>e.id===S.ev.id)?.el===s.el?1.3:1);
   s.critC=Math.min(100,s.crit+bcrit);s.critM=+(C.critMult+s.critBonus).toFixed(2);
   s.interval=Math.max(.3,1.3/(1+s.agi/150))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
-  s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*bxp*(evOn("nuit")?1.5:1);s.pros=s.prospection/100;
+  s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*bxp*(evOn("nuit")?1.5:1);s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
   s.dps=s.hit*(1+s.critC/100*(s.critM-1))*(1+s.dbl)/s.interval;
   return s;
 }
@@ -31,7 +31,9 @@ const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed);
 const monPow=lvl=>Math.exp(.0395*(Math.min(200,Math.max(25,lvl))-25))*(lvl>200?Math.pow(lvl/200,3):1);
 function monsterStats(lvl){const m=monPow(lvl);return{hp:Math.round((14+7*Math.pow(lvl,1.45))*m),atk:Math.round((2+1.5*Math.pow(lvl,1.2))*Math.pow(m,.3)),xp:Math.round((6+5*Math.pow(lvl,1.3))*Math.pow(m,.4)),ecus:Math.round((2+lvl*1.1)*Math.pow(m,.4))}}
 function makeMon(d,lvl,hpM=1,atkM=1,xpM=1,ecM=1){const ms=monsterStats(lvl),hp=Math.round(ms.hp*hpM);S.mon={id:d.id,lvl,hp,max:hp,atk:Math.round(ms.atk*atkM),xp:Math.round(ms.xp*xpM),ecus:Math.round(ms.ecus*ecM)};S.dots=[];S.monT=0;makeShiny();drawMonster();if(fx){FX.spawn(!!d.boss);VIE.monSpawn(!!d.boss);SCENE.drawQueue();if(S.mode==="zone"&&!d.boss){SCENE.walkIn();SCENE.advance()}}}
-function spawn(){const z=ZONES[S.zone],d=SCENE.nextWave(z),lvl=rnd(z.lvl[0],Math.min(z.lvl[1],Math.max(z.lvl[0],S.lvl+2)));makeMon(d,lvl)}
+/* Dernière zone : au-delà de son niveau max, les monstres suivent le niveau du héros (niveaux Oméga au-delà de 200). */
+const zoneTop=z=>z.i===ZONES.length-1?Math.max(z.lvl[1],S.lvl+2):z.lvl[1];
+function spawn(){const z=ZONES[S.zone],d=SCENE.nextWave(z),top=zoneTop(z),lo=top>z.lvl[1]?Math.max(z.lvl[0],S.lvl-15):z.lvl[0],lvl=rnd(lo,Math.min(top,Math.max(lo,S.lvl+2)));makeMon(d,lvl)}
 const towerLvl=f=>Math.round(f*2+Math.pow(f,1.35)*.25),towerRec=f=>Math.round(6*f+.4*f*f),towerPct=b=>.5*dimR(b/2)*2;
 /* Étage de départ de la tour : 80 % du record, mais jamais un étage où le monstre tiendrait plus de 10 s
    face aux dégâts actuels (héros + compagnons). */

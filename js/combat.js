@@ -2,9 +2,9 @@
 /* ================= Actions de jeu ================= */
 function gainXp(x){
   S.xp+=x;inc("xp",x);let up=false;
-  while(S.lvl<LVL_MAX&&S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;S.pts+=PTS_PER_LVL;up=true;checkUnlocks(!fx);
+  while(S.lvl<lvlMax()&&S.xp>=xpNeed(S.lvl)){S.xp-=xpNeed(S.lvl);S.lvl++;S.pts+=PTS_PER_LVL;up=true;checkUnlocks(!fx);
     const sp=CLASSES[S.cls].spells.find(s=>s.lvl===S.lvl);log(`Niveau ${S.lvl} ! +${PTS_PER_LVL} points de caractéristiques.`,"g");if(sp)log(`Nouveau sort : ${sp.name}.`,"g")}
-  if(S.lvl>=LVL_MAX)S.xp=0;
+  if(S.lvl>=lvlMax())S.xp=0;
   mx("maxLvl",S.lvl);
   if(up){sfx("level");if(fx){FX.lvl(S.lvl);VIE.cheer()}S.hp=stats().maxHp;dirty=true;drawSpells();drawZones();if(fx)toast(`Niveau ${S.lvl} !`)}
 }

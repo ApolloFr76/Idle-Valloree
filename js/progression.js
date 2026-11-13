@@ -15,7 +15,7 @@ const UNL_DETAIL={
   quests:"Trois quêtes par jour, renouvelées chaque matin. Récupérez la récompense quand une quête est terminée. Les trois quêtes réussies donnent en plus un éclat d'âme. Vous pouvez changer une quête par jour.",
   market:"Chaque ressource a un cours qui varie toutes les minutes entre ×0,5 et ×2. Vendez quand le cours est haut (en vert). Vendre beaucoup d'un coup fait baisser le cours de cette ressource.",
   coll:"Les succès donnent chacun +1 % de dégâts et d'écus pour toujours. Le bestiaire liste toutes les créatures, leurs paliers de victoires (bonus de dégâts et de butin) et leurs taux de drop, en « ??? » tant que vous n'avez pas obtenu l'objet.",
-  prest:"Oméga vous fait renaître au niveau 1 contre des éclats d'âme. Vous perdez votre niveau, vos objets et vos écus, mais gardez talents, succès et bestiaire. La tour repart de zéro. Les éclats s'investissent dans l'arbre de talents et donnent aussi +2 % de dégâts chacun tant qu'ils ne sont pas dépensés."};
+  prest:"Oméga vous fait renaître au niveau 1 contre des éclats d'âme. Vous perdez votre niveau, vos objets et vos écus, mais gardez talents, succès et bestiaire. La tour repart de zéro. Les éclats s'investissent dans l'arbre de talents. Une fois tous les talents au rang 5, chaque éclat non dépensé donne +0,5 % de dégâts. Chaque Oméga donne aussi +10 % d'XP, +10 % d'écus et relève le niveau maximum."};
 const unlTour=t=>[{sel:`[data-a="tab"][data-t="${t}"]`,t:`Nouvel onglet : ${tabName(t)}`,d:UNL_TXT[t]},{tab:t,sel:"#panel",t:tabName(t),d:UNL_DETAIL[t]}];
 const tabOpen=t=>!TAB_LOCK[t]||!!(S&&S.unl&&S.unl[t]);
 const tabName=t=>(TABS.find(x=>x[0]===t)||[t,t])[1];

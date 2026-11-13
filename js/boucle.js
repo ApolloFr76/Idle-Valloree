@@ -37,7 +37,7 @@ function offline(sec){
   if(!S.cls)return null;
   if(S.mode!=="zone"){S.mode="zone";S.dg=null;S.timer=0;S.mon=null}
   sec=Math.min(sec,8*3600);const sum={sec,xp:0,ecus:0,kills:0,res:{}},st=stats(),z=ZONES[S.zone];
-  const lvl=Math.round((z.lvl[0]+Math.min(z.lvl[1],S.lvl+4))/2),ms=monsterStats(Math.max(z.lvl[0],lvl));
+  const lvl=Math.round((z.lvl[0]+Math.min(zoneTop(z),S.lvl+4))/2),ms=monsterStats(Math.max(z.lvl[0],lvl));
   const ef=z.mons.reduce((a,m)=>a+(1-monRes(m.el,st.el)/100),0)/3,tk=ms.hp/(st.dps*ef+allyDps())+1.5,danger=ms.atk*st.def/2*tk>st.maxHp*1.5;
   const kills=danger?0:Math.floor(sec/tk*.5);
   if(kills>0){sum.kills=kills;sum.xp=Math.round(kills*ms.xp*st.xpM);sum.ecus=gainEcus(kills*ms.ecus*(1+(st.pros-1)/2));S.kills+=kills;

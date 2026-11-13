@@ -24,6 +24,11 @@ const SCENE=(()=>{
   const mon={el:null,cur:"idle",period:2200,off:0,sets:{
     idle:()=>PX.monFrames(MON[S.mon.id],"idle"),atk:()=>PX.monFrames(MON[S.mon.id],"atk"),hurt:()=>PX.monFrames(MON[S.mon.id],"hurt")}};
   let pals=[],queue=[];
+  /* Familier ou monture équipé, à côté du héros */
+  const famA={el:null,cur:"idle",period:1900,off:250,id:null,sets:{idle:()=>PX.famFrames(famA.id,"idle"),atk:()=>PX.famFrames(famA.id,"atk")}};
+  function famId(){const u=S.equip&&S.equip.familier,i=u&&S.items.find(x=>x.u===u);return i&&ITEMS[i.id]&&ITEMS[i.id].look?i.id:null}
+  function drawFam(){const e=$("afam");if(!e)return;const id=famId();if(id===famA.id&&famA.el===e)return;famA.id=id;famA.el=e;famA.last=null;e.hidden=!id;
+    if(!id){$("mon").classList.remove("hasfam");return}const L=ITEMS[id].look;e.className="px afam"+(L.m?" mount":"")+(L.vol?" fly":"");e.title=ITEMS[id].name;$("mon").classList.add("hasfam");famA.period=L.vol?900:1900}
 
   /* ---------- Équipe en formation ---------- */
   const PAL_LOOK={ecuyer:"guerrier",chasseuse:"archer",moine:"gardien",sorciere:"mage"};
@@ -73,11 +78,12 @@ const SCENE=(()=>{
       /* élan du monstre juste avant son coup */
       if(S.monT>1.8&&!winded&&S.ko<=0&&fx){winded=true;play(mon,"atk",32)}else if(S.monT<1)winded=false}
     pals.forEach(p=>{frame(p,t);if(fx&&S.mon&&S.ko<=0&&t>=p.next){p.next=t+p.every*R(.85,1.15);play(p,"atk",34);setTimeout(()=>palShot(p),150)}});
-    queue.forEach(q=>frame(q,t))}
+    queue.forEach(q=>frame(q,t));
+    drawFam();if(famA.id&&!famA.el.hidden)frame(famA,t)}
 
   return{
     init(){requestAnimationFrame(loop)},
-    hero(anim,hold=0){play(hero,anim,anim==="cast"?26:30,hold)},
+    hero(anim,hold=0){play(hero,anim,anim==="cast"?26:30,hold);if(famA.id&&anim==="atk"&&Math.random()<.5)play(famA,"atk",30)},
     monHurt(){play(mon,"hurt",36)},
     drawPals,nextWave,drawQueue,walkIn,layers,advance,lag};
 })();

@@ -197,6 +197,15 @@ function gainEcus(n){n=Math.round(n*(1+talV("t_avar")/100)*(1+.01*achN()));S.ecu
 
 /* Renaissance et talents : [id, nom, effet, rangs max, coût de base en éclats] */
 const PREST_LVL=30;
+/* Bonus Oméga : chaque passage Oméga donne +10 % d'XP et +10 % d'écus, et relève le niveau maximum
+   de 50 niveaux jusqu'au niveau 500, puis de 100 niveaux par passage. */
+const omegaN=()=>(S&&S.prest)||0;
+const lvlMax=()=>{const p=omegaN(),a=Math.min(p,6);return LVL_MAX+50*a+100*Math.max(0,p-6)};
+/* Éclats non dépensés : +0,5 % de dégâts chacun, seulement quand tous les talents sont au moins au rang 5
+   (sinon garder ses éclats rapportait plus que d'acheter des talents). */
+const SOUL_PCT=.5,SOUL_MIN_RANK=5;
+const talAll5=()=>Object.keys(TAL).every(id=>tal(id)>=SOUL_MIN_RANK);
+const soulBonus=()=>talAll5()?SOUL_PCT*(S.souls||0):0;
 const TALENTS={
   "Combat":[["t_force","Force brute","+10 % de dégâts",1],["t_prec","Précision","+2 % de critique",1],["t_vie","Vitalité ancestrale","+10 % de PV",2],["t_elem","Maîtrise élémentaire","Les faiblesses font +10 % de dégâts en plus",3]],
   "Récolte":[["t_mains","Mains agiles","Récolte 8 % plus rapide",1],["t_double","Double récolte","Chance de récolte double",1],["t_sac","Poches sans fond","+1 500 de poids",2],["t_metier","Héritage des métiers","Les métiers repartent plus haut",3]],
@@ -219,7 +228,7 @@ const talCost=id=>talCostAt(id,tal(id));
 const talSpent=id=>{let n=0;for(let k=0;k<tal(id);k++)n+=talCostAt(id,k);return n};
 const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor(Math.pow(S.lvl-20,1.3)/3)+Math.floor((S.st.bossesLife||0)/5);
 /* Succès : chaque succès donne +1 % de dégâts et +1 % d'écus */
-const ROM=["I","II","III","IV","V","VI"];
+const ROM=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 /* Icônes des succès : une par série (12×12 pixels) */
 const AICO={"kill":"M3 0h6v1h-6zM2 1h8v1h-8zM1 2h10v1h-10zM1 3h2v1h-2zM5 3h2v1h-2zM9 3h2v1h-2zM1 4h2v1h-2zM5 4h2v1h-2zM9 4h2v1h-2zM1 5h10v1h-10zM2 6h3v1h-3zM7 6h3v1h-3zM3 7h6v1h-6zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h1v1h-1zM3 9h6v1h-6zM4 10h4v1h-4z","lvl":"M5 0h2v1h-2zM4 1h4v1h-4zM3 2h6v1h-6zM2 3h8v1h-8zM1 4h4v1h-4zM7 4h4v1h-4zM4 5h4v1h-4zM4 6h4v1h-4zM4 7h4v1h-4zM4 8h4v1h-4zM2 9h8v1h-8zM2 10h8v1h-8z","ecu":"M3 1h6v1h-6zM2 2h1v1h-1zM9 2h1v1h-1zM2 3h8v1h-8zM3 4h6v1h-6zM2 5h1v1h-1zM9 5h1v1h-1zM2 6h8v1h-8zM3 7h6v1h-6zM2 8h1v1h-1zM9 8h1v1h-1zM2 9h8v1h-8zM3 10h6v1h-6z","boss":"M0 1h1v1h-1zM5 1h2v1h-2zM11 1h1v1h-1zM0 2h2v1h-2zM4 2h4v1h-4zM10 2h2v1h-2zM0 3h3v1h-3zM4 3h4v1h-4zM9 3h3v1h-3zM0 4h12v1h-12zM0 5h12v1h-12zM0 6h2v1h-2zM3 6h2v1h-2zM7 6h2v1h-2zM10 6h2v1h-2zM0 7h12v1h-12zM0 8h12v1h-12zM1 9h10v1h-10z","dg":"M4 0h4v1h-4zM2 1h8v1h-8zM1 2h3v1h-3zM8 2h3v1h-3zM1 3h2v1h-2zM9 3h2v1h-2zM0 4h2v1h-2zM10 4h2v1h-2zM0 5h2v1h-2zM4 5h4v1h-4zM10 5h2v1h-2zM0 6h2v1h-2zM4 6h1v1h-1zM7 6h1v1h-1zM10 6h2v1h-2zM0 7h2v1h-2zM4 7h1v1h-1zM7 7h1v1h-1zM10 7h2v1h-2zM0 8h2v1h-2zM4 8h1v1h-1zM7 8h1v1h-1zM10 8h2v1h-2zM0 9h2v1h-2zM4 9h4v1h-4zM10 9h2v1h-2zM0 10h12v1h-12zM0 11h12v1h-12z","tour":"M0 0h1v1h-1zM2 0h1v1h-1zM4 0h1v1h-1zM7 0h1v1h-1zM9 0h1v1h-1zM11 0h1v1h-1zM0 1h10v1h-10zM0 2h12v1h-12zM1 3h10v1h-10zM1 4h3v1h-3zM5 4h2v1h-2zM8 4h3v1h-3zM1 5h10v1h-10zM1 6h4v1h-4zM7 6h4v1h-4zM1 7h10v1h-10zM1 8h3v1h-3zM5 8h2v1h-2zM8 8h3v1h-3zM1 9h4v1h-4zM7 9h4v1h-4zM1 10h4v1h-4zM7 10h4v1h-4zM0 11h12v1h-12z","pk":"M5 0h1v1h-1zM5 1h1v1h-1zM4 2h3v1h-3zM0 3h11v1h-11zM1 4h9v1h-9zM2 5h7v1h-7zM2 6h7v1h-7zM1 7h4v1h-4zM6 7h4v1h-4zM1 8h3v1h-3zM7 8h3v1h-3zM1 9h1v1h-1zM9 9h1v1h-1zM10 11h1v1h-1z","craft":"M1 0h7v1h-7zM0 1h9v1h-9zM0 2h9v1h-9zM1 3h7v1h-7zM4 4h2v1h-2zM4 5h2v1h-2zM4 6h2v1h-2zM4 7h2v1h-2zM4 8h2v1h-2zM4 9h2v1h-2zM4 10h2v1h-2zM4 11h2v1h-2z","ench":"M5 0h1v1h-1zM4 1h3v1h-3zM3 2h5v1h-5zM2 3h7v1h-7zM1 4h9v1h-9zM0 5h11v1h-11zM1 6h9v1h-9zM2 7h7v1h-7zM3 8h5v1h-5zM4 9h3v1h-3zM5 10h1v1h-1z","combo":"M6 0h4v1h-4zM5 1h4v1h-4zM4 2h4v1h-4zM3 3h4v1h-4zM2 4h7v1h-7zM1 5h7v1h-7zM4 6h4v1h-4zM3 7h4v1h-4zM2 8h4v1h-4zM1 9h3v1h-3zM1 10h1v1h-1z","click":"M0 0h1v1h-1zM0 1h2v1h-2zM0 2h3v1h-3zM0 3h4v1h-4zM0 4h5v1h-5zM0 5h6v1h-6zM0 6h7v1h-7zM0 7h8v1h-8zM0 8h5v1h-5zM0 9h2v1h-2zM3 9h3v1h-3zM0 10h1v1h-1zM4 10h3v1h-3zM5 11h2v1h-2z","ally":"M0 0h2v1h-2zM0 1h10v1h-10zM0 2h12v1h-12zM0 3h12v1h-12zM0 4h10v1h-10zM0 5h12v1h-12zM0 6h10v1h-10zM0 7h2v1h-2zM0 8h2v1h-2zM0 9h2v1h-2zM0 10h2v1h-2zM0 11h4v1h-4z","job":"M2 0h6v1h-6zM1 1h8v1h-8zM0 2h2v1h-2zM7 2h3v1h-3zM7 3h4v1h-4zM7 4h1v1h-1zM9 4h2v1h-2zM6 5h2v1h-2zM10 5h2v1h-2zM5 6h2v1h-2zM4 7h2v1h-2zM3 8h2v1h-2zM2 9h2v1h-2zM1 10h2v1h-2zM0 11h2v1h-2z","quest":"M1 0h10v1h-10zM0 1h12v1h-12zM0 2h2v1h-2zM10 2h2v1h-2zM1 3h1v1h-1zM3 3h6v1h-6zM10 3h1v1h-1zM1 4h1v1h-1zM10 4h1v1h-1zM1 5h1v1h-1zM3 5h6v1h-6zM10 5h1v1h-1zM1 6h1v1h-1zM10 6h1v1h-1zM1 7h1v1h-1zM3 7h4v1h-4zM10 7h1v1h-1zM1 8h1v1h-1zM10 8h1v1h-1zM0 9h12v1h-12zM1 10h10v1h-10z","pot":"M4 0h4v1h-4zM4 1h4v1h-4zM5 2h2v1h-2zM4 3h1v1h-1zM7 3h1v1h-1zM3 4h1v1h-1zM8 4h1v1h-1zM2 5h1v1h-1zM9 5h1v1h-1zM1 6h10v1h-10zM1 7h10v1h-10zM1 8h10v1h-10zM1 9h10v1h-10zM2 10h8v1h-8z","rar":"M0 1h12v1h-12zM0 2h12v1h-12zM1 3h10v1h-10zM2 4h8v1h-8zM4 5h4v1h-4zM4 6h4v1h-4zM4 7h4v1h-4zM3 8h6v1h-6zM2 9h8v1h-8zM1 10h10v1h-10z","prest":"M3 0h6v1h-6zM1 1h10v1h-10zM0 2h3v1h-3zM9 2h3v1h-3zM0 3h2v1h-2zM10 3h2v1h-2zM0 4h2v1h-2zM10 4h2v1h-2zM0 5h2v1h-2zM10 5h2v1h-2zM0 6h3v1h-3zM9 6h3v1h-3zM1 7h3v1h-3zM8 7h3v1h-3zM2 8h2v1h-2zM8 8h2v1h-2zM2 9h2v1h-2zM8 9h2v1h-2zM0 10h4v1h-4zM8 10h4v1h-4zM0 11h4v1h-4zM8 11h4v1h-4z","best":"M4 0h1v1h-1zM7 0h1v1h-1zM3 1h2v1h-2zM7 1h2v1h-2zM3 2h2v1h-2zM7 2h2v1h-2zM0 3h1v1h-1zM11 3h1v1h-1zM0 4h2v1h-2zM9 4h3v1h-3zM0 5h2v1h-2zM4 5h4v1h-4zM10 5h2v1h-2zM3 6h6v1h-6zM2 7h8v1h-8zM2 8h8v1h-8zM2 9h8v1h-8zM3 10h6v1h-6z"};
 const achIcon=k=>`<svg viewBox="0 0 12 12" aria-hidden="true"><path fill="currentColor" shape-rendering="crispEdges" d="${AICO[k]||AICO.kill}"/></svg>`;
@@ -227,7 +236,7 @@ const achKey=a=>a.id.replace(/\d+$/,"");
 const ACH=[];
 const achSet=(key,name,unit,list,get)=>list.forEach((v,i)=>ACH.push({id:key+i,n:`${name} ${ROM[i]}`,unit,v,get,get txt(){return this.unit(this.v)}}));
 achSet("kill","Chasseur",v=>`Vaincre ${fmt(v)} monstres`,[10,100,1e3,1e4,1e5],()=>S.kills);
-achSet("lvl","Aventurier",v=>`Atteindre le niveau ${v}`,[10,25,50,75,100,150,200],()=>Math.max(S.lvl,S.st.maxLvl||0));
+achSet("lvl","Aventurier",v=>`Atteindre le niveau ${v}`,[10,25,50,75,100,150,200,300,500,1000],()=>Math.max(S.lvl,S.st.maxLvl||0));
 achSet("ecu","Fortuné",v=>`Gagner ${fmt(v)} écus au total`,[1e3,1e5,1e6,1e8,1e10],()=>S.st.ecus||0);
 achSet("boss","Tueur de boss",v=>`Vaincre ${v} boss`,[1,10,100],()=>S.st.bosses||0);
 achSet("dg","Explorateur",v=>`Terminer ${v} donjon${v>1?"s":""}`,[1,10,50],()=>S.st.dungeons||0);
@@ -242,7 +251,7 @@ achSet("job","Travailleur",v=>`Monter un métier au niveau ${v}`,[10,30,60],()=>
 achSet("quest","Serviable",v=>`Terminer ${v} quête${v>1?"s":""}`,[1,10,50,200],()=>S.st.quests||0);
 achSet("pot","Alchimiste",v=>`Préparer ${v} potion${v>1?"s":""}`,[1,25,100],()=>S.st.brews||0);
 achSet("rar","Maître forgeron",v=>`Forger un objet ${RAR[v].n.toLowerCase()}`,[1,2,3],()=>S.st.bestRar||0);
-achSet("prest","Phénix",v=>`Atteindre le niveau Oméga ${v}`,[1,3,10],()=>S.prest||0);
+achSet("prest","Phénix",v=>`Atteindre le niveau Oméga ${v}`,[1,3,10,25,50],()=>S.prest||0);
 achSet("best","Naturaliste",v=>`Atteindre le palier 2 du bestiaire pour ${v} créatures`,[6,18],()=>Object.keys(MON).filter(id=>bestTier(id)>=2).length);
 const achN=()=>S.ach?Object.keys(S.ach).length:0;
 /* Bestiaire : paliers de victoires par créature (+5 % de dégâts et +10 % de butin contre elle par palier) */
@@ -299,15 +308,36 @@ const EVENTS=[
 const EV_DUR=120,EV_MIN=240,EV_MAX=480;
 const evOn=id=>S.ev&&S.ev.id===id;
 
-/* Familiers et montures (fabriqués dans l'Atelier) */
+/* Familiers et montures (fabriqués dans l'Atelier). Ils s'affichent à côté du héros dans la zone de combat.
+   [id, nom, type, niveau, stats, recette, zone, apparence]. Apparence (dessinée par PX.fam) :
+   t = forme (quad, oiseau, insecte, scarabee, crapaud, hippocampe, raie, follet, golem), c/c2 = couleurs,
+   o = oreilles (longue, pointe, rond, cornes), q = queue (touffe, fine, flamme), x = détail (carapace, criniere, ailes, taches),
+   vol = vole au-dessus du sol. */
+const famSt=(z,w)=>{const b=budget(z),o={};for(const k in w)o[k]=k==="crit"?Math.round(w[k]):Math.round(b*w[k]);return o};
 const FAMS=[
-  ["fam_lapin","Lapinou des prés","Familier",5,{prospection:20,sagesse:5},[["laine",10],["plume",10],["ble",15]],0],
-  ["fam_luciole","Luciole apprivoisée","Familier",15,{sagesse:25,vit:20},[["lueur",15],["spore",10],["chataignier",15]],1],
-  ["mont_crapaud","Crapaud de selle","Monture",25,{vit:80,agi:30},[["bave",20],["vase",15],["avoine",20]],2],
-  ["mont_scarabee","Scarabée porteur","Monture",45,{vit:150,puissance:60,prospection:30},[["elytre",25],["geode",15],["or",20]],4],
-  ["fam_givre","Renardeau de givre","Familier",60,{puissance:120,crit:5,prospection:40},[["fourrure",30],["givre",20],["lin",30]],5],
+  ["fam_lapin","Lapinou des prés","Familier",5,{prospection:20,sagesse:5},[["laine",10],["plume",10],["ble",15]],0,{t:"quad",c:"#f4ead8",c2:"#f4a6a0",o:"longue",q:"touffe"}],
+  ["fam_luciole","Luciole apprivoisée","Familier",15,{sagesse:25,vit:20},[["lueur",15],["spore",10],["chataignier",15]],1,{t:"insecte",c:"#6a5a8a",c2:"#fff27a",vol:1}],
+  ["mont_crapaud","Crapaud de selle","Monture",25,{vit:80,agi:30},[["bave",20],["vase",15],["avoine",20]],2,{t:"crapaud",c:"#6fa35a",c2:"#e8d48a"}],
+  ["fam_taupe","Taupinette des galeries","Familier",35,famSt(3,{prospection:.45,agi:.35}),[["geode",20],["griffe",15],["chene",25]],3,{t:"quad",c:"#6a5a62",c2:"#f4a6a0",o:"rond",x:"griffes"}],
+  ["mont_belier","Bélier des galeries","Monture",38,famSt(3,{vit:.9,puissance:.45}),[["rouille",25],["argent",15],["houblon",25]],3,{t:"quad",c:"#e8dcc4",c2:"#9a7a5a",o:"cornes",x:"laine",m:1}],
+  ["mont_scarabee","Scarabée porteur","Monture",45,{vit:150,puissance:60,prospection:30},[["elytre",25],["geode",15],["or",20]],4,{t:"scarabee",c:"#3e8f8a",c2:"#c6e86b",m:1}],
+  ["fam_fennec","Fennec des dunes","Familier",50,famSt(4,{agi:.45,prospection:.4,crit:4}),[["sable",25],["mirage",20],["seigle",30]],4,{t:"quad",c:"#e8b86a",c2:"#fff2d8",o:"pointe",q:"touffe"}],
+  ["fam_givre","Renardeau de givre","Familier",60,{puissance:120,crit:5,prospection:40},[["fourrure",30],["givre",20],["lin",30]],5,{t:"quad",c:"#e8f1f5",c2:"#8fc7e0",o:"pointe",q:"touffe"}],
+  ["mont_ours","Ours des neiges","Monture",70,famSt(5,{vit:1,puissance:.5}),[["fourrure",35],["souffle",25],["cobalt",30]],5,{t:"quad",c:"#f4f8fa",c2:"#b9d4f0",o:"rond",m:1}],
+  ["fam_hibou","Hibou d'orage","Familier",82,famSt(6,{sagesse:.6,air:.5,crit:5}),[["eclair",30],["nuee",25],["bouleau",35]],6,{t:"oiseau",c:"#8f8a9c",c2:"#f2d94a",vol:1}],
+  ["mont_griffon","Griffon des falaises","Monture",90,famSt(6,{vit:1,agi:.5,puissance:.4}),[["galet",35],["eclair",30],["zinc",35]],6,{t:"quad",c:"#e2b66a",c2:"#f4f8fa",o:"pointe",q:"fine",x:"ailes",m:1}],
+  ["fam_ouistiti","Ouistiti des lianes","Familier",102,famSt(7,{agi:.6,prospection:.6,crit:6}),[["liane",35],["poilroux",30],["merisier",40]],7,{t:"quad",c:"#b9773f",c2:"#f4d8b0",o:"rond",q:"fine"}],
+  ["mont_panthere","Panthère d'émeraude","Monture",110,famSt(7,{puissance:.7,agi:.5,vit:.7}),[["poilroux",40],["petalecarn",35],["manganese",40]],7,{t:"quad",c:"#2f6a3a",c2:"#7ad08a",o:"pointe",q:"fine",x:"taches",m:1}],
+  ["fam_hippocampe","Hippocampe nacré","Familier",122,famSt(8,{sagesse:.7,prospection:.6}),[["pince",40],["filament",35],["riz",45]],8,{t:"hippocampe",c:"#c08af0",c2:"#f4e8ff",vol:1}],
+  ["mont_tortue","Tortue de corail","Monture",130,famSt(8,{vit:1.5,puissance:.4}),[["piquant",45],["pince",35],["bauxite",45]],8,{t:"quad",c:"#6fa35a",c2:"#e8684a",x:"carapace",m:1}],
+  ["fam_salamandre","Salamandre de braise","Familier",142,famSt(9,{puissance:.9,crit:8}),[["magma",45],["cendre",35],["charme",50]],9,{t:"quad",c:"#f0622c",c2:"#ffd36a",q:"flamme",x:"bas"}],
+  ["mont_draco","Draco de lave","Monture",150,famSt(9,{vit:1.1,puissance:.8,agi:.3}),[["scorie",50],["magma",40],["platine",50]],9,{t:"quad",c:"#8a4a3c",c2:"#ff8a3c",o:"cornes",q:"flamme",x:"ailes",m:1}],
+  ["fam_follet","Feu follet","Familier",162,famSt(10,{sagesse:.6,puissance:.7,prospection:.4}),[["voile",50],["pierrelune",40],["ebene",55]],10,{t:"follet",c:"#a8e8e0",c2:"#f4fffd",vol:1}],
+  ["mont_golem","Golem runique","Monture",170,famSt(10,{vit:1.4,puissance:.9}),[["rune",55],["pierrelune",45],["mithril",55]],10,{t:"golem",c:"#8a8a9e",c2:"#f0a03c",m:1}],
+  ["fam_chatombre","Chat d'ombre","Familier",182,famSt(11,{puissance:1,agi:.4,crit:10}),[["ombre",55],["neant",45],["sequoia",60]],11,{t:"quad",c:"#3a3060",c2:"#c83a5a",o:"pointe",q:"fine"}],
+  ["mont_raie","Raie du néant","Monture",192,famSt(11,{vit:1.4,puissance:1.1,agi:.4}),[["larme",60],["neant",50],["obsidienne",60]],11,{t:"raie",c:"#5a4fa8",c2:"#c83a5a",vol:1,m:1}],
 ];
-FAMS.forEach(([id,name,kind,lvl,stats,recipe,z])=>ITEMS[id]={id,z,slot:"familier",kind,name,stats,recipe,lvl,price:60*(z+1)**2,noSet:true});
+FAMS.forEach(([id,name,kind,lvl,stats,recipe,z,look])=>ITEMS[id]={id,z,slot:"familier",kind,name,stats,recipe,lvl,price:60*(z+1)**2,noSet:true,look});
 /* Trophées : butin rare (1 % × prospection), un par type de monstre */
 const TR_ST=["vit","puissance","agi","sagesse","prospection","crit"];
 ZONES.forEach((z,zi)=>{const a=TR_ST[zi%6],b=TR_ST[(zi+2)%6],v=k=>k==="crit"?2+zi:Math.round(budget(zi)*.5);ITEMS["tb_"+zi]={id:"tb_"+zi,z:zi,slot:"trophee",kind:"Trophée de boss",name:"Trophée : "+BOSSES[zi][0],stats:{[a]:v(a),[b]:v(b)},recipe:[],lvl:1,price:150*(zi+1)**2,noSet:true,noEnch:true}});
@@ -345,7 +375,7 @@ const dropKind=n=>/plume|aile/i.test(n)?"feather":/laine|touffe|fourrure|poil|pe
 let DROPC=null;
 const dropCol=r=>{if(!DROPC){DROPC={};Object.values(MON).forEach(m=>{if(m.boss){if(m.bres)DROPC[m.bres[0]]=m.c}else{DROPC[m.drop[0]]=m.c;(typeof LOOT!=="undefined"&&LOOT[m.id]||[]).forEach(l=>{if(!l.item&&!DROPC[l.id])DROPC[l.id]=m.c})}})}return DROPC[r.id]||ZCOL[r.zone]||"#c9a36a"};
 const trMon=it=>it.id.startsWith("tr_")?MON[it.id.slice(3)]:it.id.startsWith("tb_")?MON["boss_"+it.id.slice(3)]:null;
-const itIcon=it=>it.img?`<img src="${it.img}" alt="">`:it.set&&MON[it.set]?`<img class="px" src="${PX.item(it.slot,MON[it.set].c)}" alt="">`:it.slot==="trophee"&&trMon(it)?`<img class="px" src="${PX.monster(trMon(it))}" alt="">`:it.slot==="familier"?`<img class="px" src="${PX.pet(ZCOL[it.z]||"#f08aa8")}" alt="">`:glyph(it.slot);
+const itIcon=it=>it.img?`<img src="${it.img}" alt="">`:it.set&&MON[it.set]?`<img class="px" src="${PX.item(it.slot,MON[it.set].c)}" alt="">`:it.slot==="trophee"&&trMon(it)?`<img class="px" src="${PX.monster(trMon(it))}" alt="">`:it.slot==="familier"?`<img class="px" src="${it.look?PX.fam(it.id):PX.pet(ZCOL[it.z]||"#f08aa8")}" alt="">`:glyph(it.slot);
 const itCol=it=>it.slot==="familier"?"#f08aa8":it.slot==="trophee"?"#f0c35a":ZCOL[it.z];
 const resIcon=r=>r.img?`<img src="${r.img}" alt="">`:r.kind==="g"?`<img class="px" src="${PX.res(r.prof,r.tier)}" width="16" height="16" alt="">`:r.kind==="d"?`<img class="px" src="${PX.drop(dropKind(r.name),dropCol(r),r.rare||r.boss)}" width="16" height="16" alt="">`:r.kind==="k"?`<img class="px" src="${PX.key()}" width="16" height="16" alt="">`:r.kind==="p"?`<img class="px" src="${PX.potion(r.col)}" width="16" height="16" alt="">`:glyph(r.kind==="d"?"drop":r.kind==="k"?"cle":r.kind==="p"?"potion":r.prof);
 const kindLabel=r=>r.kind==="d"?"Butin de monstre":r.kind==="k"?"Clé de donjon":r.kind==="p"?"Potion":"Ressource · "+PROFS[r.prof].name;

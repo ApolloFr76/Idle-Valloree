@@ -21,7 +21,7 @@ function drawModeBar(){
 function renderLog(){const L=S.opt?S.opt.logLines:8,now=Date.now();$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${l.c}${l.t&&now-l.t<700?" new":""}">${logIcon(l)}<span>${l.h}</span></div>`).join("")}
 /* Compagnons : voir SCENE.drawPals() dans js/scene.js (équipe en formation) */
 function live(){
-  if(!S.cls)return;const st=stats(),need=xpNeed(S.lvl),maxed=S.lvl>=LVL_MAX;SCENE.drawPals();
+  if(!S.cls)return;const st=stats(),need=xpNeed(S.lvl),maxed=S.lvl>=lvlMax();SCENE.drawPals();
   $("lvlTxt").textContent="Niveau "+S.lvl+(S.prest?" · Ω "+S.prest:"");$("xpTxt").textContent=maxed?"Niveau maximum":`${fmt(S.xp)} / ${fmt(need)} XP`;$("xpBar").style.width=(maxed?100:S.xp/need*100)+"%";
   $("ecusTxt").textContent=fmt(VIE.ecus());
   $("pHpTxt").textContent=`${fmt(S.hp)} / ${fmt(st.maxHp)}`;$("pHpBar").style.width=(S.hp/st.maxHp*100)+"%";SCENE.lag("pHpLag",S.hp/st.maxHp*100);

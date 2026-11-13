@@ -10,7 +10,7 @@ const PICKUPS=[
   {id:"oeuf",name:"Œuf de fortune",w:2,g:"#ff8ab0",txt:"Jackpot : écus ×8 et tous les bonus"},
 ];
 const PK_LIFE=13,PK_MIN=45,PK_MAX=120;
-function farmGold(sec){const st=stats(),z=ZONES[S.zone],ms=monsterStats(Math.round((z.lvl[0]+Math.min(z.lvl[1],Math.max(z.lvl[0],S.lvl+2)))/2));const bd=S.buffs.filter(b=>b.k==="dmg").reduce((a,b)=>a*b.v,1);return Math.round(ms.ecus/(ms.hp/(st.dps/bd)+.5)*sec)+10+S.lvl*3}
+function farmGold(sec){const st=stats(),z=ZONES[S.zone],ms=monsterStats(Math.round((z.lvl[0]+Math.min(zoneTop(z),Math.max(z.lvl[0],S.lvl+2)))/2));const bd=S.buffs.filter(b=>b.k==="dmg").reduce((a,b)=>a*b.v,1);return Math.round(ms.ecus/(ms.hp/(st.dps/bd)+.5)*sec)+10+S.lvl*3}
 function spawnPk(){let r=Math.random()*PICKUPS.reduce((a,p)=>a+p.w,0),p=PICKUPS[0];for(const q of PICKUPS){if((r-=q.w)<0){p=q;break}}
   S.pk={id:p.id,until:S.time+PK_LIFE,x:12+Math.random()*76,y:18+Math.random()*55};drawPk()}
 function drawPk(){const old=$("pk");if(old)old.remove();if(!S.pk)return;const p=PICKUPS.find(q=>q.id===S.pk.id);
@@ -21,7 +21,7 @@ function takePk(){
   if(!S.pk)return;sfx("pickup");const p=PICKUPS.find(q=>q.id===S.pk.id);S.pk=null;drawPk();S.pkN++;S.pkNext=S.time+(PK_MIN+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)*(evOn("nuit")?.5:1);inc("pickups");qProg("pickup");
   let msg="";
   const gold=m=>{const g=gainEcus(farmGold(120)*m);return`+${fmt(g)} écus`};
-  const xp=()=>{if(S.lvl>=LVL_MAX)return gold(1);const x=Math.max(5,Math.round(xpNeed(S.lvl)*.06));gainXp(x);return`+${fmt(x)} XP`};
+  const xp=()=>{if(S.lvl>=lvlMax())return gold(1);const x=Math.max(5,Math.round(xpNeed(S.lvl)*.06));gainXp(x);return`+${fmt(x)} XP`};
   if(p.id==="coffre")msg=gold(1);
   if(p.id==="etoile")msg=xp();
   if(p.id==="orbe"){pkBuff("dmg",3,15,"Frénésie");msg="Dégâts ×3 pendant 15 s"}
@@ -48,7 +48,7 @@ function makeQuest(){
   if(t==="pickup"){q.need=rnd(3,5);q.txt=`Attraper ${q.need} objets cliquables`}
   if(t==="craft"){q.need=rnd(2,4);q.txt=`Fabriquer ${q.need} objets ou potions`}
   if(t==="sell"){q.need=Math.max(200,Math.round(farmGold(180)/50)*50);q.txt=`Gagner ${fmt(q.need)} écus en vendant`}
-  q.ecus=Math.round(farmGold(300));q.xp=S.lvl>=LVL_MAX?0:Math.round(xpNeed(S.lvl)*.15);return q;
+  q.ecus=Math.round(farmGold(300));q.xp=S.lvl>=lvlMax()?0:Math.round(xpNeed(S.lvl)*.15);return q;
 }
 function ensureQuests(){const d=today();if(!S.q||S.q.day!==d){S.q={day:d,list:[0,1,2].map(makeQuest),reroll:1,bonus:false};dirty=true}}
 function qProg(type,key,n=1){if(!S.q)return;S.q.list.forEach(q=>{if(q.done||q.type!==type)return;if(q.key!=null&&q.key!==key)return;q.have=Math.min(q.need,q.have+n);if(q.have>=q.need){q.done=true;if(S.opt.logQuests)log(`Quête terminée : ${q.txt}. Récupérez la récompense dans l'onglet Quêtes.`,"g");if(fx)toast("Quête terminée !")}dirty=true})}
