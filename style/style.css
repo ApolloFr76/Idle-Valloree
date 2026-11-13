@@ -1252,3 +1252,8 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 /* 5 classes sur une ligne (Médecin de la peste) */
 @media (min-width:761px){.classes{grid-template-columns:repeat(5,minmax(0,1fr))!important}}
 .ovc:has(.classes){max-width:1100px}
+
+/* Points par clic (onglet Personnage) */
+.sfoot{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.allocn{display:flex;align-items:center;gap:6px;font-weight:700;margin-left:auto}
+.allocn input{width:90px;padding:6px 8px;font:inherit;background:var(--cream);border:3px solid var(--ink);color:var(--fg)}
