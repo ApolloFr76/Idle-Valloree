@@ -80,7 +80,7 @@ function morph(a,b){
   if(a.nodeType===3||a.nodeType===8){if(a.nodeValue!==b.nodeValue)a.nodeValue=b.nodeValue;return}
   for(const at of [...a.attributes])if(!b.hasAttribute(at.name))a.removeAttribute(at.name);
   for(const at of b.attributes)if(a.getAttribute(at.name)!==at.value)a.setAttribute(at.name,at.value);
-  if(a.nodeName==="INPUT"){if(a.value!==b.value)a.value=b.value;if(a.checked!==b.checked)a.checked=b.checked}
+  if(a.nodeName==="INPUT"&&a!==document.activeElement){if(a.value!==b.value)a.value=b.value;if(a.checked!==b.checked)a.checked=b.checked}
   morphKids(a,b);if(a.nodeName==="SELECT"&&a.value!==b.value)a.value=b.value}
 function morphKids(a,b){const A=[...a.childNodes],B=[...b.childNodes];
   for(let i=0;i<B.length;i++){if(i<A.length)morph(A[i],B[i]);else a.appendChild(B[i])}

@@ -36,6 +36,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"otab":otab=b.dataset.t;renderPanel();break;
     case"optSet":{const k=b.dataset.k,v=b.dataset.v;S.opt[k]=isNaN(+v)?v:+v;applyOpts();renderPanel();break}
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
+    case"code":{const i=$("codeBox");useCode(i&&i.value);if(i)i.value="";break}
     case"saveNow":save();lastSave=Date.now();toast("Partie enregistrée",1);break;
     case"pause":setPause(!paused);break;
     case"forgeHit":break; /* géré au pointerdown, plus précis */
@@ -98,6 +99,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(tutoI>=0){if(k==="escape"){tutoEnd()}else if(k==="arrowright"||k==="enter"){e.preventDefault();tutoI++;tutoDraw()}else if(k==="arrowleft"){tutoI=Math.max(0,tutoI-1);tutoDraw()}if(k!=="tab")e.preventDefault();return}
   if((k==="enter"||k===" ")&&e.target.dataset&&e.target.dataset.a==="atOpen"){e.preventDefault();e.target.click();return}
   if(forge&&!forge.done&&(k===" "||k==="enter")){e.preventDefault();if(!e.repeat)forgeStrike();return}
+  if(k==="enter"&&e.target.id==="codeBox"){e.preventDefault();useCode(e.target.value);e.target.value="";return}
   if(mg&&!mg.done&&k===" "){e.preventDefault();if(mg.pid==="bucheron"&&!e.repeat)logHit();if(mg.pid==="pecheur"){if(mg.st==="reel")fishHold(true);else if(!e.repeat)fishHook()}return}
   if(mg&&k==="escape"){mgClose();return}
   if(!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge||mg)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;

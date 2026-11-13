@@ -405,3 +405,18 @@ const resCol=r=>r.kind==="d"?ZCOL[r.zone]:r.kind==="k"?"#f0c35a":r.kind==="p"?r.
 const xpNeed=l=>Math.floor(40*Math.pow(l,1.75)+60*l);
 const pxNeed=l=>Math.floor(6*Math.pow(l,1.5)+5*l);
 
+
+/* ---------- Codes (Options > Sauvegarde > Code) ----------
+   Ajouter un code : "NOM":{txt:"ce que fait le code", once:true si utilisable une seule fois, go:()=>{ ... }}
+   Le nom se tape sans tenir compte des majuscules ni des espaces. go() peut renvoyer un texte affiché au joueur. */
+const CODES={
+  "ECUS":{txt:"+1 000 000 écus (test)",go:()=>{gainEcus(1e6)}},
+  "NIVEAU":{txt:"+10 niveaux (test)",go:()=>{for(let i=0;i<10&&S.lvl<lvlMax();i++)gainXp(xpNeed(S.lvl)-S.xp)}},
+  "ECLATS":{txt:"+100 éclats Oméga (test)",go:()=>{S.souls+=100;S.soulsTotal=(S.soulsTotal||0)+100}},
+  "METIERS":{txt:"+10 niveaux dans chaque métier (test)",go:()=>{for(const p in S.jobs){S.jobs[p].lvl=Math.min(PROF_MAX,S.jobs[p].lvl+10);S.jobs[p].xp=0}}},
+  "SOIN":{txt:"PV au maximum",go:()=>{S.hp=stats().maxHp}},
+  "GM2TAMRSGM2DA":{txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
+};
+function useCode(raw){const k=String(raw||"").toUpperCase().replace(/\s+/g,""),c=CODES[k];if(!k)return;
+  if(!c){toast("Code inconnu",1);return}S.codes=S.codes||{};if(c.once&&S.codes[k]){toast("Code déjà utilisé",1);return}
+  const r=c.go();S.codes[k]=(S.codes[k]||0)+1;log(`Code ${k} : ${r||c.txt}.`,"g");toast(`Code ${k} : ${r||c.txt}`,1);dirty=true;save()}
