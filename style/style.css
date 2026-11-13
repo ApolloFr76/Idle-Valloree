@@ -1269,3 +1269,12 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .lsr .sico{width:20px;height:20px}
 .lsr b{color:#fff8e6}
 .lsr .lscoin{width:16px;height:16px;margin:0 2px}
+
+/* Chronomancien, Berserker, Invocateur */
+.fx.banner.chr b{color:#8fd6ff}.fx.banner.inv b{color:#c9a8ff}
+.an.mcircle.chr{border-color:#f2d94a;box-shadow:0 0 14px rgba(242,217,74,.6)}
+.an.ringwave.chr{border-color:#8fd6ff}
+.an.spirit{width:22px;height:26px;background:radial-gradient(circle at 50% 40%,#fff 0 18%,#c9a8ff 22% 60%,rgba(201,168,255,0) 70%);border-radius:50% 50% 40% 40%!important;opacity:.9;animation:spiritFloat 1.4s ease-in-out infinite;box-shadow:0 0 10px rgba(201,168,255,.8)}
+@keyframes spiritFloat{50%{transform:translateY(-8px)}}
+@media (min-width:761px){.classes{grid-template-columns:repeat(4,minmax(0,1fr))!important}}
+.ovc:has(.classes){max-width:1100px}
