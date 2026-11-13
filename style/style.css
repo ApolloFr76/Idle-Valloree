@@ -1260,3 +1260,12 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 
 /* Super critique (chance de critique au-delà de 100 %) */
 .float.super{color:#ff5af0!important;font-size:1.35em;text-shadow:2px 2px 0 #1c1020,0 0 10px rgba(255,90,240,.8)}
+
+/* Statistiques en direct (js/rendu.js : liveStats) */
+.lstats{background:var(--slot,#3a2a1e);border:3px solid var(--ink);padding:8px 10px;color:#f4e6c8;display:flex;flex-direction:column;gap:4px;flex:none}
+.lstats .lsh{display:flex;justify-content:space-between;align-items:baseline;color:var(--sun,#ffd84a);margin-bottom:2px}
+.lstats .lsh .muted{color:#c8b08a}
+.lsr{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;font-size:13px}
+.lsr .sico{width:20px;height:20px}
+.lsr b{color:#fff8e6}
+.lsr .lscoin{width:16px;height:16px;margin:0 2px}
