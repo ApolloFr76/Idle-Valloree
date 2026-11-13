@@ -18,6 +18,19 @@ const STAT_INFO={vit:"Chaque point donne 2 points de vie.",sagesse:"Chaque point
   hp:"Quand ils tombent à 0, vous êtes K.O. pendant 5 secondes.",dmg:"Dégâts d'une attaque automatique, avant critique et résistances.",crit:"Chance qu'un coup soit critique, et multiplicateur appliqué. Au-delà de 100 %, le surplus (jusqu'à 200 %) donne des super critiques : dégâts critiques ×2.",
   dodge:"Chance d'éviter complètement une attaque de monstre.",prospection:"Augmente le butin, les écus et les chances de trophée. 100 = normal.",xp:"Expérience supplémentaire gagnée à chaque victoire.",dps:"Moyenne de vos dégâts par seconde, critiques compris (sans les compagnons)."};
 const TL=(t,body)=>`<h4>${t}</h4>${body}`;
+/* Texte d'un effet de sort (tous les types : coup, DoT, soin, bonus, invocation, rafale, écho, purge) */
+function spFxTxt(f,st,C){const sm=C.spellMult||1,x=v=>"×"+String(v).replace(".",","),D=DOTS[f.k];
+  if(f.t==="hit")return`Dégâts : <b>~${fmt(st.hit*f.m*sm)}</b>`;
+  if(f.t==="dot"&&D)return`${D.n} : <b>+${f.n}</b> charge${f.n>1?"s":""} (<b>~${fmt((st.dotPer&&st.dotPer[f.k]||0)*f.n)}</b>/s)`;
+  if(f.t==="dot")return`Dégâts sur la durée : <b>~${fmt(st.hit*(f.m||0)*sm)}</b>/s pendant ${f.d||0} s`;
+  if(f.t==="heal")return`Soin : <b>${fmt(st.maxHp*f.p)}</b> PV`;
+  if(f.t==="summon")return`Invoque <b>${f.n}</b> esprit${f.n>1?"s":""} pendant ${f.d} s : <b>~${fmt(st.hit*f.m*sm)}</b>/s chacun`;
+  if(f.t==="multi")return`<b>${f.n}</b> frappes de <b>~${fmt(st.hit*f.m*sm)}</b>`;
+  if(f.t==="echo")return`Renvoie les dégâts infligés ces <b>${f.s}</b> dernières secondes`;
+  if(f.t==="purge")return`Déclenche d'un coup tous les DoT du monstre, à <b>${Math.round(f.m*100)} %</b> de leurs dégâts restants`;
+  if(f.t==="buff"){const L={dmg:"Dégâts",spd:"Vitesse d'attaque",def:"Dégâts subis",crit:"Critique",dot:"Dégâts des DoT",ally:"Dégâts des compagnons",cdr:"Temps de recharge",pros:"Prospection",xp:"Expérience"};
+    return`${L[f.k]||"Bonus"} ${f.k==="crit"?"+"+f.v+" %":x(f.v)} pendant ${f.d} s`}
+  return""}
 function tipFor(el){
   const v=el.dataset.v||el.dataset.tip;
   if(el.dataset.s&&!v){const u=S.equip[el.dataset.s],inst=u&&S.items.find(i=>i.u===u);return inst?tipItem(ITEMS[inst.id],inst):`<h4>${EQ[el.dataset.s].n}</h4><div class="tt">Emplacement vide</div>`}
@@ -33,7 +46,7 @@ function tipFor(el){
   if(t==="mel"){const d=MON[id];if(!d)return"";const e=ELEMS[d.el];return TL(d.name,`<div>Élément : <b style="color:${e.c}">${e.n}</b></div><div>Faible : <b>${ELEMS[weakTo(d.el)].n}</b></div><div>Résiste : <b>${e.n}, ${ELEMS[BEATS[d.el]].n}</b></div>`)}
   if(t==="el"){const e=ELEMS[id];if(id==="neutre")return TL("Neutre",`<div class="tt">Aucun élément : ni bonus ni malus. Investissez des points en Feu, Eau, Terre ou Air pour choisir votre élément.</div>`);
     const w=weakTo(id),beat=BEATS[id];return TL(`<span style="color:${e.c}">${e.n}</span>`,`<div>Fort contre : <b>${ELEMS[beat].n}</b> (+${-RES_WEAK} % de dégâts)</div><div>Faible contre : <b>${ELEMS[w].n}</b></div>${sep}<div class="tt">Monstres ${e.n} : ${Object.values(MON).filter(m=>m.el===id&&!m.boss).map(m=>m.name).join(", ")}</div>`)}
-  if(t==="sp"){const sp=CLASSES[S.cls].spells.find(x=>x.id===id),C=CLASSES[S.cls];if(!sp)return"";const fx=sp.fx.map(f=>f.t==="hit"?`Dégâts : <b>~${fmt(st.hit*f.m*C.spellMult)}</b>`:f.t==="dot"?`Dégâts sur la durée : <b>~${fmt(st.hit*f.m*C.spellMult)}</b>/s pendant ${f.d} s`:f.t==="heal"?`Soin : <b>${fmt(st.maxHp*f.p)}</b> PV`:`${f.k==="dmg"?"Dégâts":f.k==="spd"?"Vitesse":f.k==="def"?"Dégâts subis":"Critique"} ${f.k==="crit"?"+"+f.v+" %":"×"+String(f.v).replace(".",",")} pendant ${f.d} s`).map(x=>`<div class="ts">${x}</div>`).join("");
+  if(t==="sp"){const sp=CLASSES[S.cls].spells.find(x=>x.id===id),C=CLASSES[S.cls];if(!sp)return"";const fx=sp.fx.map(f=>spFxTxt(f,st,C)).map(x=>`<div class="ts">${x}</div>`).join("");
     const rem=Math.max(0,(S.cds[sp.id]||0)-S.time);return TL(sp.name,`<div class="tt">Niveau ${sp.lvl} · recharge ${(+spCd(sp).toFixed(1))} s${rem?` · prêt dans ${Math.ceil(rem)} s`:""}</div>${sep}${fx}<div class="tt">Touche ${CLASSES[S.cls].spells.indexOf(sp)+1}</div>`)}
   if(t==="z"){const z=ZONES[+id],lock=S.lvl<z.lvl[0];return TL(z.name,`<div class="tt">Niveaux ${z.lvl[0]} à ${z.lvl[1]}${lock?` · <span class="tn">verrouillée</span>`:""}</div>${sep}${z.mons.map(m=>`<div>${m.name} · <span style="color:${ELEMS[m.el].c}">${ELEMS[m.el].n}</span> <span class="tt">(${(LOOT[m.id]||[]).filter(l=>!l.item).map(l=>seen(l.id)?l.n:"???").join(", ")})</span></div>`).join("")}${sep}<div>Boss : <b>${MON["boss_"+z.i].name}</b> · ${S.zk[z.i]||0}/${BOSS_KILLS}</div><div class="tt">Panoplie ${z.set} · élément ${ELEMS[z.el].n}</div>`)}
   if(t==="b"){const z=ZONES[+id],b=MON["boss_"+id],ms=monsterStats(z.lvl[1]),hp=Math.round(ms.hp*12),res=monRes(b.el,st.el),ef=st.dps*(1-res/100)+allyDps(),tk=hp/Math.max(1,ef);
