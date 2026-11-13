@@ -18,7 +18,11 @@ function save(){if(!S)return;S.last=Date.now();try{localStorage.setItem(SAVE_KEY
 const $=id=>document.getElementById(id);
 const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const fmt=n=>{n=Math.floor(n);const f=S&&S.opt&&S.opt.numFmt;if(f==="full")return n.toLocaleString("fr-FR");if(f==="sci"&&Math.abs(n)>=1e5)return n.toExponential(2).replace("e+","e");
-  return n>=1e15?n.toExponential(2).replace("e+","e"):n>=1e12?(n/1e12).toFixed(2)+" T":n>=1e9?(n/1e9).toFixed(2)+" G":n>=1e7?(n/1e6).toFixed(1)+" M":n>=1e5?(n/1e3).toFixed(1)+" k":n.toLocaleString("fr-FR")};
+  if(n<1e5)return n.toLocaleString("fr-FR");if(n<1e7)return(n/1e3).toFixed(1)+" k";
+  const e=Math.floor(Math.log10(n)/3),u=NUM_SUF[e];if(!u)return n.toExponential(2).replace("e+","e");return(n/Math.pow(1000,e)).toFixed(e===2?1:2)+" "+u};
+/* Abréviations des grands nombres : k mille, M million, B milliard, T trillion, qu quadrillion, Q quintillion, sx sextillion,
+   Sp septillion, Oc octillion, No nonillion, Dc décillion (au-delà : notation scientifique) */
+const NUM_SUF=["","k","M","B","T","qu","Q","sx","Sp","Oc","No","Dc"];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let dirty=true, fx=true;
 function toast(msg,force){const tm=S&&S.opt&&S.opt.toasts;if(!force&&(tm==="none"||tm==="important"&&!/niveau|succès|boss|quête|trophée|éclat|donjon|record|légendaire|épique|braises|averse|tempête|secousses|dorée|étoilée|brume/i.test(msg)))return;const t=$("toast");t.textContent=msg;t.hidden=false;t.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.hidden=true,300)},2200)}
