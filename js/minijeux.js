@@ -37,7 +37,7 @@ function mgBody(){const p=mg.pid;
     <button class="btn pri" data-a="mgHit" style="padding:10px 22px;font-size:15px">Couper <kbd>Espace</kbd></button>`;
   if(p==="mineur")return`<div class="mgtop"><span>Coups : <b id="mgHits">0</b></span><span>Temps : <b id="mgTime">12</b> s</span></div><div class="rock">${mg.cells.map((c,i)=>`<button class="crack" data-a="mgCell" data-i="${i}" id="mgc${i}"></button>`).join("")}</div>`;
   if(p==="paysan")return`<div class="mgtop"><span>Récolte : <b id="mgHits">0</b></span><span>Temps : <b id="mgTime">15</b> s</span></div><div class="field">${mg.pl.map((c,i)=>`<button class="ear" data-a="mgCell" data-i="${i}" id="mgc${i}"></button>`).join("")}</div>`;
-  if(p==="herboriste")return`<div class="mgtop"><span>Paires : <b id="mgHits">${mg.pairs}</b> / 6</span><span>Essais : <b>${mg.moves}</b></span></div><div class="memo">${mg.cards.map((c,i)=>`<button class="card2${c.up||c.ok?" up":""}${c.ok?" ok":""}" data-a="mgCell" data-i="${i}">${c.up||c.ok?`<img class="px" src="${PX.res("herboriste",c.i*2)}" alt="">`:""}</button>`).join("")}</div>`;
+  if(p==="herboriste")return`<div class="mgtop"><span>Paires : <b id="mgHits">${mg.pairs}</b> / 6</span><span>Essais : <b>${mg.moves}</b></span></div><div class="memo">${mg.cards.map((c,i)=>`<button class="card2${c.up||c.ok?" up":""}${c.ok?" ok":""}" data-a="mgCell" data-i="${i}">${c.up||c.ok?`<img class="px" src="${PX.plant(c.i)}" alt="">`:""}</button>`).join("")}</div>`;
   return""}
 
 /* ---------- Boucle d'animation ---------- */

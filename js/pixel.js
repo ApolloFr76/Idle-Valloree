@@ -274,6 +274,16 @@ const PX=(()=>{
     return cache[k]=s.url(),SPR[k]=s,cache[k]}
   function famFrames(id,anim){const k="fa:"+id;if(!SPR[k])fam(id);return framesOf(k,SPR[k],anim,true)}
 
+  /* Plantes du mini-jeu de mémoire : 6 formes ET 6 couleurs bien différentes pour ne pas les confondre */
+  function plant(i){const k="pl:"+i;if(cache[k])return cache[k];const s=new Spr(16,16),G="#3f8a3a",L="#5fb04a";
+    const stem=()=>{s.part(G,q=>q.line(8,15,8,8),{flat:1});s.part(L,q=>{q.ell(5,12,2.6,1.4);q.ell(11,11,2.6,1.4)})};
+    if(i===0){stem();s.part("#e8323c",q=>{[[8,3],[5,5],[11,5],[6,8],[10,8]].forEach(([x,y])=>q.ell(x,y,2.2,2.2))});s.part("#ffe04a",q=>q.ell(8,6,1.4,1.4),{flat:1})}          /* coquelicot rouge, 5 pétales */
+    if(i===1){stem();s.part("#2f6ae0",q=>q.poly([[4,2],[8,6],[12,2],[12,8],[8,10],[4,8]]))}                                                                                   /* tulipe bleue */
+    if(i===2){stem();s.part("#ffd21e",q=>{for(let a=0;a<8;a++){const r=a*Math.PI/4;q.ell(8+Math.cos(r)*4,6+Math.sin(r)*4,1.4,1.4)}});s.part("#8a4a1a",q=>q.ell(8,6,2,2),{flat:1})} /* tournesol jaune */
+    if(i===3){stem();s.part("#a040e0",q=>{for(let y=1;y<9;y+=2)q.ell(8,y,2.4-y*.15,1.2)})}                                                                                    /* lavande violette en épi */
+    if(i===4){s.part("#f4f4f4",q=>{q.ell(8,6,6,3.6);q.rect(6,6,4,8)});s.part("#e04848",q=>{q.px(5,5);q.px(10,4);q.px(8,7);q.px(11,7)},{flat:1})}                          /* champignon blanc à points rouges */
+    if(i===5){s.part("#2a9a3a",q=>{q.poly([[8,1],[13,6],[11,12],[8,15],[5,12],[3,6]])});s.part("#a8f08a",q=>q.line(8,3,8,14),{flat:1})}                                    /* feuille vert vif */
+    s.outline();return cache[k]=s.url()}
   /* Poisson vu de côté (16×16). rk : 0 commun, 1 rare (rayures, éclat), 2 légendaire (plus grand, contour doré) */
   function fish(col,rk=0,t=0){const k="fi:"+col+rk+t;if(cache[k])return cache[k];const s=new Spr(16,16),dk=mix(col,DARK,.35),lt=mix(col,"#ffffff",.55),big=rk===2;
     const tl=t%3;/* trois silhouettes selon le palier */
@@ -513,7 +523,7 @@ const PX=(()=>{
       if(P.open)s.part(gl,q=>q.px(18+x,20+y-a),{flat:1})}
     s.outline();s.shadow(12,22,6,1.2);return cache[k]=s.url()}
   const beastFrames=(id,col,anim)=>{const k="bfs:"+id+col+anim;return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>beastF(id,col,anim,f)))};
-  return{fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
+  return{plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
 })();
 
 document.body.style.backgroundImage=`url(${PX.tile()})`;
