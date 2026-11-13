@@ -20,7 +20,7 @@ function pPerso(){
       ${row("crit","Coups critiques",`${Math.round(st.critShow)} % (×${st.critM}${st.superC>0?` · super ×${+(st.critM*2).toFixed(2)}`:""})`)}
       ${row("dodge","Esquive",`${Math.round(st.dodge*100)} %`)}
       ${row("prospection","Prospection",fmt(st.prospection))}
-      ${row("xp","Bonus d'expérience",`+${st.sagesse} %`)}
+      ${row("xp","Bonus d'expérience",`+${fmt(Math.round((st.xpM-1)*100))} %`)}
       ${row("dps","Dégâts par seconde",fmt(st.dps))}
       <div class="srow">${sico("dps")}<span>dont dégâts sur la durée</span><span class="v num" style="grid-column:3/5">${fmt(st.dotDps)}</span></div>
       ${Object.entries(DOTS).map(([k,D])=>`<div class="srow" title="${D.n} (${ELEMS[D.el].n}) : ${D.txt}. Stat ${D.n} : ${fmt(st[k]||0)}">${sico(k)}<span style="color:${D.c};font-weight:700">${D.n}</span><span class="v num small" style="grid-column:3/5">${Math.round(st.dotC[k]*100)} % par coup · ${fmt(st.dotPer[k])}/charge/s · ${D.max} max</span></div>`).join("")}
