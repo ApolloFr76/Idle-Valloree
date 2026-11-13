@@ -8,7 +8,8 @@ function placeSide(){const side=$("sideCard"),cb=$("combat"),w=WIDE.matches;side
   const els=["pots","goals","log"].map(id=>$(id));if(w)els.forEach(e=>side.appendChild(e));else els.forEach(e=>cb.appendChild(e))}
 WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
 placeSide();
-function boot2(){placeSide();fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+let sceneOn=false;
+function boot2(){placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init()}fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
 function loop(){
   const now=performance.now();let dt=(now-lastT)/1000;lastT=now;
   if(S&&S.cls){

@@ -2,7 +2,7 @@
 /* ================= Boucle ================= */
 let allyAcc=0,allyFT=0,clickAcc=0;
 function doClick(auto){if(!S.cls||!S.mon||S.ko>0)return;if(!auto){if(fx)FX.click();S.combo=Math.min(comboMax(),S.combo+1);S.comboT=1.5;inc("clicks");mx("maxCombo",Math.floor(S.combo))}let m=.6*clickMult()*(1+S.combo/50);if(Math.random()<talV("t_dore")/100){m*=10;if(fx)floatNum("Frappe dorée !","crit")}hitMon(roll(m,stats()),"click")}
-function tick(dt){
+function tick(dt){VIE.tick(dt);
   S.time+=dt;if(!S.cls)return;inc("time",dt);
   const st=stats();
   if(S.comboT>0)S.comboT-=dt;else if(S.combo>0)S.combo=Math.max(0,S.combo-dt*20*(1-talV("t_combo")/100));
@@ -13,7 +13,7 @@ function tick(dt){
     if(!S.mon){S.spawnT-=dt;if(S.spawnT<=0)nextMon()}
     else{
       S.atkT+=dt;while(S.mon&&S.atkT>=st.interval){S.atkT-=st.interval;hitMon(roll(1+S.combo/200,st),"auto");if(S.mon&&Math.random()<st.dbl)hitMon(roll(1+S.combo/200,st),"auto")}
-      {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1)floatNum(fmt(allyAcc),"ally");allyAcc=0;allyFT=0}if(S.mon.hp<=0)kill()}}
+      {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1){floatNum(fmt(allyAcc),"ally");FX.palAtk()}allyAcc=0;allyFT=0}if(S.mon.hp<=0)kill()}}
       {const rate=(up("auto1")?2:0)+(up("auto2")?4:0);if(rate&&S.mon){clickAcc+=dt*rate;while(clickAcc>=1&&S.mon){clickAcc-=1;doClick(true)}}}
       S.dots=S.dots.filter(d=>d.until>S.time);S.dots.forEach(d=>{d.acc+=dt;while(d.acc>=1&&S.mon){d.acc-=1;hitMon(roll(d.m,st),"dot")}});
       if(S.mon){S.monT+=dt;if(S.monT>=2){S.monT-=2;

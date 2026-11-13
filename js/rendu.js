@@ -3,8 +3,8 @@
 function floatNum(txt,cls){const dn=S.opt&&S.opt.dmgNums;if(dn==="none"||dn==="crit"&&!/crit|heal/.test(cls))return;const e=document.createElement("div");e.className="float "+cls;e.textContent=txt;e.style.left=(cls==="hurt"?22+Math.random()*10:50+Math.random()*22)+"%";$("arena").appendChild(e);setTimeout(()=>e.remove(),950)}
 function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)a.src=PX.hero(S.cls,C.col)}$("heroBox").innerHTML=C?`${emb(S.cls)}<div><div class="nm">${esc(S.name)}</div><div class="sub">${C.name}</div></div>`:""}
 function drawZones(){$("zones").innerHTML=ZONES.map((z,i)=>i>1&&S.lvl<ZONES[i-1].lvl[0]?"":`<button class="zone${i===S.zone?" on":""}" data-a="zone" data-i="${i}" data-tip="z:${i}" ${S.lvl<z.lvl[0]?"disabled":""}><b>${z.name}</b><span>Niv. ${z.lvl[0]}–${z.lvl[1]}${S.lvl<z.lvl[0]?" · verrouillée":""}</span></button>`).join("");
-  const z=ZONES[S.zone];const A=$("arena");A.style.backgroundImage=`url(${PX.scene(z.id)})`;A.style.backgroundColor=PX.ground(z.id);setBiome(z.id)}
-function drawMonster(){const b=$("monBtn");if(!S.mon){b.innerHTML="";$("mName").textContent="…";$("mLvl").textContent="";$("mEl").innerHTML="";return}const d=MON[S.mon.id];b.innerHTML=monsterSVG(d);$("mName").textContent=d.name;$("mLvl").textContent="Niv. "+S.mon.lvl;$("mEl").innerHTML=elChip(d.el)+`<span class="small">Faible : ${ELEMS[weakTo(d.el)].n} · Résiste : ${ELEMS[d.el].n}, ${ELEMS[BEATS[d.el]].n}</span>`}
+  const z=ZONES[S.zone];const A=$("arena");A.style.backgroundImage=`url(${PX.scene(z.id)})`;A.style.backgroundColor=PX.ground(z.id);setBiome(z.id);VIE.deco(z.id);SCENE.layers(z.id)}
+function drawMonster(){const b=$("monBtn");if(!S.mon){b.innerHTML="";$("mName").textContent="…";$("mLvl").textContent="";$("mEl").innerHTML="";return}const d=MON[S.mon.id];b.innerHTML=monsterSVG(d);$("mName").textContent=(S.mon.shiny?"✦ ":"")+d.name;$("mon").classList.toggle("shiny",!!S.mon.shiny);$("mLvl").textContent="Niv. "+S.mon.lvl;$("mEl").innerHTML=elChip(d.el)+`<span class="small">Faible : ${ELEMS[weakTo(d.el)].n} · Résiste : ${ELEMS[d.el].n}, ${ELEMS[BEATS[d.el]].n}</span>`}
 function drawSpells(){if(!S.cls)return;$("spells").innerHTML=CLASSES[S.cls].spells.map(sp=>{const lock=S.lvl<sp.lvl;return`<div class="spellwrap"><button class="spell${lock?" lock":""}" data-a="cast" data-tip="sp:${sp.id}" id="sp-${sp.id}" data-sp="${sp.id}" ${lock?"disabled":""}><b>${sp.name}</b><small>${lock?"Débloqué au niveau "+sp.lvl:sp.txt+" · "+(+spCd(sp).toFixed(1))+" s"}</small><span class="cd" id="cd-${sp.id}"></span></button>${lock?"":`<label class="autot"><input type="checkbox" id="auto-${sp.id}" data-a="auto" data-s="${sp.id}" ${S.auto[sp.id]?"checked":""}> Lancer automatiquement</label>`}</div>`}).join("")}
 let mbSig="";
 function drawModeBar(){
@@ -18,13 +18,14 @@ function drawModeBar(){
     $("modeBar").innerHTML=h;$("arena").classList.toggle("special",m!=="zone")}
   if(m==="boss"||m==="tour"){const tot=m==="boss"?bossTime():towerTime(),f=$("mtFill");if(f){f.style.width=Math.max(0,S.timer/tot*100)+"%";$("mtBar").classList.toggle("low",S.timer<8);$("mtTxt").textContent=Math.max(0,Math.ceil(S.timer))+" s"}}
 }
-function renderLog(){const L=S.opt?S.opt.logLines:8;$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${l.c}">${l.h}</div>`).join("")}
+function renderLog(){const L=S.opt?S.opt.logLines:8,now=Date.now();$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${l.c}${l.t&&now-l.t<700?" new":""}">${logIcon(l)}<span>${l.h}</span></div>`).join("")}
+/* Compagnons : voir SCENE.drawPals() dans js/scene.js (équipe en formation) */
 function live(){
-  if(!S.cls)return;const st=stats(),need=xpNeed(S.lvl),maxed=S.lvl>=LVL_MAX;
+  if(!S.cls)return;const st=stats(),need=xpNeed(S.lvl),maxed=S.lvl>=LVL_MAX;SCENE.drawPals();
   $("lvlTxt").textContent="Niveau "+S.lvl+(S.prest?" · Ω "+S.prest:"");$("xpTxt").textContent=maxed?"Niveau maximum":`${fmt(S.xp)} / ${fmt(need)} XP`;$("xpBar").style.width=(maxed?100:S.xp/need*100)+"%";
-  $("ecusTxt").textContent=fmt(S.ecus);
-  $("pHpTxt").textContent=`${fmt(S.hp)} / ${fmt(st.maxHp)}`;$("pHpBar").style.width=(S.hp/st.maxHp*100)+"%";
-  if(S.mon){$("mHpTxt").textContent=`${fmt(Math.max(0,S.mon.hp))} / ${fmt(S.mon.max)}`;$("mHpBar").style.width=Math.max(0,S.mon.hp/S.mon.max*100)+"%"}else{$("mHpTxt").textContent="";$("mHpBar").style.width="0%"}
+  $("ecusTxt").textContent=fmt(VIE.ecus());
+  $("pHpTxt").textContent=`${fmt(S.hp)} / ${fmt(st.maxHp)}`;$("pHpBar").style.width=(S.hp/st.maxHp*100)+"%";SCENE.lag("pHpLag",S.hp/st.maxHp*100);
+  if(S.mon){$("mHpTxt").textContent=`${fmt(Math.max(0,S.mon.hp))} / ${fmt(S.mon.max)}`;$("mHpBar").style.width=Math.max(0,S.mon.hp/S.mon.max*100)+"%";SCENE.lag("mHpLag",Math.max(0,S.mon.hp/S.mon.max*100))}else{$("mHpTxt").textContent="";$("mHpBar").style.width="0%";SCENE.lag("mHpLag",0)}
   {const pk=$("pk");if(pk)pk.classList.toggle("fade",S.pk&&S.pk.until-S.time<3)}
   drawModeBar();drawPots();drawGoals();
   {const c=$("combo");c.hidden=S.combo<1;if(S.combo>=1){$("comboN").textContent="Combo "+Math.floor(S.combo);$("comboBar").style.width=(S.combo/comboMax()*100)+"%"}}
@@ -66,13 +67,14 @@ function dragEnd(e){const p=DRAG.p;if(!p||e.pointerId!==p.id)return;DRAG.p=null;
 document.addEventListener("pointerup",dragEnd);document.addEventListener("pointercancel",dragEnd);
 document.addEventListener("click",e=>{if(Date.now()-DRAG.skip<350){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener("dragstart",e=>{if(e.target.closest&&e.target.closest("#panel"))e.preventDefault()});
+let lastTabAnim="";
 function renderPanel(force){if(DRAG.on){dirty=true;return}
   if(!S.cls)return;if(ptrDown&&!force){dirty=true;return}dirty=false;
   const anyCraft=Object.values(ITEMS).some(canCraft);
   if(!tabOpen(S.tab))S.tab="perso";
   $("tabs").innerHTML=TABS.map(([k,n])=>!tabOpen(k)?`<button class="tab locked" data-a="tabLocked" data-t="${k}" data-tip="lk:${k}" aria-label="Onglet verrouillé, niveau ${TAB_LOCK[k]}">${LOCK_SVG}</button>`:`<button class="tab${S.tab===k?" on":""}" data-a="tab" data-t="${k}">${n}${k==="perso"&&S.pts>0||k==="atelier"&&anyCraft||k==="aventure"&&(S.zk[S.zone]||0)>=BOSS_KILLS||k==="prest"&&soulsGain()>0&&!S.prest||k==="quests"&&S.q&&S.q.list.some(q=>q.done&&!q.claimed)?'<span class="dot"></span>':""}</button>`).join("");
   const sy=$("panel").scrollTop, open=[...document.querySelectorAll("details.set[open]")].map(d=>d.dataset.z);
-  $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";$("panel").innerHTML=(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,opts:pOpts})[S.tab]||pPerso)();
+  $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";$("panel").innerHTML=(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,opts:pOpts})[S.tab]||pPerso)();if(S.tab!==lastTabAnim){if(lastTabAnim)replayCls($("panel"),"tabin");lastTabAnim=S.tab}
   open.forEach(z=>{const d=document.querySelector(`details.set[data-z="${z}"]`);if(d)d.open=true});
   $("panel").scrollTop=sy;
 }
