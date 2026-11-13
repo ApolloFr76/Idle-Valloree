@@ -18,6 +18,7 @@ function pPerso(){
       ${row("dmg","Dégâts par coup",fmt(st.hit))}
       ${row("agi","Vitesse d'attaque",`${(1/st.interval).toFixed(2)} coups/s`)}
       ${row("crit","Coups critiques",`${st.critC} % (×${st.critM})`)}
+      ${row("crit","Super critiques",st.superC>0?`${Math.round(st.superC)} % des critiques (×${+(st.critM*2).toFixed(2)})`:`<span class="muted">au-delà de 100 % de critique</span>`)}
       ${row("dodge","Esquive",`${Math.round(st.dodge*100)} %`)}
       ${row("prospection","Prospection",fmt(st.prospection))}
       ${row("xp","Bonus d'expérience",`+${st.sagesse} %`)}
