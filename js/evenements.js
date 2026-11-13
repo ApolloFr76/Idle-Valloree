@@ -45,7 +45,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"ally":{const i=+b.dataset.i,id=ALLIES[i][0];let n=b.dataset.n==="max"?1e9:+b.dataset.n,bought=0;while(n-->0){const c=allyCost(i,S.allies[id]||0);if(S.ecus<c)break;S.ecus-=c;S.allies[id]=(S.allies[id]||0)+1;bought++}
       if(bought){const l=S.allies[id];if(Math.floor(l/25)>Math.floor((l-bought)/25))toast(`${ALLIES[i][1]} : dégâts doublés !`);if(l===bought)log(`${ALLIES[i][1]} rejoint votre groupe.`,"g")}else toast("Pas assez d'écus");renderPanel();break}
     case"buy":{const u=UPGS.find(x=>x[0]===b.dataset.u);if(!u||up(u[0])||S.ecus<u[3])break;S.ecus-=u[3];S.up[u[0]]=true;sfx("coin");log(`Amélioration achetée : ${u[1]}.`,"g");toast(`${u[1]} : ${u[2]}`);renderPanel();break}
-    case"zone":if(S.mode!=="zone")endMode(false,"abandon");S.zone=+b.dataset.i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true;break;
+    case"zone":goZone(+b.dataset.i);break;
     case"cast":cast(CLASSES[S.cls].spells.find(s=>s.id===b.dataset.sp),false);break;
     case"ptab":ptab=b.dataset.t;renderPanel();break;
     case"tabLocked":toast(`Onglet verrouillé : il se débloque au niveau ${TAB_LOCK[b.dataset.t]}`,1);break;
@@ -95,7 +95,8 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(k==="escape"&&S.mode!=="zone"){endMode(false,"abandon");return}
   const tk={c:"perso",i:"inv",v:"aventure",f:"atelier",o:"opts"}[k];if(tk&&tabOpen(tk)){S.tab=tk;renderPanel()}});
 function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$("pauseBtn").classList.toggle("pri",v);$("pauseOv").hidden=!v;if(v)save()}
-document.addEventListener("change",e=>{if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
+function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
+document.addEventListener("change",e=>{if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
 window.addEventListener("pagehide",save);
