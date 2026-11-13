@@ -1257,3 +1257,6 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .sfoot{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .allocn{display:flex;align-items:center;gap:6px;font-weight:700;margin-left:auto}
 .allocn input{width:90px;padding:6px 8px;font:inherit;background:var(--cream);border:3px solid var(--ink);color:var(--fg)}
+
+/* Super critique (chance de critique au-delà de 100 %) */
+.float.super{color:#ff5af0!important;font-size:1.35em;text-shadow:2px 2px 0 #1c1020,0 0 10px rgba(255,90,240,.8)}
