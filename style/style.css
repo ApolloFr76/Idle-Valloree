@@ -1283,3 +1283,7 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .mico{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-right:6px;vertical-align:-3px;pointer-events:auto;border-radius:50%;background:var(--c);border:2px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.4);cursor:help}
 .mico svg{width:13px;height:13px;color:#fff}
 .mel:empty,.mtag .mel:empty{display:none}
+/* Étiquette du monstre à hauteur fixe : accrochée par le haut juste au-dessus de la case du monstre
+   (les sprites ne dépassent jamais le haut de leur case), le nom ne passe jamais à la ligne. */
+.world .mtag{top:-53px;bottom:auto}
+.mtag .mhead h3{white-space:nowrap}
