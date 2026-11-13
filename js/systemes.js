@@ -68,5 +68,6 @@ function drawPots(){const ids=POTIONS.map(p=>p[0]).filter(id=>S.res[id]>0),sig=i
 
 /* ================= Événements ================= */
 function startEvent(){const e=EVENTS[rnd(0,EVENTS.length-1)];S.ev={id:e.id,until:S.time+EV_DUR};log(`Événement : <b style="color:${e.c}">${e.n}</b> pendant 2 minutes. ${e.txt}.`,"g");if(fx){toast(`${e.n} : ${e.txt}`);sfx("event")}drawWeather();dirty=true}
-function drawWeather(){const w=$("weather");w.className="weather"+(S.ev&&(!S.opt||S.opt.weatherFx)?" on w-"+S.ev.id:"");VIE.weather()}
+/* Météo : le filtre du bandeau est recopié sur tout le décor de la page (prairie sous les menus). */
+function drawWeather(){const w=$("weather"),c="weather"+(S.ev&&(!S.opt||S.opt.weatherFx)?" on w-"+S.ev.id:"");w.className=c;let g=$("weatherPage");if(!g&&$("wbg")){g=document.createElement("div");g.id="weatherPage";g.setAttribute("aria-hidden","true");$("wbg").after(g)}if(g)g.className=c;VIE.weather()}
 
