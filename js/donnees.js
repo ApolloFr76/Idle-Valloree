@@ -436,12 +436,12 @@ const CODES={
   "ECLATS":{txt:"+100 éclats Oméga (test)",go:()=>{S.souls+=100;S.soulsTotal=(S.soulsTotal||0)+100}},
   "METIERS":{txt:"+10 niveaux dans chaque métier (test)",go:()=>{for(const p in S.jobs){S.jobs[p].lvl=Math.min(PROF_MAX,S.jobs[p].lvl+10);S.jobs[p].xp=0}}},
   "SOIN":{txt:"PV au maximum",go:()=>{S.hp=stats().maxHp}},
-  /* WW9F-7VPP-Q7RQ-SSZF : panoplies du Dévoreil + du Seigneur du Néant (avec 2 anneaux), légendaires +10, équipées */
+  /* WW9F-7VPP-Q7RQ-SSZF : panoplies du Dévoreil + du Seigneur du Néant (avec 2 anneaux) + Raie du néant, légendaires +10, équipées */
   "WW9F7VPPQ7RQSSZF":{txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
     const L=[["s_devoreil_coiffe","coiffe"],["s_devoreil_cape","cape"],["s_devoreil_bottes","bottes"],["s_devoreil_ceinture","ceinture"],
-      ["s_boss_11_amulette","amulette"],["s_boss_11_anneau","anneau"],["s_boss_11_anneau","anneau2"],["s_boss_11_arme","arme"],["s_boss_11_bouclier","bouclier"]];
+      ["s_boss_11_amulette","amulette"],["s_boss_11_anneau","anneau"],["s_boss_11_anneau","anneau2"],["s_boss_11_arme","arme"],["s_boss_11_bouclier","bouclier"],["mont_raie","familier"]];
     L.forEach(([id,slot])=>{if(!ITEMS[id])return;const u=S.uid++;S.items.push({u,id,e:10,r:3});S.equip[slot]=u;S.seen[id]=1});
-    S.hp=stats().maxHp;return"9 objets légendaires +10 équipés"}},
+    S.hp=stats().maxHp;return"10 objets légendaires +10 équipés (dont la Raie du néant)"}},
   "GM2TAMRSGM2DA":{txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
 };
 function useCode(raw){const k=String(raw||"").toUpperCase().replace(/[\s-]+/g,""),c=CODES[k];if(!k)return;
