@@ -1166,3 +1166,13 @@ html.rm .layfar,html.rm .layfront{transition:none}
 .ally .av.pic{width:58px;height:58px;background:linear-gradient(180deg,#fff6d8,color-mix(in srgb,var(--c) 45%,#fff6d8));overflow:hidden;padding:0}
 .ally .av.pic img{width:54px;height:54px;image-rendering:pixelated}
 .ally .av.pic.unowned img{filter:brightness(0) opacity(.45)}
+
+/* Familier ou monture à côté du héros (js/scene.js : drawFam) */
+.afam{width:72px;height:72px;flex:none;margin-right:-38px;pointer-events:none;image-rendering:pixelated;z-index:0;align-self:flex-end}
+.afam.mount{width:104px;height:104px;margin-right:-62px;margin-bottom:-6px}
+.afam.fly{margin-bottom:56px;animation:famFloat 2.4s ease-in-out infinite}
+.afam.mount.fly{margin-bottom:40px}
+@keyframes famFloat{50%{transform:translateY(-8px)}}
+.mon.ko .afam{filter:grayscale(1) brightness(.8)}
+html.rm .afam{animation:none}
+@container (max-width:420px){.afam{width:54px;height:54px;margin-right:-28px}.afam.mount{width:78px;height:78px;margin-right:-46px}}
