@@ -436,11 +436,6 @@ const codeHash=s=>{s="vallore:"+String(s||"").toUpperCase().replace(/[\s-]+/g,""
   h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(h2>>>0).toString(36)+(h1>>>0).toString(36)};
 
 const CODES={
-  "12hb6ys1tnj8uo":{txt:"+1 000 000 écus (test)",go:()=>{gainEcus(1e6)}},
-  "2qgxid19lgcha":{txt:"+10 niveaux (test)",go:()=>{for(let i=0;i<10&&S.lvl<lvlMax();i++)gainXp(xpNeed(S.lvl)-S.xp)}},
-  "1q2wskuqrz5l8":{txt:"+100 éclats Oméga (test)",go:()=>{S.souls+=100;S.soulsTotal=(S.soulsTotal||0)+100}},
-  "12izboq19x7p4s":{txt:"+10 niveaux dans chaque métier (test)",go:()=>{for(const p in S.jobs){S.jobs[p].lvl=Math.min(PROF_MAX,S.jobs[p].lvl+10);S.jobs[p].xp=0}}},
-  "b7byz07vpdkf":{txt:"PV au maximum",go:()=>{S.hp=stats().maxHp}},
   /* panoplies du Dévoreil + du Seigneur du Néant (2 anneaux) + Raie du néant légendaires +10, 6 trophées +100, le tout équipé */
   "fkrtolxmz1jh":{once:true,txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
     const L=[["s_devoreil_coiffe","coiffe"],["s_devoreil_cape","cape"],["s_devoreil_bottes","bottes"],["s_devoreil_ceinture","ceinture"],
