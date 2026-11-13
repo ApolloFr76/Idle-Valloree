@@ -471,15 +471,15 @@ const codeHash=s=>{s="vallore:"+String(s||"").toUpperCase().replace(/[\s-]+/g,""
   h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);return(h2>>>0).toString(36)+(h1>>>0).toString(36)};
 
 const CODES={
-  /* panoplies du Dévoreil + du Seigneur du Néant (2 anneaux) + Raie du néant légendaires +10, 6 trophées +100, le tout équipé */
+  /* panoplies du Dévoreil + du Seigneur du Néant (2 anneaux) + Raie du néant légendaires +10, 6 trophées +200, le tout équipé */
   "fkrtolxmz1jh":{once:true,txt:"panoplies du Dévoreil et du Seigneur du Néant légendaires +10",go:()=>{
     const L=[["s_devoreil_coiffe","coiffe"],["s_devoreil_cape","cape"],["s_devoreil_bottes","bottes"],["s_devoreil_ceinture","ceinture"],
       ["s_boss_11_amulette","amulette"],["s_boss_11_anneau","anneau"],["s_boss_11_anneau","anneau2"],["s_boss_11_arme","arme"],["s_boss_11_bouclier","bouclier"],["mont_raie","familier"]];
     L.forEach(([id,slot])=>{if(!ITEMS[id])return;const u=S.uid++;S.items.push({u,id,e:10,r:3});S.equip[slot]=u;S.seen[id]=1});
-    /* trophées +100 (si déjà possédé : on garde le rang le plus haut), équipés dans les 6 emplacements */
-    ["tr_devoreil","tr_ombrelin","tr_neantille","tr_gargouillon","tb_10","tb_11"].forEach((id,i)=>{if(!ITEMS[id])return;let t=S.items.find(x=>x.id===id);
-      if(t)t.e=Math.max(t.e||0,100);else{t={u:S.uid++,id,e:100};S.items.push(t)}S.seen[id]=1;for(const k in S.equip)if(S.equip[k]===t.u&&k!=="trophee"+i)S.equip[k]=null;S.equip["trophee"+i]=t.u});
-    S.hp=stats().maxHp;return"10 objets légendaires +10 et 6 trophées +100 équipés"}},
+    /* trophées +200 (si déjà possédé : on garde le rang le plus haut), équipés dans les 6 emplacements */
+    ["tr_devoreil","tr_ombrelin","tr_neantille","tr_gargouillon","tr_abyssal","tb_11"].forEach((id,i)=>{if(!ITEMS[id])return;let t=S.items.find(x=>x.id===id);
+      if(t)t.e=Math.max(t.e||0,200);else{t={u:S.uid++,id,e:200};S.items.push(t)}S.seen[id]=1;for(const k in S.equip)if(S.equip[k]===t.u&&k!=="trophee"+i)S.equip[k]=null;S.equip["trophee"+i]=t.u});
+    S.hp=stats().maxHp;return"10 objets légendaires +10 et 6 trophées +200 équipés"}},
   /* code de bienvenue : 1 potion de sagesse (XP) + 1 potion de fortune (prospection) */
   "mtgscjd4hf15":{once:true,txt:"1 Potion de sagesse et 1 Potion de fortune",go:()=>{S.res.p_sagesse=(S.res.p_sagesse||0)+1;S.res.p_fortune=(S.res.p_fortune||0)+1;if(typeof drawPots==="function"){potSig="";drawPots()}}},
   "fe8x7v1vuagpg":{once:true,txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
