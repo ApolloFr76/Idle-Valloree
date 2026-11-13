@@ -20,7 +20,7 @@ function stats(){
     s.dotPer[k]=(s.hit*.15*(1+Math.sqrt(v)/20)*(C.dotMult||1)+allyDps()*.02)*DOTS[k].k*bdot}   /* racine : la stat compte sans exploser à haut niveau */
   s.critC=Math.min(100,s.crit+bcrit);
   /* Super critique : la chance de critique au-delà de 100 % (jusqu'à 200 %) devient la chance qu'un critique soit « super » (dégâts critiques ×2) */
-  s.superC=Math.max(0,Math.min(100,s.crit+bcrit-100));s.critM=+(C.critMult+s.critBonus).toFixed(2);
+  s.superC=Math.max(0,Math.min(100,s.crit+bcrit-100));s.critShow=Math.min(200,s.crit+bcrit);   /* affichage : de 0 à 200 % */s.critM=+(C.critMult+s.critBonus).toFixed(2);
   s.interval=Math.max(.3,1.3/(1+s.agi/150))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
   s.pctXp+=fishN();s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*bxp*(evOn("nuit")?1.5:1);s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
