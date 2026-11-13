@@ -133,7 +133,9 @@ const budget=z=>10+z*z*7+z*14;
 const lvlBudget=l=>Math.round(6+l*2.6+Math.pow(l,1.75)*.12);
 const lvlCrit=l=>1+Math.floor(l/12);
 /* Bonus de panoplie progressifs : chaque pièce portée à partir de 2 ajoute un palier (cumulatif) */
-const SET_BONUS=z=>({2:{vit:6*(z+1)},3:{sagesse:4*(z+1)},4:{puissance:5*(z+1),pctXp:5},5:{prospection:8*(z+1),vit:6*(z+1)},6:{crit:2+z,pctEcus:10},7:{puissance:8*(z+1),agi:5*(z+1)},8:{puissance:12*(z+1),vit:14*(z+1),crit:2+z,pctDmg:15}});
+/* Bonus de panoplie : les caractéristiques suivent la même courbe que les objets de la zone (budget),
+   les bonus en % augmentent plus doucement (×1 en zone 1, ×3,75 dans la dernière zone). */
+const SET_BONUS=z=>{const f=budget(z)/budget(0),p=1+z/4;return{2:{vit:6*f},3:{sagesse:4*f},4:{puissance:5*f,pctXp:5*p},5:{prospection:8*f,vit:6*f},6:{crit:2+z,pctEcus:10*p},7:{puissance:8*f,agi:5*f},8:{puissance:12*f,vit:14*f,crit:2+z,pctDmg:15*p}}};
 /* Panoplies : une par monstre (8, 4 ou 2 pièces) et une par boss (4 pièces). SETS[clé] = {name,z,n,lvl,el,boss,ids,mon} */
 const SETS={};
 /* Paliers d'une panoplie : les petites panoplies reprennent les paliers forts du tableau */
