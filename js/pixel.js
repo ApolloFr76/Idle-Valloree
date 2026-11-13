@@ -377,14 +377,17 @@ const PX=(()=>{
   const heroFrames=(cls,col,anim,blink)=>{const k="hfs:"+cls+col+anim+(blink?1:0);return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>heroF(cls,col,anim,f,blink&&f===5)))};
 
   /* Monstres et bêtes : 10 images obtenues en redessinant le sprite pixel par pixel (écrasement, étirement, inclinaison) */
-  function xf(src,{sx=1,sy=1,sh=0,dx=0,dy=0}){const w=src.w,h=src.h,o=new Spr(w,h),by=h-3,cx=w/2;o.sh=src.sh;
-    for(let y=0;y<h;y++)for(let x=0;x<w;x++){const v=Math.round(by-(by-y+dy)/sy),u=Math.round(cx+(x-cx-dx-sh*(by-y))/sx);const c=src.get(u,v);if(c)o.p[y*w+x]=c}return o}
+  /* XP : marge transparente autour de l'image pour que l'élan, l'inclinaison et l'étirement ne soient jamais coupés
+     (l'image est ensuite agrandie d'autant en CSS avec la propriété scale, voir SCENE) */
+  const XP=20;
+  function xf(src,{sx=1,sy=1,sh=0,dx=0,dy=0}){const w=src.w,h=src.h,W=w+2*XP,H=h+2*XP,o=new Spr(W,H),by=h-3,cx=w/2;o.sh=src.sh.map(([a,b,c,d])=>[a+XP,b+XP,c,d]);
+    for(let Y=0;Y<H;Y++)for(let X=0;X<W;X++){const x=X-XP,y=Y-XP,v=Math.round(by-(by-y+dy)/sy),u=Math.round(cx+(x-cx-dx-sh*(by-y))/sx);const c=src.get(u,v);if(c)o.p[Y*W+X]=c}return o}
   const MA={
     idle:Array.from({length:10},(_,i)=>{const t=i/10,b=(1-Math.cos(2*Math.PI*t))/2;return{sy:1-.07*b,sx:1+.05*b,sh:.04*Math.sin(2*Math.PI*t)}}),
     atk:[{},{sh:.08,sy:1.04},{sh:.16,sy:1.08,sx:.96},{sh:.2,sy:1.1,sx:.94,dx:2},{sh:-.1,sy:.95,sx:1.06,dx:-4},{sh:-.28,sy:.9,sx:1.12,dx:-9},{sh:-.22,sy:.92,sx:1.1,dx:-7},{sh:-.1,sy:.96,sx:1.04,dx:-4},{sh:.04,sy:1.02,dx:-1},{}],
     hurt:[{sh:.12,dx:3,sy:.96},{sh:.18,dx:5,sy:.94,sx:1.04},{sh:.14,dx:4,sy:.96},{sh:.08,dx:2},{sh:.03,dx:1},{},{},{},{},{}]};
   function framesOf(key,spr,anim,mirror){const k="xf:"+key+anim+(mirror?"m":"");if(cache[k])return cache[k];const T=MA[anim]||MA.idle;
-    return cache[k]=T.map(p=>{const q=Object.assign({},p);if(mirror){q.sh=-(q.sh||0);q.dx=-(q.dx||0)}return xf(spr,q).url()})}
+    cache[k]=T.map(p=>{const q=Object.assign({},p);if(mirror){q.sh=-(q.sh||0);q.dx=-(q.dx||0)}return xf(spr,q).url()});cache[k].sc=((spr.w+2*XP)/spr.w).toFixed(3);return cache[k]}
   function monFrames(m,anim){const k="m:"+m.id+m.c+(m.crown?1:0);if(!SPR[k])monster(m);return framesOf(k,SPR[k],anim,false)}
   function petFrames(col,anim){pet(col);const k="pe:"+col;return framesOf(k,SPR[k],anim,true)}
 

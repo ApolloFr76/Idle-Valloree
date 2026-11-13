@@ -9,10 +9,11 @@ const SCENE=(()=>{
 
   /* ---------- Acteurs : une image <img> + des séries de 10 images ---------- */
   /* act = {el, sets:{idle,atk,...} (fonctions qui renvoient 10 urls), cur, t0, fd (ms par image), hold, period, off, last} */
-  function setSrc(a,u){if(a.last!==u&&a.el){a.el.src=u;a.last=u}}
+  /* sc : agrandissement des images avec marge (monstres, petites bêtes), pour garder la même taille à l'écran */
+  function setSrc(a,u,sc){if(a.last!==u&&a.el){a.el.src=u;a.last=u;const z=sc||"";if(a.el.style.scale!==z)a.el.style.scale=z}}
   function frame(a,t){
-    if(a.cur!=="idle"){const i=Math.floor((t-a.t0)/a.fd);const L=a.sets[a.cur]();if(i<10){setSrc(a,L[i]);return}if(a.hold&&t<a.t0+10*a.fd+a.hold){setSrc(a,L[9]);return}a.cur="idle"}
-    const cyc=(t+a.off)/a.period,i=Math.floor(cyc*10)%10;const L=a.blink&&Math.floor(cyc)%3===2?a.sets.blink():a.sets.idle();setSrc(a,L[i])}
+    if(a.cur!=="idle"){const i=Math.floor((t-a.t0)/a.fd);const L=a.sets[a.cur]();if(i<10){setSrc(a,L[i],L.sc);return}if(a.hold&&t<a.t0+10*a.fd+a.hold){setSrc(a,L[9],L.sc);return}a.cur="idle"}
+    const cyc=(t+a.off)/a.period,i=Math.floor(cyc*10)%10;const L=a.blink&&Math.floor(cyc)%3===2?a.sets.blink():a.sets.idle();setSrc(a,L[i],L.sc)}
   function play(a,anim,fd=30,hold=0){if(!a||!a.sets[anim])return;a.cur=anim;a.t0=now();a.fd=fd;a.hold=hold}
 
   /* Héros */
