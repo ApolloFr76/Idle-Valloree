@@ -149,3 +149,17 @@ body{padding:0!important;margin:0;background-image:none!important}
 .ouvn{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .ouvn select{width:100%;padding:2px 6px;font-size:14px}
 .ouvc .btn{flex:none;font-size:12px;padding:3px 7px}
+/* Barre d'action compacte : reste sous les pieds des personnages (--feet = 104px) */
+@media (min-width:701px){
+  .hudb{bottom:8px}
+  .abar{gap:8px;padding:4px;align-items:stretch}
+  .hudb .spells{gap:6px}
+  .hudb .spellwrap{width:112px}
+  .hudb .spell{padding:16px 6px 4px;align-items:center;text-align:center}
+  .hudb .spell b{font-size:14px}
+  .hudb .spell.lock small{font-size:10px}
+  .hudb .autot{right:4px;top:3px;font-size:11px}
+  .hudb .pots{flex-direction:row;flex-wrap:wrap;align-content:center;max-width:300px;gap:3px}
+  .hudb .pots .btn{font-size:11px;padding:2px 6px}
+  .hudb .pots .autot::after{font-size:11px}
+}
