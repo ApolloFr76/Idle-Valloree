@@ -91,7 +91,7 @@ function kill(){
   if(S.opt.logKills&&(S.opt.logLoot||!dropTxt))log(`${d.name} vaincu : <span class="x">+${fmt(xp)} XP</span>, <span class="g">+${fmt(ec)} écus</span>${dropTxt}`);
   S.mon=null;S.spawnT=.5;S.dots=[];sfx(d.boss?"boss":"kill");gainXp(xp);
   if(mode==="zone")S.zk[S.zone]=Math.min(BOSS_KILLS,(S.zk[S.zone]||0)+1);
-  if(mode==="boss"){inc("bosses");inc("bossesLife");qProg("boss");S.zk[S.zone]=0;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
+  if(mode==="boss"){inc("bosses");inc("bossesLife");qProg("boss");S.zk[S.zone]=0;(S.zoneBosses||(S.zoneBosses={}))[S.zone]=1;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
   if(mode==="tour"){const f=S.tower.cur;if(f>S.tower.best){S.tower.best=f;const g=gainEcus(towerRec(f));log(`Tour : nouveau record, étage ${f} ! <span class="g">+${fmt(g)} écus</span>`,"g")}mx("tower",S.tower.best);S.tower.cur++;S.timer=towerTime();S.spawnT=.3}
   if(mode==="donjon"){S.dg.wave++;if(S.dg.wave>DG_WAVES){const zi=S.dg.z,z=ZONES[zi],g=gainEcus(farmGold(600)),got=[];
       z.mons.forEach(mm=>{const n=addRes(mm.drop[0],rnd(5,10));if(n)got.push(`${n}× ${mm.drop[1]}`)});
@@ -115,10 +115,14 @@ function cast(sp,auto){
   });
   if(!auto&&fx)log(`Vous lancez ${sp.name}.`,"w");
 }
+function gainGatherXp(pid,rid,mult=1,quiet=false){
+  const p=S.jobs[pid],r=RES[rid];if(!r||p.lvl>=PROF_MAX)return;
+  p.xp+=profGatherXp(p.lvl,r.tier)*mult;
+  while(p.lvl<PROF_MAX&&p.xp>=pxNeed(p.lvl)){p.xp-=pxNeed(p.lvl);p.lvl++;if(!quiet){log(`${PROFS[pid].name} niveau ${p.lvl} !`,"g");const nu=UNLOCK.indexOf(p.lvl);if(nu>=0)log(`Nouvelle ressource : ${PROFS[pid].res[nu][1]}.`,"g")}}
+}
 function gainGather(pid,rid,quiet){
   const p=S.jobs[pid],r=RES[rid];let n=1+(Math.random()<Math.min(.5,p.lvl/120)+talV("t_double")/100?1:0);
-  n=addRes(rid,n);if(n)qProg("gather",rid,n);if(p.lvl<PROF_MAX){p.xp+=Math.round(14*Math.pow(r.tier+1,1.6)); /* l'XP compte même sac plein */
-    while(p.lvl<PROF_MAX&&p.xp>=pxNeed(p.lvl)){p.xp-=pxNeed(p.lvl);p.lvl++;if(!quiet){log(`${PROFS[pid].name} niveau ${p.lvl} !`,"g");const nu=UNLOCK.indexOf(p.lvl);if(nu>=0)log(`Nouvelle ressource : ${PROFS[pid].res[nu][1]}.`,"g")}}}
+  n=addRes(rid,n);if(n)qProg("gather",rid,n);gainGatherXp(pid,rid,1,quiet); /* l'XP compte même sac plein */
   return n;
 }
 

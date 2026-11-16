@@ -113,7 +113,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(k==="escape"&&S.mode!=="zone"){endMode(false,"abandon");return}
   const tk={c:"perso",i:"inv",v:"aventure",f:"atelier",o:"opts"}[k];if(tk&&tabOpen(tk)){S.tab=tk;renderPanel()}});
 function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$("pauseBtn").classList.toggle("pri",v);$("pauseOv").hidden=!v;if(v)save()}
-function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
+function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0]||i>0&&!(S.zoneBosses||{})[i-1])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
 document.addEventListener("input",e=>{if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
 document.addEventListener("change",e=>{if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});

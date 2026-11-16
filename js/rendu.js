@@ -7,7 +7,7 @@ function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)
 /* Choix du monde : une liste déroulante (les mondes débloqués + le prochain, grisé) pour ne pas faire défiler la colonne */
 /* Couleur de chaque monde (mêmes teintes que les anciennes cases) */
 const ZBG=["#57b04a","#1f9a78","#8a9a2e","#8a6ac8","#f0962c","#3d9fe0","#6a86b8","#2fa84a","#1fb0c8","#e2502c","#a88ae0","#5a3f96"];
-function drawZones(){const opts=ZONES.map((z,i)=>i>1&&S.lvl<ZONES[i-1].lvl[0]?"":`<option value="${i}" style="background:${S.lvl<z.lvl[0]?"#a8977e":ZBG[i]};color:#fff8e6"${i===S.zone?" selected":""}${S.lvl<z.lvl[0]?" disabled":""}>${z.name} · Niv. ${z.lvl[0]}–${z.lvl[1]}${S.lvl<z.lvl[0]?" · verrouillée":""}</option>`).join("");
+function drawZones(){const bosses=S.zoneBosses||{},opts=ZONES.map((z,i)=>{const levelLock=S.lvl<z.lvl[0],bossLock=i>0&&!bosses[i-1],locked=levelLock||bossLock;return i>1&&levelLock?"":`<option value="${i}" style="background:${locked?"#a8977e":ZBG[i]};color:#fff8e6"${i===S.zone?" selected":""}${locked?" disabled":""}>${z.name} · Niv. ${z.lvl[0]}–${z.lvl[1]}${locked?" · verrouillée":""}</option>`}).join("");
   $("zones").innerHTML=`<label class="zsel"><span>Monde</span><select id="zoneSel" style="--zb:${ZBG[S.zone]}" data-tip="z:${S.zone}" aria-label="Choisir le monde">${opts}</select></label>`;
   const z=ZONES[S.zone];setBiome(z.id);MONDE.zone(z.id)}
 /* Icône d'élément du monstre : un seul élément gardé d'un monstre à l'autre (mis à jour sur place),

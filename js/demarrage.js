@@ -25,6 +25,7 @@ function loop(){
 function start(data){
   if(started)return;started=true;
   S=(data&&data.S)||load()||fresh();
+  S.zoneBosses=S.zoneBosses||{};for(let i=0;i<S.zone;i++)S.zoneBosses[i]=1;
   if(S.cls&&OLD_CLS[S.cls]){S.cls=OLD_CLS[S.cls];let r=0;for(const k in S.alloc)r+=S.alloc[k]||0;S.pts+=r;S.alloc=fresh().alloc;S.cds={};S.auto={};S.buffs=[];S.dots=[];
     setTimeout(()=>{log("Nouveau système d'éléments : votre classe a été convertie et vos points vous ont été rendus.","g");toast("Vos points de caractéristiques vous ont été rendus")},300)}
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});

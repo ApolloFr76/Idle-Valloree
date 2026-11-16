@@ -52,51 +52,51 @@ const DOTS={poison:{n:"Poison",el:"air",c:"#7ad04a",max:10,k:1,d:6,txt:"s'empile
 const EL_DOT={air:"poison",feu:"brulure",eau:"gelure",terre:"saignement"};
 const OLD_CLS={brasier:"mage",maree:"gardien",roc:"guerrier",bourrasque:"archer"};
 const ZONES = [
-  {id:"prairie",el:"terre",name:"Prairie des Clochettes",lvl:[1,10],set:"de la Prairie",zt:"#3d5f3a",zb:"#243a25",mons:[
+  {id:"prairie",el:"terre",name:"Prairie des Clochettes",lvl:[1,30],set:"de la Prairie",zt:"#3d5f3a",zb:"#243a25",mons:[
     {id:"pompon",el:"terre",name:"Pompon laineux",c:"#efe2c4",shape:"blob",ft:"ears",drop:["laine","Touffe de laine"]},
     {id:"picoreau",el:"air",name:"Picoreau",c:"#f2c14e",shape:"bird",ft:"none",drop:["plume","Plume de Picoreau"]},
     {id:"champignard",el:"feu",name:"Champignard",c:"#d9574f",shape:"cap",ft:"none",drop:["spore","Spore luisante"]}]},
-  {id:"bois",el:"air",name:"Bois de Mousselune",lvl:[8,20],set:"du Bois",zt:"#2f4f45",zb:"#1b302a",mons:[
+  {id:"bois",el:"air",name:"Bois de Mousselune",lvl:[20,65],set:"du Bois",zt:"#2f4f45",zb:"#1b302a",mons:[
     {id:"ecorcin",el:"terre",name:"Écorcin",c:"#8a6a45",shape:"tall",ft:"leaf",drop:["ecorce","Écorce vivante"]},
     {id:"lucioleux",el:"feu",name:"Lucioleux",c:"#c6e86b",shape:"blob",ft:"antenna",drop:["lueur","Poussière de lueur"]},
     {id:"renardine",el:"air",name:"Renardine",c:"#e07b39",shape:"blob",ft:"ears",drop:["queue","Queue touffue"]}]},
-  {id:"marais",el:"eau",name:"Marais Glouglou",lvl:[18,32],set:"du Marais",zt:"#38503f",zb:"#22302a",mons:[
+  {id:"marais",el:"eau",name:"Marais Glouglou",lvl:[45,110],set:"du Marais",zt:"#38503f",zb:"#22302a",mons:[
     {id:"crapoteux",el:"eau",name:"Crapoteux",c:"#6fa35a",shape:"blob",ft:"none",drop:["bave","Bave visqueuse"]},
     {id:"vasard",el:"terre",name:"Vasard",c:"#7a6a50",shape:"tall",ft:"horns",drop:["vase","Motte de vase"]},
     {id:"nenuphage",el:"air",name:"Nénuphage",c:"#4fb3a0",shape:"spiky",ft:"leaf",drop:["petale","Pétale d'eau"]}]},
-  {id:"mines",el:"feu",name:"Mines de Cuivrecœur",lvl:[30,45],set:"des Mines",zt:"#3d3a4c",zb:"#24222e",mons:[
+  {id:"mines",el:"feu",name:"Mines de Cuivrecœur",lvl:[80,180],set:"des Mines",zt:"#3d3a4c",zb:"#24222e",mons:[
     {id:"taupineur",el:"terre",name:"Taupineur",c:"#7b6a8f",shape:"blob",ft:"ears",drop:["griffe","Griffe usée"]},
     {id:"geodin",el:"air",name:"Géodin",c:"#9b8ec9",shape:"spiky",ft:"crystal",drop:["geode","Éclat de géode"]},
     {id:"rouillard",el:"feu",name:"Rouillard",c:"#b0643a",shape:"tall",ft:"horns",drop:["rouille","Écaille rouillée"]}]},
-  {id:"dunes",el:"feu",name:"Dunes Ambrées",lvl:[43,60],set:"des Dunes",zt:"#6b5030",zb:"#3e2e1c",mons:[
+  {id:"dunes",el:"feu",name:"Dunes Ambrées",lvl:[130,270],set:"des Dunes",zt:"#6b5030",zb:"#3e2e1c",mons:[
     {id:"scaraboule",el:"terre",name:"Scaraboule",c:"#3e8f8a",shape:"blob",ft:"horns",drop:["elytre","Élytre irisé"]},
     {id:"sablin",el:"air",name:"Sablin",c:"#e2b66a",shape:"tall",ft:"none",drop:["sable","Sable chantant"]},
     {id:"mirageon",el:"feu",name:"Mirageon",c:"#f08aa8",shape:"bird",ft:"antenna",drop:["mirage","Plume de mirage"]}]},
-  {id:"givre",el:"eau",name:"Pics de Givrecrin",lvl:[58,80],set:"du Givre",zt:"#3e5870",zb:"#22324a",mons:[
+  {id:"givre",el:"eau",name:"Pics de Givrecrin",lvl:[195,360],set:"du Givre",zt:"#3e5870",zb:"#22324a",mons:[
     {id:"yetinou",el:"eau",name:"Yétinou",c:"#e8f1f5",shape:"blob",ft:"horns",drop:["fourrure","Fourrure de neige"]},
     {id:"stalagor",el:"terre",name:"Stalagor",c:"#8fc7e0",shape:"spiky",ft:"crystal",drop:["givre","Cœur de givre"]},
     {id:"blizzaron",el:"air",name:"Blizzaron",c:"#b9d4f0",shape:"bird",ft:"none",drop:["souffle","Souffle glacé"]}]},
-  {id:"falaises",el:"air",name:"Falaises d'Orageline",lvl:[78,100],set:"des Falaises",zt:"#4a5a70",zb:"#2a3446",mons:[
+  {id:"falaises",el:"air",name:"Falaises d'Orageline",lvl:[275,470],set:"des Falaises",zt:"#4a5a70",zb:"#2a3446",mons:[
     {id:"foudrillon",el:"air",name:"Foudrillon",c:"#f2d94a",shape:"bat",ft:"none",drop:["eclair","Aile électrique"]},
     {id:"rocailleux",el:"terre",name:"Rocailleux",c:"#8f8a9c",shape:"golem",ft:"crystal",drop:["galet","Galet d'orage"]},
     {id:"nuageon",el:"eau",name:"Nuageon",c:"#cfe3f5",shape:"ghost",ft:"none",drop:["nuee","Flocon de nuée"]}]},
-  {id:"jungle",el:"terre",name:"Jungle d'Émeraude-Lys",lvl:[98,120],set:"de la Jungle",zt:"#2f6a3a",zb:"#1a3e22",mons:[
+  {id:"jungle",el:"terre",name:"Jungle d'Émeraude-Lys",lvl:[370,590],set:"de la Jungle",zt:"#2f6a3a",zb:"#1a3e22",mons:[
     {id:"lianard",el:"terre",name:"Lianard",c:"#5fae4a",shape:"snake",ft:"leaf",drop:["liane","Liane souple"]},
     {id:"macaquin",el:"feu",name:"Macaquin",c:"#b9773f",shape:"quad",ft:"none",drop:["poilroux","Poil roussi"]},
     {id:"carnifleur",el:"eau",name:"Carnifleur",c:"#e0508a",shape:"plant",ft:"none",drop:["petalecarn","Pétale carnivore"]}]},
-  {id:"recifs",el:"eau",name:"Récifs de Corail-Chant",lvl:[118,140],set:"des Récifs",zt:"#2f7a8a",zb:"#1a4652",mons:[
+  {id:"recifs",el:"eau",name:"Récifs de Corail-Chant",lvl:[485,700],set:"des Récifs",zt:"#2f7a8a",zb:"#1a4652",mons:[
     {id:"crabouille",el:"eau",name:"Crabouille",c:"#e8684a",shape:"crab",ft:"none",drop:["pince","Pince nacrée"]},
     {id:"meduline",el:"air",name:"Méduline",c:"#c08af0",shape:"jelly",ft:"none",drop:["filament","Filament luisant"]},
     {id:"oursinet",el:"terre",name:"Oursinet",c:"#4f5fa0",shape:"spiky",ft:"none",drop:["piquant","Piquant d'oursin"]}]},
-  {id:"volcan",el:"feu",name:"Volcan de Brasemont",lvl:[138,160],set:"du Volcan",zt:"#5a2e24",zb:"#301814",mons:[
+  {id:"volcan",el:"feu",name:"Volcan de Brasemont",lvl:[620,820],set:"du Volcan",zt:"#5a2e24",zb:"#301814",mons:[
     {id:"magmoule",el:"feu",name:"Magmoule",c:"#f0622c",shape:"slime",ft:"flame",drop:["magma","Goutte de magma"]},
     {id:"cendrillard",el:"air",name:"Cendrillard",c:"#6a5a62",shape:"bat",ft:"none",drop:["cendre","Cendre volante"]},
     {id:"scorillon",el:"terre",name:"Scorillon",c:"#8a4a3c",shape:"golem",ft:"horns",drop:["scorie","Scorie brûlante"]}]},
-  {id:"ruines",el:"air",name:"Ruines d'Astrelune",lvl:[158,180],set:"des Ruines",zt:"#5a5478",zb:"#34304a",mons:[
+  {id:"ruines",el:"air",name:"Ruines d'Astrelune",lvl:[775,930],set:"des Ruines",zt:"#5a5478",zb:"#34304a",mons:[
     {id:"spectrelin",el:"air",name:"Spectrelin",c:"#a8e8e0",shape:"ghost",ft:"antenna",drop:["voile","Voile spectral"]},
     {id:"gargouillon",el:"terre",name:"Gargouillon",c:"#8a8a9e",shape:"quad",ft:"none",drop:["pierrelune","Pierre de lune"]},
     {id:"runelin",el:"feu",name:"Runelin",c:"#f0a03c",shape:"eye",ft:"horns",drop:["rune","Rune ardente"]}]},
-  {id:"abime",el:"eau",name:"Abîme de Nuitombre",lvl:[178,200],set:"de l'Abîme",zt:"#2e2450",zb:"#18122e",mons:[
+  {id:"abime",el:"eau",name:"Abîme de Nuitombre",lvl:[940,1000],set:"de l'Abîme",zt:"#2e2450",zb:"#18122e",mons:[
     {id:"ombrelin",el:"eau",name:"Ombrelin",c:"#5a4fa8",shape:"jelly",ft:"none",drop:["ombre","Essence d'ombre"]},
     {id:"devoreil",el:"feu",name:"Dévoreil",c:"#c83a5a",shape:"eye",ft:"none",drop:["larme","Larme écarlate"]},
     {id:"neantille",el:"air",name:"Néantille",c:"#7a6a9a",shape:"snake",ft:"crystal",drop:["neant","Écaille du néant"]}]},
@@ -128,7 +128,7 @@ const PROFS = {
   herboriste:{name:"Herboriste",verb:"Cueillir",res:[["ortie","Ortie"],["sauge","Sauge"],["menthe","Menthe"],["melisse","Mélisse"],["edelweiss","Edelweiss"],["mandragore","Mandragore"],["lavande","Lavande"],["thym","Thym"],["belladone","Belladone"],["ginseng","Ginseng"],["orchidee","Orchidée"],["lotus","Lotus"]]},
   pecheur:{name:"Pêcheur",verb:"Pêcher",res:[["p_goujon","Goujon des prés"],["p_ablette","Ablette moussue"],["p_perche","Perche des marais"],["p_chabot","Chabot des galeries"],["p_carpe","Carpe ambrée"],["p_truite","Truite de givre"],["p_vairon","Vairon d'orage"],["p_piranha","Piranha émeraude"],["p_clown","Poisson-clown corail"],["p_anguille","Anguille de braise"],["p_silure","Silure astral"],["p_lanterne","Lanterne abyssale"]]},
 };
-const UNLOCK=[1,10,20,30,40,50,60,70,80,90,100,110], PROF_MAX=120, LVL_MAX=200, PTS_PER_LVL=5;
+const UNLOCK=[1,10,20,30,40,50,60,70,80,90,100,110], PROF_MAX=120, PTS_PER_LVL=5;
 const SLOTS=[
   {id:"coiffe",name:"Coiffe",st:{vit:.6,sagesse:.4},g:"paysan"},
   {id:"cape",name:"Cape",st:{vit:.5,agi:.5},g:"paysan"},
@@ -274,10 +274,10 @@ function gainEcus(n){n=Math.round(n*(1+talV("t_avar")/100)*(1+.01*achN()));S.ecu
 
 /* Renaissance et talents : [id, nom, effet, rangs max, coût de base en éclats] */
 const PREST_LVL=30;
-/* Bonus Oméga : chaque passage Oméga donne +10 % d'XP et +10 % d'écus, et relève le niveau maximum
-   de 50 niveaux jusqu'au niveau 500, puis de 100 niveaux par passage. */
+/* Bonus Oméga : chaque passage Oméga donne +10 % d'XP et +10 % d'écus.
+   Le niveau du personnage est illimité. */
 const omegaN=()=>(S&&S.prest)||0;
-const lvlMax=()=>{const p=omegaN(),a=Math.min(p,6);return LVL_MAX+50*a+100*Math.max(0,p-6)};
+const lvlMax=()=>Infinity;
 /* Éclats non dépensés : +0,5 % de dégâts chacun, seulement quand tous les talents sont au moins au rang 5
    (sinon garder ses éclats rapportait plus que d'acheter des talents). */
 const SOUL_PCT=.5,SOUL_MIN_RANK=5;
@@ -291,19 +291,23 @@ const TALENTS={
 };
 const TAL={};Object.entries(TALENTS).forEach(([br,l])=>l.forEach((t,i)=>TAL[t[0]]={id:t[0],n:t[1],txt:t[2],cost:t[3],br,i,prev:i?l[i-1][0]:null}));
 const tal=id=>(S.tal&&S.tal[id])||0;
-/* Rangs illimités : [valeur du 1er rang, plafond (0 = sans plafond), format]. Sans plafond : 10 rangs pleins puis rendement décroissant. Avec plafond : chaque rang rapproche du plafond. */
+/* Rangs illimités : [valeur du 1er rang, cible de rendement initial (0 = linéaire), format].
+   Après 10 rangs, tous les talents continuent avec un rendement décroissant. */
 const TALV={t_force:[10,0,"+# % de dégâts"],t_prec:[2,30,"+# % de critique"],t_vie:[10,0,"+# % de PV"],t_elem:[10,50,"+# % sur les faiblesses"],
   t_mains:[8,60,"Récolte # % plus rapide"],t_double:[6,50,"+# % de récolte double"],t_sac:[1500,0,"+# de poids"],t_metier:[5,60,"Métiers au niveau #"],
   t_avar:[10,0,"+# % d'écus"],t_pros:[15,0,"+# Prospection"],t_trefle:[10,60,"Objets cliquables # % plus fréquents"],t_depart:[1000,0,"# écus au départ"],
   t_doigts:[25,0,"+# % de dégâts de clic"],t_combo:[30,90,"Combo baisse # % moins vite"],t_dore:[2,25,"# % de frappe dorée ×10"],t_cmd:[20,0,"+# % de dégâts des compagnons"]};
 const dimR=r=>r<=10?r:10+Math.log(1+.08*(r-10))/.08;
-const talAt=(id,r)=>{const[v,cap]=TALV[id];return r<=0?0:cap?cap*(1-Math.pow(1-v/cap,r)):v*dimR(r)};
+const talAt=(id,r)=>{const[v,cap]=TALV[id];if(r<=0)return 0;if(!cap)return v*dimR(r);
+  const at=n=>cap*(1-Math.pow(1-v/cap,n)),n=Math.min(r,10),base=at(n);
+  return r<=10?base:base+(at(10)-at(9))*(dimR(r)-10)};
 const talV=id=>talAt(id,tal(id));
 const talTxt=(id,r)=>{const x=talAt(id,r),f=TALV[id][2];return f.replace("#",x>=100?fmt(Math.round(x)):(Math.round(x*10)/10).toString().replace(".",","))};
 const talCostAt=(id,r)=>Math.ceil(TAL[id].cost*(r+1)*Math.pow(1.04,r));
 const talCost=id=>talCostAt(id,tal(id));
 const talSpent=id=>{let n=0;for(let k=0;k<tal(id);k++)n+=talCostAt(id,k);return n};
-const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor(Math.pow(S.lvl-20,1.3)/3)+Math.floor((S.st.bossesLife||0)/5);
+const OMEGA_GROWTH=1.008;
+const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor(5*Math.pow(OMEGA_GROWTH,S.lvl-PREST_LVL))+Math.floor(Math.pow(S.st.bossesLife||0,1.15)/10);
 /* Succès : chaque succès donne +1 % de dégâts et +1 % d'écus */
 const ROM=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 /* Icônes des succès : une par série (12×12 pixels) */
@@ -458,8 +462,14 @@ const itCol=it=>it.slot==="familier"?"#f08aa8":it.slot==="trophee"?"#f0c35a":ZCO
 const resIcon=r=>r.img?`<img src="${r.img}" alt="">`:r.kind==="g"?`<img class="px" src="${PX.res(r.prof,r.tier)}" width="16" height="16" alt="">`:r.kind==="d"?`<img class="px" src="${PX.drop(dropKind(r.name),dropCol(r),r.rare||r.boss)}" width="16" height="16" alt="">`:r.kind==="k"?`<img class="px" src="${PX.key()}" width="16" height="16" alt="">`:r.kind==="p"?`<img class="px" src="${PX.potion(r.col)}" width="16" height="16" alt="">`:glyph(r.kind==="d"?"drop":r.kind==="k"?"cle":r.kind==="p"?"potion":r.prof);
 const kindLabel=r=>r.kind==="d"?"Butin de monstre":r.kind==="k"?"Clé de donjon":r.kind==="p"?"Potion":"Ressource · "+PROFS[r.prof].name;
 const resCol=r=>r.kind==="d"?ZCOL[r.zone]:r.kind==="k"?"#f0c35a":r.kind==="p"?r.col:PCOL[r.prof];
-const xpNeed=l=>Math.floor(40*Math.pow(l,1.75)+60*l);
-const pxNeed=l=>Math.floor(6*Math.pow(l,1.5)+5*l);
+const xpNeed=l=>Math.floor(40*Math.pow(l,1.75)*Math.pow(1.004,l)+60*l);
+const PROF_TIME_TARGET=[3600,7200,14400,25200,36000,43200,54000,64800,72000,79200,90000,115200];
+const profTierAt=l=>{let t=0;UNLOCK.forEach((u,i)=>{if(l>=u)t=i});return t};
+const profRelevance=(l,t)=>Math.max(.02,Math.pow(Math.max(0,1-(l-UNLOCK[t])/25),2));
+const profGatherXp=(l,t)=>Math.max(1,Math.round(14*Math.pow(t+1,1.6)*profRelevance(l,t)));
+const profGatherTime=(l,t)=>(3+t*1.2)*(1-Math.min(.4,Math.max(0,l-UNLOCK[t])*.01));
+const pxNeed=l=>{const t=profTierAt(l),target=PROF_TIME_TARGET[Math.min(PROF_TIME_TARGET.length-1,Math.floor((l-1)/10))]/10;
+  return Math.max(1,Math.round(target/profGatherTime(l,t)*profGatherXp(l,t)))};
 
 
 /* ---------- Codes cadeaux (Options > Sauvegarde > Code cadeau) ----------

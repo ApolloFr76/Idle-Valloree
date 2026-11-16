@@ -17,9 +17,9 @@ const OUV=(()=>{
     list:L,
     at:pid=>L().filter(w=>RES[w.r]&&RES[w.r].prof===pid),
     /* récolte pendant le jeu */
-    tick(dt){L().forEach((w,i)=>{if(!w.r||!RES[w.r])return;const gt=time(w);w.t+=dt;while(w.t>=gt){const n=addRes(w.r,1);if(!n){w.t=gt;w.full=1;return}w.t-=gt;w.full=0;w.n=(w.n||0)+n;qProg("gather",w.r,n);if(fx)SITE.pop(i,"+"+n)}})},
+    tick(dt){L().forEach((w,i)=>{if(!w.r||!RES[w.r])return;const gt=time(w);w.t+=dt;while(w.t>=gt){const n=addRes(w.r,1);if(!n){w.t=gt;w.full=1;return}w.t-=gt;w.full=0;w.n=(w.n||0)+n;qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.25,true);if(fx)SITE.pop(i,"+"+n)}})},
     /* récolte pendant l'absence (même plafond que le reste : 8 h, voir offline()) */
-    offline(sec,sum){L().forEach(w=>{if(!w.r||!RES[w.r])return;const gt=time(w),tot=sec+w.t,want=Math.floor(tot/gt);w.t=tot-want*gt;const n=want>0?addRes(w.r,want):0;w.n=(w.n||0)+n;if(n){qProg("gather",w.r,n);sum.res[RES[w.r].name]=(sum.res[RES[w.r].name]||0)+n}})},
+    offline(sec,sum){L().forEach(w=>{if(!w.r||!RES[w.r])return;const gt=time(w),tot=sec+w.t,want=Math.floor(tot/gt);w.t=tot-want*gt;const n=want>0?addRes(w.r,want):0;w.n=(w.n||0)+n;if(n){qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.25*n,true);sum.res[RES[w.r].name]=(sum.res[RES[w.r].name]||0)+n}})},
     hire(pid){if(L().length>=OUV_MAX)return;const c=cost();if(S.ecus<c){toast(`Il faut ${fmt(c)} écus`);return}S.ecus-=c;
       const used=new Set(L().map(w=>w.name)),name=OUV_NAMES.find(n=>!used.has(n))||"Ouvrier";const w={name,look:L().length%OUV_LOOK.length,r:best(pid),t:0,n:0};L().push(w);
       sfx("coin");log(`${name} rejoint vos ouvriers (${PROFS[pid].name} : ${RES[w.r].name}).`,"g");toast(`${name} embauché`)},
