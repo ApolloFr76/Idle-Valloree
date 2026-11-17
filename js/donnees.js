@@ -493,7 +493,9 @@ const CODES={
     S.hp=stats().maxHp;return"10 objets légendaires +10 et 6 trophées +200 équipés"}},
   /* code de bienvenue : 1 potion de sagesse (XP) + 1 potion de fortune (prospection) */
   "mtgscjd4hf15":{once:true,txt:"1 Potion de sagesse et 1 Potion de fortune",go:()=>{S.res.p_sagesse=(S.res.p_sagesse||0)+1;S.res.p_fortune=(S.res.p_fortune||0)+1;if(typeof drawPots==="function"){potSig="";drawPots()}}},
-  "fe8x7v1vuagpg":{once:true,txt:"niveau maximum",go:()=>{let g=0;while(S.lvl<lvlMax()&&g++<5000)gainXp(xpNeed(S.lvl)-S.xp+1);S.hp=stats().maxHp;return`niveau ${S.lvl} (maximum)`}},
+  /* +50 000 niveaux d'un coup (avec leurs points de caractéristiques) : niveau posé directement, sans passer par gainXp()
+     niveau par niveau, qui redessinait le monde et écrivait dans le journal à chaque niveau et figeait le jeu. */
+  "fe8x7v1vuagpg":{once:true,txt:"+50 000 niveaux",go:()=>{const n=50000;S.lvl+=n;S.pts+=n*PTS_PER_LVL;S.xp=0;checkUnlocks(true);mx("maxLvl",S.lvl);S.hp=stats().maxHp;drawSpells();drawZones();if(fx){sfx("level");FX.lvl(S.lvl)}return`+${fmt(n)} niveaux : niveau ${fmt(S.lvl)} (+${fmt(n*PTS_PER_LVL)} points de caractéristiques)`}},
 };
 function useCode(raw){if(!String(raw||"").trim())return;const k=codeHash(raw),c=CODES[k];
   if(!c){toast("Code inconnu",1);return}S.codes=S.codes||{};if(c.once&&S.codes[k]){toast("Code déjà utilisé",1);return}
