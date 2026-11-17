@@ -132,7 +132,9 @@ function statBreak(){
 /* ---------- Statistiques en direct (3e colonne en grand écran) : moyennes sur les 2 dernières minutes ---------- */
 const LS={q:[]};
 function liveStats(){const e=$("lstats");if(!S||!S.cls)return;const now=Date.now(),T=S.st;
-  LS.q.push({t:now,xp:T.xp||0,ec:T.ecus||0,k:S.kills||0,d:T.dmg||0});while(LS.q.length>121)LS.q.shift();
+  const p={t:now,xp:T.xp||0,ec:T.ecus||0,k:S.kills||0,d:T.dmg||0},l=LS.q[LS.q.length-1];
+  /* compteurs revenus en arrière (nouvelle partie, import, renaissance) : on repart de zéro au lieu d'afficher des valeurs négatives */
+  if(l&&(p.xp<l.xp||p.ec<l.ec||p.k<l.k||p.d<l.d))LS.q=[];LS.q.push(p);while(LS.q.length>121)LS.q.shift();
   if(!e||e.hidden)return;const a=LS.q[0],b=LS.q[LS.q.length-1],dt=Math.max(1,(b.t-a.t)/1000);
   const xph=(b.xp-a.xp)/dt*3600,ech=(b.ec-a.ec)/dt*3600,kpm=(b.k-a.k)/dt*60,dps=(b.d-a.d)/dt,need=xpNeed(S.lvl)-S.xp,xps=xph/3600;
   const eta=S.lvl>=lvlMax()?"Niveau maximum":xps>0?dur(need/xps):"—";
