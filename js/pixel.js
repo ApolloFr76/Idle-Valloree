@@ -740,7 +740,9 @@ const PX=(()=>{
     const k="h:"+cls+col+pose;if(cache[k])return cache[k];
     if(pose==="atk"||pose==="up")return cache[k]=heroF(cls,col,pose==="up"?"cast":"atk",pose==="up"?7:6);   /* poses d'action : cadre large de 64 px */
     const s=heroSpr(cls,col,"idle",0,pose==="blink");
-    const o=new Spr(40,44),W=s.w;o.shadow(19.5,42,9,1.7);for(let y=0;y<44;y++)for(let x=0;x<40;x++){const c=s.p[(y+HP-12)*W+x+HP-4];if(c)o.p[y*40+x]=c}
+    /* cadre de 40 px : décalé vers la droite si l'arme dépasse (hache du Berserker), sans couper le corps à gauche */
+    const W=s.w;let x0=W,x1=-1;for(let y=0;y<W;y++)for(let x=0;x<W;x++)if(s.p[y*W+x]){if(x<x0)x0=x;if(x>x1)x1=x}
+    const sh=Math.max(0,Math.min(x1-(HP-4+39),x0-(HP-4))),o=new Spr(40,44);o.shadow(19.5-sh,42,9,1.7);for(let y=0;y<44;y++)for(let x=0;x<40;x++){const c=s.p[(y+HP-12)*W+x+HP-4+sh];if(c)o.p[y*40+x]=c}
     return cache[k]=o.url()}
   function heroF(cls,col,anim,f,blink,tight){
     if(anim==="atk")anim=ATK[cls]||"atk";
