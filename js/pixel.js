@@ -611,7 +611,7 @@ const PX=(()=>{
   const HP=16;
   const HAIRS=["#6b3a22","#e8c25a","#b5532c","#3a2a3c","#ece6d6","#9a5a2e","#d98a4a","#54406e"];
   const HCLS={guerrier:0,archer:1,mage:4,gardien:5,peste:5,chrono:4,berserk:2,invoc:3};
-  function heroSpr(cls,col,anim,f,blink){
+  function heroSpr(cls,col,anim,f,blink,arm){
     const T=HA[anim]||HA.idle,s=new Spr(32+2*HP,32+2*HP,HP,HP),F={flat:1},SK={dk:.17,lt:.3},ink=mix(col,INK,.84);
     let g=s;const P=(c,fn,o)=>g.part(c,fn,o),px=(x,y,c)=>g.set(Math.round(x),Math.round(y),c);
     const own=typeof CLASSES!=="undefined"&&CLASSES[cls]&&CLASSES[cls].col===col;let hh=0;for(let i=0;i<col.length;i++)hh=(hh*31+col.charCodeAt(i))>>>0;
@@ -619,6 +619,8 @@ const PX=(()=>{
     const cc=rgb(col),EM=Math.abs(cc[0]-242)+Math.abs(cc[1]-193)+Math.abs(cc[2]-78)<110?"#fff8e0":"#f2c14e",dk=mix(col,DARK,.42),lt=mix(col,"#ffffff",.45),skin="#f6cfa6",skD="#d99a7a",B="#1c1020",W="#ffffff";
     const ST="#c3cad6",STD="#8790a4",GO="#f2c14e",LE="#8a5a34",LED="#5c3a22",BONE="#f1e4bf",FUR="#8a6a45",RUNE="#d9c6ff",RED="#e8483c";
     const robe=cls==="mage"||cls==="chrono"||cls==="invoc",caster=robe||cls==="peste";
+    /* armure portée (coiffe, cape, bottes, ceinture) : chaque pièce a un style et une couleur, dessinés dans la forme de la classe */
+    const AR=arm||{},AH=AR.coiffe,AC=AR.cape,AF=AR.bottes,AB=AR.ceinture,aDk=o=>mix(o.c,DARK,.4),aLt=o=>mix(o.c,"#ffffff",.42);
     const u=Math.max(0,T.dy[f]),up=()=>{g.oy=HP+u},dn=()=>{g.oy=HP};                 /* le buste respire, les pieds restent au sol */
     /* un calque : dessiné à part, cerné, puis posé sur le personnage */
     const lay=fn=>{g=new Spr(s.w,s.h,HP,HP);fn();g.outline(ink);const p=g.p;for(let i=0;i<p.length;i++)if(p[i])s.p[i]=p[i];g=s};
@@ -646,10 +648,14 @@ const PX=(()=>{
 
     /* ----- calque arrière : capes, carquois, crinières, bâton au repos, esprit de l'invocateur ----- */
     lay(()=>{up();
-      if(cls==="gardien")P(col,q=>q.poly([[8,11],[15,11],[13,26],[4-sw,27],[5,17]]));
-      if(cls==="guerrier")P(col,q=>{q.poly([[8,11],[15,11],[13,22],[4-sw,24+sw],[5,16]]);q.clear(6-sw,24+sw,1,1);q.clear(9-sw,23+sw,1,1)});
-      if(cls==="peste")P(dk,q=>{q.poly([[7,10],[15,10],[13,24],[5-sw,25],[5,16]]);q.clear(7-sw,25,1,1);q.clear(10-sw,25,1,1)});
-      if(cls==="invoc")P(mix(col,DARK,.6),q=>{q.poly([[7,10],[15,10],[13,26],[3-sw,27],[5,16]]);q.clear(5-sw,27,1,1);q.clear(8-sw,27,2,1)});
+      /* cape de l'armure : la cape de la classe prend sa couleur ; les classes sans cape en reçoivent une, dont la longueur dépend du style */
+      const cc=AC?AC.c:null,cs=AC?AC.s:"";
+      if(AC&&!["gardien","guerrier","peste","invoc"].includes(cls)){const L=cs==="cuir"?19:cs==="robe"?26:23;P(cc,q=>{q.poly([[8,11],[15,11],[13,L-2],[4-sw,L+sw],[5,16]]);if(cs==="ecailles"){q.clear(6-sw,L-1+sw,1,1);q.clear(9-sw,L-2+sw,1,1)}})}
+      if(cls==="gardien")P(cc||col,q=>q.poly([[8,11],[15,11],[13,26],[4-sw,27],[5,17]]));
+      if(cls==="guerrier")P(cc||col,q=>{q.poly([[8,11],[15,11],[13,22],[4-sw,24+sw],[5,16]]);q.clear(6-sw,24+sw,1,1);q.clear(9-sw,23+sw,1,1)});
+      if(cls==="peste")P(cc?aDk(AC):dk,q=>{q.poly([[7,10],[15,10],[13,24],[5-sw,25],[5,16]]);q.clear(7-sw,25,1,1);q.clear(10-sw,25,1,1)});
+      if(cls==="invoc")P(cc?aDk(AC):mix(col,DARK,.6),q=>{q.poly([[7,10],[15,10],[13,26],[3-sw,27],[5,16]]);q.clear(5-sw,27,1,1);q.clear(8-sw,27,2,1)});
+      if(AC&&cs==="fourrure")P(aLt(AC),q=>q.rect(7,10,9,2));
       if(cls==="archer"){P(hair,q=>q.poly([[8,4],[11,5],[9,13],[5-sw,15],[6-sw,11]]));P(LE,q=>q.poly([[5,11],[8,10],[11,19],[8,20]]));P(BONE,q=>{q.line(5,10,4,7);q.line(7,9,7,6)},F);px(4,6,RED);px(3,7,RED);px(7,5,RED);px(8,6,RED)}
       if(cls==="mage")P(hair,q=>q.poly([[8,2],[12,2],[11,14],[5-sw,16],[6,8]]));
       if(cls==="berserk")P(hair,q=>q.poly([[8,0],[12,0],[12,13],[8-sw,15],[4-sw,16],[5-sw,11],[5,7]]));
@@ -665,14 +671,18 @@ const PX=(()=>{
         if(cls==="mage"){P(GO,q=>q.rect(7,27,17,1),F);P(lt,q=>q.rect(15,20,1,7),F)}
         if(cls==="chrono"){P(GO,q=>q.rect(7,27,17,1),F);P(dk,q=>q.rect(8,25,15,1),F)}
         if(cls==="invoc")[9,13,17,21].forEach((x,i)=>px(x,25+i%2,RUNE));
-        P(cls==="chrono"?GO:"#4a3550",q=>{q.rect(10+step,29,4,1);q.rect(17+step,29,4,1)},F)}
+        P(AF?AF.c:cls==="chrono"?GO:"#4a3550",q=>{q.rect(10+step,29,4,1);q.rect(17+step,29,4,1)},F)}
       else{const LG={guerrier:"#6a5a52",archer:"#8a6442",gardien:STD,peste:"#7a5636",berserk:skin}[cls]||"#6a5a52",BT={guerrier:ST,archer:LED,gardien:ST,peste:"#5c4028",berserk:FUR}[cls]||LED;
         P(LG,q=>{q.rect(10,21,5,5);q.rect(16+step,21,5,5)},LG===skin?SK:undefined);
-        P(BT,q=>{q.rect(9,26,6,4);q.rect(16+step,26,6,4);q.px(22+step,28);q.px(22+step,29)});
+        const BT2=AF?(AF.s==="plaques"?ST:AF.s==="fourrure"||AF.s==="cuir"?aDk(AF):AF.c):BT;
+        P(BT2,q=>{q.rect(9,26,6,4);q.rect(16+step,26,6,4);q.px(22+step,28);q.px(22+step,29)});
         if(cls==="archer")P(LE,q=>{q.rect(9,25,6,1);q.rect(16+step,25,6,1)},F);
         if(cls==="guerrier"||cls==="gardien")P(col,q=>{q.rect(10,25,5,1);q.rect(16+step,25,5,1)},F);
-        if(cls==="berserk")P(BONE,q=>{q.rect(9,26,6,1);q.rect(16+step,26,6,1)},F)}
-      up();const chest=c=>P(c,q=>{q.rect(9,11,13,9);q.clear(9,11,1,1);q.clear(21,11,1,1)},c===skin?SK:undefined),belt=c=>P(c,q=>q.rect(9,19,13,1),F),skirt=(c,h,cut)=>P(c,q=>{q.rect(9,20,13,h);cut.forEach(x=>q.clear(x,19+h,1,1))});
+        if(cls==="berserk"&&!AF)P(BONE,q=>{q.rect(9,26,6,1);q.rect(16+step,26,6,1)},F);
+        /* détail des bottes selon le style */
+        if(AF){const s=AF.s;if(s==="plaques"||s==="cuir")P(AF.c,q=>{q.rect(9,26,6,1);q.rect(16+step,26,6,1)},F);if(s==="fourrure")P(aLt(AF),q=>{q.rect(9,26,6,2);q.rect(16+step,26,6,2)},F);
+          if(s==="ecailles")P(aDk(AF),q=>{q.px(11,28);q.px(13,28);q.px(18+step,28);q.px(20+step,28)},F);if(s==="cristal"){px(11,27,aLt(AF));px(18+step,27,aLt(AF))}}}
+      up();const chest=c=>P(c,q=>{q.rect(9,11,13,9);q.clear(9,11,1,1);q.clear(21,11,1,1)},c===skin?SK:undefined),belt=c=>{P(AB?AB.c:c,q=>q.rect(9,19,13,1),F);if(AB){const bk=AB.s==="plaques"?ST:AB.s==="cristal"?aLt(AB):AB.s==="robe"?GO:aDk(AB);px(15,19,bk);px(16,19,bk)}},skirt=(c,h,cut)=>P(c,q=>{q.rect(9,20,13,h);cut.forEach(x=>q.clear(x,19+h,1,1))});
       if(cls==="guerrier"){chest(ST);P(STD,q=>{q.rect(10,16,11,1);q.rect(15,12,1,4)},F);skirt(col,3,[15]);belt(LED);px(15,19,GO);px(16,19,GO);P(col,q=>q.rect(11,11,9,3),{dk:.2});P(ST,q=>q.ell(9.5,12.5,2.3,2.1));px(9,12,GO)}
       if(cls==="archer"){chest(col);P(LE,q=>q.line(10,12,20,18),F);skirt(col,3,[9,12,15,18,21]);belt(LED);px(14,19,GO);P(dk,q=>q.poly([[8,10],[23,10],[22,13],[9,13]]));px(15,11,GO);px(16,11,GO)}
       if(cls==="mage"){chest(col);P(lt,q=>q.rect(15,13,1,6),F);belt(GO);P(dk,q=>q.poly([[7,10],[24,10],[22,14],[9,14]]));px(15,12,GO);px(16,12,GO)}
@@ -710,48 +720,56 @@ const PX=(()=>{
     lay(()=>{up();
       const face=(c=skin,cx=15.5,cy=4.5,rx=6.6,ry=5.6)=>P(c,q=>q.ell(cx,cy,rx,ry),SK);
       const cap=(c,ry=4.8)=>P(c,q=>{q.ell(15.5,1.2,7.3,ry);q.clear(11,3,12,9);q.rect(8,3,3,5)});
-      let mouth=1,blush=1,EY=B;
+      let mouth=1,blush=1,EY=B;const hc=AH?AH.c:col;
       if(cls==="guerrier"){face();P(hair,q=>{q.ell(15.5,1.2,7.3,4.8);q.clear(11,3,12,9);q.rect(8,3,3,5);q.poly([[8,2],[4,-3],[10,-2]]);q.poly([[9,-1],[8,-8],[14,-3]]);q.poly([[13,-3],[15,-8],[18,-3]]);q.poly([[17,-3],[21,-6],[22,-1]]);q.poly([[20,-1],[25,1],[22,3]]);q.px(12,3);q.px(16,3);q.px(17,3);q.px(21,3);q.px(22,3)});
-        P(col,q=>q.rect(9,1,14,2));P(col,q=>q.poly([[9,1],[9,3],[5-sw,6+sw],[4-sw,4+sw]]))}
+        P(hc,q=>q.rect(9,1,14,2));P(hc,q=>q.poly([[9,1],[9,3],[5-sw,6+sw],[4-sw,4+sw]]))}
       if(cls==="archer"){face();cap(hair,4.4);P(hair,q=>{q.px(11,3);q.px(12,3);q.px(13,3);q.px(21,3);q.px(22,3);q.px(22,4)},F);
-        P(col,q=>{q.poly([[8,0],[10,-6],[17,-7],[22,-1]]);q.poly([[6,2],[8,-1],[23,-1],[27,2],[23,2]])});P(dk,q=>q.rect(9,0,14,1),F);P(RED,q=>q.poly([[11,-5],[6,-11],[9,-11],[14,-6]]))}
+        P(hc,q=>{q.poly([[8,0],[10,-6],[17,-7],[22,-1]]);q.poly([[6,2],[8,-1],[23,-1],[27,2],[23,2]])});P(AH?aDk(AH):dk,q=>q.rect(9,0,14,1),F);P(RED,q=>q.poly([[11,-5],[6,-11],[9,-11],[14,-6]]))}
       if(cls==="mage"){face();P(hair,q=>{q.rect(8,2,3,9);q.rect(21,3,2,7);q.px(11,3);q.px(12,3);q.px(20,3)});
-        P(col,q=>{q.poly([[9,0],[11,-6],[8,-11],[14,-9],[19,-5],[22,0]]);q.ell(15.5,1,10.5,1.4)});P(GO,q=>q.rect(10,-1,12,1),F);px(15,-4,GO);px(14,-3,GO);px(16,-3,GO);px(15,-3,W);px(15,-2,GO)}
+        P(hc,q=>{q.poly([[9,0],[11,-6],[8,-11],[14,-9],[19,-5],[22,0]]);q.ell(15.5,1,10.5,1.4)});P(GO,q=>q.rect(10,-1,12,1),F);px(15,-4,GO);px(14,-3,GO);px(16,-3,GO);px(15,-3,W);px(15,-2,GO)}
       if(cls==="gardien"){face();P(ST,q=>{q.ell(15.5,1.2,7.6,5.4);q.clear(11,3,11,9);q.rect(8,3,3,6);q.rect(21,2,2,6)});P(GO,q=>q.rect(8,2,15,1),F);P(STD,q=>q.rect(16,3,1,3),F);
-        P(col,q=>q.poly([[11,-4],[15,-9],[20,-7],[15,-4],[9-sw,-2],[6-sw,3],[4-sw,0],[7-sw,-4]]))}
+        P(hc,q=>q.poly([[11,-4],[15,-9],[20,-7],[15,-4],[9-sw,-2],[6-sw,3],[4-sw,0],[7-sw,-4]]))}
       if(cls==="peste"){face();cap(hair,4.6);P(hair,q=>{q.rect(8,3,3,9);q.rect(21,3,2,8);q.px(11,3);q.px(12,3);q.px(20,3)});px(21,10,"#8fe05a");px(22,10,"#8fe05a");
         P(BONE,q=>{q.line(11,-2,8,-7);q.line(8,-7,8,-10);q.line(9,-5,5,-8);q.line(20,-2,23,-7);q.line(23,-7,23,-10);q.line(22,-5,26,-8)},F);
         P("#6fbf4a",q=>{q.ell(9.5,.5,1.6,1.3);q.ell(15.5,-.5,1.7,1.6);q.ell(21.5,.5,1.6,1.3)});P("#b8e86a",q=>{q.ell(12.5,0,1.4,1.2);q.ell(18.5,0,1.4,1.2)});px(15,1,"#c94a5a")}
-      if(cls==="chrono"){P(col,q=>q.ell(15.5,2.5,8,7.6));P(GO,q=>q.ell(16,5.3,5.9,5.3),F);face(skin,16,5.5,5,4.4);
+      if(cls==="chrono"){P(hc,q=>q.ell(15.5,2.5,8,7.6));P(GO,q=>q.ell(16,5.3,5.9,5.3),F);face(skin,16,5.5,5,4.4);
         P("#ece6d6",q=>{q.rect(12,8,8,2);q.rect(13,10,6,2);q.rect(15,12,2,1)});px(15,8,skin);px(16,8,skin);mouth=0;P(GO,q=>{q.rect(14,-4,3,1);q.rect(15,-3,1,1);q.rect(14,-2,3,1)},F)}
       if(cls==="berserk"){face();P(hair,q=>{q.rect(8,3,3,7);q.rect(21,3,2,6);q.rect(11,8,10,2);q.rect(12,10,8,1);q.px(13,11);q.px(16,11);q.px(18,11);q.clear(15,8,3,1)});
-        P(STD,q=>{q.ell(15.5,.8,7.4,4.6);q.clear(8,3,16,9)});P(LE,q=>q.rect(8,1,15,2));px(15,1,BONE);px(16,1,BONE);
+        P(STD,q=>{q.ell(15.5,.8,7.4,4.6);q.clear(8,3,16,9)});P(AH?hc:LE,q=>q.rect(8,1,15,2));px(15,1,BONE);px(16,1,BONE);
         P(BONE,q=>{q.poly([[10,0],[6,-2],[4,-9],[6,-9],[8,-4],[12,-2]]);q.poly([[21,0],[25,-2],[27,-9],[25,-9],[23,-4],[19,-2]])});
         [[12,3],[13,3],[14,4],[20,3],[19,3],[18,4]].forEach(([x,y])=>px(x,y,B));[[11,7],[12,8],[21,7],[20,8]].forEach(([x,y])=>px(x,y,"#c8302a"));blush=0;mouth=0}
-      if(cls==="invoc"){P(mix(col,DARK,.5),q=>{q.ell(15.5,2.5,8.2,7.8);q.poly([[10,-3],[7,-10],[13,-5]]);q.poly([[21,-3],[24,-10],[18,-5]])});P(col,q=>q.ell(16,5.3,5.9,5.3),F);P("#2a1a3e",q=>q.ell(16,5.5,5,4.4),F);
+      if(cls==="invoc"){P(mix(hc,DARK,.5),q=>{q.ell(15.5,2.5,8.2,7.8);q.poly([[10,-3],[7,-10],[13,-5]]);q.poly([[21,-3],[24,-10],[18,-5]])});P(col,q=>q.ell(16,5.3,5.9,5.3),F);P("#2a1a3e",q=>q.ell(16,5.5,5,4.4),F);
         px(15,-2,RUNE);px(16,-3,RUNE);px(8,4,RUNE);px(23,4,RUNE);mouth=0;blush=0;EY=RUNE}
+      /* détail de la coiffe selon le style, posé sur le bandeau ou le couvre-chef de la classe */
+      if(AH){const by={guerrier:1,archer:0,mage:-1,gardien:2,peste:0,chrono:-3,berserk:1,invoc:-2}[cls]??0,s=AH.s,c1=AH.c,c2=aLt(AH);
+        if(s==="plaques")P(ST,q=>{q.px(10,by);q.px(14,by);q.px(17,by);q.px(21,by)},F);
+        if(s==="cuir")P(aDk(AH),q=>{q.px(23,by+1);q.px(24,by+2);q.px(23,by+3)},F);
+        if(s==="robe")P(GO,q=>{q.px(12,by);q.px(19,by)},F);
+        if(s==="ecailles")P(c2,q=>q.poly([[13.5,by],[17.5,by],[15.5,by-3]]));
+        if(s==="fourrure")P(c1,q=>{q.poly([[9,by],[11,by-4],[13,by]]);q.poly([[18,by],[20,by-4],[22,by]])});
+        if(s==="cristal")P(c2,q=>{q.poly([[11,by],[13,by],[12,by-2]]);q.poly([[14.5,by],[16.5,by],[15.5,by-3]]);q.poly([[18,by],[20,by],[19,by-2]])},{lt:.4})}
       [13,18].forEach(x=>{if(blink){px(x,6,EY);px(x+1,6,EY)}else{for(let y=4;y<7;y++){px(x,y,EY);px(x+1,y,EY)}px(x,4,W)}});
       if(blush){px(11,7,"#f29a8e");px(12,7,"#f29a8e");px(20,7,"#f29a8e");px(21,7,"#f29a8e")}
       if(mouth){px(16,8,"#c07a62");px(17,8,"#c07a62")}});
     if(!behind)frontArm();
     return s}
   /* image fixe du héros (40×44) : création du personnage, inventaire, visiteurs. pose : "" ou "blink" ("atk" et "up" renvoient une image d'animation) */
-  function hero(cls,col,pose=""){
-    const k="h:"+cls+col+pose;if(cache[k])return cache[k];
-    if(pose==="atk"||pose==="up")return cache[k]=heroF(cls,col,pose==="up"?"cast":"atk",pose==="up"?7:6);   /* poses d'action : cadre large de 64 px */
-    const s=heroSpr(cls,col,"idle",0,pose==="blink");
+  function hero(cls,col,pose="",arm){
+    const k="h:"+cls+col+pose+(arm?arm.k:"");if(cache[k])return cache[k];
+    if(pose==="atk"||pose==="up")return cache[k]=heroF(cls,col,pose==="up"?"cast":"atk",pose==="up"?7:6,0,0,arm);   /* poses d'action : cadre large de 64 px */
+    const s=heroSpr(cls,col,"idle",0,pose==="blink",arm);
     /* cadre de 40 px : décalé vers la droite si l'arme dépasse (hache du Berserker), sans couper le corps à gauche */
     const W=s.w;let x0=W,x1=-1;for(let y=0;y<W;y++)for(let x=0;x<W;x++)if(s.p[y*W+x]){if(x<x0)x0=x;if(x>x1)x1=x}
     const sh=Math.max(0,Math.min(x1-(HP-4+39),x0-(HP-4))),o=new Spr(40,44);o.shadow(19.5-sh,42,9,1.7);for(let y=0;y<44;y++)for(let x=0;x<40;x++){const c=s.p[(y+HP-12)*W+x+HP-4+sh];if(c)o.p[y*40+x]=c}
     return cache[k]=o.url()}
-  function heroF(cls,col,anim,f,blink,tight){
+  function heroF(cls,col,anim,f,blink,tight,arm){
     if(anim==="atk")anim=ATK[cls]||"atk";
-    const k="hf:"+cls+col+anim+f+(blink?"b":"")+(tight?"t":"");if(cache[k])return cache[k];const T=HA[anim]||HA.idle,s=heroSpr(cls,col,anim,f,blink);
+    const k="hf:"+cls+col+anim+f+(blink?"b":"")+(tight?"t":"")+(arm?arm.k:"");if(cache[k])return cache[k];const T=HA[anim]||HA.idle,s=heroSpr(cls,col,anim,f,blink,arm);
     /* décalage du corps ; en portrait, on descend le cadre sur le buste */
     const W=s.w,P=tight?0:HP,N=32+2*P,o=new Spr(N,N),ox=T.dx[f]-HP+P,oy=Math.min(0,T.dy[f])-HP+P+(tight?11:0);if(!tight)o.shadow(15.5+P,30+P,9,1.7);
     for(let y=0;y<W;y++)for(let x=0;x<W;x++){const c=s.p[y*W+x];if(c){const X=x+ox,Y=y+oy;if(X>=0&&Y>=0&&X<N&&Y<N)o.p[Y*N+X]=c}}
     return cache[k]=o.url()}
-  const heroFrames=(cls,col,anim,blink)=>{const k="hfs:"+cls+col+anim+(blink?1:0);return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>heroF(cls,col,anim,f,blink&&f===5)),cache[k].sc=((32+2*HP)/32).toFixed(3),cache[k])};
+  const heroFrames=(cls,col,anim,blink,arm)=>{const k="hfs:"+cls+col+anim+(blink?1:0)+(arm?arm.k:"");return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>heroF(cls,col,anim,f,blink&&f===5,0,arm)),cache[k].sc=((32+2*HP)/32).toFixed(3),cache[k])};
 
   /* Monstres et bêtes : 10 images obtenues en redessinant le sprite pixel par pixel (écrasement, étirement, inclinaison) */
   /* XP : marge transparente autour de l'image pour que l'élan, l'inclinaison et l'étirement ne soient jamais coupés
@@ -844,6 +862,6 @@ const ELG={feu:'<path fill="currentColor" stroke="none" shape-rendering="crispEd
 const elChip=(e,txt)=>`<span class="elc" data-tip="el:${e}" style="--c:${ELEMS[e].c}"><svg viewBox="0 0 24 24" aria-hidden="true">${ELG[e]}</svg>${txt??ELEMS[e].n}</span>`;
 function monRes(monEl,atk){if(atk==="neutre")return 0;if(BEATS[atk]===monEl)return RES_WEAK-(S&&S.tal?talV("t_elem"):0);if(atk===monEl)return RES_SELF;if(BEATS[monEl]===atk)return RES_STRONG;return 0}
 const weakTo=e=>Object.keys(BEATS).find(k=>BEATS[k]===e);
-function heroSVG(k){return PX.img(PX.hero(k,CLASSES[k].col),"herofig")}
+function heroSVG(k,arm){return PX.img(PX.hero(k,CLASSES[k].col,"",arm),"herofig")}
 const emb=(k,size=40)=>`<span class="emb" style="width:${size}px;height:${size}px;background:${shade(CLASSES[k].col,-.55)};color:${CLASSES[k].col}"><svg viewBox="0 0 24 24">${EMB[k]}</svg></span>`;
 

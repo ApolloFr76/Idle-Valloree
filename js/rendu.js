@@ -3,7 +3,7 @@
 function floatNum(txt,cls){const dn=S.opt&&S.opt.dmgNums;if(dn==="none"||dn==="crit"&&!/crit|heal/.test(cls))return;const e=document.createElement("div");e.className="float "+cls;e.textContent=txt;
   /* au-dessus du monstre (ou du héros quand il est touché), où qu'ils soient dans le monde */
   const a=$("arena"),tg=$(/hurt/.test(cls)?"ahero":"monBtn");if(tg&&a&&tg.getBoundingClientRect().width){const ar=a.getBoundingClientRect(),r=tg.getBoundingClientRect();e.style.left=(r.left-ar.left+r.width*(.25+Math.random()*.5))+"px";e.style.top=(r.top-ar.top+r.height*(.1+Math.random()*.3))+"px";e.style.bottom="auto"}else e.style.left=(cls==="hurt"?22+Math.random()*10:50+Math.random()*22)+"%";a.appendChild(e);setTimeout(()=>e.remove(),950)}
-function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)a.src=PX.hero(S.cls,C.col)}$("heroBox").innerHTML=C?`${emb(S.cls)}<div><div class="nm">${esc(S.name)}</div><div class="sub">${C.name}</div></div>`:""}
+function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)a.src=PX.hero(S.cls,C.col,"",heroArm())}$("heroBox").innerHTML=C?`${emb(S.cls)}<div><div class="nm">${esc(S.name)}</div><div class="sub">${C.name}</div></div>`:""}
 /* Choix du monde : une liste déroulante (les mondes débloqués + le prochain, grisé) pour ne pas faire défiler la colonne */
 /* Couleur de chaque monde (mêmes teintes que les anciennes cases) */
 const ZBG=["#57b04a","#1f9a78","#8a9a2e","#8a6ac8","#f0962c","#3d9fe0","#6a86b8","#2fa84a","#1fb0c8","#e2502c","#a88ae0","#5a3f96"];

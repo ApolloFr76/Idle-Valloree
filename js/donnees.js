@@ -270,6 +270,15 @@ const UPGS=[
   ["sp1","Sort automatique I","Votre 1er sort peut se lancer tout seul (case Auto)",5000],["sp2","Sort automatique II","Votre 2e sort peut se lancer tout seul (case Auto)",60000],["sp3","Sort automatique III","Votre 3e sort peut se lancer tout seul (case Auto)",6e5],
   ["potauto","Potions automatiques","Boit une potion de soin tout seul sous le seuil de PV",10000],["cdr1","Concentration","Sorts 10 % plus rapides",25000],["cdr2","Maîtrise des arcanes","Sorts encore 10 % plus rapides",3e5],
   ["bossauto","Défi automatique","Défie le boss tout seul dès que les 10 victoires sont faites",40000]];
+/* Apparence de l'armure : chaque panoplie a un style (fin de jeu : cristal ; grandes panoplies et boss : plaques ; sinon selon le monstre)
+   et la couleur de son élément teintée par celle de son monstre. heroArm() décrit les pièces visibles portées par le héros. */
+const ARM_STYLES=["cuir","robe","ecailles","fourrure"];
+const armStyle=t=>t.z>=9?"cristal":t.boss||t.n===8?"plaques":ARM_STYLES[[...t.key].reduce((a,ch)=>a+ch.charCodeAt(0),0)%ARM_STYLES.length];
+const armCol=t=>{const a=ELEMS[t.el].c,b=(MON[t.mon]&&MON[t.mon].c)||a,h=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)),A=h(a),B=h(b);return"#"+A.map((v,i)=>Math.round(v*.7+B[i]*.3).toString(16).padStart(2,"0")).join("")};
+let armSig=null,armObj=null;
+function heroArm(){if(!S||!S.cls||(S.opt&&S.opt.showArmor===false))return null;let sig="";const P={};
+  ["coiffe","cape","bottes","ceinture"].forEach(sl=>{const u=S.equip[sl],i=u&&S.items.find(x=>x.u===u),it=i&&ITEMS[i.id];if(it&&it.set&&SETS[it.set]){P[sl]=SETS[it.set];sig+=sl+":"+it.set+"|"}});
+  if(!sig)return null;if(sig!==armSig){armSig=sig;armObj={k:sig};for(const sl in P)armObj[sl]={s:armStyle(P[sl]),c:armCol(P[sl])}}return armObj}
 /* Métiers au niveau max : chacun donne +10 % d'XP et +5 000 de poids */
 const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].lvl>=PROF_MAX).length:0;
 const up=id=>!!(S.up&&S.up[id]);
@@ -377,7 +386,7 @@ const OPT_DEF={
   textSize:100,ambiance:true,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
   potThreshold:30,autoSellFull:false,koRetreat:false,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
-  keys:true,saveEvery:10,offline:true};
+  keys:true,saveEvery:10,offline:true,showArmor:true};
 /* Rareté des objets fabriqués */
 const RAR=[{n:"Commun",c:"#5a4a3a",m:1},{n:"Rare",c:"#1f6fb8",m:1.15},{n:"Épique",c:"#7a3fc0",m:1.35},{n:"Légendaire",c:"#c2560a",m:1.6}];
 /* Chances de rareté (%) selon le score de forge (0 à 6 points), et sans mini-jeu */

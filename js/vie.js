@@ -40,7 +40,7 @@ const VIE=(()=>{
 
   /* ---------- Héros : clignement, sueur quand les PV sont bas, joie ---------- */
   let blinkT=0,sweatT=0;
-  function heroBlink(){const h=$("ahero");if(!h||h.hidden||heroAtk.t&&performance.now()-atkT<300)return;const C=CLASSES[S.cls];h.src=PX.hero(S.cls,C.col,"blink");setTimeout(()=>{if(performance.now()-atkT>200)h.src=PX.hero(S.cls,C.col)},140)}
+  function heroBlink(){const h=$("ahero");if(!h||h.hidden||heroAtk.t&&performance.now()-atkT<300)return;const C=CLASSES[S.cls];h.src=PX.hero(S.cls,C.col,"blink",heroArm());setTimeout(()=>{if(performance.now()-atkT>200)h.src=PX.hero(S.cls,C.col,"",heroArm())},140)}
   function cheer(){if(!on())return;const h=$("ahero");if(h)replayCls(h,"cheer");document.querySelectorAll("#pals .pal").forEach((p,i)=>setTimeout(()=>replayCls(p,"patk"),i*90))}
   function sweat(){const h=$("ahero"),a=A();if(!h||h.hidden)return;const p=relTo(h,a);const d=document.createElement("i");d.className="fxsweat";d.style.left=(p.x+p.w*.72)+"px";d.style.top=(p.y+p.h*.2)+"px";a.appendChild(d);setTimeout(()=>d.remove(),900)}
 

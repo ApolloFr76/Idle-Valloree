@@ -99,7 +99,7 @@ document.addEventListener("click",e=>{ptrDown=false;
   }
 });
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){const v=+e.target.value;S.opt[k]=Number.isFinite(v)?v:OPT_DEF[k];const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});
-document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="checkbox"){S.opt[k]=e.target.checked;applyOpts();if(k==="music"){audioInit();musicSync()}}});
+document.addEventListener("change",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="checkbox"){S.opt[k]=e.target.checked;applyOpts();if(k==="showArmor"){drawHero();renderPanel(true)}if(k==="music"){audioInit();musicSync()}}});
 document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="escape"&&atSel&&!forge){atSel=null;renderPanel(true);return}
   if(tutoI>=0){if(k==="escape"){tutoEnd()}else if(k==="arrowright"||k==="enter"){e.preventDefault();tutoI++;tutoDraw()}else if(k==="arrowleft"){tutoI=Math.max(0,tutoI-1);tutoDraw()}if(k!=="tab")e.preventDefault();return}
   if((k==="enter"||k===" ")&&e.target.dataset&&e.target.dataset.a==="atOpen"){e.preventDefault();e.target.click();return}

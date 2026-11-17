@@ -18,8 +18,8 @@ const SCENE=(()=>{
 
   /* Héros */
   const hero={el:null,cur:"idle",period:1700,off:0,blink:1,sets:{
-    idle:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"idle"),blink:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"idle",1),
-    atk:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"atk"),cast:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"cast")}};
+    idle:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"idle",0,heroArm()),blink:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"idle",1,heroArm()),
+    atk:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"atk",0,heroArm()),cast:()=>PX.heroFrames(S.cls,CLASSES[S.cls].col,"cast",0,heroArm())}};
   /* Monstre ciblé */
   const mon={el:null,cur:"idle",period:2200,off:0,sets:{
     idle:()=>PX.monFrames(MON[S.mon.id],"idle"),atk:()=>PX.monFrames(MON[S.mon.id],"atk"),hurt:()=>PX.monFrames(MON[S.mon.id],"hurt")}};
