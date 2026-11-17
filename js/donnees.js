@@ -497,6 +497,9 @@ const CODES={
      niveau par niveau, qui redessinait le monde et écrivait dans le journal à chaque niveau et figeait le jeu. */
   "fe8x7v1vuagpg":{once:true,txt:"+50 000 niveaux",go:()=>{const n=50000;S.lvl+=n;S.pts+=n*PTS_PER_LVL;S.xp=0;checkUnlocks(true);mx("maxLvl",S.lvl);S.hp=stats().maxHp;drawSpells();drawZones();if(fx){sfx("level");FX.lvl(S.lvl)}return`+${fmt(n)} niveaux : niveau ${fmt(S.lvl)} (+${fmt(n*PTS_PER_LVL)} points de caractéristiques)`}},
 };
+/* Résultat d'un code : bulle + message sous le champ (Options > Sauvegarde), plus visible que la bulle seule. */
+let codeRes=null;
+function codeMsg(t,ok){toast(t,1);codeRes={t,ok:!!ok,at:Date.now()};const m=$("codeMsg");if(m){m.textContent=t;m.className="codemsg "+(ok?"ok":"ko");m.hidden=false}}
 function useCode(raw){if(!String(raw||"").trim())return;const k=codeHash(raw),c=CODES[k];
-  if(!c){toast("Code inconnu",1);return}S.codes=S.codes||{};if(c.once&&S.codes[k]){toast("Code déjà utilisé",1);return}
-  const r=c.go();S.codes[k]=(S.codes[k]||0)+1;log(`Code cadeau : ${r||c.txt}.`,"g");toast(`Code cadeau : ${r||c.txt}`,1);dirty=true;save()}
+  if(!c){codeMsg("Code inconnu.");return}S.codes=S.codes||{};if(c.once&&S.codes[k]){codeMsg("Code déjà utilisé : il sera de nouveau disponible après votre prochaine renaissance Oméga.");return}
+  const r=c.go();S.codes[k]=(S.codes[k]||0)+1;log(`Code cadeau : ${r||c.txt}.`,"g");codeMsg(`Code cadeau : ${r||c.txt}`,1);dirty=true;save()}
