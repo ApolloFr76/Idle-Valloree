@@ -121,6 +121,6 @@ function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0]||i>0&&!(S.zoneBosses||{})
 document.addEventListener("input",e=>{if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
 document.addEventListener("change",e=>{if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
-document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
-window.addEventListener("pagehide",save);
+document.addEventListener("visibilitychange",()=>{if(document.hidden){beginAfk();save()}else{const s=settleAfk();if(s){boot2();if(s.kills||Object.keys(s.res).length)showOffline(s)}}});
+window.addEventListener("pagehide",()=>{beginAfk();save()});
 

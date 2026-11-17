@@ -51,8 +51,11 @@ function tick(dt){VIE.tick(dt);
 }
 function offline(sec){
   if(!S.cls)return null;
+  const room=Math.max(0,bagCap()-bagWeight());
+  sec=Math.min(Math.max(0,sec),room);
+  S.afkWeight=sec;
   if(S.mode!=="zone"){S.mode="zone";S.dg=null;S.timer=0;S.mon=null}
-  sec=Math.min(sec,8*3600);const sum={sec,xp:0,ecus:0,kills:0,res:{}},st=stats(),z=ZONES[S.zone];
+  const sum={sec,xp:0,ecus:0,kills:0,res:{}},st=stats(),z=ZONES[S.zone];
   const lvl=Math.round((z.lvl[0]+Math.min(zoneTop(z),S.lvl+4))/2),ms=monsterStats(Math.max(z.lvl[0],lvl));
   const ef=z.mons.reduce((a,m)=>a+(1-monRes(m.el,st.el)/100),0)/z.mons.length,tk=ms.hp/(st.dps*ef+allyDps())+1.5,danger=ms.atk*st.def/2*tk>st.maxHp*1.5;
   const kills=danger?0:Math.floor(sec/tk*.5);

@@ -12,11 +12,22 @@ WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener
 placeSide();
 let sceneOn=false;
 function boot2(){placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+function settleAfk(){
+  if(!S||!S.cls||!S.afkSince)return null;
+  const sec=Math.max(0,(Date.now()-S.afkSince)/1000);
+  let sum=null;
+  if(S.opt.offline&&sec>0)sum=offline(sec);
+  S.afkSince=0;
+  S.afkWeight=0;
+  save();
+  return sum;
+}
+function beginAfk(){if(S&&S.cls&&!S.afkSince)S.afkSince=Date.now()}
 function loop(){
   const now=performance.now();let dt=(now-lastT)/1000;lastT=now;
   if(S&&S.cls){
     if(paused||(S.opt.pauseHidden&&document.hidden))dt=0;
-    if(dt>120){if(S.opt.offline){const s=offline(dt);boot2();if(s&&(s.kills||Object.keys(s.res).length))showOffline(s)}}
+    if(dt>120){const s=document.hidden?settleAfk():S.opt.offline?offline(dt):null;if(!document.hidden)S.afkWeight=0;if(s){boot2();if(s.kills||Object.keys(s.res).length)showOffline(s)}}
     else if(dt>0){fx=!document.hidden&&dt<1;const steps=Math.min(600,Math.ceil(dt/.2));for(let i=0;i<steps;i++)tick(dt/steps);fx=true}
     live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests();checkTips();liveStats()}
     if(dirty&&now-lastPanel>600){lastPanel=now;renderPanel()}
@@ -35,7 +46,7 @@ function start(data){
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}
   S.opt=fixOpts(S.opt);applyOpts();checkUnlocks(true);
   if(!S.cls){showCreate();}
-  else{const away=(Date.now()-(S.last||Date.now()))/1000;let sum=null;if(away>60&&S.opt.offline)sum=offline(away);boot2();if(sum&&(sum.kills||Object.keys(sum.res).length))showOffline(sum)}
+  else{const away=(Date.now()-(S.afkSince||S.last||Date.now()))/1000;let sum=null;if(away>0&&S.opt.offline)sum=offline(away);S.afkSince=0;S.afkWeight=0;boot2();save();if(sum&&(sum.kills||Object.keys(sum.res).length))showOffline(sum)}
   lastT=performance.now();setInterval(loop,100);setInterval(()=>{if(Date.now()-lastSave>=(S.opt?.saveEvery||10)*1000){lastSave=Date.now();save()}},1000);
 }
 window.claude?.hot?.snapshot?.(()=>({S}));

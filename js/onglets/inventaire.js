@@ -47,7 +47,7 @@ function pInv(){
   const tiles=all.slice(invP*PER,invP*PER+PER).map(e=>{if(e.t==="u"){const i=e.i,it=ITEMS[i.id];return`<button class="tile${e.us.includes(selU)&&selLast==="inv"?" on":""}" data-a="selInv" data-v="u:${i.u}" title="${esc(it.name)}" style="--ic:${itCol(it)};${i.r?`border-color:${rarOf(i).c};box-shadow:inset 0 0 12px ${rarOf(i).c}44`:""}">${itIcon(it)}${i.e?`<span class="badge">+${i.e}</span>`:""}${e.n>1?`<span class="q num">×${e.n}</span>`:""}</button>`}
     const r=RES[e.k];return`<button class="tile${selInv==="r:"+e.k&&selLast==="inv"?" on":""}" data-a="selInv" data-v="r:${e.k}" title="${esc(r.name)}" style="--ic:${resCol(r)}">${resIcon(r)}<span class="q num">${fmt(S.res[e.k])}</span></button>`}).join("");
   const F=[["all","Tout","all"],["equip","Équipements","arme"],["fam","Montures et familiers","familier"],["tro","Trophées","trophee"],["res","Ressources","drop"]];
-  const w=bagWeight(),cap=bagCap();
+  const w=S.afkWeight||0,cap=bagCap();
   const R=`<div class="invR">
     <div class="itabs">${F.map(([k,n,g])=>`<button class="itab${invF===k?" on":""}" data-a="filt" data-f="${k}" title="${n}" aria-label="${n}">${glyph(g)}</button>`).join("")}</div>
     <select id="invSub" aria-label="Catégorie">${SUBS[invF].map(([k,n])=>`<option value="${k}" ${invSub===k?"selected":""}>${n}</option>`).join("")}</select>
