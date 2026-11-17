@@ -1310,3 +1310,7 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .world .mslot .mdots{top:10px;bottom:auto;left:50%;right:auto;transform:translateX(-50%);margin:0;width:236px;max-width:none;justify-content:center;flex-wrap:wrap}
 /* Filtre météo étendu à tout le décor : sous les menus, au-dessus de la prairie de fond */
 #weatherPage{position:fixed;inset:0;z-index:0;border-radius:0}
+/* Résultat du code cadeau, sous le champ */
+.codemsg{margin:8px 0 0;padding:6px 10px;border:2px solid var(--ink);font-weight:700}
+.codemsg.ok{background:#d9f0c4;color:#2a5a18}
+.codemsg.ko{background:#f6d6c8;color:#8a2a12}
