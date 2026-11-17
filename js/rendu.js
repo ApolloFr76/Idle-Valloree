@@ -88,6 +88,8 @@ function morph(a,b){
   for(const at of [...a.attributes])if(!b.hasAttribute(at.name))a.removeAttribute(at.name);
   for(const at of b.attributes)if(a.getAttribute(at.name)!==at.value)a.setAttribute(at.name,at.value);
   if(a.nodeName==="INPUT"&&a!==document.activeElement){if(a.value!==b.value)a.value=b.value;if(a.checked!==b.checked)a.checked=b.checked}
+  /* zone de texte en cours d'utilisation (sauvegarde à copier, code à coller) : on n'y touche pas, sinon la sélection saute */
+  if(a.nodeName==="TEXTAREA"&&a===document.activeElement)return;
   morphKids(a,b);if(a.nodeName==="SELECT"&&a.value!==b.value)a.value=b.value}
 function morphKids(a,b){const A=[...a.childNodes],B=[...b.childNodes];
   for(let i=0;i<B.length;i++){if(i<A.length)morph(A[i],B[i]);else a.appendChild(B[i])}

@@ -91,8 +91,8 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"ouvHire":{OUV.hire(b.dataset.p);renderPanel();break}
     case"ouvFire":{OUV.fire(+b.dataset.i);renderPanel();break}
     case"job":{const r=b.dataset.r;S.job=S.job&&S.job.r===r?null:{r,t:0};renderPanel();break}
-    case"copy":{const t=$("exportBox");const done=()=>toast("Code copié");try{navigator.clipboard.writeText(t.value).then(done,()=>{t.select();toast("Sélectionné : copiez avec Ctrl+C")})}catch(err){t.select();toast("Sélectionné : copiez avec Ctrl+C")}break}
-    case"import":{try{const d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))));if(!d||!d.cls)throw 0;S=Object.assign(fresh(),d);save();boot2();toast("Partie chargée")}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.")}break}
+    case"copy":{const t=$("exportBox");const done=()=>toast("Code de sauvegarde copié",1);try{navigator.clipboard.writeText(t.value).then(done,()=>{t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)})}catch(err){t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)}break}
+    case"import":{try{const d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))));if(!d||!d.cls)throw 0;S=Object.assign(fresh(),d);save();boot2();toast("Partie chargée",1)}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.",1)}break}
     case"reset":confirmReset=true;renderPanel();break;
     case"resetNo":confirmReset=false;renderPanel();break;
     case"resetYes":confirmReset=false;S=fresh();try{localStorage.removeItem(SAVE_KEY)}catch(err){}showCreate();break;
