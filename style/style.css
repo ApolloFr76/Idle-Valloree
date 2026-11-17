@@ -351,6 +351,20 @@ textarea{width:100%;min-height:70px;background:#121922;color:var(--fg);border:1p
 .ov{position:fixed;inset:0;z-index:50;background:rgba(8,12,18,.82);display:grid;place-items:center;padding:20px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
 .ovc{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;max-width:860px;width:100%;display:flex;flex-direction:column;gap:14px}
 .ovc h2{font-size:26px;color:var(--gold)}
+/* Bouton des notes de mise à jour (en-tête) : parchemin + pastille quand une note n'est pas lue */
+.updatesBtn{position:relative;display:grid;place-items:center;padding:4px 8px 8px}
+.updatesBtn svg{width:24px;height:24px;display:block}
+.updatesBtn .dot{position:absolute;top:-5px;right:-5px;width:12px;height:12px;margin:0;background:#e8483c;border:2px solid var(--ink);animation:updPulse 1.4s ease-in-out infinite}
+.updatesBtn .dot[hidden]{display:none}
+@keyframes updPulse{50%{transform:scale(1.25)}}
+.updatesPanel{max-width:680px}
+.updatesHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.updatesHead h2{margin:0}
+.updatesList{display:grid;gap:12px;max-height:min(65vh,560px);overflow:auto;padding-right:4px}
+.updateEntry{padding:14px 16px;background:color-mix(in srgb,var(--panel) 78%,var(--ink));border:1px solid var(--line);border-radius:10px}
+.updateMeta{display:flex;align-items:baseline;justify-content:space-between;gap:12px;color:var(--gold)}
+.updateEntry ul{margin:8px 0 0;padding-left:20px}
+.updateEntry li+li{margin-top:5px}
 .classes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 @media (max-width:760px){.classes{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:420px){.classes{grid-template-columns:minmax(0,1fr)}}

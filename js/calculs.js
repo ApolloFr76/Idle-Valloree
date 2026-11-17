@@ -34,12 +34,12 @@ function roll(mult,st){if(S.mon)mult*=1+.05*bestTier(S.mon.id);const r=S.mon?mon
 const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed)*S.buffs.filter(b=>b.k==="cdr").reduce((a,b)=>a*b.v,1);
 /* Puissance des monstres : courbe de base, puis un multiplicateur qui grimpe de façon exponentielle au-delà du
    niveau 25 (×2,7 au niv. 50, ×19 au niv. 100, ×140 au niv. 150, ×1000 au niv. 200) pour suivre la puissance du joueur
-   en fin de jeu (dégâts des monstres ×8 au niv. 200). Les gains (XP, écus) suivent en partie pour que les combats plus longs restent rentables. */
+   en fin de jeu (dégâts des monstres ×8 au niv. 200). Les gains suivent cette difficulté pour que les combats plus longs restent rentables. */
 /* La croissance reste exponentielle après 200, avec une composante polynomiale pour
    garder une progression forte sans rendre les valeurs inutilisables trop tôt. */
 const monPow=lvl=>Math.exp(.0395*(Math.min(200,Math.max(25,lvl))-25))*(lvl>200?Math.pow(lvl/200,3)*Math.pow(1.004,lvl-200):1);
 const MON_BOOST=1.15;   /* tous les monstres +15 % de PV et de dégâts */
-function monsterStats(lvl){const m=monPow(lvl);return{hp:Math.round((14+7*Math.pow(lvl,1.45))*m*MON_BOOST),atk:Math.round((2+1.5*Math.pow(lvl,1.2))*Math.pow(m,.3)*MON_BOOST),xp:Math.round((6+5*Math.pow(lvl,1.3))*Math.pow(m,.4)),ecus:Math.round((2+lvl*1.1)*Math.pow(m,.4))}}
+function monsterStats(lvl){const m=monPow(lvl),goldScale=Math.pow(Math.max(1,lvl/25),.35);return{hp:Math.round((14+7*Math.pow(lvl,1.45))*m*MON_BOOST),atk:Math.round((2+1.5*Math.pow(lvl,1.2))*Math.pow(m,.3)*MON_BOOST),xp:Math.round((6+5*Math.pow(lvl,1.3))*Math.pow(m,.4)),ecus:Math.round((2+lvl*1.1)*Math.pow(m,.65)*goldScale)}}
 function makeMon(d,lvl,hpM=1,atkM=1,xpM=1,ecM=1){const ms=monsterStats(lvl),hp=Math.round(ms.hp*hpM);S.mon={id:d.id,lvl,hp,max:hp,atk:Math.round(ms.atk*atkM),xp:Math.round(ms.xp*xpM),ecus:Math.round(ms.ecus*ecM)};S.dots=[];S.mdot={};S.monT=0;makeShiny();drawMonster();if(fx){FX.spawn(!!d.boss);VIE.monSpawn(!!d.boss);SCENE.drawQueue();if(S.mode==="zone"&&!d.boss){SCENE.walkIn();SCENE.advance()}}}
 /* Dernière zone : au-delà du niveau 1000, les monstres suivent le héros avec 50 niveaux de moins. */
 const ZONE_LAG=50;

@@ -1105,7 +1105,8 @@ const MONDE=(()=>{
 
   function resize(){const a=$("arena");if(!a||!cv)return;const w=a.clientWidth,h=a.clientHeight;if(!w||!h)return;
     P=w<640?3:4;W=Math.ceil(w/P);H=Math.ceil(h/P);cv.width=W;cv.height=H;cv.style.width=W*P+"px";cv.style.height=H*P+"px";wc.width=W;wc.height=H;
-    const feet=P===4?Math.min(104,Math.round(h*.21)):78;FY=H-Math.round(feet/P);GT=FY-(PY-TM);a.style.setProperty("--feet",(H-FY)*P+"px");a.style.setProperty("--px",P);skyKey="";
+    /* grand écran : le décor (ciel compris) garde au plus ~540 px au-dessus des pieds, le reste est du sol */
+    const feet=P===4?Math.max(Math.min(104,Math.round(h*.21)),h-540):Math.max(78,h-440);FY=H-Math.round(feet/P);GT=FY-(PY-TM);a.style.setProperty("--feet",(H-FY)*P+"px");a.style.setProperty("--px",P);skyKey="";
     /* CT : bas de l'en-tête quand il recouvre le bandeau (la voûte du bois commence juste dessous) */
     const hd=document.querySelector("header.top");CT=hd?Math.max(0,Math.round((hd.getBoundingClientRect().bottom-a.getBoundingClientRect().top)/P)):0}
 
@@ -1308,6 +1309,8 @@ const MONDE=(()=>{
     if(L.gulls)gulls.forEach(b=>{const x=Math.round(b.x),y=Math.round(b.y+Math.sin(b.ph*1.6)*2),up=Math.sin(b.ph*5)>0;g.fillStyle="#f4f6fa";g.fillRect(x,y,1,1);g.fillRect(x-2,y-(up?1:0),2,1);g.fillRect(x+1,y-(up?1:0),2,1);g.fillStyle="#8a94a8";g.fillRect(x-3,y-(up?2:-1),1,1);g.fillRect(x+3,y-(up?2:-1),1,1)});
     band(g,L.wall,.5,GT-L.wall.height+3);if(L.meta.kelp)kelp(g,t,moving);if(L.meta.shards)shards(g,t,moving);
     band(g,L.ground,1,GT-TM);
+    /* monde plein écran : sous la bande du sol, la prairie du dessous continue jusqu'en bas */
+    if(L.low){const y0=GT-TM+L.ground.height,ox=((Math.round(cam)%L.gW)+L.gW)%L.gW;for(let y=y0;y<H;y+=L.low.height)for(let x=-ox;x<W;x+=L.gW)g.drawImage(L.low,x,y)}
     drawLife(g,t,ph);
     /* hautes herbes qui ondulent : elles défilent exactement avec le sol où elles sont plantées */
     {const gw=L.gW,off=((Math.round(cam)%gw)+gw)%gw,y0=GT-TM,base=tf=>y0+tf.y;L.tufts.forEach(tf=>{const b=base(tf);if(b>H-1)return;   /* entière dans le bandeau, jamais coupée par son bord */if(!tf.cs){tf.cs=css(tf.c);tf.ct=css(mix(tf.c,"#fff2c2",.25))}

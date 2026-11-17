@@ -7,6 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="style/style.css">
 <link rel="stylesheet" href="style/monde.css">
+<link rel="stylesheet" href="style/disposition.css">
 </head>
 <body>
 <!-- La prairie continue sous le bandeau, derrière les menus (js/monde.js) -->
@@ -30,6 +31,7 @@
   <!-- En-tête : nom, héros, XP, écus, aide, pause (posé sur le ciel) -->
   <header class="top">
     <div class="brand">Vallorée</div>
+    <button class="btn updatesBtn" id="updatesBtn" data-a="updates" title="Notes de mise à jour" aria-label="Ouvrir les notes de mise à jour" style="order:7"><span id="updatesIcon" aria-hidden="true"></span><span class="dot" id="updatesDot" hidden></span></button>
     <button class="btn" id="helpBtn" data-a="help" title="Aide" style="order:8">?</button>
     <button class="btn" id="pauseBtn" data-a="pause" title="Pause (touche P)" style="order:9">Pause</button>
     <div class="hero" id="heroBox"></div>
@@ -45,6 +47,8 @@
     <div class="modebar" id="modeBar"></div>
     <div class="buffs" id="buffs"></div>
     <div class="hint" id="hint">Cliquez sur le monstre pour frapper. Le combat continue tout seul.</div>
+    <!-- Objectifs, statistiques en direct (grand écran) et journal, repliables -->
+    <section class="side" id="sideCard"><button class="sidetog" id="sideTog" data-a="sideTog" aria-expanded="true">Journal</button><div class="goals" id="goals"></div><div class="log" id="log"></div></section>
   </div>
   <!-- Bas : barre d'action (sorts et potions) -->
   <div class="hudb">
@@ -52,17 +56,14 @@
   </div>
 </div>
 
-<!-- ===== Application ===== -->
-<div class="wrap" id="app">
-  <div class="main">
-    <!-- Colonne onglets : barre d'onglets + contenu (rempli par js/onglets/*.js) -->
-    <section class="card" id="panelCard">
-      <nav class="tabs" id="tabs"></nav>
-      <div id="panel"></div>
-    </section>
-    <!-- Colonne de droite : objectifs, statistiques en direct (grand écran), journal -->
-    <section class="card" id="sideCard"><div class="goals" id="goals"></div><div class="log" id="log"></div></section>
-  </div>
+<!-- ===== Onglets : barre verticale à droite (en bas sur téléphone), qui ouvre le tiroir ===== -->
+<nav class="tabs rail" id="tabs" aria-label="Onglets"></nav>
+<!-- ===== Tiroir : contenu de l'onglet ouvert, posé sur le monde (js/disposition.js) ===== -->
+<div class="wrap drawer" id="app">
+  <section class="card" id="panelCard">
+    <div class="dhead"><h2 id="dTitle"></h2><button class="btn dclose" data-a="drawerClose" title="Fermer (Échap)" aria-label="Fermer le panneau">✕</button></div>
+    <div id="panel"></div>
+  </section>
 </div>
 <!-- ===== Couches flottantes : fenêtres, info-bulles, bulles ===== -->
 <div class="ov" id="ov" hidden></div>
@@ -89,11 +90,13 @@
 <script src="js/succes.js"></script>
 <script src="js/boucle.js"></script>
 <script src="js/rendu.js"></script>
+<script src="js/disposition.js"></script>
 <script src="js/vie.js"></script>
 <script src="js/anim.js"></script>
 <script src="js/scene.js"></script>
 <script src="js/monde.js"></script>
 <script src="js/ouvriers.js"></script>
+<script src="js/updates.js"></script>
 <script src="js/onglets/personnage.js"></script>
 <script src="js/onglets/inventaire.js"></script>
 <script src="js/onglets/aventure.js"></script>

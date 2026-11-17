@@ -1,7 +1,15 @@
 /* Boucle de jeu (tick) : combat automatique, récolte, temps. */
 /* ================= Boucle ================= */
 let allyAcc=0,allyFT=0,clickAcc=0;
-function doClick(auto){if(!S.cls||!S.mon||S.ko>0)return;if(!auto){if(fx)FX.click();S.combo=Math.min(comboMax(),S.combo+1);S.comboT=1.5;inc("clicks");mx("maxCombo",Math.floor(S.combo))}let m=.6*clickMult()*(1+S.combo/50);if(Math.random()<talV("t_dore")/100){m*=10;if(fx)floatNum("Frappe dorée !","crit")}hitMon(roll(m,stats()),"click")}
+const PLAYER_CPS_LIMIT=20,playerClickTimes=[];
+function playerClickAllowed(){
+  const now=performance.now();
+  while(playerClickTimes.length&&now-playerClickTimes[0]>=1000)playerClickTimes.shift();
+  if(playerClickTimes.length>=PLAYER_CPS_LIMIT)return false;
+  playerClickTimes.push(now);
+  return true;
+}
+function doClick(auto){if(!S.cls||!S.mon||S.ko>0)return;if(!auto){if(!playerClickAllowed())return;if(fx)FX.click();S.combo=Math.min(comboMax(),S.combo+1);S.comboT=1.5;inc("clicks");mx("maxCombo",Math.floor(S.combo))}let m=.6*clickMult()*(1+S.combo/50);if(Math.random()<talV("t_dore")/100){m*=10;if(fx)floatNum("Frappe dorée !","crit")}hitMon(roll(m,stats()),"click")}
 function tick(dt){VIE.tick(dt);
   S.time+=dt;if(!S.cls)return;inc("time",dt);
   const st=stats();
@@ -47,7 +55,7 @@ function offline(sec){
   const ef=z.mons.reduce((a,m)=>a+(1-monRes(m.el,st.el)/100),0)/z.mons.length,tk=ms.hp/(st.dps*ef+allyDps())+1.5,danger=ms.atk*st.def/2*tk>st.maxHp*1.5;
   const kills=danger?0:Math.floor(sec/tk*.5);
   if(kills>0){sum.kills=kills;sum.xp=Math.round(kills*ms.xp*st.xpM);sum.ecus=gainEcus(kills*ms.ecus*(1+(st.pros-1)/2));S.kills+=kills;
-    const dr=Math.floor(kills*.35*st.pros);z.mons.filter(m=>!m.extra).forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){addRes(m.drop[0],n);sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+n}});
+    const dr=Math.floor(kills*.35*st.pros);z.mons.filter(m=>!m.extra).forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){const got=addRes(m.drop[0],n,true);if(got)sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+got}});
     fx=false;gainXp(sum.xp);fx=true}
   if(S.job){const r=RES[S.job.r];let t=sec+S.job.t,tot=0,guard=0;while(guard++<20000){const gt=gatherTime(r.prof,r.tier);if(t<gt)break;t-=gt;tot+=gainGather(r.prof,r.id,true)}S.job.t=t;if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
   OUV.offline(sec,sum);

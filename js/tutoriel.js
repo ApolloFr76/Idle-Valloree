@@ -41,7 +41,7 @@ let tutoI=-1,tipQ=[],tipShown=null,TSTEPS=TUTO,tutoKind="main",unlQ=[];
 function tutoRun(steps,kind){TSTEPS=steps;tutoKind=kind;tutoI=0;paused=true;$("tuto").hidden=false;tutoDraw()}
 function tutoStart(){tutoRun(TUTO,"main")}
 function tutoEnd(){const k=tutoKind;tutoI=-1;$("tuto").hidden=true;paused=false;if(k==="main"){S.tutoDone=1;S.tab="perso"}renderPanel();save();setTimeout(checkTips,500)}
-function tutoDraw(){const TU=TSTEPS,st=TU[tutoI];if(!st){tutoEnd();return}if(st.tab&&S.tab!==st.tab){S.tab=st.tab;renderPanel()}
+function tutoDraw(){const TU=TSTEPS,st=TU[tutoI];if(!st){tutoEnd();return}if(st.tab){if(!UI.o)UI.open(true);if(S.tab!==st.tab){S.tab=st.tab;renderPanel()}}
   const el=st.sel?document.querySelector(st.sel):null;if(el)el.scrollIntoView({block:"center",behavior:"instant"});
   requestAnimationFrame(()=>{const r=el?el.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2,right:innerWidth/2,bottom:innerHeight/2,width:0,height:0},sp=$("tspot"),b=$("tbub"),pad=el?6:0;b.classList.toggle("center",!el);sp.classList.toggle("none",!el);
     sp.style.left=(r.left-pad)+"px";sp.style.top=(r.top-pad)+"px";sp.style.width=(r.width+pad*2)+"px";sp.style.height=(r.height+pad*2)+"px";

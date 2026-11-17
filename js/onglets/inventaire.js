@@ -29,13 +29,13 @@ function pInv(){
     dl=`<span class="small muted">${it.kind||EQ[it.slot]?.n||""} · niveau ${it.lvl}</span><span class="iname" style="color:${rarOf(inst).c}">${it.name}${inst.e?` <em>+${inst.e}</em>`:""} <span class="tag">${rarOf(inst).n}</span>${nS>1?` <span class="muted num">×${nS}</span>`:""}</span><span class="istats">${statsTxt(itemStats(inst))}</span><div class="row"><button class="btn pri" data-a="equip" data-u="${inst.u}" ${S.lvl<it.lvl?"disabled":""}>Équiper</button><button class="btn" data-a="sellItem" data-u="${inst.u}">Vendre · ${fmt(sv)} écus</button>${nS>1?`<button class="btn" data-a="sellStack" data-k="${sk}">Tout vendre (${nS}) · ${fmt(sv*nS)}</button>`:""}</div>`}}
   if(selLast==="inv"&&selInv&&selInv[0]==="r"){const k=selInv.slice(2),r=RES[k],q=S.res[k]||0;if(q>0)
     dl=`<span class="small muted">${kindLabel(r)}</span><span class="iname">${r.name} <span class="muted num">×${fmt(q)}</span></span><span class="istats">${r.txt?r.txt+" · ":""}${priceOf(k)} écus l'unité${r.kind!=="k"?` · cours ×${mkOf(k).toFixed(2)} ${trend(k)}`:""}</span><div class="row">${r.kind==="p"?`<button class="btn pri" data-a="drink" data-r="${k}">Boire</button>`:""}<button class="btn" data-a="sell" data-r="${k}" data-n="1">Vendre 1</button><button class="btn" data-a="sell" data-r="${k}" data-n="10" ${q<10?"disabled":""}>Vendre 10</button><button class="btn pri" data-a="sell" data-r="${k}" data-n="all">Tout vendre · ${fmt(q*priceOf(k))}</button></div>`}
+  const noSel=dl.startsWith(`<span class="small muted" style="margin:auto">`);
   const L=`<div class="invL">
     <div class="doll"><div class="dcol">${DOLL_L.map(slotBtn).join("")}</div>
       <div class="dmid">${heroSVG(S.cls)}<span class="nm">${esc(S.name)}</span><span class="small muted">${C.name} · niv. ${S.lvl}</span><span class="small muted num">${fmt(st.maxHp)} PV · ${fmt(st.dps)} dég./s</span></div>
       <div class="dcol">${DOLL_R.map(slotBtn).join("")}</div></div>
     <div class="trophies">${DOLL_B.map(slotBtn).join("")}</div>
-    ${(sc=>Object.keys(sc).length?`<div class="setlist">${Object.keys(sc).map(z=>setBox(z,sc[z],true)).join("")}</div>`:`<div class="setb small">Portez plusieurs pièces d'une même panoplie : chaque pièce à partir de la 2e débloque un bonus.</div>`)(setCounts())}
-    <div class="detail" style="min-height:120px">${dl}</div></div>`;
+    ${(sc=>Object.keys(sc).length?`<div class="setlist">${Object.keys(sc).map(z=>setBox(z,sc[z],true)).join("")}</div>`:`<div class="setb small">Portez plusieurs pièces d'une même panoplie : chaque pièce à partir de la 2e débloque un bonus.</div>`)(setCounts())}</div>`;
   /* sac */
   const subOk=(it)=>invSub==="all"||(invF==="equip"?it.slot===invSub:invF==="fam"?it.kind===invSub:true);
   const items=invF==="res"?[]:S.items.filter(i=>!eq.has(i.u)&&(invF==="all"||invF===ikind(ITEMS[i.id]))&&subOk(ITEMS[i.id]));
@@ -53,10 +53,11 @@ function pInv(){
     <select id="invSub" aria-label="Catégorie">${SUBS[invF].map(([k,n])=>`<option value="${k}" ${invSub===k?"selected":""}>${n}</option>`).join("")}</select>
     <div class="igrid">${tiles||`<p class="small muted empty">Rien dans cette catégorie.</p>`}</div>
     <div class="pager"><button class="btn" data-a="page" data-d="-1" ${invP<=0?"disabled":""} aria-label="Page précédente">◀</button><span class="num">${invP+1} / ${pages}</span><button class="btn" data-a="page" data-d="1" ${invP>=pages-1?"disabled":""} aria-label="Page suivante">▶</button></div>
+    <div class="detail idock${noSel?" nosel":""}" aria-live="polite">${dl}</div>
     <div class="wallet">
       <div class="wrow"><span class="muted">Écus</span><b class="num">${fmt(S.ecus)} <span class="coin"></span></b></div>
       <div><div class="wrow"><span class="muted">Niveau ${S.lvl}</span><span class="num muted">${S.lvl>=lvlMax()?"max":`${fmt(S.xp)} / ${fmt(need)} XP`}</span></div><div class="bar xp" style="margin-top:4px"><i style="width:${S.lvl>=lvlMax()?100:S.xp/need*100}%"></i></div></div>
-      <div><div class="wrow"><span class="muted">Poids</span><span class="num ${w>=cap?"":"muted"}" ${w>=cap?'style="color:var(--hp)"':""}>${fmt(w)} / ${fmt(cap)}</span></div><div class="bar wt${w>=cap?" full":""}" style="margin-top:4px"><i style="width:${Math.min(100,w/cap*100)}%"></i></div></div>
+      <div><div class="wrow"><span class="muted">Poids AFK</span><span class="num ${w>=cap?"":"muted"}" ${w>=cap?'style="color:var(--hp)"':""}>${fmt(w)} / ${fmt(cap)}</span></div><div class="bar wt${w>=cap?" full":""}" style="margin-top:4px"><i style="width:${Math.min(100,w/cap*100)}%"></i></div></div>
     </div></div>`;
   return`<div class="invsplit">${L}${R}</div>`;
 }

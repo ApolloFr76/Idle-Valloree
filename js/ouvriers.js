@@ -1,6 +1,6 @@
 /* Ouvriers : on les embauche avec des écus et on les place sur une ressource déjà débloquée d'un
    métier. Ils récoltent seuls, deux fois moins vite que vous et sans XP de métier, pendant les
-   combats et hors ligne (8 h max), tant que le sac a de la place. On les voit travailler dans le
+   combats et hors ligne (8 h max), avec 50 % de l'XP de métier et le poids du sac appliqué uniquement aux gains hors ligne. On les voit travailler dans le
    chantier de l'onglet Métiers (SITE, js/monde.js). Objet OUV, état dans S.workers. */
 const OUV_MAX=6,OUV_SLOW=2,OUV_BASE=300,OUV_GROWTH=5;
 const OUV_NAMES=["Gaston","Margot","Baptiste","Lison","Firmin","Rosalie","Anselme","Perrine","Hector","Jeanne","Éloi","Mahaut"];
@@ -17,9 +17,9 @@ const OUV=(()=>{
     list:L,
     at:pid=>L().filter(w=>RES[w.r]&&RES[w.r].prof===pid),
     /* récolte pendant le jeu */
-    tick(dt){L().forEach((w,i)=>{if(!w.r||!RES[w.r])return;const gt=time(w);w.t+=dt;while(w.t>=gt){const n=addRes(w.r,1);if(!n){w.t=gt;w.full=1;return}w.t-=gt;w.full=0;w.n=(w.n||0)+n;qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.25,true);if(fx)SITE.pop(i,"+"+n)}})},
-    /* récolte pendant l'absence (même plafond que le reste : 8 h, voir offline()) */
-    offline(sec,sum){L().forEach(w=>{if(!w.r||!RES[w.r])return;const gt=time(w),tot=sec+w.t,want=Math.floor(tot/gt);w.t=tot-want*gt;const n=want>0?addRes(w.r,want):0;w.n=(w.n||0)+n;if(n){qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.25*n,true);sum.res[RES[w.r].name]=(sum.res[RES[w.r].name]||0)+n}})},
+    tick(dt){L().forEach((w,i)=>{if(!w.r||!RES[w.r])return;const gt=time(w);w.t+=dt;while(w.t>=gt){const n=addRes(w.r,1);if(!n){w.t=gt;w.full=1;return}w.t-=gt;w.full=0;w.n=(w.n||0)+n;qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.5,true);if(fx)SITE.pop(i,"+"+n)}})},
+    /* récolte pendant l'absence (poids du sac et plafond de 8 h, voir offline()) */
+    offline(sec,sum){L().forEach(w=>{if(!w.r||!RES[w.r])return;const gt=time(w),tot=sec+w.t,want=Math.floor(tot/gt);w.t=tot-want*gt;const n=want>0?addRes(w.r,want,true):0;w.full=n<want;w.n=(w.n||0)+n;if(n){qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.5*n,true);sum.res[RES[w.r].name]=(sum.res[RES[w.r].name]||0)+n}})},
     hire(pid){if(L().length>=OUV_MAX)return;const c=cost();if(S.ecus<c){toast(`Il faut ${fmt(c)} écus`);return}S.ecus-=c;
       const used=new Set(L().map(w=>w.name)),name=OUV_NAMES.find(n=>!used.has(n))||"Ouvrier";const w={name,look:L().length%OUV_LOOK.length,r:best(pid),t:0,n:0};L().push(w);
       sfx("coin");log(`${name} rejoint vos ouvriers (${PROFS[pid].name} : ${RES[w.r].name}).`,"g");toast(`${name} embauché`)},

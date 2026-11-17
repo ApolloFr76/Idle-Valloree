@@ -42,7 +42,7 @@ function live(){
   const ad=allyDps(),buffs=$("buffs");if(ad>0)buffs.dataset.ally=fmt(ad);
   $("ko").hidden=!(S.ko>0);if(S.ko>0)$("koT").textContent=Math.ceil(S.ko);$("mon").classList.toggle("ko",S.ko>0);
   const r=S.mon?monRes(MON[S.mon.id].el,st.el):0,elTxt=elChip(st.el,`Vous : ${ELEMS[st.el].n}${S.mon&&st.el!=="neutre"?(r<0?" · efficace":r>0?` · résisté ${r} %`:""):""}`);
-  buffs.innerHTML=elTxt+(S.ev?(e=>`<span class="chip evchip" style="color:${e.c};border-color:${e.c}" title="${e.txt}">${e.n} · ${Math.ceil(S.ev.until-S.time)} s</span>`)(EVENTS.find(e=>e.id===S.ev.id)):"")+(ad>0?`<span class="chip">Compagnons · ${fmt(ad)}/s</span>`:"")+S.buffs.map(b=>`<span class="chip">${b.n} · ${Math.ceil(b.until-S.time)} s</span>`).join("")+(S.dots.length?`<span class="chip">Brûlure · ${Math.ceil(Math.max(...S.dots.map(d=>d.until))-S.time)} s</span>`:"")+(S.job?`<span class="chip">${PROFS[RES[S.job.r].prof].name} : ${RES[S.job.r].name}</span>`:"")+(bagWeight()>=bagCap()?`<span class="chip" style="color:var(--hp)">Sac plein</span>`:"");
+  buffs.innerHTML=elTxt+(S.ev?(e=>`<span class="chip evchip" style="color:${e.c};border-color:${e.c}" title="${e.txt}">${e.n} · ${Math.ceil(S.ev.until-S.time)} s</span>`)(EVENTS.find(e=>e.id===S.ev.id)):"")+(ad>0?`<span class="chip">Compagnons · ${fmt(ad)}/s</span>`:"")+S.buffs.map(b=>`<span class="chip">${b.n} · ${Math.ceil(b.until-S.time)} s</span>`).join("")+(S.dots.length?`<span class="chip">Brûlure · ${Math.ceil(Math.max(...S.dots.map(d=>d.until))-S.time)} s</span>`:"")+(S.job?`<span class="chip">${PROFS[RES[S.job.r].prof].name} : ${RES[S.job.r].name}</span>`:"")+(bagWeight()>=bagCap()?`<span class="chip" style="color:var(--hp)" title="La capacité limite uniquement les gains obtenus hors ligne">Limite AFK atteinte</span>`:"");
   CLASSES[S.cls].spells.forEach(sp=>{const b=$("sp-"+sp.id),c=$("cd-"+sp.id);if(!b||!c)return;const rem=Math.max(0,(S.cds[sp.id]||0)-S.time);c.style.width=(rem/spCd(sp,st)*100)+"%";b.classList.toggle("wait",rem>0)});
   if(S.job){const r=RES[S.job.r],e=$("gp-"+r.id);if(e)e.style.width=(S.job.t/gatherTime(r.prof,r.tier)*100)+"%"}
   if(S.tab==="metiers")OUV.list().forEach((w,i)=>{const e=$("ouvp-"+i);if(e&&RES[w.r])e.style.width=Math.min(100,w.t/OUV.time(w)*100)+"%"});
@@ -101,7 +101,7 @@ function renderPanel(force){if(DRAG.on){dirty=true;return}
   const sy=$("panel").scrollTop, open=[...document.querySelectorAll("details.set[open]")].map(d=>d.dataset.z);
   $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";setHTML($("panel"),(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,opts:pOpts})[S.tab]||pPerso)());if(S.tab!==lastTabAnim){if(lastTabAnim)replayCls($("panel"),"tabin");lastTabAnim=S.tab}
   open.forEach(z=>{const d=document.querySelector(`details.set[data-z="${z}"]`);if(d)d.open=true});
-  $("panel").scrollTop=sy;
+  $("panel").scrollTop=sy;UI.sync();
 }
 function statsTxt(o){return Object.entries(o).map(([k,v])=>k==="crit"?`+${v} % critique`:`+${fmt(v)} ${STAT_LBL[k]}`).join(" · ")}
 let ptab="resume";

@@ -1,0 +1,71 @@
+/* Disposition plein écran (js/disposition.js) : le monde remplit l'écran, les onglets forment une barre
+   à droite et leur contenu s'ouvre dans un tiroir. La page ne défile jamais : seul le tiroir défile.
+   Chargé en dernier, il remplace la mise en page en colonnes de style.css et monde.css. */
+:root{--rail:150px;--hh:56px;--dw:clamp(540px,46vw,880px)}
+html,body{height:100%;overflow:hidden}
+.wbg{display:none}
+
+/* ---------- Le monde ---------- */
+.world{position:fixed;left:0;top:0;right:var(--rail);bottom:0;height:auto}
+
+/* ---------- Barre d'onglets ---------- */
+#tabs.rail{position:fixed;top:0;right:0;bottom:0;width:var(--rail);z-index:30;margin:0;padding:10px 8px;display:flex;flex-direction:column;flex-wrap:nowrap;gap:6px;
+  overflow-y:auto;scrollbar-width:thin;background:linear-gradient(90deg,#3a2117,#2a1712);border:0;border-left:4px solid var(--ink);box-shadow:-4px 0 0 rgba(0,0,0,.18)}
+#tabs.rail .tab{flex:none;width:100%;min-width:0;text-align:left;font-size:14px;padding:7px 10px 11px;overflow:hidden;text-overflow:ellipsis;transform:none}
+#tabs.rail .tab.locked{text-align:center}
+#tabs.rail .tab.on{transform:translateX(-4px)}
+body:not(.drawer-open) #tabs.rail .tab.on{outline:0;box-shadow:inset 0 3px 0 var(--bl),inset 0 -5px 0 var(--bd)}
+
+/* ---------- Le tiroir ---------- */
+#app.drawer{position:fixed;top:var(--hh);right:var(--rail);bottom:0;width:var(--dw);max-width:calc(100vw - var(--rail));height:auto;margin:0;padding:0;z-index:25;
+  display:block;transform:translateX(calc(100% + var(--rail) + 8px));visibility:hidden;transition:transform .25s ease-out,visibility 0s linear .25s}
+body.drawer-open #app.drawer{transform:none;visibility:visible;transition:transform .25s ease-out,visibility 0s}
+#app #panelCard{height:100%;display:flex;flex-direction:column;overflow:hidden;padding:10px 14px 0;border-right:0;border-top:0}
+#panelCard>.dhead{flex:none;display:flex;align-items:center;gap:10px;margin:0 0 8px;padding-bottom:6px;border-bottom:4px solid var(--wood-d)}
+#panelCard>.dhead h2{flex:1;margin:0;font-size:22px}
+#panelCard>.dhead .dclose{flex:none;padding:2px 10px 6px;font-size:16px}
+#app #panel{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding:0 4px 14px 0}
+
+/* le combat se recentre dans la partie visible du monde quand le tiroir est ouvert */
+@media (min-width:1100px){
+  .world .mon,.hudb,.bossbar{transition:left .25s ease-out,width .25s ease-out}
+  body.drawer-open .world .mon{left:calc((100% - var(--dw)) / 2);width:min(720px,calc(100% - var(--dw) - 24px))}
+  body.drawer-open .hudb,body.drawer-open .bossbar{left:calc((100% - var(--dw)) / 2)}
+  body.drawer-open .world .kostate{right:var(--dw)}
+}
+/* écran moyen : le tiroir passe par-dessus le monde */
+@media (max-width:1099px){:root{--dw:min(640px,calc(100vw - var(--rail)))}}
+
+/* ---------- Journal et objectifs (haut gauche du monde) ---------- */
+.hudl{bottom:150px}
+.hudl>*{flex:none}
+#sideCard.side{flex:0 1 auto;min-height:0;width:100%;display:flex;flex-direction:column;gap:6px;margin:0;padding:0;background:none;border:0}
+#sideCard .sidetog{align-self:flex-start;font-size:13px;padding:2px 10px 5px;background:rgba(28,16,32,.72);color:var(--cream);border:2px solid var(--ink)}
+#sideCard .sidetog::after{content:" ▴"}
+body.side-closed #sideCard .sidetog::after{content:" ▾"}
+body.side-closed #sideCard>:not(.sidetog){display:none}
+#sideCard .goals{margin:0;flex:none}
+#sideCard .lstats{flex:none}
+#sideCard .log{margin:0;flex:1 1 auto;min-height:60px;max-height:260px;overflow:auto;scrollbar-width:thin;opacity:.94}
+
+/* ---------- Téléphone : onglets en bas, tiroir plein écran ---------- */
+@media (max-width:700px){
+  :root{--rail:0px;--railh:58px;--dw:100vw}
+  .world{right:0;bottom:var(--railh);overflow-y:auto}
+  .hudl{bottom:auto}
+  #sideCard .log{max-height:200px}
+  #tabs.rail{top:auto;left:0;right:0;bottom:0;width:auto;height:var(--railh);flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:6px;border-left:0;border-top:4px solid var(--ink)}
+  #tabs.rail .tab{width:auto;font-size:13px;padding:6px 10px 9px}
+  #tabs.rail .tab.on{transform:translateY(-3px)}
+  #app.drawer{top:0;left:0;right:0;bottom:var(--railh);width:auto;max-width:none;transform:translateY(calc(100% + var(--railh)))}
+}
+
+/* ---------- Intérieur des onglets ---------- */
+/* Inventaire : la fiche de l'objet suit la grille du sac et reste visible en bas du tiroir */
+#panel .detail.idock{position:sticky;bottom:0;z-index:2;min-height:96px;box-shadow:0 -6px 0 var(--panel),inset 0 3px 0 rgba(255,255,255,.14),inset 0 -4px 0 rgba(0,0,0,.3)}
+/* noms colorés par rareté : lisibles sur le fond sombre de la fiche */
+.detail .iname{align-self:flex-start;background:#f6e7c4;border:2px solid var(--ink);padding:1px 8px 3px;text-shadow:none}
+.detail .iname .tag{background:var(--ink)}
+#panel .detail.idock.nosel{position:static;min-height:0;box-shadow:inset 0 3px 0 rgba(255,255,255,.14),inset 0 -4px 0 rgba(0,0,0,.3)}
+/* téléphone : le sac passe avant le mannequin */
+@media (max-width:700px){.invsplit>.invR{order:-1}}

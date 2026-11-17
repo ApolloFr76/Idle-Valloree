@@ -13,6 +13,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"pick":pick=b.dataset.k;S.name=$("heroName").value;showCreate();break;
     case"start":{S.cls=pick;S.name=($("heroName").value||"Aventurier").trim().slice(0,20)||"Aventurier";S.hp=stats().maxHp;$("ov").hidden=true;log(`Bienvenue, ${esc(S.name)}. La Prairie des Clochettes vous attend.`,"g");boot2();save();if(!S.tutoDone)setTimeout(tutoStart,400);break}
     case"closeOv":$("ov").hidden=true;break;
+    case"updates":showUpdates();break;
     case"pickup":takePk();break;
     case"mode":startMode(b.dataset.m,b.dataset.z!=null?+b.dataset.z:null);renderPanel();break;
     case"quit":endMode(false,"abandon");break;
@@ -29,9 +30,9 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"tutoSkip":tutoEnd();break;
     case"tutoReplay":tutoStart();break;
     case"unlReplay":if(tabOpen(b.dataset.t))tutoRun(unlTour(b.dataset.t),"unl");break;
-    case"help":S.tab="opts";otab="aide";renderPanel();break;
+    case"help":S.tab="opts";otab="aide";UI.open(true);renderPanel();break;
     case"tipOk":closeTip();break;
-    case"tipGo":{const t=tipShown;if(t&&t.tab){S.tab=t.tab;renderPanel()}closeTip();break}
+    case"tipGo":{const t=tipShown;if(t&&t.tab){S.tab=t.tab;UI.open(true);renderPanel()}closeTip();break}
     case"tipsReset":S.tips={};tipQ=[];toast("Les conseils réapparaîtront au fil du jeu",1);break;
     case"otab":otab=b.dataset.t;renderPanel();break;
     case"optSet":{const k=b.dataset.k,v=b.dataset.v;S.opt[k]=isNaN(+v)?v:+v;applyOpts();renderPanel();break}
@@ -45,7 +46,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"mgQuit":mgClose();break;
     case"mgCell":mgCell(+b.dataset.i);break;
     case"mgHit":case"mgHold":break; /* gérés au pointerdown */
-    case"fishDex":mg=null;$("ov").hidden=true;S.tab="coll";ctab="fish";renderPanel();break;
+    case"fishDex":mg=null;$("ov").hidden=true;S.tab="coll";ctab="fish";UI.open(true);renderPanel();break;
     case"eatFish":eatFish(b.dataset.r);break;
     case"forgeSkip":forgeFinish(true);break;
     case"forgeClose":$("ov").hidden=true;forge=null;renderPanel();break;
@@ -62,7 +63,9 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"cast":cast(CLASSES[S.cls].spells.find(s=>s.id===b.dataset.sp),false);break;
     case"ptab":ptab=b.dataset.t;renderPanel();break;
     case"tabLocked":toast(`Onglet verrouillé : il se débloque au niveau ${TAB_LOCK[b.dataset.t]}`,1);break;
-    case"tab":if(!tabOpen(b.dataset.t))break;S.tab=b.dataset.t;confirmReset=false;dirty=true;renderPanel();break;
+    case"tab":if(!tabOpen(b.dataset.t))break;if(b.closest("#tabs")&&S.tab===b.dataset.t&&UI.o){UI.open(false);break}S.tab=b.dataset.t;confirmReset=false;dirty=true;UI.open(true);renderPanel();break;
+    case"drawerClose":UI.open(false);break;
+    case"sideTog":UI.toggleSide();break;
     case"alloc":{const k=b.dataset.k;let n=Math.min(S.pts,b.dataset.n==="custom"?allocN:+b.dataset.n);if(SEC[k]?.cap&&!PRIM_OK[k]){const room=SEC[k].cap*SEC_STEP-(stats()[k]||0);n=Math.min(n,room);if(n<=0){toast("Bonus secondaire déjà au maximum");break}}S.alloc[b.dataset.k]+=n;S.pts-=n;dirty=true;renderPanel();break}
     case"respec":ALLOC.forEach(k=>{S.pts+=S.alloc[k];S.alloc[k]=0});S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
     case"sell":{const k=b.dataset.r,n=b.dataset.n==="all"?S.res[k]:Math.min(+b.dataset.n,S.res[k]);if(n>0){const g=sellRes(k,n);if(n>1)toast(`${fmt(n)}× ${RES[k].name} vendus : +${fmt(g)} écus`)}renderPanel();break}
@@ -104,6 +107,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(k==="enter"&&e.target.id==="codeBox"){e.preventDefault();useCode(e.target.value);e.target.value="";return}
   if(mg&&!mg.done&&k===" "){e.preventDefault();if(mg.pid==="bucheron"&&!e.repeat)logHit();if(mg.pid==="pecheur"){if(mg.st==="reel")fishHold(true);else if(!e.repeat)fishHook()}return}
   if(mg&&k==="escape"){mgClose();return}
+  if(k==="escape"&&UI.o&&$("ov").hidden&&!forge&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){UI.open(false);return}
   if(!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge||mg)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
   if(k==="p"){setPause(!paused);e.preventDefault();return}if(paused)return;
   if(k===" "||k==="a"){e.preventDefault();doClick(false);return}
@@ -111,7 +115,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(k==="b"){if(tabOpen("aventure"))startMode("boss");return}if(k==="e"){if(S.pk)takePk();return}
   if(k==="s"){const p=["p_gsoin","p_soin"].find(id=>S.res[id]>0);if(p)drink(p,false);return}
   if(k==="escape"&&S.mode!=="zone"){endMode(false,"abandon");return}
-  const tk={c:"perso",i:"inv",v:"aventure",f:"atelier",o:"opts"}[k];if(tk&&tabOpen(tk)){S.tab=tk;renderPanel()}});
+  const tk={c:"perso",i:"inv",v:"aventure",f:"atelier",o:"opts"}[k];if(tk&&tabOpen(tk)){if(S.tab===tk&&UI.o)UI.open(false);else{S.tab=tk;UI.open(true)}renderPanel()}});
 function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$("pauseBtn").classList.toggle("pri",v);$("pauseOv").hidden=!v;if(v)save()}
 function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0]||i>0&&!(S.zoneBosses||{})[i-1])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
 document.addEventListener("input",e=>{if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
