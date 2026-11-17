@@ -1,10 +1,10 @@
 /* Calculs : statistiques du héros, résistances, dégâts, temps de récolte, sac. */
 /* ================= Calculs ================= */
-function itemStats(inst){const it=ITEMS[inst.id],m=(it.slot==="trophee"?1+.25*dimR(inst.e||0):1+.1*(inst.e||0))*rarOf(inst).m,o={};for(const k in it.stats)o[k]=Math.round(it.stats[k]*m);return o}
+function itemStats(inst){const it=ITEMS[inst.id],m=(it.slot==="trophee"?1+.25*dimR(inst.e||0):1+.1*(inst.e||0))*rarOf(inst).m,o={};for(const k in it.stats)o[k]=Math.round(it.stats[k]*m);if(it.fx)for(const k in it.fx)o[k]=(o[k]||0)+it.fx[k];return o}
 function equipped(){return Object.values(S.equip).map(u=>S.items.find(i=>i.u===u)).filter(Boolean)}
-function setCounts(eq=equipped()){const c={};eq.forEach(i=>{const it=ITEMS[i.id];if(it.noSet||!it.set)return;c[it.set]=(c[it.set]||0)+1});return c}
+function setCounts(eq=equipped()){const c={};eq.forEach(i=>{const it=ITEMS[i.id];if(it.noSet||!it.set)return;[it.set,...(it.also||[])].forEach(k=>c[k]=(c[k]||0)+1)});return c}
 function stats(){
-  const C=CLASSES[S.cls],s={vit:0,puissance:0,agi:0,sagesse:0,crit:5,prospection:100,dmg:0,feu:0,eau:0,terre:0,air:0,pctXp:0,pctEcus:0,pctDmg:0,poison:0,brulure:0,gelure:0,saignement:0};
+  const C=CLASSES[S.cls],s={vit:0,puissance:0,agi:0,sagesse:0,crit:5,prospection:100,dmg:0,feu:0,eau:0,terre:0,air:0,pctXp:0,pctEcus:0,pctDmg:0,pctSpd:0,poison:0,brulure:0,gelure:0,saignement:0};
   const add=o=>{for(const k in o)s[k]+=o[k]};
   const eq=equipped();add(C.base);add(S.alloc);eq.forEach(i=>add(itemStats(i)));
   const sc=setCounts(eq);for(const z in sc){const b=SETB(z);setSteps(z).forEach(n=>{if(sc[z]>=n)add(b[n])})}
@@ -22,16 +22,16 @@ function stats(){
   s.critC=Math.min(100,s.crit+bcrit);
   /* Super critique : la chance de critique au-delà de 100 % (jusqu'à 200 %) devient la chance qu'un critique soit « super » (dégâts critiques ×2) */
   s.superC=Math.max(0,Math.min(100,s.crit+bcrit-100));s.critShow=Math.min(200,s.crit+bcrit);   /* affichage : de 0 à 200 % */s.critM=+(C.critMult+s.critBonus).toFixed(2);
-  s.interval=Math.max(.3,1.3/(1+s.agi/150))/bspd;
+  s.interval=Math.max(.3,1.3/(1+s.agi/150)/Math.max(.2,1+s.pctSpd/100))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
-  s.pctXp+=fishN();s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*bxp*(evOn("nuit")?1.5:1);s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
+  s.pctXp+=fishN();s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*bxp*(evOn("nuit")?1.5:1)*(1+.1*profMaxN());s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
   s.dps=s.hit*(1+s.critC/100*(s.critM*(1+s.superC/100)-1))*(1+s.dbl)/s.interval;
   /* estimation des DoT en continu (charges moyennes entretenues par les coups) ajoutée aux dégâts/s */
   {const hps=(1+s.dbl)/s.interval;s.dotDps=0;for(const k in DOTS){const n=Math.min(DOTS[k].max,s.dotC[k]*hps*DOTS[k].d);s.dotDps+=n*s.dotPer[k]}s.dps+=s.dotDps}
   return s;
 }
 function roll(mult,st){if(S.mon)mult*=1+.05*bestTier(S.mon.id);const r=S.mon?monRes(MON[S.mon.id].el,st.el):0;let v=st.hit*mult*(1-r/100)*(.9+Math.random()*.2),crit=Math.random()*100<st.critC,sup=crit&&Math.random()*100<(st.superC||0);if(crit)v*=st.critM*(sup?2:1);return{v:Math.max(1,Math.round(v)),crit,sup,r}}
-const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed)*S.buffs.filter(b=>b.k==="cdr").reduce((a,b)=>a*b.v,1);
+const spCd=(sp,st=stats())=>sp.cd*(CLASSES[S.cls].cdMult||1)*(1-st.cdRed)*(up("cdr1")?.9:1)*(up("cdr2")?.9:1)*S.buffs.filter(b=>b.k==="cdr").reduce((a,b)=>a*b.v,1);
 /* Puissance des monstres : courbe de base, puis un multiplicateur qui grimpe de façon exponentielle au-delà du
    niveau 25 (×2,7 au niv. 50, ×19 au niv. 100, ×140 au niv. 150, ×1000 au niv. 200) pour suivre la puissance du joueur
    en fin de jeu (dégâts des monstres ×8 au niv. 200). Les gains suivent cette difficulté pour que les combats plus longs restent rentables. */
@@ -66,7 +66,7 @@ function startMode(m,zi){
 }
 function endMode(win,why){
   if(S.mode==="zone")return;
-  if(!win){sfx("fail");if(S.mode==="boss")log(`${MON["boss_"+S.zone].name} vous a échappé (${why}). Retentez quand vous voulez.`,"r");
+  if(!win){sfx("fail");if(S.mode==="boss")S.bossAutoT=S.time+30;if(S.mode==="boss")log(`${MON["boss_"+S.zone].name} vous a échappé (${why}). Retentez quand vous voulez.`,"r");
     if(S.mode==="tour")log(`Tour : vous vous arrêtez à l'étage ${S.tower.cur} (${why}). Record : ${S.tower.best}.`,"r");
     if(S.mode==="donjon")log(`Donjon raté (${why}). La clé est perdue.`,"r")}
   S.mode="zone";S.dg=null;S.timer=0;S.mon=null;S.spawnT=.6;S.dots=[];drawZones();dirty=true;

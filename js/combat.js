@@ -8,7 +8,7 @@ function gainXp(x){
   mx("maxLvl",S.lvl);
   if(up){sfx("level");if(fx){FX.lvl(S.lvl);VIE.cheer()}S.hp=stats().maxHp;dirty=true;drawSpells();drawZones();if(fx)toast(`Niveau ${S.lvl} !`)}
 }
-const bagCap=()=>1000+100*S.lvl+(up("sac1")?2000:0)+(up("sac2")?8000:0)+Math.round(talV("t_sac"));
+const bagCap=()=>1000+100*S.lvl+5000*profMaxN()+(up("sac1")?2000:0)+(up("sac2")?8000:0)+Math.round(talV("t_sac"));
 function bagWeight(){const eq=new Set(Object.values(S.equip));let w=0;for(const k in S.res)w+=S.res[k]||0;S.items.forEach(i=>{if(!eq.has(i.u))w+=10});return w}
 let fullWarn=0;
 function addRes(id,n,limitBag=false){if(!limitBag){if(n<=0)return 0;S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}

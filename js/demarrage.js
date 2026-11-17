@@ -28,6 +28,8 @@ function start(data){
   S.zoneBosses=S.zoneBosses||{};for(let i=0;i<S.zone;i++)S.zoneBosses[i]=1;
   if(S.cls&&OLD_CLS[S.cls]){S.cls=OLD_CLS[S.cls];let r=0;for(const k in S.alloc)r+=S.alloc[k]||0;S.pts+=r;S.alloc=fresh().alloc;S.cds={};S.auto={};S.buffs=[];S.dots=[];
     setTimeout(()=>{log("Nouveau système d'éléments : votre classe a été convertie et vos points vous ont été rendus.","g");toast("Vos points de caractéristiques vous ont été rendus")},300)}
+  /* sorts et potions automatiques devenus payants : ceux qui les utilisaient déjà les gardent */
+  if(!S.migAuto){S.migAuto=1;S.up=S.up||{};if(S.cls&&CLASSES[S.cls])CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto&&S.auto[sp.id])S.up["sp"+(i+1)]=true});if(S.autoPot)S.up.potauto=true}
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});
   Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});if(!Array.isArray(S.workers))S.workers=[];
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}

@@ -3,11 +3,12 @@
 function tipItem(it,inst){
   const r=inst?rarOf(inst):null,st=inst?itemStats(inst):it.stats,lvlOk=S.lvl>=it.lvl,eqs=new Set(Object.values(S.equip)),worn=inst&&eqs.has(inst.u);
   let h=`<h4 style="color:${r?r.c:"var(--fg)"}">${it.name}${inst&&inst.e?` +${inst.e}`:""}</h4><div class="tt">${inst?r.n+" · ":""}${it.kind||EQ[it.slot]?.n||""}${worn?" · porté":""}</div><div class="${lvlOk?"tt":"tn"}">Niveau requis : ${it.lvl}</div><div class="tsep"></div>`;
-  h+=Object.entries(st).map(([k,v])=>`<div class="ts">${k==="crit"?`+${v} % critique`:`+${fmt(v)} ${STAT_LBL[k]}`}</div>`).join("");
+  h+=Object.entries(st).map(([k,v])=>`<div class="${v<0?"tn":"ts"}">${k==="crit"?`+${v} % critique`:`${v<0?"":"+"}${fmt(v)} ${STAT_LBL[k]}`}</div>`).join("");
+  if(it.wkind)h+=`<div class="tt">Arme ${it.wkind} : ${it.wkind==="lourde"?"frappe fort mais lentement":"frappe vite mais moins fort"}</div>`;
   if(inst&&!worn){const ks=Object.keys(EQ).filter(k=>EQ[k].t===it.slot),cu=ks.map(k=>S.equip[k]).find(Boolean),ci=cu&&S.items.find(x=>x.u===cu);
     if(ci){const a=itemStats(ci),ks2=new Set([...Object.keys(a),...Object.keys(st)]),d=[...ks2].map(k=>[k,(st[k]||0)-(a[k]||0)]).filter(x=>x[1]);
       h+=`<div class="tsep"></div><div class="tt">Comparé à ${ITEMS[ci.id].name} :</div>`+(d.length?d.map(([k,v])=>`<div class="${v>0?"ts":"tn"}">${v>0?"+":""}${fmt(v)} ${k==="crit"?"% critique":STAT_LBL[k]}</div>`).join(""):`<div class="tt">identique</div>`)}}
-  if(!it.noSet&&it.set){const T=SETS[it.set],sc=setCounts()[it.set]||0,nx=setSteps(it.set).find(n=>n>sc);h+=`<div class="tsep"></div><div class="tg">Panoplie ${T.name} · ${Math.min(T.n,sc)}/${T.n} portées</div><div class="tt">À farmer : ${MON[T.mon].name}</div>${nx?`<div class="tt">À ${nx} pièces : ${statsTxt(SETB(it.set)[nx])}</div>`:`<div class="tt">Tous les bonus sont actifs</div>`}`}
+  if(!it.noSet&&it.set){const T=SETS[it.set],sc=setCounts()[it.set]||0,nx=setSteps(it.set).find(n=>n>sc);h+=`<div class="tsep"></div><div class="tg">Panoplie ${T.name} · ${Math.min(T.n,sc)}/${T.n} portées</div><div class="tt">À farmer : ${MON[T.mon].name}</div>${it.also?`<div class="ts">Pièce partagée : compte aussi pour la panoplie ${it.also.map(k=>SETS[k].name).join(", ")}</div>`:""}${nx?`<div class="tt">À ${nx} pièces : ${statsTxt(SETB(it.set)[nx])}</div>`:`<div class="tt">Tous les bonus sont actifs</div>`}`}
   if(!inst&&it.recipe.length)h+=`<div class="tsep"></div><div class="tt">Recette : ${it.recipe.map(([x,q])=>`${q}× ${RES[x].name} (${fmt(S.res[x]||0)})`).join(", ")}</div><div class="tt">Rareté obtenue au mini-jeu de forge</div>`;
   h+=`<div class="tsep"></div><div class="tt">Revente : ${fmt(Math.round(it.price*(inst?(1+.2*(inst.e||0))*r.m:1)*sellMult()))} écus</div>`;
   return h}

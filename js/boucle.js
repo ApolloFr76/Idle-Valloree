@@ -33,7 +33,9 @@ function tick(dt){VIE.tick(dt);
         if(Math.random()<st.dodge){if(fx){floatNum("Esquive","heal hurt");FX.dodge()}}
         else{const dmg=Math.max(1,Math.round(S.mon.atk*st.def*(.85+Math.random()*.3)));S.hp-=dmg;if(fx){floatNum("-"+fmt(dmg),"hurt");FX.monAtk()}
           if(S.hp<=0){S.hp=0;S.ko=5;S.buffs=[];S.dots=[];inc("deaths");if(fx)FX.ko();if(S.mode!=="zone"){endMode(false,"K.O.")}else{log(`${MON[S.mon.id].name} vous a mis K.O. Essayez une zone plus facile ou améliorez votre équipement.`,"r");S.mon.hp=S.mon.max;if(S.opt.koRetreat&&S.zone>0){S.zone--;S.mon=null;drawZones();log(`Retour automatique : ${ZONES[S.zone].name}.`,"w")}}}}}}
-      CLASSES[S.cls].spells.forEach(sp=>{if(S.auto[sp.id])cast(sp,true)});
+      CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto[sp.id]&&up("sp"+(i+1)))cast(sp,true)});
+      /* Défi automatique (boutique) : boss lancé dès les 10 victoires ; 30 s d'attente après un échec */
+      if(up("bossauto")&&S.mode==="zone"&&S.ko<=0&&(S.zk[S.zone]||0)>=BOSS_KILLS&&S.time>=(S.bossAutoT||0))startMode("boss");
     }
   }
   S.buffs=S.buffs.filter(b=>b.until>S.time);
@@ -41,7 +43,7 @@ function tick(dt){VIE.tick(dt);
     else if(S.ev.id==="seisme"&&fx&&S.opt.shake&&!S.opt.reduceMotion&&Math.random()<dt/6){replayCls($("arena"),"shake")}}
   else if(S.time>=(S.evNext??90)&&!document.hidden)startEvent();
   S.mkT=(S.mkT||0)+dt;if(S.mkT>=MK_STEP){S.mkT=0;marketTick();if(S.tab==="market")dirty=true}
-  if(S.potCd>0)S.potCd-=dt;else if(S.autoPot&&S.ko<=0&&S.hp<st.maxHp*S.opt.potThreshold/100){const id=S.res.p_gsoin>0&&S.hp<st.maxHp*.15?"p_gsoin":S.res.p_soin>0?"p_soin":S.res.p_gsoin>0?"p_gsoin":null;if(id){drink(id,true);S.potCd=3}}
+  if(S.potCd>0)S.potCd-=dt;else if(S.autoPot&&up("potauto")&&S.ko<=0&&S.hp<st.maxHp*S.opt.potThreshold/100){const id=S.res.p_gsoin>0&&S.hp<st.maxHp*.15?"p_gsoin":S.res.p_soin>0?"p_soin":S.res.p_gsoin>0?"p_gsoin":null;if(id){drink(id,true);S.potCd=3}}
   if(S.pk){if(S.time>S.pk.until){S.pk=null;drawPk();S.pkNext=S.time+(PK_MIN*.6+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)}}
   else if(S.time>=(S.pkNext??20)&&S.ko<=0&&!document.hidden)spawnPk();
   if(S.job){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t+=dt;while(S.job.t>=gt){S.job.t-=gt;gainGather(r.prof,r.id)}}

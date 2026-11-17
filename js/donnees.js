@@ -139,7 +139,7 @@ const SLOTS=[
   {id:"ceinture",name:"Ceinture",st:{vit:.5,puissance:.3},g:"mineur"},
   {id:"bouclier",name:"Bouclier",st:{vit:.7,agi:.2},g:"bucheron"},
 ];
-const STAT_LBL={feu:"Feu",eau:"Eau",terre:"Terre",air:"Air",vit:"Vitalité",puissance:"Puissance (tous éléments)",agi:"Agilité",sagesse:"Sagesse",crit:"% Critique",poison:"Poison",brulure:"Brûlure",gelure:"Gelure",saignement:"Saignement",prospection:"Prospection",dmg:"Dégâts",pctXp:"% d'XP",pctEcus:"% d'écus",pctDmg:"% de dégâts"};
+const STAT_LBL={feu:"Feu",eau:"Eau",terre:"Terre",air:"Air",vit:"Vitalité",puissance:"Puissance (tous éléments)",agi:"Agilité",sagesse:"Sagesse",crit:"% Critique",poison:"Poison",brulure:"Brûlure",gelure:"Gelure",saignement:"Saignement",prospection:"Prospection",dmg:"Dégâts",pctXp:"% d'XP",pctEcus:"% d'écus",pctDmg:"% de dégâts",pctSpd:"% de vitesse d'attaque"};
 const ALLOC=["vit","sagesse","agi","feu","eau","terre","air"];
 
 /* ================= Registres dérivés ================= */
@@ -246,6 +246,15 @@ ZONES.forEach((z,zi)=>{
   z.mons.forEach(m=>{if(m.extra){mk(m.id,m,m.setN,z.lvl[0]+Math.round(span*m.setL),1.1);return}if(m===main)mk(m.id,m,8,z.lvl[0],1);else{o++;mk(m.id,m,o===1?4:2,z.lvl[0]+Math.round(span*(o===1?.3:.55)),o===1?1.12:1.2)}});
   mk("boss_"+zi,MON["boss_"+zi],4,z.lvl[0]+Math.round(span*.8),1.35,true);
 });
+/* Armes lourde / légère : dans chaque monde, l'arme de la grande panoplie frappe fort mais lentement, celle du boss
+   vite mais moins fort. Même élément, panoplies différentes : il faut choisir. fx = bonus fixes, non multipliés par l'amélioration. */
+ZONES.forEach((z,zi)=>{const h=ITEMS[`z${zi}_arme`],l=ITEMS[`s_boss_${zi}_arme`];if(h&&l){h.lvl=l.lvl;h.price=l.price;h.stats={...l.stats,dmg:Math.round(l.stats.dmg*1.5)};h.fx={pctDmg:25,pctSpd:-25};h.wkind="lourde";l.fx={pctDmg:-10,pctSpd:15};l.wkind="légère"}});
+/* Pièces partagées : dans chaque monde, les panoplies d'un même élément sont reliées deux à deux par un emplacement commun ;
+   la pièce de cet emplacement compte pour les deux panoplies (also = autres panoplies comptées). */
+const SHARE_SLOTS=["amulette","coiffe","bottes","cape","ceinture"];
+ZONES.forEach((z,zi)=>{const L=Object.values(SETS).filter(t=>t.z===zi&&!t.boss);["feu","eau","terre","air"].forEach(el=>{const G=L.filter(t=>t.el===el);
+  for(let i=0;i+1<G.length;i++){const A=G[i],B=G[i+1],sl=SHARE_SLOTS.find(s=>A.ids[s]&&B.ids[s]);if(!sl)continue;
+    [[A,B],[B,A]].forEach(([X,Y])=>{const it=ITEMS[X.ids[sl]];(it.also=it.also||[]).push(Y.key);(X.shared=X.shared||[]).push([sl,Y.key])})}})});
 /* Compagnons : [id, nom, dégâts/s par niveau, coût de base, couleur] */
 const ALLIES=[["ecuyer","Écuyer Bertin",2,50,"#d9a46a"],["chasseuse","Chasseuse Lina",9,400,"#8fd16a"],["rat","Rat pestilent",20,1500,"#8a8478"],["moine","Moine Tao",40,3000,"#f0c35a"],["sorciere","Sorcière Mirabelle",180,25000,"#a99ee0"],
   ["apothicaire","Apothicaire Mortimer",420,8e4,"#4f7a4a"],["golem","Golem de pierre",850,2e5,"#aab6c4"],["dragonnet","Dragonnet Ambre",4000,1.6e6,"#ef7d4a"],["serpent","Serpent d'émeraude",9000,5e6,"#3fae5a"],["phenix","Phénix d'aube",2e4,1.5e7,"#ff8ab0"]];
@@ -257,7 +266,12 @@ const UPGS=[
   ["outils1","Outils affûtés","Récolte 20 % plus rapide",2000],["aimant","Aimant à trésors","Objets cliquables 30 % plus fréquents",8000],["bourse","Bourse de marchand","Ventes +25 %",12000],
   ["allie1","Entraînement","Compagnons ×1,5",20000],["sablier","Sablier","+10 s contre les boss et dans la tour",15000],["gants2","Gants de maître","Dégâts de clic ×3",25000],
   ["rythme","Rythme","Combo maximum 150 au lieu de 100",30000],["sac2","Grand sac","+8 000 de poids",40000],["outils2","Outils de maître","Récolte 20 % plus rapide",60000],
-  ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×1,5",5e5],["allie3","Bannière de guerre","Compagnons ×2",2e7]];
+  ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×1,5",5e5],["allie3","Bannière de guerre","Compagnons ×2",2e7],
+  ["sp1","Sort automatique I","Votre 1er sort peut se lancer tout seul (case Auto)",5000],["sp2","Sort automatique II","Votre 2e sort peut se lancer tout seul (case Auto)",60000],["sp3","Sort automatique III","Votre 3e sort peut se lancer tout seul (case Auto)",6e5],
+  ["potauto","Potions automatiques","Boit une potion de soin tout seul sous le seuil de PV",10000],["cdr1","Concentration","Sorts 10 % plus rapides",25000],["cdr2","Maîtrise des arcanes","Sorts encore 10 % plus rapides",3e5],
+  ["bossauto","Défi automatique","Défie le boss tout seul dès que les 10 victoires sont faites",40000]];
+/* Métiers au niveau max : chacun donne +10 % d'XP et +5 000 de poids */
+const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].lvl>=PROF_MAX).length:0;
 const up=id=>!!(S.up&&S.up[id]);
 const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l)*(CLASSES[S.cls]?.allyCost||1));
 const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100)*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
