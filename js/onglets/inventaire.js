@@ -32,7 +32,7 @@ function pInv(){
   const noSel=dl.startsWith(`<span class="small muted" style="margin:auto">`);
   const L=`<div class="invL">
     <div class="doll"><div class="dcol">${DOLL_L.map(slotBtn).join("")}</div>
-      <div class="dmid">${heroSVG(S.cls)}<span class="nm">${esc(S.name)}</span><span class="small muted">${C.name} · niv. ${S.lvl}</span><span class="small muted num">${fmt(st.maxHp)} PV · ${fmt(st.dps)} dég./s</span></div>
+      <div class="dmid">${heroSVG(S.cls,heroArm())}<label class="autot armtog"><input type="checkbox" data-opt="showArmor" ${S.opt.showArmor!==false?"checked":""}> Afficher l'armure</label><span class="nm">${esc(S.name)}</span><span class="small muted">${C.name} · niv. ${S.lvl}</span><span class="small muted num">${fmt(st.maxHp)} PV · ${fmt(st.dps)} dég./s</span></div>
       <div class="dcol">${DOLL_R.map(slotBtn).join("")}</div></div>
     <div class="trophies">${DOLL_B.map(slotBtn).join("")}</div>
     ${(sc=>Object.keys(sc).length?`<div class="setlist">${Object.keys(sc).map(z=>setBox(z,sc[z],true)).join("")}</div>`:`<div class="setb small">Portez plusieurs pièces d'une même panoplie : chaque pièce à partir de la 2e débloque un bonus.</div>`)(setCounts())}</div>`;
