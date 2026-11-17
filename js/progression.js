@@ -53,5 +53,5 @@ let goalSig="";
 function drawGoals(){const g=$("goals");if(!g)return;if(!S.opt.goals){if(goalSig!=="off"){goalSig="off";g.innerHTML=""}return}
   const L=nextGoals(),sig=(S.opt.goalsOpen?1:0)+L.map(x=>x.t+x.s+(x.ready?1:0)).join("|");
   if(sig!==goalSig){goalSig=sig;g.innerHTML=`<button class="ghead" data-a="goalsToggle" aria-expanded="${!!S.opt.goalsOpen}"><b>Prochains objectifs</b><span class="pchev">${S.opt.goalsOpen?"▲":"▼"}</span></button>${S.opt.goalsOpen?L.map((x,i)=>`<div class="grow${x.ready?" rdy":""}"${x.tip?` data-tip="${x.tip}"`:""}><span class="gic">${x.svg||GIC[x.ic]}</span><div class="gtx"><b>${x.t}</b><span>${x.s}</span><div class="bar"><i id="gb${i}"></i></div></div>${x.ready&&x.act?`<button class="btn pri gact" ${x.act}</button>`:""}</div>`).join("")||`<div class="small muted">Rien en vue pour l'instant.</div>`:""}`}
-  if(S.opt.goalsOpen)L.forEach((x,i)=>{const b=$("gb"+i);if(b)b.style.width=Math.min(100,x.p*100)+"%"})}
+  if(S.opt.goalsOpen)L.forEach((x,i)=>setW($("gb"+i),Math.min(100,x.p*100)))}
 

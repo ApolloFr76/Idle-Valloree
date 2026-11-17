@@ -69,10 +69,12 @@ function tipFor(el){
   if(t==="cur"){const m=S.mon;if(!m)return"";const d=MON[m.id],res=monRes(d.el,st.el);return TL(d.name,`<div class="tt">Niveau ${m.lvl} · cliquez pour frapper (Espace)</div>${sep}<div>PV : <b>${fmt(Math.max(0,m.hp))} / ${fmt(m.max)}</b></div><div>Attaque : <b>${fmt(m.atk)}</b> toutes les 2 s</div><div>Contre votre élément : <b>${res>0?"résiste "+res+" %":res<0?"faible, "+(-res)+" % de dégâts en plus":"neutre"}</b></div>${sep}<div class="ts">Récompense : ${fmt(m.xp*st.xpM)} XP · ~${fmt(m.ecus)} écus</div>${sep}${lootHTML(m.id)}`)}
   return""}
 let tipEl=null;
-function tipPos(e){const t=$("tip"),w=t.offsetWidth,h=t.offsetHeight;let x=e.clientX+18,y=e.clientY+18;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=Math.max(8,innerHeight-h-8);t.style.left=Math.max(8,x)+"px";t.style.top=y+"px"}
+/* taille de la bulle mesurée une fois par contenu, pas à chaque mouvement de souris */
+function tipSet(h){const t=$("tip");if(t._h===h&&!t.hidden)return;t._h=h;t.innerHTML=h;t.hidden=false;t._w=0}
+function tipPos(e){const t=$("tip");if(!t._w){t._w=t.offsetWidth;t._hh=t.offsetHeight}const w=t._w,h=t._hh;let x=e.clientX+18,y=e.clientY+18;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=Math.max(8,innerHeight-h-8);t.style.left=Math.max(8,x)+"px";t.style.top=y+"px"}
 document.addEventListener("pointermove",e=>{if(e.pointerType==="touch"||!S||!S.cls)return;const el=e.target.closest&&e.target.closest('.tile[data-v],.eslot[data-s],[data-tip]');const t=$("tip");
   if(!el){if(tipEl){tipEl=null;t.hidden=true}return}
-  if(el!==tipEl){tipEl=el;const h=tipFor(el);if(!h){t.hidden=true;return}t.innerHTML=h;t.hidden=false}tipPos(e)});
+  if(el!==tipEl){tipEl=el;const h=tipFor(el);if(!h){t.hidden=true;return}tipSet(h)}tipPos(e)});
 document.addEventListener("pointerdown",()=>{tipEl=null;$("tip").hidden=true},true);
-setInterval(()=>{if(tipEl&&!$("tip").hidden){if(!tipEl.isConnected){tipEl=null;$("tip").hidden=true;return}const h=tipFor(tipEl);if(h)$("tip").innerHTML=h}},500);
+setInterval(()=>{if(tipEl&&!$("tip").hidden){if(!tipEl.isConnected){tipEl=null;$("tip").hidden=true;return}const h=tipFor(tipEl);if(h)tipSet(h)}},500);
 

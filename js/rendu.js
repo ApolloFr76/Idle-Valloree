@@ -9,11 +9,11 @@ function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)
 const ZBG=["#57b04a","#1f9a78","#8a9a2e","#8a6ac8","#f0962c","#3d9fe0","#6a86b8","#2fa84a","#1fb0c8","#e2502c","#a88ae0","#5a3f96"];
 function drawZones(){const bosses=S.zoneBosses||{},opts=ZONES.map((z,i)=>{const levelLock=S.lvl<z.lvl[0],bossLock=i>0&&!bosses[i-1],locked=levelLock||bossLock;return i>1&&levelLock?"":`<option value="${i}" style="background:${locked?"#a8977e":ZBG[i]};color:#fff8e6"${i===S.zone?" selected":""}${locked?" disabled":""}>${z.name} · Niv. ${z.lvl[0]}–${z.lvl[1]}${locked?" · verrouillée":""}</option>`}).join("");
   $("zones").innerHTML=`<label class="zsel"><span>Monde</span><select id="zoneSel" style="--zb:${ZBG[S.zone]}" data-tip="z:${S.zone}" aria-label="Choisir le monde">${opts}</select></label>`;
-  const z=ZONES[S.zone];setBiome(z.id);MONDE.zone(z.id)}
+  MONDE.zone(ZONES[S.zone].id)}
 /* Icône d'élément du monstre : un seul élément gardé d'un monstre à l'autre (mis à jour sur place),
    pour que l'info-bulle reste ouverte et que l'icône ne bouge pas quand les monstres meurent vite. */
 function monIco(){let e=$("mIco");if(!e){e=document.createElement("span");e.id="mIco";e.className="mico";$("mName").before(e)}return e}
-function drawMonster(){const b=$("monBtn"),ic=monIco();if(!S.mon){b.innerHTML="";$("mName").textContent="…";$("mLvl").textContent="";$("mEl").innerHTML="";return}const d=MON[S.mon.id];b.innerHTML=monsterSVG(d);if(ic.dataset.el!==d.el){ic.dataset.el=d.el;ic.style.setProperty("--c",ELEMS[d.el].c);ic.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${ELG[d.el]}</svg>`}if(ic.dataset.tip!=="mel:"+S.mon.id){ic.dataset.tip="mel:"+S.mon.id;if(tipEl===ic&&!$("tip").hidden)$("tip").innerHTML=tipFor(ic)}$("mName").textContent=(S.mon.shiny?"✦ ":"")+d.name;$("mon").classList.toggle("shiny",!!S.mon.shiny);$("mLvl").textContent="Niv. "+S.mon.lvl;$("mEl").innerHTML=""}
+function drawMonster(){const b=$("monBtn"),ic=monIco();if(!S.mon){b.innerHTML="";$("mName").textContent="…";$("mLvl").textContent="";$("mEl").innerHTML="";return}const d=MON[S.mon.id];b.innerHTML=monsterSVG(d);if(ic.dataset.el!==d.el){ic.dataset.el=d.el;ic.style.setProperty("--c",ELEMS[d.el].c);ic.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true">${ELG[d.el]}</svg>`}if(ic.dataset.tip!=="mel:"+S.mon.id){ic.dataset.tip="mel:"+S.mon.id;if(tipEl===ic&&!$("tip").hidden)tipSet(tipFor(ic))}$("mName").textContent=(S.mon.shiny?"✦ ":"")+d.name;$("mon").classList.toggle("shiny",!!S.mon.shiny);$("mLvl").textContent="Niv. "+S.mon.lvl;$("mEl").innerHTML=""}
 function drawSpells(){if(!S.cls)return;$("spells").innerHTML=CLASSES[S.cls].spells.map((sp,si)=>{const lock=S.lvl<sp.lvl,au=up("sp"+(si+1));return`<div class="spellwrap"><button class="spell${lock?" lock":""}" data-a="cast" data-tip="sp:${sp.id}" id="sp-${sp.id}" data-sp="${sp.id}" ${lock?"disabled":""}><b>${sp.name}</b><small>${lock?"Débloqué au niveau "+sp.lvl:sp.txt+" · "+(+spCd(sp).toFixed(1))+" s"}</small><span class="cd" id="cd-${sp.id}"></span></button>${lock?"":au?`<label class="autot"><input type="checkbox" id="auto-${sp.id}" data-a="auto" data-s="${sp.id}" ${S.auto[sp.id]?"checked":""}> Auto</label>`:`<span class="autot muted" data-tip="up:sp${si+1}">Auto : boutique</span>`}</div>`}).join("")}
 let mbSig="";
 function drawModeBar(){
@@ -30,20 +30,28 @@ function drawModeBar(){
 /* Journal : en grand écran (3e colonne) il remplit toute la hauteur disponible, sinon le nombre de lignes choisi dans les options */
 function renderLog(){const e=$("log"),side=e&&e.parentElement&&e.parentElement.id==="sideCard",L0=S.opt?S.opt.logLines:8,L=side&&L0>0?LOG_MAX:L0,now=Date.now();$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${l.c}${l.t&&now-l.t<700?" new":""}">${logIcon(l)}<span>${l.h}</span></div>`).join("")}
 /* Compagnons : voir SCENE.drawPals() dans js/scene.js (équipe en formation) */
+/* live() tourne 10 fois par seconde : on n'écrit dans la page que ce qui a changé,
+   sinon le navigateur recalcule styles et mise en page pour rien */
+function setT(e,v){if(e&&e._t!==v){e._t=v;e.textContent=v}}
+function setW(e,p){if(!e)return;const v=(Math.round(p*10)/10)+"%";if(e._w!==v){e._w=v;e.style.width=v}}
+let liveN=0;
+function setH(e,h){if(e&&e._h!==h){e._h=h;e.innerHTML=h}}
 function live(){
-  if(!S.cls)return;const st=stats(),need=xpNeed(S.lvl),maxed=S.lvl>=lvlMax();SCENE.drawPals();
-  $("lvlTxt").textContent="Niveau "+S.lvl+(S.prest?" · Ω "+S.prest:"");$("xpTxt").textContent=maxed?"Niveau maximum":`${fmt(S.xp)} / ${fmt(need)} XP`;$("xpBar").style.width=(maxed?100:S.xp/need*100)+"%";
-  $("ecusTxt").textContent=fmt(VIE.ecus());
-  $("pHpTxt").textContent=`${fmt(S.hp)} / ${fmt(st.maxHp)}`;$("pHpBar").style.width=(S.hp/st.maxHp*100)+"%";SCENE.lag("pHpLag",S.hp/st.maxHp*100);
-  if(S.mon){$("mHpTxt").textContent=`${fmt(Math.max(0,S.mon.hp))} / ${fmt(S.mon.max)}`;$("mHpBar").style.width=Math.max(0,S.mon.hp/S.mon.max*100)+"%";SCENE.lag("mHpLag",Math.max(0,S.mon.hp/S.mon.max*100))}else{$("mHpTxt").textContent="";$("mHpBar").style.width="0%";SCENE.lag("mHpLag",0)}
+  if(!S.cls||document.hidden)return;   /* onglet du navigateur caché : rien à afficher */
+  const st=stats(),need=xpNeed(S.lvl),maxed=S.lvl>=lvlMax();SCENE.drawPals();
+  setT($("lvlTxt"),"Niveau "+S.lvl+(S.prest?" · Ω "+S.prest:""));setT($("xpTxt"),maxed?"Niveau maximum":`${fmt(S.xp)} / ${fmt(need)} XP`);setW($("xpBar"),maxed?100:S.xp/need*100);
+  setT($("ecusTxt"),fmt(VIE.ecus()));
+  setT($("pHpTxt"),`${fmt(S.hp)} / ${fmt(st.maxHp)}`);setW($("pHpBar"),S.hp/st.maxHp*100);SCENE.lag("pHpLag",S.hp/st.maxHp*100);
+  if(S.mon){setT($("mHpTxt"),`${fmt(Math.max(0,S.mon.hp))} / ${fmt(S.mon.max)}`);setW($("mHpBar"),Math.max(0,S.mon.hp/S.mon.max*100));SCENE.lag("mHpLag",Math.max(0,S.mon.hp/S.mon.max*100))}else{setT($("mHpTxt"),"");setW($("mHpBar"),0);SCENE.lag("mHpLag",0)}
   {const pk=$("pk");if(pk)pk.classList.toggle("fade",S.pk&&S.pk.until-S.time<3)}
-  drawModeBar();drawPots();drawGoals();
-  {const c=$("combo");c.hidden=S.combo<1;if(S.combo>=1){$("comboN").textContent="Combo "+Math.floor(S.combo);$("comboBar").style.width=(S.combo/comboMax()*100)+"%"}}
-  const ad=allyDps(),buffs=$("buffs");if(ad>0)buffs.dataset.ally=fmt(ad);
-  $("ko").hidden=!(S.ko>0);if(S.ko>0)$("koT").textContent=Math.ceil(S.ko);$("mon").classList.toggle("ko",S.ko>0);
+  /* objectifs : 3 fois par seconde suffit, et rien quand le journal est replié */
+  drawModeBar();drawPots();if(++liveN%3===0&&!document.body.classList.contains("side-closed"))drawGoals();
+  {const c=$("combo"),on=S.combo>=1;if(c.hidden===on)c.hidden=!on;if(on){setT($("comboN"),"Combo "+Math.floor(S.combo));setW($("comboBar"),S.combo/comboMax()*100)}}
+  const ad=allyDps(),buffs=$("buffs");
+  {const ko=S.ko>0;if($("ko").hidden===ko){$("ko").hidden=!ko;$("mon").classList.toggle("ko",ko)}if(ko)setT($("koT"),""+Math.ceil(S.ko))}
   const r=S.mon?monRes(MON[S.mon.id].el,st.el):0,elTxt=elChip(st.el,`Vous : ${ELEMS[st.el].n}${S.mon&&st.el!=="neutre"?(r<0?" · efficace":r>0?` · résisté ${r} %`:""):""}`);
-  buffs.innerHTML=elTxt+(S.ev?(e=>`<span class="chip evchip" style="color:${e.c};border-color:${e.c}" title="${e.txt}">${e.n} · ${Math.ceil(S.ev.until-S.time)} s</span>`)(EVENTS.find(e=>e.id===S.ev.id)):"")+(ad>0?`<span class="chip">Compagnons · ${fmt(ad)}/s</span>`:"")+S.buffs.map(b=>`<span class="chip">${b.n} · ${Math.ceil(b.until-S.time)} s</span>`).join("")+(S.dots.length?`<span class="chip">Brûlure · ${Math.ceil(Math.max(...S.dots.map(d=>d.until))-S.time)} s</span>`:"")+(S.job?`<span class="chip">${PROFS[RES[S.job.r].prof].name} : ${RES[S.job.r].name}</span>`:"")+(bagWeight()>=bagCap()?`<span class="chip" style="color:var(--hp)" title="La capacité limite uniquement les gains obtenus hors ligne">Limite AFK atteinte</span>`:"");
-  CLASSES[S.cls].spells.forEach(sp=>{const b=$("sp-"+sp.id),c=$("cd-"+sp.id);if(!b||!c)return;const rem=Math.max(0,(S.cds[sp.id]||0)-S.time);c.style.width=(rem/spCd(sp,st)*100)+"%";b.classList.toggle("wait",rem>0)});
+  setH(buffs,elTxt+(S.ev?(e=>`<span class="chip evchip" style="color:${e.c};border-color:${e.c}" title="${e.txt}">${e.n} · ${Math.ceil(S.ev.until-S.time)} s</span>`)(EVENTS.find(e=>e.id===S.ev.id)):"")+(ad>0?`<span class="chip">Compagnons · ${fmt(ad)}/s</span>`:"")+S.buffs.map(b=>`<span class="chip">${b.n} · ${Math.ceil(b.until-S.time)} s</span>`).join("")+(S.dots.length?`<span class="chip">Brûlure · ${Math.ceil(Math.max(...S.dots.map(d=>d.until))-S.time)} s</span>`:"")+(S.job?`<span class="chip">${PROFS[RES[S.job.r].prof].name} : ${RES[S.job.r].name}</span>`:"")+(bagWeight()>=bagCap()?`<span class="chip" style="color:var(--hp)" title="La capacité limite uniquement les gains obtenus hors ligne">Limite AFK atteinte</span>`:""));
+  CLASSES[S.cls].spells.forEach(sp=>{const b=$("sp-"+sp.id),c=$("cd-"+sp.id);if(!b||!c)return;const rem=Math.max(0,(S.cds[sp.id]||0)-S.time);setW(c,rem/spCd(sp,st)*100);if(b._wait!==rem>0){b._wait=rem>0;b.classList.toggle("wait",b._wait)}});
   if(S.job){const r=RES[S.job.r],e=$("gp-"+r.id);if(e)e.style.width=(S.job.t/gatherTime(r.prof,r.tier)*100)+"%"}
   if(S.tab==="metiers")OUV.list().forEach((w,i)=>{const e=$("ouvp-"+i);if(e&&RES[w.r])e.style.width=Math.min(100,w.t/OUV.time(w)*100)+"%"});
 }
@@ -100,6 +108,8 @@ function renderPanel(force){if(DRAG.on){dirty=true;return}
   const anyCraft=Object.values(ITEMS).some(canCraft);
   if(!tabOpen(S.tab))S.tab="perso";
   setHTML($("tabs"),TABS.map(([k,n])=>!tabOpen(k)?`<button class="tab locked" data-a="tabLocked" data-t="${k}" data-tip="lk:${k}" aria-label="Onglet verrouillé, niveau ${TAB_LOCK[k]}">${LOCK_SVG}</button>`:`<button class="tab${S.tab===k?" on":""}" data-a="tab" data-t="${k}">${n}${k==="perso"&&S.pts>0||k==="atelier"&&anyCraft||k==="aventure"&&(S.zk[S.zone]||0)>=BOSS_KILLS||k==="prest"&&soulsGain()>0&&!S.prest||k==="quests"&&S.q&&S.q.list.some(q=>q.done&&!q.claimed)?'<span class="dot"></span>':""}</button>`).join(""));
+  /* tiroir fermé : son contenu est invisible, il sera reconstruit à l'ouverture (UI.open) */
+  if(!force&&!UI.o&&S.tab===UI.last){UI.stale=true;return}UI.stale=false;
   const sy=$("panel").scrollTop, open=[...document.querySelectorAll("details.set[open]")].map(d=>d.dataset.z);
   $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";setHTML($("panel"),(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,opts:pOpts})[S.tab]||pPerso)());if(S.tab!==lastTabAnim){if(lastTabAnim)replayCls($("panel"),"tabin");lastTabAnim=S.tab}
   open.forEach(z=>{const d=document.querySelector(`details.set[data-z="${z}"]`);if(d)d.open=true});

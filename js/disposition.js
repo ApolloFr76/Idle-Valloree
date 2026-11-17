@@ -2,10 +2,13 @@
    (en bas sur téléphone) et le contenu de l'onglet s'ouvre dans un tiroir posé sur le monde.
    Le journal et les objectifs se replient en haut à gauche du monde ; ils se replient d'eux-mêmes
    quand le tiroir est ouvert pour laisser le combat visible, et reviennent à sa fermeture. */
-const UI={o:false,last:null,sidePref:true,
+const PHONE=matchMedia("(max-width:700px)");
+const UI={o:false,last:null,sidePref:true,stale:false,
+  /* tiroir plein écran (téléphone) : le monde est entièrement caché, inutile de le dessiner */
+  covered(){return this.o&&PHONE.matches},
   /* ouvre ou ferme le tiroir */
   open(v){this.o=!!v;document.body.classList.toggle("drawer-open",this.o);const a=$("app");if(a){a.inert=!this.o;a.setAttribute("aria-hidden",this.o?"false":"true")}
-    this.showSide(!this.o&&this.sidePref);
+    this.showSide(!this.o&&this.sidePref);if(this.o&&this.stale)renderPanel(true);
     try{localStorage.setItem("vallore-tiroir",this.o?"1":"0")}catch(e){}
     if(typeof tutoI!=="undefined"&&tutoI>=0)setTimeout(()=>{if(tutoI>=0)tutoDraw()},280)},
   /* appelé après chaque rendu du panneau : un changement d'onglet ouvre le tiroir */

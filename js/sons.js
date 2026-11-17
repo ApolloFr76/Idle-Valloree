@@ -17,6 +17,8 @@ function sfx(k){if(!AC||!S.opt?.sfx||document.hidden)return;const t=AC.currentTi
   if(k==="anvilBad"){tone(160,t,.2,"sawtooth",.05)}
   if(k==="event"){tone(440,t,.5,"sine",.07);tone(660,t+.15,.6,"sine",.06)}
 }
+/* tonalité de la musique selon la zone */
+const ZKEY=[0,-2,-5,-3,2,-7,4,1,-4,-1,3,-6];
 const SCALE=[0,2,4,7,9],ROOTS=[220,196,174.6,196];
 function musicTick(){if(!AC||!S.opt?.music||document.hidden)return;const t=AC.currentTime+.05,bar=Math.floor(mStep/8)%4,root=ROOTS[bar]*Math.pow(2,(ZKEY[S.zone]||0)/12);
   if(mStep%8===0){tone(root/2,t,2.2,"sine",.12,musicGain);tone(root*1.5/2,t,2.2,"sine",.06,musicGain)}

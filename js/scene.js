@@ -67,7 +67,9 @@ const SCENE=(()=>{
 
   /* ---------- Jauges : la partie perdue reste un instant en clair puis descend ---------- */
   const lagW={};
-  function lag(id,pct){const e=$(id);if(!e)return;const old=lagW[id]??pct;if(pct>=old){e.style.transition="none";e.style.width=pct+"%";void e.offsetWidth;e.style.transition=""}else e.style.width=pct+"%";lagW[id]=pct}
+  /* qui remonte : saut immédiat ; qui descend : la transition CSS fait traîner la partie perdue.
+     La transition et la largeur changent ensemble, sans forcer de mise en page. */
+  function lag(id,pct){const e=$(id);if(!e)return;pct=Math.round(pct*10)/10;const old=lagW[id];if(pct===old)return;lagW[id]=pct;e.style.transition=old!==undefined&&pct<old?"":"none";e.style.width=pct+"%"}
 
   /* ---------- Charges de DoT sur le monstre (poison, brûlure, gelure, saignement) ---------- */
   let dotSig="";
@@ -77,7 +79,7 @@ const SCENE=(()=>{
     const m=$("mon");if(m){for(const k in DOTS)m.classList.toggle("d-"+k,ks.includes(k))}}
   /* ---------- Boucle à 60 images/seconde ---------- */
   let winded=false;
-  function loop(){requestAnimationFrame(loop);if(!S||!S.cls)return;const t=now();
+  function loop(){requestAnimationFrame(loop);if(!S||!S.cls||UI.covered())return;const t=now();
     const h=$("ahero");if(h&&!h.hidden){hero.el=h;frame(hero,t)}
     const mi=S.mon&&$("monBtn")&&$("monBtn").querySelector("img");if(mi){if(mon.el!==mi){mon.el=mi;mon.last=null;mon.cur="idle"}frame(mon,t);
       /* élan du monstre juste avant son coup */

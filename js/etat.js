@@ -4,7 +4,7 @@ const SAVE_KEY="vallore-save-v1";
 let S;
 function fresh(){return{v:1,cls:null,name:"Aventurier",lvl:1,xp:0,pts:0,alloc:{vit:0,agi:0,sagesse:0,feu:0,eau:0,terre:0,air:0},ecus:0,hp:60,zone:0,mon:null,spawnT:0,
   res:{},items:[],equip:{},uid:1,jobs:{bucheron:{lvl:1,xp:0},mineur:{lvl:1,xp:0},paysan:{lvl:1,xp:0},herboriste:{lvl:1,xp:0},pecheur:{lvl:1,xp:0}},job:null,fdex:{},mgCd:{},cds:{},auto:{},buffs:[],dots:[],
-  kills:0,pkN:0,seen:{},pkNext:20,pk:null,mode:"zone",zoneBosses:{},zk:{},dg:null,timer:0,tower:{best:0,cur:1},allies:{},up:{},combo:0,comboT:0,best:{},st:{},souls:0,soulsTotal:0,prest:0,tal:{},ach:{},q:null,mk:{},mkPrev:{},mkT:0,autoPot:false,potCd:0,ev:null,evNext:90,opt:{},time:0,atkT:0,monT:0,ko:0,log:[],workers:[],tab:"perso",last:Date.now()}}
+  kills:0,pkN:0,seen:{},pkNext:20,pk:null,mode:"zone",zoneBosses:{},zk:{},dg:null,timer:0,tower:{best:0,cur:1},allies:{},up:{},combo:0,comboT:0,best:{},st:{},souls:0,soulsTotal:0,prest:0,tal:{},ach:{},q:null,mk:{},mkPrev:{},mkT:0,autoPot:false,potCd:0,ev:null,evNext:90,opt:{},time:0,atkT:0,monT:0,ko:0,log:[],workers:[],tab:"perso",last:Date.now(),afkSince:0,afkWeight:0}}
 /* Trophée en double : fusionne avec celui qu'on a déjà (+1 rang). */
 function giveTrophy(id){const own=S.items.filter(x=>x.id===id);if(!own.length){S.items.push({u:S.uid++,id,e:0});return 0}
   const eq=new Set(Object.values(S.equip)),t=own.find(x=>eq.has(x.u))||own[0];t.e=(t.e||0)+1;mx("trophyRank",t.e);dirty=true;log(`${ITEMS[id].name} fusionné : rang ${t.e+1}.`,"g");return t.e}
@@ -28,6 +28,10 @@ let dirty=true, fx=true;
 function toast(msg,force){const tm=S&&S.opt&&S.opt.toasts;if(!force&&(tm==="none"||tm==="important"&&!/niveau|succès|boss|quête|trophée|éclat|donjon|record|légendaire|épique|braises|averse|tempête|secousses|dorée|étoilée|brume/i.test(msg)))return;const t=$("toast");t.textContent=msg;t.hidden=false;t.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.hidden=true,300)},2200)}
 const LOG_MAX=60;
 function log(html,cls="w"){S.log.unshift({h:html,c:cls,t:Date.now()});S.log.length=Math.min(S.log.length,LOG_MAX);renderLog()}
-function replayCls(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
+/* rejoue l'animation CSS d'une classe. La classe est retirée tout de suite et remise à l'image suivante,
+   toutes ensemble : un seul recalcul de la page par image, même quand les coups pleuvent. */
+const replayQ=[];let replayRaf=0;
+function replayCls(el,cls){if(!el)return;for(let i=0;i<replayQ.length;i+=2)if(replayQ[i]===el&&replayQ[i+1]===cls)return;if(!el.classList.contains(cls)){el.classList.add(cls);return}el.classList.remove(cls);replayQ.push(el,cls);
+  if(!replayRaf)replayRaf=requestAnimationFrame(()=>{replayRaf=0;void document.body.offsetWidth;const q=replayQ.splice(0);for(let i=0;i<q.length;i+=2)q[i].classList.add(q[i+1])})}
 function shade(hex,a){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const t=a<0?0:255,p=Math.abs(a);r=Math.round(r+(t-r)*p);g=Math.round(g+(t-g)*p);b=Math.round(b+(t-b)*p);return`rgb(${r},${g},${b})`}
 

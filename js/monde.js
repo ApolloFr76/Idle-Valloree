@@ -1100,7 +1100,6 @@ const MONDE=(()=>{
   let cv=null,ctx=null,wc=null,wx=null,P=4,W=0,H=0,FY=0,GT=0,CT=0,zid=null,L=null,ro=null,lastT=0,skyKey="",skyCv=null;
   let cam=0,camFrom=0,camTo=0,walkT0=0,walkMs=0;
   let birds=[],flies=[],shadows=[],puffs=[],tumbles=[],gusts=[],flakes=[],gulls=[],bolt=null,schools=[],jellies=[],plume=[],bombs=[],erupt=4,debris=[],bossOn=false,lbT=0;
-  let lc=null,lx=null,lw=null,lwx=null,LT=0,LHt=0,lowSh=[];   /* prairie du dessous : canvas, contexte, hauteur en pixels logiques */
   const drops=[];
 
   function resize(){const a=$("arena");if(!a||!cv)return;const w=a.clientWidth,h=a.clientHeight;if(!w||!h)return;
@@ -1110,7 +1109,7 @@ const MONDE=(()=>{
     /* CT : bas de l'en-tête quand il recouvre le bandeau (la voûte du bois commence juste dessous) */
     const hd=document.querySelector("header.top");CT=hd?Math.max(0,Math.round((hd.getBoundingClientRect().bottom-a.getBoundingClientRect().top)/P)):0}
 
-  /* ---------- Ciel selon l'heure réelle (mêmes plages que VIE.sky) ---------- */
+  /* ---------- Ciel selon l'heure réelle  ---------- */
   const SKY={day:["#5aa8ec","#cfeefc"],dawn:["#6a78c8","#ffc9a0"],dusk:["#3c3a88","#ff9e78"],night:["#0b0f2e","#283070"],cave:["#100e18","#2a2538"]};
   const TINT={day:null,dawn:"rgba(255,150,90,.14)",dusk:"rgba(120,50,100,.24)",night:"rgba(16,22,70,.52)",cave:null};
   function phase(){const d=new Date(),h=d.getHours()+d.getMinutes()/60;return h>=21||h<5.5?"night":h<8?"dawn":h>=18?"dusk":"day"}
@@ -1329,22 +1328,7 @@ const MONDE=(()=>{
     if(L.abyss)voidLife(g,t,moving);
     ctx.drawImage(wc,0,0);
     if(ZAP){ctx.fillStyle="rgba(235,240,255,.16)";ctx.fillRect(0,0,W,H)}
-    drawLow(t,ph,moving,dt);
     if(ph==="night")flies.forEach(f=>{if(!f.n)return;const a=.4+.6*Math.abs(Math.sin(f.t*2.2));ctx.fillStyle=`rgba(${L.nightC||"250,255,200"},${a})`;ctx.fillRect(Math.round(f.x),Math.round(f.y),1,1)})}
-
-  /* ---------- Prairie sous le bandeau ---------- */
-  function lowResize(){if(!lc||!W)return;const ar=$("arena"),wr=$("app");if(!ar||!wr)return;const hb=Math.floor(ar.clientHeight/P);
-    const top=ar.getBoundingClientRect().top+scrollY+hb*P,bottom=Math.max(wr.getBoundingClientRect().bottom+scrollY,innerHeight),h=Math.max(P,Math.ceil((bottom-top)/P));
-    LT=hb;LHt=h;if(lc.width!==W||lc.height!==h){lc.width=W;lc.height=h;lw.width=W;lw.height=h}lc.style.top=top+"px";lc.style.width=W*P+"px";lc.style.height=h*P+"px"}
-  function drawLow(t,ph,moving,dt){if(!lc||!L||!LHt)return;const g=lwx,ox=((Math.round(cam)%L.gW)+L.gW)%L.gW;g.clearRect(0,0,W,LHt);
-    /* d'abord la fin de la bande du sol (sous le bord du bandeau), puis la prairie qui se répète */
-    const y0=GT-TM-LT,gh=L.ground.height;for(let x=-ox;x<W;x+=L.gW)g.drawImage(L.ground,x,y0);
-    for(let y=y0+gh;y<LHt;y+=L.low.height)for(let x=-ox;x<W;x+=L.gW)g.drawImage(L.low,x,y);
-    /* ombres des nuages qui glissent aussi sur le bas */
-    if(ph!=="night"&&!L.dark){while(lowSh.length<Math.ceil(LHt/90))lowSh.push({x:R(0,1000),y:R(4,LHt),rx:R(30,56),ry:R(5,8),v:R(2,4)});if(moving)lowSh.forEach(s=>s.x-=s.v*dt);
-      g.fillStyle="rgba(20,40,30,.12)";lowSh.forEach(s=>{const o=((s.x-cam)%1000+1000)%1000-120;for(let y=-s.ry;y<=s.ry;y++){const w=Math.round(s.rx*Math.sqrt(1-(y/s.ry)**2));g.fillRect(Math.round(o-w),Math.round(s.y+y),w*2,1)}})}
-    const TN=L.tint&&L.tint[ph]!==undefined?L.tint[ph]:TINT[ph];if(TN||bossOn||L.under){g.globalCompositeOperation="source-atop";if(L.under){g.fillStyle="rgba(30,110,180,.2)";g.fillRect(0,0,W,LHt)}if(TN){g.fillStyle=TN;g.fillRect(0,0,W,LHt)}if(bossOn){g.fillStyle="rgba(70,0,30,.28)";g.fillRect(0,0,W,LHt)}g.globalCompositeOperation="source-over"}
-    lx.clearRect(0,0,W,LHt);lx.drawImage(lw,0,0)}
 
   /* ---------- Butin au sol ---------- */
   const A=()=>$("arena");
@@ -1362,7 +1346,9 @@ const MONDE=(()=>{
     const f=document.createElement("div");f.className="gdrop fly "+d.e.className.replace("gdrop","");f.innerHTML=d.e.innerHTML;f.style.left=r.left+"px";f.style.top=r.top+"px";document.body.appendChild(f);d.e.remove();
     const dx=b.left+b.width/2-r.left-r.width/2,dy=b.top+b.height/2-r.top-r.height/2;
     f.animate([{transform:"translate(0,0) scale(1)"},{transform:`translate(${dx*.3}px,${dy*.3-50}px) scale(1.15)`,offset:.35},{transform:`translate(${dx}px,${dy}px) scale(.55)`,opacity:.7}],{duration:620,easing:"ease-in"}).onfinish=()=>{f.remove();const p=d.kind==="coin"?tgt.parentElement:tgt;if(p)replayCls(p,"bump")}}
-  function updDrops(now){if(!drops.length)return;const h=$("ahero"),a=A();const hr=h&&!h.hidden?h.getBoundingClientRect():null,ar=a.getBoundingClientRect();const lim=hr?(hr.right-ar.left)/P+4:W*.4;
+  /* la position du héros ne change qu'au redimensionnement : relue 4 fois par seconde, pas à chaque image */
+  let limT=-1e9,lim=0;
+  function updDrops(now){if(!drops.length)return;if(now-limT>250){limT=now;const h=$("ahero"),a=A();const hr=h&&!h.hidden?h.getBoundingClientRect():null,ar=a.getBoundingClientRect();lim=hr?(hr.right-ar.left)/P+4:W*.4}
     [...drops].forEach(d=>{place(d);const age=now-d.t0;if(age>700&&(d.x-cam<lim||age>6000))collect(d)})}
 
   /* ---------- Boss : mise en scène ---------- */
@@ -1373,16 +1359,14 @@ const MONDE=(()=>{
 
   /* ---------- Boucle ---------- */
   function loop(t){requestAnimationFrame(loop);if(!S||!S.cls)return;const dt=Math.min(.1,(t-(lastT||t))/1000);lastT=t;
-    if(cv&&(cv.width!==W||!W))resize();if(lc&&(t-(lowResize.t||0))>500){lowResize.t=t;lowResize()}draw(t,dt);updDrops(t);bossCheck();SITE.draw(t,dt)}
+    if(UI.covered()){SITE.draw(t,dt);return}if(cv&&(cv.width!==W||!W))resize();draw(t,dt);updDrops(t);bossCheck();SITE.draw(t,dt)}
 
   return{
     init(){cv=$("wcv");if(!cv)return;ctx=cv.getContext("2d");wc=document.createElement("canvas");wx=wc.getContext("2d");
-      lc=$("wbg");if(lc){lx=lc.getContext("2d");lw=document.createElement("canvas");lwx=lw.getContext("2d")}
-      const rs=()=>{resize();lowResize()};
-      if(window.ResizeObserver){ro=new ResizeObserver(rs);ro.observe($("arena"));ro.observe($("app"))}addEventListener("resize",rs);rs();requestAnimationFrame(loop)},
-    /* changement de zone : nouveaux plans ; la prairie du dessous remplace le motif de fond de page */
-    zone(id){if(id===zid&&L)return;zid=id;L=makeLayers(id);birds=[];shadows=[];puffs=[];tumbles=[];gusts=[];flies=[];flakes=[];gulls=[];bolt=null;schools=[];jellies=[];plume=[];bombs=[];erupt=4;debris=[];lowSh=[];drops.splice(0).forEach(d=>d.e.remove());
-      const c=css(L.G[0]);document.body.style.backgroundImage="none";document.body.style.backgroundColor=c;document.documentElement.style.backgroundColor=c;lowResize()},
+      if(window.ResizeObserver){ro=new ResizeObserver(resize);ro.observe($("arena"))}addEventListener("resize",resize);resize();requestAnimationFrame(loop)},
+    /* changement de zone : nouveaux plans ; la couleur du sol sert de fond de page */
+    zone(id){if(id===zid&&L)return;zid=id;L=makeLayers(id);birds=[];shadows=[];puffs=[];tumbles=[];gusts=[];flies=[];flakes=[];gulls=[];bolt=null;schools=[];jellies=[];plume=[];bombs=[];erupt=4;debris=[];drops.splice(0).forEach(d=>d.e.remove());
+      const c=css(L.G[0]);document.body.style.backgroundImage="none";document.body.style.backgroundColor=c;document.documentElement.style.backgroundColor=c},
     /* l'équipe avance jusqu'à l'endroit où se tenait le monstre */
     walk(){const h=$("ahero"),m=$("monBtn");let step=60;if(h&&m&&!h.hidden){const a=h.getBoundingClientRect(),b=m.getBoundingClientRect();if(a.width&&b.width)step=Math.max(30,(b.left+b.width/2-a.left-a.width/2)/P)}
       if(calm()){cam+=step;return}camFrom=cam;camTo=(walkMs?camTo:cam)+step;walkT0=performance.now();walkMs=750;$("arena").classList.add("walking")},

@@ -35,7 +35,6 @@ function pOpts(){
     ${seg("numFmt","Format des nombres","Exemple : "+({short:"1,5 M",full:"1 500 000",sci:"1.50e6"})[O.numFmt],[["short","Abrégé"],["full","Complet"],["sci","Scientifique"]])}
     ${seg("dmgNums","Chiffres de dégâts","",[["all","Tous"],["crit","Critiques et soins"],["none","Aucun"]])}
     ${seg("logLines","Journal de combat","",[[0,"Masqué"],[4,"4 lignes"],[8,"8"],[15,"15"]])}
-    ${sw("ambiance","Ambiance animée","Particules du biome derrière l'interface : feuilles, neige, braises, bulles…")}
     ${sw("weatherFx","Effets de météo","L'événement reste actif même sans l'effet visuel.")}
     ${sw("shake","Secousses de l'arène","")}
     ${sw("reduceMotion","Réduire les animations","Coupe toutes les animations et transitions.")}

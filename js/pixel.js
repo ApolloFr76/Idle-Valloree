@@ -2,7 +2,11 @@
 /* ================= Moteur pixel art (sprites et décors générés par le code) ================= */
 const PX=(()=>{
   const cache={};
-  const rgb=c=>{if(Array.isArray(c))return c;if(c[0]==="#"){if(c.length===4)c="#"+c[1]+c[1]+c[2]+c[2]+c[3]+c[3];const n=parseInt(c.slice(1),16);return[n>>16,n>>8&255,n&255]}return c.match(/\d+/g).slice(0,3).map(Number)};
+  /* couleur texte → [r,g,b], mémorisée : le décor pose des centaines de milliers de pixels avec les mêmes couleurs */
+  const RGB=new Map();
+  const rgb=c=>{if(Array.isArray(c))return c;let v=RGB.get(c);if(v)return[v[0],v[1],v[2]];   /* copie : du code compare les pixels par identité */
+    if(c[0]==="#"){let h=c;if(h.length===4)h="#"+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];const n=parseInt(h.slice(1),16);v=[n>>16,n>>8&255,n&255]}else v=c.match(/\d+/g).slice(0,3).map(Number);
+    if(RGB.size>4096)RGB.clear();RGB.set(c,v);return[v[0],v[1],v[2]]};
   const mix=(a,b,p)=>{a=rgb(a);b=rgb(b);return[0,1,2].map(i=>Math.round(a[i]+(b[i]-a[i])*p))};
   const LIGHT="#fff2c2",DARK="#2b1842",INK="#1c1020";
   function rng(seed){let s=seed>>>0||1;return()=>{s^=s<<13;s>>>=0;s^=s>>17;s^=s<<5;s>>>=0;return s/4294967296}}
@@ -13,7 +17,8 @@ const PX=(()=>{
     /* msk(m=>{…formes…}) : masque des pixels couverts par les formes (rect, ell, poly, line, px, clear) */
     msk(fn){
       const w=this.w,h=this.h,M=new Uint8Array(w*h);
-      const ox=this.ox,oy=this.oy,put=(x,y,v=1)=>{x=Math.round(x)+ox;y=Math.round(y)+oy;if(x>=0&&y>=0&&x<w&&y<h)M[y*w+x]=v};
+      /* B : rectangle qui contient tous les pixels posés, pour ne pas parcourir tout le sprite ensuite */
+      const B=[w,-1,h,-1],ox=this.ox,oy=this.oy,put=(x,y,v=1)=>{x=Math.round(x)+ox;y=Math.round(y)+oy;if(x>=0&&y>=0&&x<w&&y<h){M[y*w+x]=v;if(v){if(x<B[0])B[0]=x;if(x>B[1])B[1]=x;if(y<B[2])B[2]=y;if(y>B[3])B[3]=y}}};
       const m={px:put,
         rect:(x,y,rw,rh)=>{for(let j=0;j<rh;j++)for(let i=0;i<rw;i++)put(x+i,y+j)},
         ell:(cx,cy,rx,ry)=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++){const dx=(x-cx)/(rx+.35),dy=(y-cy)/(ry+.35);if(dx*dx+dy*dy<=1)put(x,y)}},
@@ -23,11 +28,11 @@ const PX=(()=>{
           pts.forEach(q=>put(q[0],q[1]))},
         line:(x0,y0,x1,y1,t=1)=>{const n=Math.max(Math.abs(x1-x0),Math.abs(y1-y0))||1;for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n,y=y0+(y1-y0)*i/n;for(let a=0;a<t;a++)for(let b=0;b<t;b++)put(x+a,y+b)}},
         clear:(x,y,rw,rh)=>{for(let j=0;j<rh;j++)for(let i=0;i<rw;i++)put(x+i,y+j,0)}};
-      fn(m);return M}
+      fn(m);M.b=B;return M}
     /* part(couleur, m=>{…formes…}, {flat}) : dessine un masque puis l'ombre en 3 tons */
     part(col,fn,o={}){
       const w=this.w,h=this.h,M=this.msk(fn);
-      let x0=w,x1=-1,y0=h,y1=-1;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(M[y*w+x]){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
+      let x0=w,x1=-1,y0=h,y1=-1;for(let y=M.b[2];y<=M.b[3];y++)for(let x=M.b[0];x<=M.b[1];x++)if(M[y*w+x]){x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y)}
       if(x1<0)return this;
       const base=rgb(col),lt=mix(base,LIGHT,o.lt??.38),dk=mix(base,DARK,o.dk??.36),bw=x1-x0+1,bh=y1-y0+1,cx=(x0+x1)/2,cy=(y0+y1)/2;
       const g=(x,y)=>x>=0&&y>=0&&x<w&&y<h&&M[y*w+x];
@@ -41,12 +46,13 @@ const PX=(()=>{
        lumière en haut à gauche. r = rayon du bombé (par défaut la demi-épaisseur de la forme), sp:0 = sans reflet. */
     vol(col,fn,o={}){
       const w=this.w,h=this.h,M=this.msk(fn),D=new Float32Array(w*h),at=(x,y)=>x>=0&&y>=0&&x<w&&y<h?D[y*w+x]:0;let mx=0;
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(M[i])D[i]=Math.min(at(x-1,y)+1,at(x,y-1)+1,at(x-1,y-1)+1.4,at(x+1,y-1)+1.4)}
-      for(let y=h-1;y>=0;y--)for(let x=w-1;x>=0;x--){const i=y*w+x;if(M[i]){D[i]=Math.min(D[i],at(x+1,y)+1,at(x,y+1)+1,at(x+1,y+1)+1.4,at(x-1,y+1)+1.4);if(D[i]>mx)mx=D[i]}}
+      const[X0,X1,Y0,Y1]=M.b;
+      for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=y*w+x;if(M[i])D[i]=Math.min(at(x-1,y)+1,at(x,y-1)+1,at(x-1,y-1)+1.4,at(x+1,y-1)+1.4)}
+      for(let y=Y1;y>=Y0;y--)for(let x=X1;x>=X0;x--){const i=y*w+x;if(M[i]){D[i]=Math.min(D[i],at(x+1,y)+1,at(x,y+1)+1,at(x+1,y+1)+1.4,at(x-1,y+1)+1.4);if(D[i]>mx)mx=D[i]}}
       if(!mx)return this;
       const R=Math.max(1.5,o.r??mx),Z=(x,y)=>{const t=Math.min(at(x,y),R)/R;return Math.sqrt(1-(1-t)*(1-t))*R};
       const b=rgb(col),T=[mix(b,"#1a0c2e",.6),mix(b,"#2b1842",.33),b,mix(b,"#fff0c0",.36),mix(b,"#ffffff",.66)];
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(!M[i])continue;const zx=(Z(x+1,y)-Z(x-1,y))/2,zy=(Z(x,y+1)-Z(x,y-1))/2,I=(zx*.56+zy*.72+.42)/Math.hypot(zx,zy,1);
+      for(let y=Y0;y<=Y1;y++)for(let x=X0;x<=X1;x++){const i=y*w+x;if(!M[i])continue;const zx=(Z(x+1,y)-Z(x-1,y))/2,zy=(Z(x,y+1)-Z(x,y-1))/2,I=(zx*.56+zy*.72+.42)/Math.hypot(zx,zy,1);
         this.p[i]=T[I>.86&&o.sp!==0?4:I>.62?3:I>.2?2:I>-.25?1:0]}
       return this}
     shadow(cx,cy,rx,ry){this.sh.push([cx,cy,rx,ry]);return this}
@@ -54,9 +60,30 @@ const PX=(()=>{
     blit(s,ox,oy){for(let y=0;y<s.h;y++)for(let x=0;x<s.w;x++){const c=s.p[y*s.w+x];if(c)this.set(ox+x,oy+y,c)}return this}
     cvs(){const c=document.createElement("canvas");c.width=this.w;c.height=this.h;const x=c.getContext("2d"),I=x.createImageData(this.w,this.h),D=I.data;
       this.sh.forEach(([cx,cy,rx,ry])=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let xx=Math.floor(cx-rx);xx<=cx+rx;xx++){const dx=(xx-cx)/(rx+.35),dy=(y-cy)/(ry+.35);if(dx*dx+dy*dy<=1&&xx>=0&&y>=0&&xx<this.w&&y<this.h){const i=(y*this.w+xx)*4;D[i]=30;D[i+1]=14;D[i+2]=40;D[i+3]=95}}});
-      this.p.forEach((q,i)=>{if(q){D[i*4]=q[0];D[i*4+1]=q[1];D[i*4+2]=q[2];D[i*4+3]=255}});x.putImageData(I,0,0);return c}
-    url(){return this.cvs().toDataURL()}
+      const P=this.p;for(let i=0,j=0,n=P.length;i<n;i++,j+=4){const q=P[i];if(q){D[j]=q[0];D[j+1]=q[1];D[j+2]=q[2];D[j+3]=255}}x.putImageData(I,0,0);return c}
+    /* image du sprite pour <img src> : PNG à palette encodé ici (voir png()), servi par une URL blob */
+    url(){const w=this.w,h=this.h,N=w*h,I=new Uint8Array(N),map=new Map(),pal=[0],al=[0];
+      const idx=(c,a)=>{const k=c*256+a;let i=map.get(k);if(i===undefined){i=pal.length;map.set(k,i);pal.push(c);al.push(a)}return i};
+      if(this.sh.length){const s=idx(0x1e0e28,95);this.sh.forEach(([cx,cy,rx,ry])=>{for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++){const dx=(x-cx)/(rx+.35),dy=(y-cy)/(ry+.35);if(dx*dx+dy*dy<=1&&x>=0&&y>=0&&x<w&&y<h)I[y*w+x]=s}})}
+      for(let i=0;i<N;i++){const q=this.p[i];if(q)I[i]=idx(c8(q[0])<<16|c8(q[1])<<8|c8(q[2]),255)}
+      if(pal.length>256)return this.cvs().toDataURL();
+      return URL.createObjectURL(new Blob([png(w,h,I,pal,al)],{type:"image/png"}))}
   }
+  /* PNG à palette sans compression : bien plus rapide que canvas.toDataURL() (pas de canvas, pas de zlib),
+     et les sprites ont peu de couleurs, donc le fichier reste petit (1 octet par pixel). */
+  const c8=v=>v<0?0:v>255?255:Math.round(v);
+  const CRC=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xedb88320^(c>>>1):c>>>1;CRC[n]=c>>>0}
+  function png(w,h,I,pal,al){const n=pal.length,row=w+1,raw=row*h,nb=Math.max(1,Math.ceil(raw/65535)),il=2+raw+nb*5+4;
+    const o=new Uint8Array(8+25+12+3*n+12+n+12+il+12),v=new DataView(o.buffer);let p=8;o.set([137,80,78,71,13,10,26,10]);
+    const chunk=(type,len,fill)=>{v.setUint32(p,len);p+=4;const s=p;for(let i=0;i<4;i++)o[p++]=type.charCodeAt(i);fill();let c=~0;for(let i=s;i<p;i++)c=CRC[(c^o[i])&255]^(c>>>8);v.setUint32(p,~c>>>0);p+=4};
+    chunk("IHDR",13,()=>{v.setUint32(p,w);v.setUint32(p+4,h);o[p+8]=8;o[p+9]=3;p+=13});
+    chunk("PLTE",3*n,()=>{for(const c of pal){o[p++]=c>>16;o[p++]=c>>8&255;o[p++]=c&255}});
+    chunk("tRNS",n,()=>{for(const a of al)o[p++]=a});
+    chunk("IDAT",il,()=>{o[p++]=0x78;o[p++]=1;let a1=1,a2=0,left=raw,k=0;
+      for(let b=0;b<nb;b++){const len=Math.min(65535,left);left-=len;o[p++]=left?0:1;o[p++]=len&255;o[p++]=len>>8;o[p++]=~len&255;o[p++]=~len>>8&255;
+        for(let j=0;j<len;j++,k++){const x=k%row,byte=x?I[(k-x)/row*w+x-1]:0;o[p++]=byte;a1+=byte;a2+=a1;if((k&4095)===4095){a1%=65521;a2%=65521}}}
+      a1%=65521;a2%=65521;v.setUint32(p,(a2<<16|a1)>>>0);p+=4});
+    chunk("IEND",0,()=>{});return o}
 
   /* ---------- Monstres (40×40, tournés vers le héros à gauche) ---------- */
   /* Chaque monstre garde sa forme (shape), son attribut (ft) et sa couleur ; MLOOK ajoute une variante de dessin (k)
@@ -539,53 +566,6 @@ const PX=(()=>{
     givre:{nw:1,g:["#dfeef8","#f2f9ff","#c6ddef","#aecbe4"],path:"#c2d8ea",wall:"ice",wc:"#8fb8dc",water:"#7ab4e8",
       props:[["pine",5,"#3f7a6a","#5a4030",1],["crystal",5,"#a6dcff"],["rock",4,"#9ab0c8"]],fl:["#ffffff","#bfe3ff"]},
   };
-  function scene(id){
-    const k="s:"+id;if(cache[k])return cache[k];const T=TH[id]||TH.prairie,W=240,H=130,s=new Spr(W,H),r=rng(id.length*7919+id.charCodeAt(0)*131+id.charCodeAt(1));
-    const G=T.g.map(rgb),P=rgb(T.path),WY=24;
-    for(let y=0;y<H;y++)for(let x=0;x<W;x++)s.p[y*W+x]=G[0];
-    /* plaques de teinte */
-    for(let i=0;i<34;i++){const cx=r()*W,cy=WY+r()*(H-WY),rx=6+r()*16,ry=3+r()*7,c=G[1+(i%3)];
-      for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++){const d=((x-cx)/rx)**2+((y-cy)/ry)**2;if(d<1&&(d<.7||(x+y)%2===0))s.set(x,y,c)}}
-    /* clairière au centre, là où l'on se bat */
-    for(let y=30;y<92;y++)for(let x=60;x<180;x++){const d=((x-120)/56)**2+((y-62)/24)**2;if(d<.72||(d<1&&(x+y)%2===0))s.set(x,y,P)}
-    {const pl=mix(P,LIGHT,.35),pd=mix(P,DARK,.22);for(let i=0;i<90;i++){const x=70+(r()*100|0),y=42+(r()*40|0);if(((x-120)/50)**2+((y-62)/20)**2<1){const c=r()<.5?pl:pd;s.set(x,y,c);s.set(x+1,y,c)}}}
-    /* eau */
-    if(T.water){const wc=rgb(T.water),wl=mix(wc,"#ffffff",.45),wd=mix(wc,DARK,.3),sh=mix(G[3],DARK,.35);
-      [[30,96,30,13],[214,44,22,9]].forEach(([cx,cy,rx,ry])=>{for(let y=Math.floor(cy-ry-2);y<=cy+ry+2;y++)for(let x=Math.floor(cx-rx-2);x<=cx+rx+2;x++){const d=((x-cx)/rx)**2+((y-cy)/ry)**2;
-        if(d<1){let c=wc;if(y<cy-ry*.45&&d>.5)c=wd;else if((x+y*3)%13===0||((x*5+y*2)%17===0&&x%2))c=wl;s.set(x,y,c)}else if(d<1.25)s.set(x,y,sh)}})}
-    /* brins, fleurs, cailloux */
-    for(let i=0;i<420;i++){const x=r()*W|0,y=WY+2+(r()*(H-WY-3)|0),c=r()<.5?G[2]:G[1];if(s.get(x,y)===G[0]||s.get(x,y)===G[1]||s.get(x,y)===G[2]){s.set(x,y,c);s.set(x+1,y,c);if(r()<.4)s.set(x,y-1,c)}}
-    for(let i=0;i<70;i++){const x=4+(r()*(W-8)|0),y=WY+4+(r()*(H-WY-8)|0),c=T.fl[r()*T.fl.length|0];if(T.water&&s.get(x,y)&&s.get(x,y)[2]>s.get(x,y)[1]&&!T.nw)continue;s.set(x,y,c);if(r()<.5){s.set(x+1,y,c);s.set(x,y+1,mix(c,DARK,.3))}}
-    /* fond : mur, lisière, falaise… */
-    const wc=rgb(T.wc);
-    if(T.wall==="stone"||T.wall==="rock"||T.wall==="cliff"||T.wall==="ice"){
-      const lt=mix(wc,LIGHT,.35),dk=mix(wc,DARK,.4),ink=mix(wc,INK,.7),bh=T.wall==="stone"?6:8;
-      for(let y=0;y<WY;y++)for(let x=0;x<W;x++)s.set(x,y,dk);
-      for(let row=0;row*bh<WY;row++){let x=-(row%2)*5-(r()*4|0);while(x<W){const bw=T.wall==="stone"?9+(r()*5|0):12+(r()*12|0),y0=row*bh,c=r()<.3?mix(wc,DARK,.15):r()<.3?mix(wc,LIGHT,.12):wc;
-        for(let j=0;j<bh-1;j++)for(let i=0;i<bw-1;i++){const e=(i===0&&j===0)||(i===bw-2&&j===0)||(i===0&&j===bh-2)||(i===bw-2&&j===bh-2);if(e)continue;s.set(x+i,y0+j,j===0||i===0?lt:(j===bh-2||i===bw-2?mix(c,DARK,.25):c))}x+=bw}}
-      for(let x=0;x<W;x++){s.set(x,WY,ink);s.set(x,WY+1,mix(G[3],DARK,.35));if((x*7)%3)s.set(x,WY+2,mix(G[3],DARK,.2))}
-      if(T.wall==="stone")for(let i=0;i<26;i++){const x=r()*W|0,y=r()*8|0;s.set(x,y,G[2]);s.set(x+1,y,G[1]);s.set(x,y+1,G[2])}
-      if(T.wall==="ice")for(let x=0;x<W;x++){const hgt=1+((x*13)%5===0?3:(x*7)%3);for(let j=0;j<hgt;j++)s.set(x,j,"#f8fdff")}
-      if(T.wall==="rock")for(let x=20;x<W;x+=66){for(let y=0;y<WY;y++){s.set(x,y,"#7a5232");s.set(x+1,y,"#9a6a3c");s.set(x+2,y,"#5a3a22")}for(let i=-6;i<9;i++){s.set(x+i,2,"#9a6a3c");s.set(x+i,3,"#5a3a22")}}
-    }else{
-      const dk=mix(wc,DARK,.45);for(let y=0;y<WY;y++)for(let x=0;x<W;x++)s.set(x,y,(x+y)%2&&y>WY-4?mix(G[3],DARK,.25):dk);
-      if(T.wall==="trees"){for(let x=6;x<W;x+=14+(r()*8|0)){const tw=4+(r()*3|0);for(let y=6;y<WY+2;y++)for(let i=0;i<tw;i++)s.set(x+i,y,i===0?"#7a5a40":i===tw-1?"#2e2018":"#5a4030")}
-        for(let i=0;i<60;i++){const cx=r()*W,cy=r()*9,rr=4+r()*5,c=r()<.5?mix(wc,LIGHT,.18):mix(wc,DARK,.1);for(let y=Math.floor(cy-rr);y<=cy+rr;y++)for(let x=Math.floor(cx-rr);x<=cx+rr;x++)if((x-cx)**2+(y-cy)**2<rr*rr)s.set(x,y,c)}}
-      if(T.wall==="reeds"){const w2=rgb(T.water),wl=mix(w2,"#fff",.4);for(let y=0;y<WY-3;y++)for(let x=0;x<W;x++)s.set(x,y,(x+y*5)%19===0?wl:w2);
-        for(let x=1;x<W;x+=3+(r()*4|0)){const hgt=6+(r()*9|0);for(let j=0;j<hgt;j++)s.set(x,WY+1-j,j>hgt-3?"#7a4a2a":r()<.5?"#7fa24e":"#5c8040")}}
-    }
-    /* accessoires, triés par profondeur, en dehors de la clairière */
-    const items=[];T.props.forEach(([n,cnt,...a])=>{for(let i=0;i<cnt;i++){const sp=prop[n](r,...a);let x,y,t=0;do{x=r()*(W-sp.w)|0;y=(n==="tree"||n==="pine"?WY-22:WY+2)+(r()*(H-WY-sp.h+ (n==="tree"||n==="pine"?16:0))|0);t++}while(t<30&&((x+sp.w>62&&x<178&&y+sp.h>34&&y+sp.h<100)||(T.water&&s.get(x+sp.w/2|0,y+sp.h-1)&&s.get(x+sp.w/2|0,y+sp.h-1)[2]>170&&!T.nw)));
-      items.push([sp,x,y])}});
-    items.sort((a,b)=>a[2]+a[0].h-b[2]-b[0].h).forEach(([sp,x,y])=>{const sc=mix(G[3],DARK,.4);for(let i=1;i<sp.w-1;i++){s.set(x+i,y+sp.h-1,sc);if(i>1&&i<sp.w-2)s.set(x+i,y+sp.h,sc)}s.blit(sp,x,y)});
-    return cache[k]=s.url()}
-
-  /* ---------- Motif de fond de page ---------- */
-  /* Fond de page : herbe (ou sol) du biome, un peu plus sombre que l'arène */
-  function tile(id="prairie"){const k="t:"+id;if(cache[k])return cache[k];const T=TH[id]||TH.prairie,s=new Spr(32,32),r=rng(4242+id.length*31),g=T.g.map(c=>mix(c,DARK,.18));for(let i=0;i<1024;i++)s.p[i]=g[0];
-    for(let i=0;i<70;i++){const x=r()*32|0,y=r()*32|0,c=g[1+(r()*3|0)];s.set(x,y,c);s.set((x+1)%32,y,c);if(r()<.4)s.set(x,(y+31)%32,c)}
-    const fl=T.fl||["#ffd84a","#fff"];[[5,7],[21,19],[14,27],[27,4]].forEach(([x,y],i)=>{const c=fl[i%fl.length];s.set(x,y,c);s.set(x+1,y,mix(c,DARK,.25))});return cache[k]=s.url()}
-
   const img=(u,cls="",w,h)=>`<img class="px ${cls}" src="${u}" alt="" draggable="false"${w?` width="${w}" height="${h}"`:""}>`;
 
   /* ================= Animation image par image (10 images par mouvement) ================= */
@@ -786,16 +766,6 @@ const PX=(()=>{
   function monFrames(m,anim){const k="m:"+m.id+m.c+(m.crown?1:0);if(!SPR[k])monster(m);return framesOf(k,SPR[k],anim,false)}
   function petFrames(col,anim){pet(col);const k="pe:"+col;return framesOf(k,SPR[k],anim,true)}
 
-  /* ---------- Couches de décor qui défilent (bandes raccordables) ---------- */
-  function strip(id,kind){const k="st:"+id+kind;if(cache[k])return cache[k];const T=TH[id]||TH.prairie,W=256,H=kind==="front"?26:46,s=new Spr(W,H),r=rng(id.length*331+(kind==="front"?7:3));
-    const put=(x,y,c)=>s.set(((x%W)+W)%W,y,c);
-    if(kind==="front"){const G=T.g.map(rgb);
-      for(let i=0;i<46;i++){const x=r()*W|0,hgt=5+(r()*9|0),c=G[i%3+1],cd=mix(G[3],DARK,.35);for(let j=0;j<hgt;j++){const sw=j>hgt*.6?(i%2?1:-1):0;put(x+sw,H-1-j,j===hgt-1?mix(c,LIGHT,.3):c);put(x+1+sw,H-1-j,cd)}}
-      for(let i=0;i<9;i++){const x=r()*W|0,rw=5+(r()*6|0),rh=3+(r()*3|0),c=rgb((T.props.find(p=>p[0]==="rock")||[0,0,"#9a92ae"])[2]||"#9a92ae");for(let y=0;y<rh;y++)for(let xx=0;xx<rw;xx++){const e=(xx===0||xx===rw-1)&&y===0;if(!e)put(x+xx,H-rh+y,y===0?mix(c,LIGHT,.3):xx===rw-1?mix(c,DARK,.35):c)}}
-      for(let i=0;i<14;i++){const x=r()*W|0,c=T.fl[i%T.fl.length];put(x,H-8-(r()*6|0),c)}}
-    else{const c=mix(T.wc,LIGHT,.55);for(let i=0;i<7;i++){const cx=r()*W,cy=8+r()*22,rx=14+r()*22,ry=3+r()*4;for(let y=Math.floor(cy-ry);y<=cy+ry;y++)for(let x=Math.floor(cx-rx);x<=cx+rx;x++){const d=((x-cx)/rx)**2+((y-cy)/ry)**2;if(d<1&&(d<.6||(x+y)%2===0))put(x,y,c)}}}
-    return cache[k]=s.url()}
-
   /* ---------- Compagnons-créatures : golem, dragonnet, phénix (24×24, 10 images par mouvement) ---------- */
   const BA={
     /* idle : battement d'ailes + petit vol de haut en bas (phénix, dragonnet), balancement lourd (golem) */
@@ -838,13 +808,9 @@ const PX=(()=>{
   const beastFrames=(id,col,anim)=>{const k="bfs:"+id+col+anim;return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>beastF(id,col,anim,f)))};
   /* outils de dessin pour le monde en bandeau (js/monde.js) */
   const kit={Spr,prop,rng,rgb,mix,TH,LIGHT,DARK,INK};
-  return{kit,plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,strip,pickup,scene,tile,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
+  return{kit,plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,pickup,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
 })();
 
-document.body.style.backgroundImage=`url(${PX.tile()})`;
-let biomeId=null;
-function setBiome(id){if(id===biomeId)return;biomeId=id;const b=document.body,c=mix2(PX.ground(id));b.style.backgroundImage=`url(${PX.tile(id)})`;b.style.backgroundColor=c;document.documentElement.style.backgroundColor=c;ambReset()}
-function mix2(hex){const n=parseInt(hex.slice(1),16),f=v=>Math.round(v*.82);return`rgb(${f(n>>16)},${f(n>>8&255)},${f(n&255)})`}
 function monsterSVG(m){return PX.img(PX.monster(m))}
 const EMB={guerrier:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M9 1h6v1h-6zM8 2h7v1h-7zM8 3h2v1h-2zM13 3h2v1h-2zM7 4h2v1h-2zM13 4h2v1h-2zM7 5h2v1h-2zM13 5h2v1h-2zM6 6h2v1h-2zM13 6h2v1h-2zM6 7h2v1h-2zM12 7h3v1h-3zM3 8h1v1h-1zM5 8h2v1h-2zM11 8h3v1h-3zM2 9h5v1h-5zM10 9h3v1h-3zM3 10h3v1h-3zM9 10h3v1h-3zM3 11h4v1h-4zM8 11h3v1h-3zM2 12h8v1h-8zM1 13h3v1h-3zM5 13h4v1h-4zM1 14h2v1h-2zM6 14h2v1h-2z"/>',
   archer:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M3 1h2v1h-2zM3 2h4v1h-4zM10 2h4v1h-4zM3 3h6v1h-6zM11 3h3v1h-3zM4 4h10v1h-10zM5 5h7v1h-7zM13 5h1v1h-1zM6 6h6v1h-6zM3 7h10v1h-10zM1 8h6v1h-6zM8 8h5v1h-5zM2 9h1v1h-1zM7 9h7v1h-7zM7 10h2v1h-2zM10 10h4v1h-4zM7 11h2v1h-2zM11 11h4v1h-4zM7 12h2v1h-2zM12 12h3v1h-3zM6 13h2v1h-2zM7 14h1v1h-1z"/>',

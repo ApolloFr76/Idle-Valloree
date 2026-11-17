@@ -383,7 +383,7 @@ const MK_MIN=.5,MK_MAX=2,MK_STEP=60,MK_SELL=.002;
 function fixOpts(o){o=Object.assign({},OPT_DEF,o||{});for(const k in OPT_DEF){const d=OPT_DEF[k];if(typeof d==="number"){const v=o[k]==null||o[k]===""?NaN:+o[k];o[k]=Number.isFinite(v)?v:d}else if(typeof d==="boolean"&&typeof o[k]!=="boolean")o[k]=d;else if(typeof d==="string"&&typeof o[k]!=="string")o[k]=d}return o}
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
-  textSize:100,ambiance:true,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
+  textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
   potThreshold:30,autoSellFull:false,koRetreat:false,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
   keys:true,saveEvery:10,offline:true,showArmor:true};

@@ -3,7 +3,6 @@
    Chargé en dernier, il remplace la mise en page en colonnes de style.css et monde.css. */
 :root{--rail:150px;--hh:56px;--dw:clamp(540px,46vw,880px)}
 html,body{height:100%;overflow:hidden}
-.wbg{display:none}
 
 /* ---------- Le monde ---------- */
 .world{position:fixed;left:0;top:0;right:var(--rail);bottom:0;height:auto}
