@@ -36,6 +36,8 @@ function tick(dt){VIE.tick(dt);
       CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto[sp.id]&&up("sp"+(i+1)))cast(sp,true)});
       /* Défi automatique (boutique) : boss lancé dès les 10 victoires ; 30 s d'attente après un échec */
       if(S.opt.autoFightBoss&&up("bossauto")&&S.mode==="zone"&&S.ko<=0&&bossReady(S.zone)&&S.time>=(S.bossAutoT||0))startMode("boss");
+      /* Donjon automatique (boutique) : entre dans le donjon de la zone dès qu'on a sa clé ; le boss passe avant ; 30 s d'attente après un échec */
+      if(S.opt.autoDungeon&&up("dgauto")&&S.mode==="zone"&&S.ko<=0&&(S.res["cle_"+S.zone]||0)>0&&S.lvl>=ZONES[S.zone].lvl[0]&&S.time>=(S.dgAutoT||0)&&!(S.opt.autoFightBoss&&up("bossauto")&&bossReady(S.zone)))startMode("donjon",S.zone);
     }
   }
   S.buffs=S.buffs.filter(b=>b.until>S.time);

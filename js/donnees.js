@@ -285,7 +285,8 @@ const UPGS=[
   ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×1,5",5e5],["allie3","Bannière de guerre","Compagnons ×2",2e7],
   ["sp1","Sort automatique I","Votre 1er sort peut se lancer tout seul (case Auto)",5000],["sp2","Sort automatique II","Votre 2e sort peut se lancer tout seul (case Auto)",60000],["sp3","Sort automatique III","Votre 3e sort peut se lancer tout seul (case Auto)",6e5],
   ["potauto","Potions automatiques","Boit une potion de soin tout seul sous le seuil de PV",10000],["cdr1","Concentration","Sorts 10 % plus rapides",25000],["cdr2","Maîtrise des arcanes","Sorts encore 10 % plus rapides",3e5],
-  ["bossauto","Défi automatique","Défie le boss tout seul dès que les 10 victoires sont faites",40000]];
+  ["bossauto","Défi automatique","Défie le boss tout seul dès que les 10 victoires sont faites",40000],
+  ["dgauto","Explorateur","Entre tout seul dans le donjon de la zone dès que vous avez sa clé (case Donjon auto)",80000]];
 /* Apparence de l'armure : chaque panoplie a un style (fin de jeu : cristal ; grandes panoplies et boss : plaques ; sinon selon le monstre)
    et la couleur de son élément teintée par celle de son monstre. heroArm() décrit les pièces visibles portées par le héros. */
 const ARM_STYLES=["cuir","robe","ecailles","fourrure"];
@@ -297,7 +298,9 @@ function heroArm(){if(!S||!S.cls||(S.opt&&S.opt.showArmor===false))return null;l
   if(!sig)return null;if(sig!==armSig){armSig=sig;armObj={k:sig};for(const sl in P)armObj[sl]={s:armStyle(P[sl]),c:armCol(P[sl])}}return armObj}
 /* Métiers au niveau max : chacun donne +10 % d'XP et +5 000 de poids */
 const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].lvl>=PROF_MAX).length:0;
-const up=id=>!!(S.up&&S.up[id]);
+/* Amélioration active : achetée dans cette vie, ou rendue permanente avec des éclats Oméga (gardée après chaque renaissance) */
+const up=id=>!!(S.up&&S.up[id]||S.upPerm&&S.upPerm[id]);
+const upPermCost=id=>{const u=UPGS.find(x=>x[0]===id);return u?Math.max(1,Math.round(Math.log10(u[3])*2-5)):0};
 const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l)*(CLASSES[S.cls]?.allyCost||1));
 const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100)*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
 const allyDpsOf=(i,l,m=allyMult())=>l<=0?0:ALLIES[i][2]*.4*l*Math.pow(1.5,Math.floor(l/25))*m;
@@ -406,7 +409,7 @@ function fixOpts(o){o=Object.assign({},OPT_DEF,o||{});for(const k in OPT_DEF){co
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
-  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
+  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
   keys:true,saveEvery:10,offline:true,showArmor:true};
 /* Rareté des objets fabriqués */
