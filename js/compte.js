@@ -2,7 +2,7 @@
    Le site reste 100 % statique (GitHub Pages) : le jeu parle directement à l'API Supabase avec fetch, sans bibliothèque.
    Le mot de passe n'est jamais stocké par le jeu : Supabase le chiffre ; le jeu garde seulement un jeton de session.
    Tant que SUPA.url / SUPA.key sont vides, les comptes sont masqués et le jeu marche comme avant. */
-const SUPA={url:"",key:""};
+const SUPA={url:"https://rnhpijbqenpnxnulfgyu.supabase.co",key:"sb_publishable_ObErez9O4g8TiGqsClH8vw_5phhmuAK"};  /* clé publique : sans danger, les règles de la table protègent les sauvegardes */
 const ACC_KEY="vallore-compte-v1",ACC_BACKUP="vallore-save-avant-compte",ACC_EVERY=30;
 const COMPTE=(()=>{
   let acc=null,busy=false,msg="",msgOk=false,lastPush=0,choice=null;
