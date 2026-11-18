@@ -7,7 +7,7 @@ function doPrestige(){
   const keep={cls:S.cls,name:S.name,st:S.st,best:S.best,fdex:S.fdex,ach:S.ach,tower:{best:0,cur:1},souls:S.souls+g,soulsTotal:(S.soulsTotal||0)+g,prest:(S.prest||0)+1,tal:S.tal,unl:S.unl,tips:S.tips,tutoDone:S.tutoDone,pkN:S.pkN,kills:S.kills,uid:S.uid,log:[],tab:"prest",time:S.time,auto:S.auto,opt:S.opt,q:S.q,mk:S.mk,mkPrev:S.mkPrev,autoPot:S.autoPot,upPerm:S.upPerm||{},sellCfg:S.sellCfg||{}};
   for(const k in keep)if(keep[k]===undefined)delete keep[k];
   S=Object.assign(fresh(),keep);S.st.bossesLife=0;S.ecus=Math.round(talV("t_depart"));
-  const jl=Math.max(1,Math.round(talV("t_metier")));Object.values(S.jobs).forEach(j=>j.lvl=jl);
+  const jl=Math.min(PROF_MAX,Math.max(1,Math.round(talV("t_metier"))));Object.values(S.jobs).forEach(j=>j.lvl=jl);
   S.hp=stats().maxHp;log(`Niveau Oméga ${S.prest} atteint : +${g} éclats Oméga. Une nouvelle vie commence.`,"g");toast(`Oméga ${S.prest} · +${g} éclats`);boot2();save();FX.omega(S.prest);
 }
 

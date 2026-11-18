@@ -26,7 +26,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;
     case"prestNo":prestConfirm=false;renderPanel();break;
     case"prestYes":prestConfirm=false;doPrestige();break;
-    case"talent":{const id=b.dataset.t,T=TAL[id];if(T.prev&&!tal(T.prev))break;const c=talCost(id);if(S.souls<c)break;S.souls-=c;S.tal[id]=tal(id)+1;S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break}
+    case"talent":{const id=b.dataset.t,T=TAL[id];if(T.prev&&!tal(T.prev))break;if(talIsMax(id))break;const c=talCost(id);if(S.souls<c)break;S.souls-=c;S.tal[id]=tal(id)+1;S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break}
     case"talReset":{let r=0;for(const id in S.tal)if(TAL[id])r+=talSpent(id);S.souls+=r;S.tal={};toast(`${r} éclats rendus`);renderPanel();break}
     case"ctab":ctab=b.dataset.t;renderPanel();break;
     case"clsSwap":{const k=b.dataset.k,c=clsCost();if(!CLASSES[k]||k===S.cls||S.souls<c)break;S.souls-=c;S.clsSwaps=(S.clsSwaps||0)+1;S.cls=k;S.cds={};S.buffs=[];S.hp=Math.min(S.hp,stats().maxHp);drawHero();drawSpells();mbSig="";log(`Vous devenez ${CLASSES[k].name}.`,"g");toast(`Nouvelle classe : ${CLASSES[k].name}`);renderPanel(true);break}

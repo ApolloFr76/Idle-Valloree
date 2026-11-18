@@ -353,8 +353,15 @@ const dimR=r=>r<=10?r:10+Math.log(1+.08*(r-10))/.08;
 const talAt=(id,r)=>{const[v,cap]=TALV[id];if(r<=0)return 0;if(!cap)return v*dimR(r);
   const at=n=>cap*(1-Math.pow(1-v/cap,n)),n=Math.min(r,10),base=at(n);
   return r<=10?base:base+(at(10)-at(9))*(dimR(r)-10)};
-const talV=id=>talAt(id,tal(id));
-const talTxt=(id,r)=>{const x=talAt(id,r),f=TALV[id][2];return f.replace("#",x>=100?fmt(Math.round(x)):(Math.round(x*10)/10).toString().replace(".",","))};
+/* Plafonds utiles : au-delà, un rang de plus ne change plus rien, donc le talent affiche MAX et ne s'achète plus.
+   Mains agiles : jusqu'à ce que l'ouvrier le plus lent (ressource la plus longue, sans outils) récolte en 0,1 s. */
+const TAL_CAP={t_prec:95,t_double:100,t_combo:100,t_dore:100,t_trefle:90,t_metier:PROF_MAX,
+  t_mains:()=>100*(1-.1/((3+1.2*(UNLOCK.length-1))*(typeof OUV_SLOW!=="undefined"?OUV_SLOW:2)))};
+const talCapV=id=>{const c=TAL_CAP[id];return c==null?Infinity:typeof c==="function"?c():c};
+const talMaxR=id=>{const c=talCapV(id);if(c===Infinity||talAt(id,1e6)<c)return Infinity;let lo=1,hi=1e6;while(lo<hi){const m=(lo+hi)>>1;if(talAt(id,m)>=c)hi=m;else lo=m+1}return lo};
+const talIsMax=id=>tal(id)>=talMaxR(id);
+const talV=id=>Math.min(talCapV(id),talAt(id,tal(id)));
+const talTxt=(id,r)=>{const x=Math.min(talCapV(id),talAt(id,r)),f=TALV[id][2];return f.replace("#",x>=100?fmt(Math.round(x)):(Math.round(x*10)/10).toString().replace(".",","))};
 const talCostAt=(id,r)=>Math.ceil(TAL[id].cost*(r+1)*Math.pow(1.04,r));
 const talCost=id=>talCostAt(id,tal(id));
 const talSpent=id=>{let n=0;for(let k=0;k<tal(id);k++)n+=talCostAt(id,k);return n};

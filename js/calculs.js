@@ -77,5 +77,6 @@ function endMode(win,why){
     if(S.mode==="donjon")log(`Donjon raté (${why}). La clé est perdue.`,"r")}
   S.mode="zone";S.dg=null;S.timer=0;S.mon=null;S.spawnT=.6;S.dots=[];drawZones();dirty=true;
 }
-function gatherTime(pid,t){const L=S.jobs[pid].lvl;return Math.max(.1,profGatherTime(L,t)*(up("outils1")?.8:1)*(up("outils2")?.8:1)*(1-talV("t_mains")/100))}/* jamais moins de 0,1 s (évite un temps négatif qui bloque le jeu) */
+function gatherRaw(pid,t){const L=S.jobs[pid].lvl;return profGatherTime(L,t)*(up("outils1")?.8:1)*(up("outils2")?.8:1)*(1-talV("t_mains")/100)}
+function gatherTime(pid,t){return Math.max(.1,gatherRaw(pid,t))}/* jamais moins de 0,1 s (évite un temps négatif qui bloque le jeu) */
 

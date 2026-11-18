@@ -10,7 +10,7 @@ const OUV=(()=>{
   const L=()=>S.workers||(S.workers=[]);
   const cost=()=>Math.round(OUV_BASE*Math.pow(OUV_GROWTH,L().length));
   const open=rid=>{const r=RES[rid];return!!(r&&r.prof&&!r.rare&&S.jobs[r.prof].lvl>=UNLOCK[r.tier])};
-  const time=w=>{const r=RES[w.r];return gatherTime(r.prof,r.tier)*OUV_SLOW};
+  const time=w=>{const r=RES[w.r];return Math.max(.1,gatherRaw(r.prof,r.tier)*OUV_SLOW)};
   const best=pid=>{const J=S.jobs[pid];let t=0;UNLOCK.forEach((u,i)=>{if(J.lvl>=u)t=i});return PROFS[pid].res[t][0]};
   return{
     MAX:OUV_MAX,cost,open,time,

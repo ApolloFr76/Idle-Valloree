@@ -43,6 +43,9 @@ function start(data){
   if(!S.migAuto){S.migAuto=1;S.up=S.up||{};if(S.cls&&CLASSES[S.cls])CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto&&S.auto[sp.id])S.up["sp"+(i+1)]=true});if(S.autoPot)S.up.potauto=true}
   /* vente automatique devenue payante (Colporteur) : ceux qui l'avaient activée la gardent */
   if(!S.migSell){S.migSell=1;S.up=S.up||{};if(S.opt&&S.opt.autoSellFull)S.up.vendeur=true}
+  /* talents achetés au-delà de leur rang max : rangs en trop remboursés en éclats ; métiers ramenés au niveau max */
+  S.tal=S.tal||{};Object.keys(TAL).forEach(id=>{const m=talMaxR(id);if(tal(id)>m){let g=0;for(let k=m,e=Math.min(tal(id),m+1e5);k<e;k++)g+=talCostAt(id,k);S.souls=(S.souls||0)+(isFinite(g)?g:0);S.tal[id]=m}});
+  Object.values(S.jobs||{}).forEach(j=>{if(j.lvl>PROF_MAX){j.lvl=PROF_MAX;j.xp=0}});
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});
   Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});if(!Array.isArray(S.workers))S.workers=[];
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}
