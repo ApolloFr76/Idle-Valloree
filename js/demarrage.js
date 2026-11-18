@@ -50,9 +50,12 @@ function start(data){
   Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});if(!Array.isArray(S.workers))S.workers=[];
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}
   S.opt=fixOpts(S.opt);applyOpts();checkUnlocks(true);
+  /* écran d'accueil d'abord : le jeu (temps hors ligne, boucles) ne démarre qu'en le quittant */
+  ACCUEIL.open(()=>{
   if(!S.cls){showCreate();}
   else{const away=(Date.now()-(S.afkSince||S.last||Date.now()))/1000;let sum=null;if(away>0&&S.opt.offline)sum=offline(away);S.afkSince=0;S.afkWeight=0;boot2();save();if(sum&&(sum.kills||Object.keys(sum.res).length))showOffline(sum)}
   lastT=performance.now();setInterval(loop,100);setInterval(()=>{if(Date.now()-lastSave>=(S.opt?.saveEvery||10)*1000){lastSave=Date.now();save()}},1000);
+  });
 }
 window.claude?.hot?.snapshot?.(()=>({S}));
 window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});

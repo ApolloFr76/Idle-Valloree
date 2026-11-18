@@ -45,6 +45,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
     case"code":{const i=$("codeBox");useCode(i&&i.value);if(i)i.value="";break}
     case"accCreate":case"accLogin":case"accLogout":case"accPush":case"accUseRemote":case"accUseLocal":COMPTE.act(a,b);break;
+    case"accTab":case"accEye":case"accNew":case"accNewNo":case"accNewYes":case"accRetry":case"accGo":case"accHome":ACCUEIL.act(a,b);break;
     case"saveNow":save();lastSave=Date.now();toast("Partie enregistrée",1);break;
     case"pause":setPause(!paused);break;
     case"forgeHit":break; /* géré au pointerdown, plus précis */
@@ -114,7 +115,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(mg&&!mg.done&&k===" "){e.preventDefault();if(mg.pid==="bucheron"&&!e.repeat)logHit();if(mg.pid==="pecheur"){if(mg.st==="reel")fishHold(true);else if(!e.repeat)fishHook()}return}
   if(mg&&k==="escape"){mgClose();return}
   if(k==="escape"&&UI.o&&$("ov").hidden&&!forge&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){UI.open(false);return}
-  if(!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge||mg)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+  if(ACC_OPEN||!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge||mg)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
   if(k==="p"){setPause(!paused);e.preventDefault();return}if(paused)return;
   if(k===" "||k==="a"){e.preventDefault();doClick(false);return}
   if(["1","2","3"].includes(k)){const sp=CLASSES[S.cls].spells[+k-1];if(sp)cast(sp,false);return}

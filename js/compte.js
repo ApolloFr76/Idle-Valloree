@@ -10,6 +10,7 @@ const COMPTE=(()=>{
   const on=()=>!!(SUPA.url&&SUPA.key),logged=()=>!!(acc&&acc.at&&acc.uid);
   const keep=()=>{try{acc?localStorage.setItem(ACC_KEY,JSON.stringify(acc)):localStorage.removeItem(ACC_KEY)}catch(e){}};
   const say=(t,ok)=>{msg=t;msgOk=!!ok;const L=document.querySelectorAll(".accMsg");L.forEach(m=>{m.textContent=t;m.className="small accMsg "+(ok?"accok":"accko")});if(!L.length&&t)toast(t,1)};
+  const rp=()=>{if(typeof ACC_OPEN!=="undefined"&&ACC_OPEN)ACCUEIL.render();else if(S&&S.cls&&S.tab==="opts")renderPanel(true)};
   const mail=p=>p.toLowerCase()+"@joueurs.idle-valloree.app";
   const okPseudo=p=>/^[A-Za-z0-9_-]{3,20}$/.test(p);
   const errTxt=j=>{const m=((j&&(j.msg||j.error_description||j.message||j.error))||"")+"";
@@ -23,7 +24,7 @@ const COMPTE=(()=>{
   function setSession(j,pseudo){acc={pseudo:pseudo||(acc&&acc.pseudo)||"",uid:j.user.id,at:j.access_token,rt:j.refresh_token,exp:Date.now()+((j.expires_in||3600)-120)*1000,syncAt:acc&&acc.uid===j.user.id?acc.syncAt:null};keep()}
   async function fresh_(){if(!acc||!acc.rt||Date.now()<acc.exp)return;
     try{const j=await api("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:acc.rt})});setSession(j)}
-    catch(e){acc=null;keep();say("Session expirée, reconnectez-vous.");if(S&&S.tab==="opts")renderPanel(true);throw e}}
+    catch(e){acc=null;keep();say("Session expirée, reconnectez-vous.");rp();throw e}}
   /* sauvegarde en ligne : une ligne par compte dans la table « saves » */
   async function remote(){const r=await api(`/rest/v1/saves?user_id=eq.${acc.uid}&select=data,updated_at`,{},true);return r&&r[0]||null}
   async function push(force){if(!logged()||!S||!S.cls)return false;
@@ -51,6 +52,7 @@ const COMPTE=(()=>{
     ask(r)}
   async function auth(kind,box){if(busy)return;const ip=box&&box.querySelector(".accP"),iw=box&&box.querySelector(".accW"),p=((ip||{}).value||"").trim(),pw=(iw||{}).value||"";
     if(!okPseudo(p)){say("Pseudo : 3 à 20 caractères, lettres sans accent, chiffres, - ou _.");return}if(pw.length<6){say("Mot de passe : 6 caractères minimum.");return}
+    const iw2=box&&box.querySelector(".accW2");if(kind==="create"&&iw2&&iw2.value!==pw){say("Les deux mots de passe ne sont pas identiques.");return}
     busy=true;say(kind==="create"?"Création du compte…":"Connexion…",1);
     try{const j=kind==="create"?await api("/auth/v1/signup",{method:"POST",body:JSON.stringify({email:mail(p),password:pw,data:{pseudo:p}})})
                                :await api("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email:mail(p),password:pw})});
@@ -58,12 +60,15 @@ const COMPTE=(()=>{
       acc=null;setSession(j,p);if(kind==="create"){await push(true);say(`Compte « ${p} » créé. Votre partie actuelle y est sauvegardée.`,1)}else await afterLogin();
       if(iw)iw.value="";}
     catch(e){if(kind==="create"&&acc){say("Compte créé, mais l'envoi de la partie a échoué : "+errTxt(e),0)}else{acc=null;keep();say(errTxt(e))}}
-    finally{busy=false;if(S&&S.cls&&S.tab==="opts")renderPanel(true);if((!S||!S.cls)&&logged()){const f=$("accCreateBox");if(f)f.outerHTML=formHtml(true)}}}
+    finally{busy=false;rp()}}
   function formHtml(start){if(!on())return"";
     if(logged())return`<div class="accbox" id="accCreateBox"><span class="small">Connecté : <b>${esc(acc.pseudo)}</b></span></div>`;
     return`<div class="accbox" id="${start?"accCreateBox":"accBox"}"><div class="row accform"><input class="accP" type="text" maxlength="20" placeholder="Pseudo" autocomplete="username" spellcheck="false"><input class="accW" type="password" placeholder="Mot de passe" autocomplete="current-password">
       ${start?"":`<button class="btn pri" data-a="accCreate">Créer un compte</button>`}<button class="btn${start?" pri":""}" data-a="accLogin">Se connecter</button></div><div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`}
-  return{on,logged,formHtml,
+  return{on,logged,formHtml,pseudo:()=>acc&&acc.pseudo||"",clearMsg:()=>{msg=""},
+    msgHtml:()=>`<div class="small accMsg ${msgOk?"accok":"accko"}" role="status">${esc(msg)}</div>`,
+    /* le serveur répond-il ? (5 s maximum) */
+    async ping(){try{const c=new AbortController();setTimeout(()=>c.abort(),5000);const r=await fetch(SUPA.url.replace(/\/$/,"")+"/auth/v1/health",{headers:{apikey:SUPA.key},signal:c.signal});return r.ok}catch(e){return false}},
     /* section de l'onglet Options > Sauvegarde */
     html(){if(!on())return`<div class="sec"><h3>Compte en ligne</h3><p class="small muted">Les comptes en ligne ne sont pas encore activés.</p></div>`;
       if(!logged())return`<div class="sec"><h3>Compte en ligne</h3><p class="small muted">Créez un compte pour retrouver votre partie sur n'importe quel ordinateur. Votre partie actuelle est gardée et envoyée sur le compte.</p>${formHtml(false)}</div>`;
@@ -71,7 +76,7 @@ const COMPTE=(()=>{
         <div class="row"><button class="btn pri" data-a="accPush">Envoyer maintenant</button><button class="btn" data-a="accLogout">Se déconnecter</button></div><div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`},
     async act(a,btn){try{const box=btn&&btn.closest&&btn.closest(".accbox");
       if(a==="accCreate")await auth("create",box);else if(a==="accLogin")await auth("login",box);
-      else if(a==="accLogout"){try{if(logged())await push(false)}catch(e){}acc=null;keep();say("Déconnecté. Votre partie reste dans ce navigateur.",1);renderPanel(true)}
+      else if(a==="accLogout"){try{if(logged())await push(false)}catch(e){}acc=null;keep();say("Déconnecté. Votre partie reste dans ce navigateur.",1);rp()}
       else if(a==="accPush"){say("Envoi…",1);if(await push(false))say("Partie envoyée.",1);renderPanel(true)}
       else if(a==="accUseRemote"&&choice)useData(choice.data,choice.updated_at);
       else if(a==="accUseLocal"&&choice){try{localStorage.setItem(ACC_BACKUP,choice.data)}catch(e){}choice=null;$("ov").hidden=true;await push(true);say("Partie de ce navigateur envoyée sur le compte.",1);if(S.tab==="opts")renderPanel(true)}
