@@ -307,6 +307,9 @@ const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].l
 const up=id=>!!(S.up&&S.up[id]||S.upPerm&&S.upPerm[id]);
 /* Vente automatique : réglage par ressource (on : vendue automatiquement, oui par défaut ; keep : quantité toujours gardée) */
 const sellCfg=k=>(S.sellCfg&&S.sellCfg[k])||{},sellKeep=k=>Math.max(0,sellCfg(k).keep||0),sellAuto=k=>sellCfg(k).on!==false;
+/* Modes automatiques : [option, amélioration(s) qui le débloquent, nom court]. Chacun a son bouton ON / OFF au-dessus du combat dès qu'il est débloqué. */
+const AUTOS=[["autoClick",["auto1","auto2"],"Clic"],["autoFightBoss","bossauto","Boss"],["autoDungeon","dgauto","Donjon"],["autoTower","tourauto","Tour"],["autoZone","zoneauto","Monde"],["autoQuest","qauto","Quêtes"],["autoSellFull","vendeur","Vente"],["autoFortune","fortauto","Fortune"]];
+const autoOwned=a=>[].concat(a[1]).some(up);
 const upPermCost=id=>{const u=UPGS.find(x=>x[0]===id);return u?Math.max(1,Math.round(Math.log10(u[3])*2-5)):0};
 const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l)*(CLASSES[S.cls]?.allyCost||1));
 const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100)*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
@@ -416,7 +419,7 @@ function fixOpts(o){o=Object.assign({},OPT_DEF,o||{});for(const k in OPT_DEF){co
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
-  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,autoTower:true,autoQuest:true,autoZone:true,autoFortune:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
+  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,autoTower:true,autoQuest:true,autoZone:true,autoFortune:true,autoClick:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
   keys:true,saveEvery:10,offline:true,showArmor:true};
 /* Rareté des objets fabriqués */

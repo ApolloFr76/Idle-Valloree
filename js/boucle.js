@@ -22,7 +22,7 @@ function tick(dt){VIE.tick(dt);
     else{
       S.atkT+=dt;while(S.mon&&S.atkT>=st.interval){S.atkT-=st.interval;hitMon(roll(1+S.combo/200,st),"auto");if(S.mon&&Math.random()<st.dbl)hitMon(roll(1+S.combo/200,st),"auto")}
       {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1){floatNum(fmt(allyAcc),"ally");FX.palAtk()}allyAcc=0;allyFT=0;if(up("allyel")&&EL_DOT[st.el])addDot(EL_DOT[st.el],1)}if(S.mon.hp<=0)kill()}}
-      {const rate=(up("auto1")?2:0)+(up("auto2")?4:0);if(rate&&S.mon){clickAcc+=dt*rate;while(clickAcc>=1&&S.mon){clickAcc-=1;doClick(true)}}}
+      {const rate=S.opt.autoClick===false?0:(up("auto1")?2:0)+(up("auto2")?4:0);if(rate&&S.mon){clickAcc+=dt*rate;while(clickAcc>=1&&S.mon){clickAcc-=1;doClick(true)}}}
       S.dots=S.dots.filter(d=>d.until>S.time);S.dots.forEach(d=>{d.acc+=dt;while(d.acc>=1&&S.mon){d.acc-=1;hitMon(roll(d.m,st),"dot")}});
       /* compagnons empoisonneurs, puis dégâts des DoT élémentaires */
       if(S.mon){S.allyDotAcc=S.allyDotAcc||{};for(const id in ALLY_DOT){const l=S.allies[id]||0;if(!l)continue;const[k,r]=ALLY_DOT[id];S.allyDotAcc[k]=(S.allyDotAcc[k]||0)+r*dt;const n=Math.floor(S.allyDotAcc[k]);if(n>0){S.allyDotAcc[k]-=n;addDot(k,n)}}}

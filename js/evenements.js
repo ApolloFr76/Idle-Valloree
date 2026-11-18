@@ -17,6 +17,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"pickup":takePk();break;
     case"mode":startMode(b.dataset.m,b.dataset.z!=null?+b.dataset.z:null);renderPanel();break;
     case"craftBkey":craftBkey(+b.dataset.z);if(bkeyPop!=null)bkeyDraw();renderPanel();break;
+    case"autoTog":{const k=b.dataset.k;if(!AUTOS.some(a=>a[0]===k))break;S.opt[k]=!S.opt[k];mbSig="";drawModeBar();renderPanel();toast(`${AUTOS.find(a=>a[0]===k)[2]} auto : ${S.opt[k]?"activé":"désactivé"}`,1);break}
     case"bkeyOpen":bkeyPop=+b.dataset.z;bkeyDraw();break;
     case"bkeyClose":bkeyPop=null;$("ov").hidden=true;break;
     case"quit":endMode(false,"abandon");break;
