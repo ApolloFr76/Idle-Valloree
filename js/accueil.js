@@ -2,12 +2,14 @@
    Connecté : Reprendre, Nouvelle partie (avec confirmation), Se déconnecter. Pas connecté : onglets Invité / Connexion / Créer un compte.
    Le jeu ne démarre (boucles, temps hors ligne) qu'en quittant cet écran : demarrage.js appelle ACCUEIL.open(suite). */
 let ACC_OPEN=false;
+/* heure de la dernière sauvegarde, lue avant que le démarrage ne réenregistre la partie */
+const ACC_LAST=(()=>{try{return(JSON.parse(localStorage.getItem(SAVE_KEY))||{}).last||0}catch(e){return 0}})();
 const ACCUEIL=(()=>{
   let el=null,go=null,tab="inv",confirmNew=false,showPw=false,online=null,pinging=false;
   const ago=t=>{if(!t)return"";const s=(Date.now()-t)/1000;return s<60?"à l'instant":s<3600?`il y a ${Math.floor(s/60)} min`:s<86400?`il y a ${Math.floor(s/3600)} h`:`le ${new Date(t).toLocaleDateString("fr-FR")}`};
   const hasHero=()=>!!(S&&S.cls&&CLASSES[S.cls]);
   function saveBox(where){if(!hasHero())return`<div class="accsave"><div><b>Aucun héros pour l'instant</b><span>Choisissez une classe pour commencer.</span></div></div>`;
-    return`<div class="accsave">${heroSVG(S.cls)}<div><b>${esc(S.name||"Aventurier")} · ${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}${S.prest?" · Ω "+S.prest:""}</b><span>${where} ${ago(S.last)}</span></div></div>`}
+    return`<div class="accsave">${heroSVG(S.cls)}<div><b>${esc(S.name||"Aventurier")} · ${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}${S.prest?" · Ω "+S.prest:""}</b><span>${where} ${ago(ACC_LAST||S.last)}</span></div></div>`}
   const pw=(cls,ph,ac)=>`<div class="accin"><input class="${cls}" type="${showPw?"text":"password"}" placeholder="${ph}" autocomplete="${ac}"><button type="button" class="acceye" data-a="accEye">${showPw?"Cacher":"Afficher"}</button></div>`;
   const newBlock=()=>confirmNew?`<div class="accconf">Une nouvelle partie remplace ${COMPTE.logged()?"celle du compte":"celle de ce navigateur"} (${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}). Une copie de secours est gardée dans ce navigateur.
       <div class="accrow"><button class="accsec" data-a="accNewYes">Oui, recommencer</button><button class="accsec" data-a="accNewNo">Annuler</button></div></div>`
