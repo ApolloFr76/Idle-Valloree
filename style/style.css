@@ -1363,3 +1363,7 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .accdot i{width:9px;height:9px;background:#3be37a;box-shadow:0 0 8px #3be37a}.accdot.off i{background:#e0533f;box-shadow:0 0 8px #e0533f}.accdot.wait i{background:#e0a23f;box-shadow:none}
 .accueil button:focus-visible,.accueil input:focus-visible{outline:2px solid var(--a-acc2);outline-offset:2px}
 @media (max-width:760px){.acchero,.accbub{display:none}.accrib{margin-left:16px;font-size:26px}.accboard{margin-left:16px}}
+
+/* case « Auto » sous les potions à effet (enchaînement automatique) */
+.hudb #pots:not(:empty){display:grid;grid-auto-flow:column;grid-template-rows:repeat(3,auto);align-content:center;gap:4px 10px}
+.potw{display:flex;align-items:center;gap:6px}.potw .btn{flex:1;white-space:nowrap}.potw .potab{margin:0;flex:none}
