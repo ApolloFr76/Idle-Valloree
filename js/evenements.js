@@ -88,7 +88,9 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"selInv":{const v=b.dataset.v,now=performance.now(),dbl=lastSel.v===v&&now-lastSel.t<450;lastSel={v,t:now};selInv=v;selLast="inv";
       if(dbl){lastSel={v:null,t:0};if(v[0]==="u"){const inst=S.items.find(i=>i.u===+v.slice(2));if(inst){const it=ITEMS[inst.id];if(S.lvl<it.lvl)toast(`Niveau ${it.lvl} requis`,1);else{equipItem(inst.u,null);toast(`${it.name} équipé`,1)}}}else if(RES[v.slice(2)]?.kind==="p")drink(v.slice(2),false)}
       renderPanel();break}
-    case"filt":invF=b.dataset.f;invSub="all";invP=0;renderPanel();break;
+    case"filt":invF=b.dataset.f;invSub="all";invP=0;invSellArm=false;if(invF==="res")invRar=-1;renderPanel();break;
+    case"invSellAll":{if(!invSellArm){invSellArm=true;renderPanel(true);break}const v=invView(new Set(Object.values(S.equip)));invSellDo(invSellList(v.items,v.res));renderPanel(true);break}
+    case"invSellNo":invSellArm=false;renderPanel(true);break;
     case"page":invP=Math.max(0,invP+ +b.dataset.d);renderPanel();break;
     case"unequip":delete S.equip[b.dataset.s];S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
     case"sellStack":{const k=b.dataset.k,eq=new Set(Object.values(S.equip)),L=S.items.filter(x=>!eq.has(x.u)&&stackKey(x)===k);if(!L.length)break;const it=ITEMS[L[0].id],v=Math.round(it.price*(1+.2*(L[0].e||0))*sellMult()*rarOf(L[0]).m)*L.length;S.items=S.items.filter(x=>!L.includes(x));gainEcus(v);sfx("coin");selInv=null;toast(`${L.length}× ${it.name} vendus : +${fmt(v)} écus`);renderPanel();break}
@@ -125,11 +127,11 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   const tk={c:"perso",i:"inv",v:"aventure",f:"atelier",o:"opts"}[k];if(tk&&tabOpen(tk)){if(S.tab===tk&&UI.o)UI.open(false);else{S.tab=tk;UI.open(true)}renderPanel()}});
 function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$("pauseBtn").classList.toggle("pri",v);$("pauseOv").hidden=!v;if(v)save()}
 function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0]||i>0&&!(S.zoneBosses||{})[i-1])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
-document.addEventListener("input",e=>{if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
+document.addEventListener("input",e=>{if(e.target.id==="invSearch"){invQ=e.target.value;invP=0;invSellArm=false;renderPanel(true);return}if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
 document.addEventListener("change",e=>{const ds=e.target.dataset||{};
   if(ds.sell){S.sellCfg=S.sellCfg||{};(S.sellCfg[ds.sell]=S.sellCfg[ds.sell]||{}).on=e.target.checked;renderPanel(true);return}
   if(ds.keep!=null){S.sellCfg=S.sellCfg||{};const v=Math.max(0,Math.floor(+e.target.value||0));(S.sellCfg[ds.keep]=S.sellCfg[ds.keep]||{}).keep=v;e.target.value=v;renderPanel(true);return}
-  if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.dataset&&e.target.dataset.autobuff){S.autoBuff=S.autoBuff||{};S.autoBuff[e.target.dataset.autobuff]=e.target.checked;potSig="";drawPots();return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
+  if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.dataset&&e.target.dataset.autobuff){S.autoBuff=S.autoBuff||{};S.autoBuff[e.target.dataset.autobuff]=e.target.checked;potSig="";drawPots();return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;invSellArm=false;renderPanel();return}if(e.target.id==="invRar"){invRar=+e.target.value;invP=0;invSellArm=false;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden){beginAfk();save()}else{const s=settleAfk();if(s){boot2();if(s.kills||Object.keys(s.res).length)showOffline(s)}}});
 window.addEventListener("pagehide",()=>{beginAfk();save()});
