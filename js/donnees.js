@@ -542,6 +542,8 @@ const codeHash=s=>{s="vallore:"+String(s||"").toUpperCase().replace(/[\s-]+/g,""
 const CODES={
   /* code de bienvenue : 1 potion de sagesse (XP) + 1 potion de fortune (prospection) */
   "mtgscjd4hf15":{once:true,txt:"1 Potion de sagesse et 1 Potion de fortune",go:()=>{S.res.p_sagesse=(S.res.p_sagesse||0)+1;S.res.p_fortune=(S.res.p_fortune||0)+1;if(typeof drawPots==="function"){potSig="";drawPots()}}},
+  /* code de test : +2 000 niveaux d'un coup (avec leurs points), utilisable à volonté */
+  "1uxvz21s8ls9c":{txt:"+2 000 niveaux",go:()=>{const n=2000;S.lvl+=n;S.pts+=n*PTS_PER_LVL;S.xp=0;checkUnlocks(true);mx("maxLvl",S.lvl);S.hp=stats().maxHp;drawSpells();drawZones();if(fx){sfx("level");FX.lvl(S.lvl)}return`+${fmt(n)} niveaux : niveau ${fmt(S.lvl)}`}},
 };
 /* Résultat d'un code : bulle + message sous le champ (Options > Sauvegarde), plus visible que la bulle seule. */
 let codeRes=null;
