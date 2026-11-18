@@ -1367,3 +1367,7 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 /* case « Auto » sous les potions à effet (enchaînement automatique) */
 .hudb #pots:not(:empty){display:grid;grid-auto-flow:column;grid-template-rows:repeat(3,auto);align-content:center;gap:4px 10px}
 .potw{display:flex;align-items:center;gap:6px}.potw .btn{flex:1;white-space:nowrap}.potw .potab{margin:0;flex:none}
+
+/* Inventaire : recherche, rareté, vente groupée */
+.invtools{display:flex;gap:6px}.invtools input{flex:1;min-width:0}.invtools select{flex:none;width:auto}
+.invsell{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.invsell .btn{flex:1}.invsell.arm{border:2px solid var(--hp);padding:6px;background:rgba(198,58,46,.08)}.invsell.arm .small{flex-basis:100%}
