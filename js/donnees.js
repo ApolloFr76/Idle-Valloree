@@ -286,7 +286,12 @@ const UPGS=[
   ["sp1","Sort automatique I","Votre 1er sort peut se lancer tout seul (case Auto)",5000],["sp2","Sort automatique II","Votre 2e sort peut se lancer tout seul (case Auto)",60000],["sp3","Sort automatique III","Votre 3e sort peut se lancer tout seul (case Auto)",6e5],
   ["potauto","Potions automatiques","Boit une potion de soin tout seul sous le seuil de PV",10000],["cdr1","Concentration","Sorts 10 % plus rapides",25000],["cdr2","Maîtrise des arcanes","Sorts encore 10 % plus rapides",3e5],
   ["bossauto","Défi automatique","Défie le boss tout seul dès que les 10 victoires sont faites",40000],
-  ["dgauto","Explorateur","Entre tout seul dans le donjon de la zone dès que vous avez sa clé (case Donjon auto)",80000]];
+  ["dgauto","Explorateur","Entre tout seul dans le donjon de la zone dès que vous avez sa clé (case Donjon auto)",80000],
+  ["vendeur","Colporteur","Vend la plus grosse pile de ressources quand le sac est plein (case dans Options)",15000],["qauto","Messager","Récupère tout seul la récompense des quêtes terminées (case dans Options)",30000],
+  ["fortauto","Flasque de fortune","Boit une potion de fortune au début de chaque donjon (case dans Options)",45000],["forgex","Forge express","Forge sans mini-jeu : rareté au moins Rare (option Mini-jeu de forge désactivée)",50000],
+  ["zoneauto","Éclaireur","Passe au monde suivant dès que son boss est battu et que vous avez le niveau (case dans Options)",60000],["tourauto","Grimpeur","Relance la tour quand elle se termine, depuis 80 % du record (case dans Options)",100000],
+  ["coffre","Coffre garni","+1 objet de la zone dans le coffre final des donjons",120000],["kmag","Aimant à clés","Chance doublée de trouver une clé de boss sur les monstres",150000],
+  ["allyel","Compagnons d'élite","Vos compagnons posent chaque seconde un état de votre élément (poison, brûlure, gelure, saignement)",200000],["sacx","Sac sans fond","Capacité du sac doublée",250000]];
 /* Apparence de l'armure : chaque panoplie a un style (fin de jeu : cristal ; grandes panoplies et boss : plaques ; sinon selon le monstre)
    et la couleur de son élément teintée par celle de son monstre. heroArm() décrit les pièces visibles portées par le héros. */
 const ARM_STYLES=["cuir","robe","ecailles","fourrure"];
@@ -409,13 +414,13 @@ function fixOpts(o){o=Object.assign({},OPT_DEF,o||{});for(const k in OPT_DEF){co
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
-  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
+  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,autoTower:true,autoQuest:true,autoZone:true,autoFortune:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
   keys:true,saveEvery:10,offline:true,showArmor:true};
 /* Rareté des objets fabriqués */
 const RAR=[{n:"Commun",c:"#5a4a3a",m:1},{n:"Rare",c:"#1f6fb8",m:1.15},{n:"Épique",c:"#7a3fc0",m:1.35},{n:"Légendaire",c:"#c2560a",m:1.6}];
 /* Chances de rareté (%) selon le score de forge (0 à 6 points), et sans mini-jeu */
-const FORGE_W=[[90,10,0,0],[80,17,3,0],[70,24,6,0],[55,32,11,2],[40,37,18,5],[25,38,27,10],[10,32,38,20]],FORGE_SKIP=[75,20,5,0];
+const FORGE_W=[[90,10,0,0],[80,17,3,0],[70,24,6,0],[55,32,11,2],[40,37,18,5],[25,38,27,10],[10,32,38,20]],FORGE_SKIP=[75,20,5,0],FORGE_FAST=[0,70,25,5];
 const rarOf=i=>RAR[(i&&i.r)||0];
 /* Bonus secondaires des caractéristiques : un palier tous les 5 points (équipement compris) */
 const SEC_STEP=5;

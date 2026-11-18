@@ -16,7 +16,7 @@ function drawForge(){const f=forge,o=$("ov");o.hidden=false;const sc=f.pts.reduc
 const forgePos=f=>{const ph=((performance.now()-f.t0)/1000*f.speed*100)%200;return ph<=100?ph:200-ph};
 function forgeStrike(){const f=forge;if(!f||f.done)return;f.pos=forgePos(f);const d=Math.abs(f.pos-f.zone),p=d<=3.5?2:d<=11?1:0;f.pts.push(p);sfx(p?"anvil":"anvilBad");
   if(f.pts.length>=3){forgeFinish(false);return}{const p=forgePos(f);f.speed*=1.3;const T=2/f.speed,ph=p/100*T/2;f.t0=performance.now()-ph*1000}f.zone=rnd(12,88);drawForge()}
-function forgeFinish(skip){const f=forge;if(!f||f.done)return;f.done=true;const sc=f.pts.reduce((a,b)=>a+b,0),r=pickW(skip?FORGE_SKIP:FORGE_W[sc]),it=f.it;
+function forgeFinish(skip){const f=forge;if(!f||f.done)return;f.done=true;const sc=f.pts.reduce((a,b)=>a+b,0),r=pickW(skip?(up("forgex")?FORGE_FAST:FORGE_SKIP):FORGE_W[sc]),it=f.it;
   const u=S.uid++,inst={u,id:it.id,e:0,r};S.items.push(inst);inc("crafts");qProg("craft");if(r===3)inc("legend");mx("bestRar",r);
   const fs=freeSlot(it),cur=S.equip[fs];if(fs)S.equip[fs]=u;
   log(`Vous fabriquez : <span style="color:${RAR[r].c}">${it.name} (${RAR[r].n})</span>${skip?"":` · score ${sc}/6`}.`,"g");if(r>=2){sfx("level");FX.flash(RAR[r].c)}else sfx("coin");

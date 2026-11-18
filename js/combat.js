@@ -8,12 +8,12 @@ function gainXp(x){
   mx("maxLvl",S.lvl);
   if(up){sfx("level");if(fx){FX.lvl(S.lvl);VIE.cheer()}S.hp=stats().maxHp;dirty=true;drawSpells();drawZones();if(fx)toast(`Niveau ${S.lvl} !`)}
 }
-const bagCap=()=>1000+100*S.lvl+5000*profMaxN()+(up("sac1")?2000:0)+(up("sac2")?8000:0)+Math.round(talV("t_sac"));
+const bagCap=()=>(1000+100*S.lvl+5000*profMaxN()+(up("sac1")?2000:0)+(up("sac2")?8000:0)+Math.round(talV("t_sac")))*(up("sacx")?2:1);
 function bagWeight(){const eq=new Set(Object.values(S.equip));let w=0;for(const k in S.res)w+=S.res[k]||0;S.items.forEach(i=>{if(!eq.has(i.u))w+=10});return w}
 let fullWarn=0;
 function addRes(id,n,limitBag=false){if(!limitBag){if(n<=0)return 0;S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
   let room=Math.max(0,bagCap()-bagWeight());
-  if(room<n&&S.opt.autoSellFull){const big=Object.keys(S.res).filter(k=>S.res[k]>0&&RES[k].kind!=="k"&&RES[k].kind!=="p").sort((a,b)=>S.res[b]-S.res[a])[0];if(big){const q=S.res[big],g=sellRes(big,q);log(`Sac plein : ${fmt(q)}× ${RES[big].name} vendus automatiquement (+${fmt(g)} écus).`,"g");room=Math.max(0,bagCap()-bagWeight())}}
+  if(room<n&&S.opt.autoSellFull&&up("vendeur")){const big=Object.keys(S.res).filter(k=>S.res[k]>0&&RES[k].kind!=="k"&&RES[k].kind!=="p").sort((a,b)=>S.res[b]-S.res[a])[0];if(big){const q=S.res[big],g=sellRes(big,q);log(`Sac plein : ${fmt(q)}× ${RES[big].name} vendus automatiquement (+${fmt(g)} écus).`,"g");room=Math.max(0,bagCap()-bagWeight())}}
   n=Math.min(n,room);
   if(n<=0){if(S.time-fullWarn>30){fullWarn=S.time;log("Sac plein : vendez des ressources dans l'Inventaire pour continuer à ramasser.","r");if(fx)toast("Sac plein")}return 0}
   S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
@@ -92,12 +92,14 @@ function kill(){
   if(S.opt.logKills&&(S.opt.logLoot||!dropTxt))log(`${d.name} vaincu : <span class="x">+${fmt(xp)} XP</span>, <span class="g">+${fmt(ec)} écus</span>${dropTxt}`);
   S.mon=null;S.spawnT=.5;S.dots=[];sfx(d.boss?"boss":"kill");gainXp(xp);
   if(mode==="zone"){S.zk[S.zone]=Math.min(BOSS_KILLS,(S.zk[S.zone]||0)+1);
-    if(Math.random()<BKEY_DROP){const id="bkey_"+S.zone;S.res[id]=(S.res[id]||0)+1;S.seen[id]=1;log(`Butin exceptionnel : ${RES[id].name} !`,"g");toast(`Butin exceptionnel : ${RES[id].name} !`,1)}}
+    if(Math.random()<BKEY_DROP*(up("kmag")?2:1)){const id="bkey_"+S.zone;S.res[id]=(S.res[id]||0)+1;S.seen[id]=1;log(`Butin exceptionnel : ${RES[id].name} !`,"g");toast(`Butin exceptionnel : ${RES[id].name} !`,1)}}
   if(mode==="boss"){inc("bosses");inc("bossesLife");(S.bossLife||(S.bossLife={}))[S.zone]=1;qProg("boss");S.zk[S.zone]=0;(S.zoneBosses||(S.zoneBosses={}))[S.zone]=1;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
   if(mode==="tour"){const f=S.tower.cur;if(f>S.tower.best){S.tower.best=f;const g=gainEcus(towerRec(f));log(`Tour : nouveau record, étage ${f} ! <span class="g">+${fmt(g)} écus</span>`,"g")}mx("tower",S.tower.best);S.tower.cur++;S.timer=towerTime();S.spawnT=.3}
   if(mode==="donjon"){S.dg.wave++;if(S.dg.wave>DG_WAVES){const zi=S.dg.z,z=ZONES[zi],g=gainEcus(farmGold(600)),got=[];
       z.mons.forEach(mm=>{const n=addRes(mm.drop[0],rnd(5,10));if(n)got.push(`${n}× ${mm.drop[1]}`)});
       if(Math.random()<.4){giveTrophy("tb_"+zi);got.push(ITEMS["tb_"+zi].name)}
+      /* Coffre garni (boutique) : un objet de panoplie de la zone en plus */
+      if(up("coffre")){const L=Object.values(ITEMS).filter(it=>it.z===zi&&it.set&&it.slot!=="trophee");if(L.length){const it=L[Math.floor(Math.random()*L.length)],rr=pickW([55,32,10,3]);S.items.push({u:S.uid++,id:it.id,e:0,r:rr});S.seen[it.id]=1;got.push(`<span style="color:${RAR[rr].c}">${it.name}</span>`)}}
       inc("dungeons");log(`Coffre du donjon ${DUNGEONS[zi]} : <span class="g">+${fmt(g)} écus</span>${got.length?", "+got.join(", "):""}`,"g");if(fx)toast(`Donjon terminé : +${fmt(g)} écus`);endMode(true)}}
 }
 function cast(sp,auto){

@@ -41,6 +41,8 @@ function start(data){
     setTimeout(()=>{log("Nouveau système d'éléments : votre classe a été convertie et vos points vous ont été rendus.","g");toast("Vos points de caractéristiques vous ont été rendus")},300)}
   /* sorts et potions automatiques devenus payants : ceux qui les utilisaient déjà les gardent */
   if(!S.migAuto){S.migAuto=1;S.up=S.up||{};if(S.cls&&CLASSES[S.cls])CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto&&S.auto[sp.id])S.up["sp"+(i+1)]=true});if(S.autoPot)S.up.potauto=true}
+  /* vente automatique devenue payante (Colporteur) : ceux qui l'avaient activée la gardent */
+  if(!S.migSell){S.migSell=1;S.up=S.up||{};if(S.opt&&S.opt.autoSellFull)S.up.vendeur=true}
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});
   Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});if(!Array.isArray(S.workers))S.workers=[];
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}

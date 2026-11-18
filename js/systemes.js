@@ -61,6 +61,9 @@ function sellRes(k,n){n=Math.min(n,S.res[k]||0);if(n<=0)return 0;sfx("coin");let
 function brew(id,n){const r=RES[id];let made=0;while(n-->0){if(S.jobs.herboriste.lvl<r.plvl||!r.recipe.every(([x,q])=>(S.res[x]||0)>=q))break;r.recipe.forEach(([x,q])=>S.res[x]-=q);S.res[id]=(S.res[id]||0)+1;made++;inc("brews");inc("crafts");qProg("craft");
     const J=S.jobs.herboriste;if(J.lvl<PROF_MAX){J.xp+=Math.round(20*Math.pow(r.tier+1,1.6));while(J.lvl<PROF_MAX&&J.xp>=pxNeed(J.lvl)){J.xp-=pxNeed(J.lvl);J.lvl++;log(`Herboriste niveau ${J.lvl} !`,"g")}}}
   if(made)toast(`${made}× ${r.name} préparée${made>1?"s":""}`);dirty=true;return made}
+/* Récompense d'une quête du jour terminée (bouton ou amélioration Messager) */
+function claimQuest(i){const q=S.q&&S.q.list[i];if(!q||!q.done||q.claimed)return;q.claimed=true;gainEcus(q.ecus);if(q.xp)gainXp(q.xp);inc("quests");log(`Récompense de quête : <span class="g">+${fmt(q.ecus)} écus</span>${q.xp?`, <span class="x">+${fmt(q.xp)} XP</span>`:""}`,"g");
+  if(S.q.list.every(x=>x.claimed)&&!S.q.bonus){S.q.bonus=true;S.souls++;S.soulsTotal=(S.soulsTotal||0)+1;log("Toutes les quêtes du jour sont terminées : +1 éclat d'âme !","g");toast("+1 éclat d'âme")}dirty=true}
 function drink(id,auto){const r=RES[id];if(!r||r.kind!=="p"||!(S.res[id]>0)||S.ko>0)return;const st=stats();S.res[id]--;inc("potions");
   if(r.fx.heal){const h=Math.round(st.maxHp*r.fx.heal);S.hp=Math.min(st.maxHp,S.hp+h);if(fx){floatNum("+"+fmt(h),"heal");FX.heal()}}
   else pkBuff(r.fx.k,r.fx.v,r.fx.d,r.name);

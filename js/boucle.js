@@ -21,7 +21,7 @@ function tick(dt){VIE.tick(dt);
     if(!S.mon){S.spawnT-=dt;if(S.spawnT<=0)nextMon()}
     else{
       S.atkT+=dt;while(S.mon&&S.atkT>=st.interval){S.atkT-=st.interval;hitMon(roll(1+S.combo/200,st),"auto");if(S.mon&&Math.random()<st.dbl)hitMon(roll(1+S.combo/200,st),"auto")}
-      {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1){floatNum(fmt(allyAcc),"ally");FX.palAtk()}allyAcc=0;allyFT=0}if(S.mon.hp<=0)kill()}}
+      {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1){floatNum(fmt(allyAcc),"ally");FX.palAtk()}allyAcc=0;allyFT=0;if(up("allyel")&&EL_DOT[st.el])addDot(EL_DOT[st.el],1)}if(S.mon.hp<=0)kill()}}
       {const rate=(up("auto1")?2:0)+(up("auto2")?4:0);if(rate&&S.mon){clickAcc+=dt*rate;while(clickAcc>=1&&S.mon){clickAcc-=1;doClick(true)}}}
       S.dots=S.dots.filter(d=>d.until>S.time);S.dots.forEach(d=>{d.acc+=dt;while(d.acc>=1&&S.mon){d.acc-=1;hitMon(roll(d.m,st),"dot")}});
       /* compagnons empoisonneurs, puis dégâts des DoT élémentaires */
@@ -37,6 +37,10 @@ function tick(dt){VIE.tick(dt);
       /* Défi automatique (boutique) : boss lancé dès les 10 victoires ; 30 s d'attente après un échec */
       if(S.opt.autoFightBoss&&up("bossauto")&&S.mode==="zone"&&S.ko<=0&&bossReady(S.zone)&&S.time>=(S.bossAutoT||0))startMode("boss");
       /* Donjon automatique (boutique) : entre dans le donjon de la zone dès qu'on a sa clé ; le boss passe avant ; 30 s d'attente après un échec */
+      /* Grimpeur : relance la tour 3 s après la fin ; Éclaireur : monde suivant dès que son boss est battu ; Messager : quêtes récupérées */
+      if(up("tourauto")&&S.opt.autoTower&&S.mode==="zone"&&S.ko<=0&&S.towerAgainT&&S.time>=S.towerAgainT){S.towerAgainT=0;startMode("tour")}
+      if(up("zoneauto")&&S.opt.autoZone&&S.mode==="zone"&&S.ko<=0&&S.time>=(S.zoneAutoT||0)){const n=S.zone+1;if(ZONES[n]&&(S.zoneBosses||{})[S.zone]&&S.lvl>=ZONES[n].lvl[0]){S.zoneAutoT=S.time+5;goZone(n);log(`Éclaireur : en route pour ${ZONES[n].name}.`,"g")}}
+      if(up("qauto")&&S.opt.autoQuest&&S.q&&S.q.list)S.q.list.forEach((q,i)=>{if(q.done&&!q.claimed)claimQuest(i)});
       if(S.opt.autoDungeon&&up("dgauto")&&S.mode==="zone"&&S.ko<=0&&(S.res["cle_"+S.zone]||0)>0&&S.lvl>=ZONES[S.zone].lvl[0]&&S.time>=(S.dgAutoT||0)&&!(S.opt.autoFightBoss&&up("bossauto")&&bossReady(S.zone)))startMode("donjon",S.zone);
     }
   }

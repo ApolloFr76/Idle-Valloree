@@ -56,8 +56,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"forgeClose":$("ov").hidden=true;forge=null;renderPanel();break;
     case"drink":drink(b.dataset.r,false);renderPanel();break;
     case"brew":brew(b.dataset.r,b.dataset.n==="max"?999:+b.dataset.n);renderPanel();break;
-    case"qClaim":{const q=S.q.list[+b.dataset.i];if(!q||!q.done||q.claimed)break;q.claimed=true;gainEcus(q.ecus);if(q.xp)gainXp(q.xp);inc("quests");log(`Récompense de quête : <span class="g">+${fmt(q.ecus)} écus</span>${q.xp?`, <span class="x">+${fmt(q.xp)} XP</span>`:""}`,"g");
-      if(S.q.list.every(x=>x.claimed)&&!S.q.bonus){S.q.bonus=true;S.souls++;S.soulsTotal=(S.soulsTotal||0)+1;log("Toutes les quêtes du jour sont terminées : +1 éclat d'âme !","g");toast("+1 éclat d'âme")}renderPanel();break}
+    case"qClaim":claimQuest(+b.dataset.i);renderPanel();break;
     case"qReroll":{if(!S.q||S.q.reroll<1)break;const i=+b.dataset.i;if(S.q.list[i].done)break;S.q.list[i]=makeQuest();S.q.reroll--;renderPanel();break}
     case"mkSell":{const k=b.dataset.r,g=sellRes(k,b.dataset.n==="all"?S.res[k]:+b.dataset.n);if(g)toast(`+${fmt(g)} écus`);renderPanel();break}
     case"ally":{const i=+b.dataset.i,id=ALLIES[i][0];let n=b.dataset.n==="max"?1e9:+b.dataset.n,bought=0;while(n-->0){const c=allyCost(i,S.allies[id]||0);if(S.ecus<c)break;S.ecus-=c;S.allies[id]=(S.allies[id]||0)+1;bought++}
