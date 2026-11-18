@@ -22,6 +22,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"bkeyClose":bkeyPop=null;$("ov").hidden=true;break;
     case"quit":endMode(false,"abandon");break;
     case"upPerm":{const id=b.dataset.u,u=UPGS.find(x=>x[0]===id),c=upPermCost(id);S.upPerm=S.upPerm||{};if(!u||S.upPerm[id]||S.souls<c)break;S.souls-=c;S.upPerm[id]=true;sfx("level");log(`Amélioration permanente : ${u[1]} (gardée après chaque Oméga).`,"g");toast(`${u[1]} : permanente`,1);drawSpells();potSig="";mbSig="";renderPanel();break}
+    case"otabP":otabP=b.dataset.t;renderPanel(true);break;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;
     case"prestNo":prestConfirm=false;renderPanel();break;
     case"prestYes":prestConfirm=false;doPrestige();break;
