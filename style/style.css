@@ -1275,3 +1275,4 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .bkrow span{flex:1}
 .bkrow.ok b{color:#3f7d1f}
 .bkrow.ko b{color:#b3261e}
+.modebar .mbauto{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
