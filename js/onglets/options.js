@@ -17,6 +17,7 @@ function pOpts(){
   </div></div><div class="sec"><h3>Combat et automatismes</h3><div class="olist">
     ${rng("potThreshold","Seuil des potions automatiques","Boire une potion de soin sous ce seuil de PV (si l'option est cochée sous les sorts).",10,70,5)}
     ${sw("koRetreat","Reculer d'une zone après un K.O.","Évite d'enchaîner les K.O. pendant votre absence.")}
+    ${sw("autoFightBoss","Combat automatique des boss","Lance automatiquement le boss dès que l'amélioration est achetée et que les 10 victoires sont obtenues.")}
     ${sw("autoSellFull","Vente automatique quand le sac est plein","Vend la plus grosse pile de ressources, jamais les clés ni les potions.")}
     ${sw("confirmPrest","Confirmation avant un passage Oméga","")}
     ${sw("pauseHidden","Pause quand l'onglet est caché","Sinon le jeu continue en arrière-plan.")}

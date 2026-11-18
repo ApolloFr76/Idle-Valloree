@@ -35,7 +35,7 @@ function tick(dt){VIE.tick(dt);
           if(S.hp<=0){S.hp=0;S.ko=5;S.buffs=[];S.dots=[];inc("deaths");if(fx)FX.ko();if(S.mode!=="zone"){endMode(false,"K.O.")}else{log(`${MON[S.mon.id].name} vous a mis K.O. Essayez une zone plus facile ou améliorez votre équipement.`,"r");S.mon.hp=S.mon.max;if(S.opt.koRetreat&&S.zone>0){S.zone--;S.mon=null;drawZones();log(`Retour automatique : ${ZONES[S.zone].name}.`,"w")}}}}}}
       CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto[sp.id]&&up("sp"+(i+1)))cast(sp,true)});
       /* Défi automatique (boutique) : boss lancé dès les 10 victoires ; 30 s d'attente après un échec */
-      if(up("bossauto")&&S.mode==="zone"&&S.ko<=0&&(S.zk[S.zone]||0)>=BOSS_KILLS&&S.time>=(S.bossAutoT||0))startMode("boss");
+      if(S.opt.autoFightBoss&&up("bossauto")&&S.mode==="zone"&&S.ko<=0&&(S.zk[S.zone]||0)>=BOSS_KILLS&&S.time>=(S.bossAutoT||0))startMode("boss");
     }
   }
   S.buffs=S.buffs.filter(b=>b.until>S.time);

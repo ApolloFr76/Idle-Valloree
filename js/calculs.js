@@ -1,6 +1,12 @@
 /* Calculs : statistiques du héros, résistances, dégâts, temps de récolte, sac. */
 /* ================= Calculs ================= */
 function itemStats(inst){const it=ITEMS[inst.id],m=(it.slot==="trophee"?1+.25*dimR(inst.e||0):1+.1*(inst.e||0))*rarOf(inst).m,o={};for(const k in it.stats)o[k]=Math.round(it.stats[k]*m);if(it.fx)for(const k in it.fx)o[k]=(o[k]||0)+it.fx[k];return o}
+function enchCost(inst){
+  const it=ITEMS[inst.id],e=inst.e||0,lvl=Math.max(1,it.lvl||1);
+  const levelCost=lvlBudget(lvl)*Math.pow(lvl/(lvl+20),2);
+  const weaponScale=it.slot==="arme"?1.5:1;
+  return Math.round(1000*levelCost*weaponScale*Math.pow(e+1,2));
+}
 function equipped(){return Object.values(S.equip).map(u=>S.items.find(i=>i.u===u)).filter(Boolean)}
 function setCounts(eq=equipped()){const c={};eq.forEach(i=>{const it=ITEMS[i.id];if(it.noSet||!it.set)return;[it.set,...(it.also||[])].forEach(k=>c[k]=(c[k]||0)+1)});return c}
 function stats(){
