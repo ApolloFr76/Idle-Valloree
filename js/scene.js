@@ -92,7 +92,8 @@ const SCENE=(()=>{
   return{
     init(){requestAnimationFrame(loop)},
     hero(anim,hold=0){play(hero,anim,anim==="cast"?26:30,hold);if(famA.id&&anim==="atk"&&Math.random()<.5)play(famA,"atk",30)},
-    monHurt(){play(mon,"hurt",36)},
+    /* « touché » n'interrompt pas l'élan d'attaque : sinon, en cliquant vite, on ne voit jamais le monstre frapper */
+    monHurt(){if(mon.cur==="atk"&&now()-mon.t0<10*mon.fd)return;play(mon,"hurt",36)},
     drawPals,nextWave,drawQueue,walkIn,advance,lag};
 })();
 

@@ -7,7 +7,7 @@ const ANIM=(()=>{
   const R=(a,b)=>a+Math.random()*(b-a);
   const box=el=>{const a=A().getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left,y:r.top-a.top,w:r.width,h:r.height,cx:r.left-a.left+r.width/2,cy:r.top-a.top+r.height/2}};
   const add=(cls,x,y,ms,html)=>{const e=document.createElement("div");e.className="an "+cls;e.style.left=x+"px";e.style.top=y+"px";if(html)e.innerHTML=html;A().appendChild(e);if(ms)setTimeout(()=>e.remove(),ms);return e};
-  const parts=(x,y,n,cols,spread=60,ms=550,sz=4,up=0)=>{if(calm())n=Math.ceil(n/3);for(let i=0;i<n;i++){const e=add("ap",x,y,ms),a=Math.random()*Math.PI*2,d=spread*R(.4,1),s=sz+(Math.random()*3|0);
+  const parts=(x,y,n,cols,spread=60,ms=550,sz=4,up=0)=>{if(calm())n=Math.ceil(n/3);n=Math.min(n,40-A().getElementsByClassName("ap").length);   /* 40 particules max à la fois */for(let i=0;i<n;i++){const e=add("ap",x,y,ms),a=Math.random()*Math.PI*2,d=spread*R(.4,1),s=sz+(Math.random()*3|0);
     e.style.width=e.style.height=s+"px";e.style.background=cols[i%cols.length];
     e.animate([{transform:"translate(-50%,-50%)",opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*d}px),calc(-50% + ${Math.sin(a)*d-up}px))`,opacity:0}],{duration:ms*R(.7,1),easing:"cubic-bezier(.2,.7,.4,1)",fill:"forwards"})}};
   const shake=big=>{if(!S.opt.shake||calm())return;replayCls(A(),big?"shake2":"shake")};
@@ -41,7 +41,7 @@ const ANIM=(()=>{
         setTimeout(()=>shoot("arw",hb.x+hb.w*.85,hb.y+hb.h*.45+k*6,mb.x+mb.w*.4,mb.cy+R(-8,8),190,12,"rgba(255,255,255,.5)",()=>{const st=add("arw stuck",mb.x+mb.w*.38,mb.cy+R(-10,10),600);st.style.transform=`rotate(${R(-15,15)}deg)`}),90)},k*120)}
     else if(S.cls==="peste"){pose("atk",200);const tip={x:hb.x+hb.w*.92,y:hb.y+hb.h*.12},G=["#7ad04a","#b8f08a","#3f7a2a"];
       setTimeout(()=>shoot("flask",tip.x,tip.y,mb.x+mb.w*.42,mb.cy,260,26,"",()=>{const b=add("burst2",mb.x+mb.w*.42,mb.cy,320);b.style.setProperty("--c",G[0]);parts(mb.x+mb.w*.42,mb.cy,6,G,40,380,3);
-        for(let k=0;k<3;k++){const e=add("toxbub",mb.x+mb.w*R(.3,.7),mb.y+mb.h*R(.45,.8),900);e.style.animationDelay=(k*80)+"ms"}}),110)}
+        /* au plus 6 bulles à l'écran : en cliquant vite, elles ne s'empilent plus */const nb=Math.min(3,6-A().getElementsByClassName("toxbub").length);for(let k=0;k<nb;k++){const e=add("toxbub",mb.x+mb.w*R(.3,.7),mb.y+mb.h*R(.45,.8),900);e.style.animationDelay=(k*80)+"ms"}}),110)}
     else{pose("atk",200);const c=elc(),tip={x:hb.x+hb.w*.92,y:hb.y+hb.h*.12};const rune=add("rune",tip.x,tip.y,320);rune.style.setProperty("--c",c[0]);
       setTimeout(()=>shoot("orb2",tip.x,tip.y,mb.x+mb.w*.42,mb.cy,240,8,c[1],()=>{const b=add("burst2",mb.x+mb.w*.42,mb.cy,320);b.style.setProperty("--c",c[0]);parts(mb.x+mb.w*.42,mb.cy,6,c,40,350,3)}),110)}}
 

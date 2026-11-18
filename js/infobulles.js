@@ -32,6 +32,9 @@ function spFxTxt(f,st,C){const sm=C.spellMult||1,x=v=>"×"+String(v).replace("."
   if(f.t==="buff"){const L={dmg:"Dégâts",spd:"Vitesse d'attaque",def:"Dégâts subis",crit:"Critique",dot:"Dégâts des DoT",ally:"Dégâts des compagnons",cdr:"Temps de recharge",pros:"Prospection",xp:"Expérience"};
     return`${L[f.k]||"Bonus"} ${f.k==="crit"?"+"+f.v+" %":x(f.v)} pendant ${f.d} s`}
   return""}
+/* Attaque du monstre telle que le héros la subit : défense de classe, résistance (Terre) et buffs, cadence ralentie par la gelure */
+function monAtkTip(m,st){const dmg=Math.max(1,Math.round(m.atk*st.def)),g=S.mdot&&S.mdot.gelure?S.mdot.gelure.n*DOTS.gelure.slow:0,iv=String(+(2*(1+g)).toFixed(1)).replace(".",","),hits=Math.ceil(st.maxHp/dmg),dp=Math.round((1-st.def)*100);
+  return`<div>Attaque : <b>${fmt(dmg)}</b> toutes les ${iv} s${g?` <span class="muted">(gelure)</span>`:""}</div><div class="ts">${dp?`${fmt(m.atk)} avant votre défense (${dp>0?"−":"+"}${Math.abs(dp)} %) · `:""}K.O. en ${hits} coup${hits>1?"s":""}${st.dodge>=.01?` · esquive ${Math.round(st.dodge*100)} %`:""}</div>`}
 function tipFor(el){
   const v=el.dataset.v||el.dataset.tip;
   if(el.dataset.s&&!v){const u=S.equip[el.dataset.s],inst=u&&S.items.find(i=>i.u===u);return inst?tipItem(ITEMS[inst.id],inst):`<h4>${EQ[el.dataset.s].n}</h4><div class="tt">Emplacement vide</div>`}
@@ -66,7 +69,7 @@ function tipFor(el){
   if(t==="lk")return TL("Onglet verrouillé",`<div>Se débloque au <b>niveau ${TAB_LOCK[id]}</b>${id==="prest"?" (ou après une renaissance)":""}.</div><div class="tt">Vous êtes niveau ${S.lvl}.</div>`);
   if(t==="hd"){if(id==="xp"){const need=xpNeed(S.lvl);return TL(`Niveau ${S.lvl}`,`<div>${S.lvl>=lvlMax()?"Niveau maximum":`<b>${fmt(S.xp)}</b> / ${fmt(need)} XP (${Math.floor(S.xp/need*100)} %)`}</div><div class="tt">Bonus d'XP : ×${st.xpM.toFixed(2)}</div><div class="tt">+${PTS_PER_LVL} points de caractéristiques par niveau</div>`)}
     return TL("Écus",`<div><b>${fmt(S.ecus)}</b> en poche</div><div class="tt">Gagnés au total : ${fmt(S.st.ecus||0)}</div>${sep}<div class="tt">Victoires, objets cliquables, ventes, quêtes et coffres de donjon.</div>`)}
-  if(t==="cur"){const m=S.mon;if(!m)return"";const d=MON[m.id],res=monRes(d.el,st.el);return TL(d.name,`<div class="tt">Niveau ${m.lvl} · cliquez pour frapper (Espace)</div>${sep}<div>PV : <b>${fmt(Math.max(0,m.hp))} / ${fmt(m.max)}</b></div><div>Attaque : <b>${fmt(m.atk)}</b> toutes les 2 s</div><div>Contre votre élément : <b>${res>0?"résiste "+res+" %":res<0?"faible, "+(-res)+" % de dégâts en plus":"neutre"}</b></div>${sep}<div class="ts">Récompense : ${fmt(m.xp*st.xpM)} XP · ~${fmt(m.ecus)} écus</div>${sep}${lootHTML(m.id)}`)}
+  if(t==="cur"){const m=S.mon;if(!m)return"";const d=MON[m.id],res=monRes(d.el,st.el);return TL(d.name,`<div class="tt">Niveau ${m.lvl} · cliquez pour frapper (Espace)</div>${sep}<div>PV : <b>${fmt(Math.max(0,m.hp))} / ${fmt(m.max)}</b></div>${monAtkTip(m,st)}<div>Contre votre élément : <b>${res>0?"résiste "+res+" %":res<0?"faible, "+(-res)+" % de dégâts en plus":"neutre"}</b></div>${sep}<div class="ts">Récompense : ${fmt(m.xp*st.xpM)} XP · ~${fmt(m.ecus)} écus</div>${sep}${lootHTML(m.id)}`)}
   return""}
 let tipEl=null;
 /* taille de la bulle mesurée une fois par contenu, pas à chaque mouvement de souris */

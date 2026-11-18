@@ -46,7 +46,7 @@ function nextGoals(){const G=[],lp=n=>Math.min(1,(S.lvl-1+S.xp/xpNeed(S.lvl))/Ma
     if(it)G.push({ic:"craft",act:`data-a="craft" data-i="${it.i.id}">Forger`,t:it.i.name,s:it.r>=1?"à fabriquer !":`${Math.floor(it.r*100)} % des ressources`,p:it.r,ready:it.r>=1,tip:"i:"+it.i.id})}
   {const a=ACH.filter(a=>!S.ach[a.id]).map(a=>({a,p:Math.min(1,a.get()/a.v)})).sort((x,y)=>y.p-x.p)[0];if(a)G.push({ic:"ach",svg:achIcon(achKey(a.a)),t:`Succès : ${a.a.n}`,s:`${fmt(Math.min(a.a.v,a.a.get()))} / ${fmt(a.a.v)}`,p:a.p*.98,tip:"ach:"+a.a.id})}
   if(soulsGain()>0&&tabOpen("prest"))G.push({ic:"omega",act:`data-a="tab" data-t="prest">Ouvrir`,t:"Oméga disponible",s:`+${soulsGain()} éclats`,p:1,ready:true});
-  else if(S.lvl<PREST_LVL&&S.lvl>=20)G.push({ic:"omega",t:"Oméga (renaissance)",s:`niveau ${PREST_LVL}`,p:lp(PREST_LVL)});
+  else if(S.lvl<PREST_LVL&&S.lvl>=PREST_LVL-20)G.push({ic:"omega",t:"Oméga (renaissance)",s:`niveau ${PREST_LVL}`,p:lp(PREST_LVL)});
   return G.sort((a,b)=>(b.ready?2:0)+b.p-((a.ready?2:0)+a.p)).slice(0,S.opt.goalsN||4)}
 const GIC={lock:"🔒",sp:"✦",zone:"⛰",boss:"♛",shop:"⚒",ally:"⚑",pts:"+",craft:"⚙",omega:"Ω"};
 let goalSig="";

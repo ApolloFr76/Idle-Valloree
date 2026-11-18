@@ -46,7 +46,7 @@ const FX=(()=>{
   const rel=el=>{const a=A().getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left,y:r.top-a.top,w:r.width,h:r.height}};
   const add=(cls,x,y,ms,html)=>{const e=document.createElement("div");e.className="fx "+cls;e.style.left=x+"px";e.style.top=y+"px";if(html)e.innerHTML=html;A().appendChild(e);setTimeout(()=>e.remove(),ms);return e};
   const shake=(big)=>{if(!S.opt.shake||calm())return;const a=A();a.classList.remove("shake","shake2");void a.offsetWidth;a.classList.add(big?"shake2":"shake")};
-  const parts=(x,y,n,cols,spread=60,ms=600,sz=4)=>{if(calm())n=Math.ceil(n/3);for(let i=0;i<n;i++){const e=add("pt",x,y,ms);const c=cols[i%cols.length],ang=Math.random()*Math.PI*2,d=spread*(.4+Math.random()*.6),s=sz+(Math.random()*3|0);
+  const parts=(x,y,n,cols,spread=60,ms=600,sz=4)=>{if(calm())n=Math.ceil(n/3);n=Math.min(n,40-A().getElementsByClassName("pt").length);   /* 40 particules max à la fois */for(let i=0;i<n;i++){const e=add("pt",x,y,ms);const c=cols[i%cols.length],ang=Math.random()*Math.PI*2,d=spread*(.4+Math.random()*.6),s=sz+(Math.random()*3|0);
     e.style.width=e.style.height=s+"px";e.style.background=c;e.animate([{transform:"translate(-50%,-50%)",opacity:1},{transform:`translate(calc(-50% + ${Math.cos(ang)*d}px),calc(-50% + ${Math.sin(ang)*d+20}px))`,opacity:0}],{duration:ms*(.7+Math.random()*.3),easing:"cubic-bezier(.2,.7,.4,1)",fill:"forwards"})}};
   const monBox=()=>{const b=$("monBtn");return b?rel(b):null},heroBox=()=>{const h=$("ahero");return h&&!h.hidden?rel(h):null};
   const banner=(txt,sub,cls,ms=1600)=>{A().querySelectorAll(".fx.banner").forEach(x=>x.remove());const e=add("banner "+cls,0,0,ms,`<b>${txt}</b>${sub?`<span>${sub}</span>`:""}`);e.style.setProperty("--d",ms+"ms");return e};
@@ -92,7 +92,7 @@ function kill(){
   if(S.opt.logKills&&(S.opt.logLoot||!dropTxt))log(`${d.name} vaincu : <span class="x">+${fmt(xp)} XP</span>, <span class="g">+${fmt(ec)} écus</span>${dropTxt}`);
   S.mon=null;S.spawnT=.5;S.dots=[];sfx(d.boss?"boss":"kill");gainXp(xp);
   if(mode==="zone")S.zk[S.zone]=Math.min(BOSS_KILLS,(S.zk[S.zone]||0)+1);
-  if(mode==="boss"){inc("bosses");inc("bossesLife");qProg("boss");S.zk[S.zone]=0;(S.zoneBosses||(S.zoneBosses={}))[S.zone]=1;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
+  if(mode==="boss"){inc("bosses");inc("bossesLife");(S.bossLife||(S.bossLife={}))[S.zone]=1;qProg("boss");S.zk[S.zone]=0;(S.zoneBosses||(S.zoneBosses={}))[S.zone]=1;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
   if(mode==="tour"){const f=S.tower.cur;if(f>S.tower.best){S.tower.best=f;const g=gainEcus(towerRec(f));log(`Tour : nouveau record, étage ${f} ! <span class="g">+${fmt(g)} écus</span>`,"g")}mx("tower",S.tower.best);S.tower.cur++;S.timer=towerTime();S.spawnT=.3}
   if(mode==="donjon"){S.dg.wave++;if(S.dg.wave>DG_WAVES){const zi=S.dg.z,z=ZONES[zi],g=gainEcus(farmGold(600)),got=[];
       z.mons.forEach(mm=>{const n=addRes(mm.drop[0],rnd(5,10));if(n)got.push(`${n}× ${mm.drop[1]}`)});

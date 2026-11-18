@@ -296,7 +296,7 @@ const priceOf=k=>Math.max(1,Math.round(RES[k].price*sellMult()*(RES[k].kind==="k
 function gainEcus(n){n=Math.round(n*(1+talV("t_avar")/100)*(1+.01*achN()));S.ecus+=n;inc("ecus",n);return n}
 
 /* Renaissance et talents : [id, nom, effet, rangs max, coût de base en éclats] */
-const PREST_LVL=30;
+const PREST_LVL=100;
 /* Bonus Oméga : chaque passage Oméga donne +10 % d'XP et +10 % d'écus.
    Le niveau du personnage est illimité. */
 const omegaN=()=>(S&&S.prest)||0;
@@ -329,8 +329,14 @@ const talTxt=(id,r)=>{const x=talAt(id,r),f=TALV[id][2];return f.replace("#",x>=
 const talCostAt=(id,r)=>Math.ceil(TAL[id].cost*(r+1)*Math.pow(1.04,r));
 const talCost=id=>talCostAt(id,tal(id));
 const talSpent=id=>{let n=0;for(let k=0;k<tal(id);k++)n+=talCostAt(id,k);return n};
+/* Éclats d'un passage Oméga : 5 × 1,008^(niveau − 30), plus la valeur de chaque boss de zone vaincu dans cette vie (une seule fois chacun).
+   La courbe du niveau reste ancrée au niveau 30 même si la renaissance n'ouvre qu'au niveau PREST_LVL.
+   Boss : 10 éclats pour le premier, puis ×1,5 par boss jusqu'au 4e ; à partir du 5e, l'écart de niveau entre zones se creuse,
+   donc le multiplicateur gagne 0,1 à chaque boss (×1,6, ×1,7… ×2,3 pour le dernier). */
+const BOSS_SOULS=(()=>{const a=[];let v=10;for(let i=0;i<BOSSES.length;i++){if(i)v*=i<4?1.5:1.5+.1*(i-3);a.push(Math.round(v))}return a})();
+const bossSouls=()=>{let n=0;for(const i in S.bossLife||{})n+=BOSS_SOULS[i]||0;return n};
 const OMEGA_GROWTH=1.008;
-const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor(5*Math.pow(OMEGA_GROWTH,S.lvl-PREST_LVL))+Math.floor(Math.pow(S.st.bossesLife||0,1.15)/10);
+const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor(5*Math.pow(OMEGA_GROWTH,S.lvl-30))+bossSouls();
 /* Succès : chaque succès donne +1 % de dégâts et +1 % d'écus */
 const ROM=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 /* Icônes des succès : une par série (12×12 pixels) */
@@ -384,7 +390,7 @@ function fixOpts(o){o=Object.assign({},OPT_DEF,o||{});for(const k in OPT_DEF){co
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
-  potThreshold:30,autoSellFull:false,koRetreat:false,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
+  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
   keys:true,saveEvery:10,offline:true,showArmor:true};
 /* Rareté des objets fabriqués */
