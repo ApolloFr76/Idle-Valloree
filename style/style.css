@@ -1266,3 +1266,12 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .modebar .mbtop .autot{margin:0}
 .modebar .mbbtns{display:flex;flex-wrap:wrap;gap:5px}
 .modebar .mbbtns .btn{flex:1 1 0;min-width:0;margin:0;padding:3px 6px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Fenêtre de fabrication des clés de boss */
+.ovc.bkpop{max-width:440px;gap:10px}
+.bkpop h2 img{width:26px;height:26px;vertical-align:-5px}
+.bklist{display:flex;flex-direction:column;gap:6px}
+.bkrow{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--bg2);border:2px solid var(--ink)}
+.bkrow img{width:24px;height:24px}
+.bkrow span{flex:1}
+.bkrow.ok b{color:#3f7d1f}
+.bkrow.ko b{color:#b3261e}
