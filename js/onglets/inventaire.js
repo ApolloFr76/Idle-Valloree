@@ -13,6 +13,19 @@ function equipItem(u,target){
 }
 function enchInfo(inst){const e=inst.e||0;return{e,cost:enchCost(inst),ch:Math.round(Math.max(.2,.9-.07*e)*100)}}
 let selLast="slot",invP=0,invSub="all";
+/* recherche par nom, filtre de rareté, vente groupée de ce qui est affiché (en deux clics : vendre puis confirmer) */
+let invQ="",invRar=-1,invSellArm=false;
+const invNorm=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+/* objets et ressources affichés dans le sac selon l'onglet, la catégorie, la rareté et la recherche */
+function invView(eq){const q=invNorm(invQ.trim()),subOk=it=>invSub==="all"||(invF==="equip"?it.slot===invSub:invF==="fam"?it.kind===invSub:true);
+  const items=invF==="res"?[]:S.items.filter(i=>!eq.has(i.u)&&ITEMS[i.id]&&(invF==="all"||invF===ikind(ITEMS[i.id]))&&subOk(ITEMS[i.id])&&(invRar<0||(i.r||0)===invRar)&&(!q||invNorm(ITEMS[i.id].name).includes(q)));
+  const res=(invF==="all"||invF==="res")&&invRar<0?Object.keys(S.res).filter(k=>S.res[k]>0&&RES[k]&&(invSub==="all"||(invSub==="d"||invSub==="p"?RES[k].kind===invSub:RES[k].prof===invSub))&&(!q||invNorm(RES[k].name).includes(q))).sort((a,b)=>RES[a].kind.localeCompare(RES[b].kind)||RES[a].price-RES[b].price):[];
+  return{items,res}}
+/* ce que la vente groupée vend : tout l'affichage sauf les clés de boss, et les potions seulement dans la catégorie Potions */
+function invSellList(items,res){const its=items.slice(),rs=res.filter(k=>RES[k].kind!=="k"&&(RES[k].kind!=="p"||invSub==="p"));
+  let v=0;its.forEach(i=>{const it=ITEMS[i.id];v+=Math.round(it.price*(1+.2*(i.e||0))*sellMult()*rarOf(i).m)});rs.forEach(k=>v+=priceOf(k)*(S.res[k]||0));return{its,rs,v,n:its.length+rs.reduce((a,k)=>a+(S.res[k]||0),0)}}
+function invSellDo(L){if(!L.n)return;let g=0;const set=new Set(L.its);S.items=S.items.filter(x=>!set.has(x));L.its.forEach(i=>{const it=ITEMS[i.id];g+=Math.round(it.price*(1+.2*(i.e||0))*sellMult()*rarOf(i).m)});g=L.its.length?gainEcus(g):0;
+  L.rs.forEach(k=>{g+=sellRes(k,S.res[k]||0)});sfx("coin");selInv=null;invSellArm=false;toast(`${fmt(L.n)} objets et ressources vendus : +${fmt(g)} écus`);log(`Vente groupée : ${fmt(L.n)} objets et ressources vendus pour ${fmt(g)} écus.`,"g")}
 const SUBS={all:[["all","Toutes catégories"]],equip:[["all","Toutes catégories"],...SLOTS.map(x=>[x.id,x.name])],fam:[["all","Toutes catégories"],["Familier","Familiers"],["Monture","Montures"]],tro:[["all","Toutes catégories"]],res:[["all","Toutes catégories"],["d","Butin de monstre"],["bucheron","Bois"],["mineur","Minerais"],["paysan","Céréales"],["herboriste","Herbes"],["p","Potions"]]};
 function pInv(){
   const st=stats(),C=CLASSES[S.cls],need=xpNeed(S.lvl),eq=new Set(Object.values(S.equip));
@@ -37,9 +50,7 @@ function pInv(){
     <div class="trophies">${DOLL_B.map(slotBtn).join("")}</div>
     ${(sc=>Object.keys(sc).length?`<div class="setlist">${Object.keys(sc).map(z=>setBox(z,sc[z],true)).join("")}</div>`:`<div class="setb small">Portez plusieurs pièces d'une même panoplie : chaque pièce à partir de la 2e débloque un bonus.</div>`)(setCounts())}</div>`;
   /* sac */
-  const subOk=(it)=>invSub==="all"||(invF==="equip"?it.slot===invSub:invF==="fam"?it.kind===invSub:true);
-  const items=invF==="res"?[]:S.items.filter(i=>!eq.has(i.u)&&(invF==="all"||invF===ikind(ITEMS[i.id]))&&subOk(ITEMS[i.id]));
-  const res=(invF==="all"||invF==="res")?Object.keys(S.res).filter(k=>S.res[k]>0&&(invSub==="all"||(invSub==="d"||invSub==="p"?RES[k].kind===invSub:RES[k].prof===invSub))).sort((a,b)=>RES[a].kind.localeCompare(RES[b].kind)||RES[a].price-RES[b].price):[];
+  const {items,res}=invView(eq);
   const grp=new Map();items.forEach(i=>{const k=stackKey(i);if(!grp.has(k))grp.set(k,{i,n:0,us:[]});const g=grp.get(k);g.n++;g.us.push(i.u)});
   const selU=selInv&&selInv[0]==="u"?+selInv.slice(2):null;
   const all=[...[...grp.values()].map(g=>({t:"u",i:g.us.includes(selU)?S.items.find(x=>x.u===selU):g.i,n:g.n,us:g.us})),...res.map(k=>({t:"r",k}))],PER=36,pages=Math.max(1,Math.ceil(all.length/PER));
@@ -51,6 +62,9 @@ function pInv(){
   const R=`<div class="invR">
     <div class="itabs">${F.map(([k,n,g])=>`<button class="itab${invF===k?" on":""}" data-a="filt" data-f="${k}" title="${n}" aria-label="${n}">${glyph(g)}</button>`).join("")}</div>
     <select id="invSub" aria-label="Catégorie">${SUBS[invF].map(([k,n])=>`<option value="${k}" ${invSub===k?"selected":""}>${n}</option>`).join("")}</select>
+    <div class="invtools"><input id="invSearch" type="text" placeholder="Rechercher par nom" value="${esc(invQ)}" autocomplete="off" spellcheck="false" aria-label="Rechercher dans le sac">${invF==="res"?"":`<select id="invRar" aria-label="Rareté"><option value="-1">Toutes raretés</option>${RAR.map((r,i)=>`<option value="${i}" ${invRar===i?"selected":""}>${r.n}</option>`).join("")}</select>`}</div>
+    ${(L=>!L.n?"":invSellArm?`<div class="invsell arm"><span class="small">Vendre les <b>${fmt(L.n)}</b> objets et ressources affichés pour environ <b>${fmt(L.v)}</b> écus ?</span><button class="btn dng" data-a="invSellAll">Confirmer la vente</button><button class="btn" data-a="invSellNo">Annuler</button></div>`
+      :`<div class="invsell"><button class="btn" data-a="invSellAll" title="Vend tout ce qui est affiché avec ces filtres, trophées compris (sauf l'équipement porté, les clés de boss, et les potions hors catégorie Potions)">Vendre tout l'affichage · ${fmt(L.n)} · ≈ ${fmt(L.v)} écus</button></div>`)(invSellList(items,res))}
     <div class="igrid">${tiles||`<p class="small muted empty">Rien dans cette catégorie.</p>`}</div>
     <div class="pager"><button class="btn" data-a="page" data-d="-1" ${invP<=0?"disabled":""} aria-label="Page précédente">◀</button><span class="num">${invP+1} / ${pages}</span><button class="btn" data-a="page" data-d="1" ${invP>=pages-1?"disabled":""} aria-label="Page suivante">▶</button></div>
     <div class="detail idock${noSel?" nosel":""}" aria-live="polite">${dl}</div>
