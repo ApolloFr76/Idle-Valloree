@@ -1286,3 +1286,38 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 .modebar .tog b{font-size:11px;margin-left:2px}
 .modebar .tog.on{background:#4f9a3a;color:#fff}
 .modebar .tog:hover{filter:brightness(1.12)}
+/* Onglet Oméga compact : en-tête fixe, sous-onglets, listes serrées */
+.ohead{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;background:linear-gradient(135deg,#4a2f7a,#2e1d52);color:#f4ecff;border:3px solid var(--ink);box-shadow:inset 0 2px 0 rgba(255,255,255,.15)}
+.ohead .osoul{display:flex;align-items:center;gap:6px}
+.ohead .osoul b{font-size:26px;font-family:var(--display);color:#fff}
+.ohead .osoul .small{color:#cdbbe8}
+.ohead .oinfo{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
+.ohead .oinfo>b{font-family:var(--display);font-size:18px;color:#ffd86b;margin-right:4px}
+.ohead .oinfo .tag{background:rgba(255,255,255,.14);color:#f4ecff;border-color:rgba(0,0,0,.35)}
+.ohead .oact{display:flex;gap:6px;align-items:center}
+.ohead .oact .small{color:#cdbbe8}
+.osub{display:flex;gap:4px;flex-wrap:wrap;margin:10px 0 2px}
+.osub button{font:inherit;font-size:14px;padding:5px 10px;border:2px solid var(--ink);background:var(--bg2);color:var(--fg);cursor:pointer}
+.osub button .num{font-size:12px;opacity:.7;margin-left:3px}
+.osub button.on{background:#5a3a8f;color:#fff}
+.obosses{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px;margin-top:6px}
+.obosses span{display:flex;justify-content:space-between;gap:6px;padding:3px 7px;font-size:13px;background:var(--bg2);border:2px solid rgba(0,0,0,.15);opacity:.6}
+.obosses span.on{opacity:1;border-color:#5a3a8f;background:#efe4ff}
+.otree{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))!important}
+.otal{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 6px;margin-top:4px;background:var(--bg2);border:2px solid rgba(0,0,0,.15)}
+.otal>span{display:flex;flex-direction:column;min-width:0;line-height:1.15}
+.otal>span b{font-size:13px}
+.otal.has{border-color:#5a3a8f;background:#efe4ff}
+.otal.lock{opacity:.55}
+.otal .btn{padding:2px 7px;font-size:12px;flex:none}
+.operm{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px}
+.operm>div{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 8px;background:var(--bg2);border:2px solid rgba(0,0,0,.15);font-size:14px}
+.operm>div.own{border-color:#5a3a8f;background:#efe4ff}
+.operm .btn{padding:2px 8px;font-size:12px;flex:none}
+@media (min-width:900px){
+  #panel[data-tab=prest]{display:grid;grid-template-columns:200px minmax(0,1fr);gap:10px 14px;align-items:start;align-content:start}
+  #panel[data-tab=prest]>.ohead{grid-column:1/-1}
+  #panel[data-tab=prest]>.osub{grid-column:1;flex-direction:column;flex-wrap:nowrap;margin:0;position:sticky;top:0}
+  #panel[data-tab=prest]>.osub button{display:flex;justify-content:space-between;align-items:center;text-align:left}
+  #panel[data-tab=prest]>.sec,#panel[data-tab=prest]>.sec:nth-child(3){grid-column:2;grid-row:auto;margin-top:0}
+}
