@@ -18,6 +18,7 @@ function pOpts(){
     ${rng("potThreshold","Seuil des potions automatiques","Boire une potion de soin sous ce seuil de PV (si l'option est cochée sous les sorts).",10,70,5)}
     ${sw("koRetreat","Reculer d'une zone après un K.O.","Évite d'enchaîner les K.O. pendant votre absence.")}
     ${sw("autoFightBoss","Combat automatique des boss","Lance automatiquement le boss dès que l'amélioration est achetée et que les 10 victoires sont obtenues.")}
+    ${sw("autoClick","Clic automatique","Améliorations Clic automatique I et II. Frappe le monstre toute seule.")}
     ${sw("autoTower","Tour automatique","Amélioration Grimpeur. Relance la tour 3 s après sa fin, depuis 80 % du record.")}
     ${sw("autoZone","Monde suivant automatique","Amélioration Éclaireur. Passe au monde suivant dès que son boss est battu et que vous avez le niveau.")}
     ${sw("autoQuest","Quêtes automatiques","Amélioration Messager. Récupère tout seul la récompense des quêtes terminées.")}
