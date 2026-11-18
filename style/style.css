@@ -1321,3 +1321,9 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
   #panel[data-tab=prest]>.osub button{display:flex;justify-content:space-between;align-items:center;text-align:left}
   #panel[data-tab=prest]>.sec,#panel[data-tab=prest]>.sec:nth-child(3){grid-column:2;grid-row:auto;margin-top:0}
 }
+
+/* Compte en ligne */
+.accform{flex-wrap:wrap;gap:6px}.accform input{flex:1;min-width:120px}
+.accok{color:var(--xp);margin-top:4px}.accko{color:var(--hp);margin-top:4px}
+.accchoix{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.accchoix .btn{display:flex;flex-direction:column;gap:4px;padding:12px;text-align:center;white-space:normal}
+@media (max-width:520px){.accchoix{grid-template-columns:1fr}}
