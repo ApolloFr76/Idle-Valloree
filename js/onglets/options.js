@@ -18,8 +18,12 @@ function pOpts(){
     ${rng("potThreshold","Seuil des potions automatiques","Boire une potion de soin sous ce seuil de PV (si l'option est cochée sous les sorts).",10,70,5)}
     ${sw("koRetreat","Reculer d'une zone après un K.O.","Évite d'enchaîner les K.O. pendant votre absence.")}
     ${sw("autoFightBoss","Combat automatique des boss","Lance automatiquement le boss dès que l'amélioration est achetée et que les 10 victoires sont obtenues.")}
+    ${sw("autoTower","Tour automatique","Amélioration Grimpeur. Relance la tour 3 s après sa fin, depuis 80 % du record.")}
+    ${sw("autoZone","Monde suivant automatique","Amélioration Éclaireur. Passe au monde suivant dès que son boss est battu et que vous avez le niveau.")}
+    ${sw("autoQuest","Quêtes automatiques","Amélioration Messager. Récupère tout seul la récompense des quêtes terminées.")}
+    ${sw("autoFortune","Potion de fortune en donjon","Amélioration Flasque de fortune. Boit une potion de fortune au début de chaque donjon, s'il vous en reste.")}
     ${sw("autoDungeon","Donjon automatique","Entre automatiquement dans le donjon de la zone dès que l'amélioration Explorateur est achetée et que vous avez sa clé.")}
-    ${sw("autoSellFull","Vente automatique quand le sac est plein","Vend la plus grosse pile de ressources, jamais les clés ni les potions.")}
+    ${sw("autoSellFull","Vente automatique quand le sac est plein","Amélioration Colporteur. Vend la plus grosse pile de ressources, jamais les clés ni les potions.")}
     ${sw("confirmPrest","Confirmation avant un passage Oméga","")}
     ${sw("pauseHidden","Pause quand l'onglet est caché","Sinon le jeu continue en arrière-plan.")}
     ${sw("offline","Gains hors ligne","Chasse et récolte pendant que la page est fermée, jusqu'à 8 h.")}
