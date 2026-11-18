@@ -237,6 +237,14 @@ ZONES.forEach((z,zi)=>{const b=MON["boss_"+zi],dr=z.mons.filter(m=>!m.extra).sli
 const bkeyN=zi=>S.res["bkey_"+zi]||0,bossReady=zi=>(S.zk[zi]||0)>=BOSS_KILLS&&bkeyN(zi)>0,bkeyCan=zi=>RES["bkey_"+zi].recipe.every(([x,q])=>(S.res[x]||0)>=q);
 function craftBkey(zi){const r=RES["bkey_"+zi];if(!r)return;if(!bkeyCan(zi)){toast("Il manque des ressources pour fabriquer cette clé",1);return}
   r.recipe.forEach(([x,q])=>S.res[x]-=q);S.res[r.id]=(S.res[r.id]||0)+1;S.seen[r.id]=1;sfx("coin");log(`Vous fabriquez : ${r.name}.`,"g");toast(`${r.name} fabriquée`,1);dirty=true}
+/* Fenêtre de fabrication d'une clé de boss : ingrédients, stock et bouton Fabriquer */
+let bkeyPop=null;
+function bkeyDraw(){const zi=bkeyPop;if(zi==null)return;const r=RES["bkey_"+zi],ok=bkeyCan(zi),o=$("ov");o.hidden=false;
+  o.innerHTML=`<div class="ovc bkpop"><div class="row" style="justify-content:space-between;align-items:center"><h2>${resIcon(r)} Fabriquer la clé</h2><button class="btn" data-a="bkeyClose" aria-label="Fermer">✕</button></div>
+  <p class="muted" style="margin:0">${r.name} · en stock : <b class="num">${bkeyN(zi)}</b></p>
+  <div class="bklist">${r.recipe.map(([x,q])=>{const h=S.res[x]||0;return`<div class="bkrow ${h>=q?"ok":"ko"}" data-tip="r:${x}">${resIcon(RES[x])}<span>${RES[x].name}</span><b class="num">${fmt(h)} / ${fmt(q)}</b></div>`}).join("")}</div>
+  <p class="small muted" style="margin:0">Butins sur les monstres de ${ZONES[zi].name}, métal avec le métier Mineur. La clé peut aussi tomber (0,001 %) sur n'importe quel monstre de la zone.</p>
+  <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-a="bkeyClose">Fermer</button><button class="btn pri" data-a="craftBkey" data-z="${zi}" ${ok?"":"disabled"}>Fabriquer</button></div></div>`}
 /* Article devant le nom du monstre pour nommer sa panoplie (« du » par défaut) */
 const ART={ecorcin:"de l'",renardine:"de la ",crabouille:"de la ",meduline:"de la ",oursinet:"de l'",magmoule:"de la ",ombrelin:"de l'",neantille:"de la ",boss_2:"de la ",boss_6:"de l'",boss_7:"de la ",limaconne:"de la ",glandouille:"de la ",roseline:"de la ",libellune:"de la ",grisouille:"de la ",cactoche:"de la ",tortecaille:"de la ",cauchemire:"de la ",hiboulet:"de l'",herissoc:"de l'",anacondor:"de l'",albatrombe:"de l'",aurorin:"de l'",etincelot:"de l'",obsidien:"de l'",hippocampin:"de l'",anemonix:"de l'",astrolin:"de l'",abyssal:"de l'"};
 const SET_SLOTS={8:SLOTS.map(s=>s.id),6:["coiffe","cape","amulette","anneau","bottes","ceinture"],5:["coiffe","cape","amulette","bottes","ceinture"],4:["coiffe","cape","bottes","ceinture"],3:["coiffe","amulette","bottes"],2:["amulette","anneau"],boss:["arme","bouclier","amulette","anneau"]};
