@@ -5,7 +5,7 @@ function showCreate(){
   const o=$("ov");o.hidden=false;
   o.innerHTML=`<div class="ovc"><div><h2>Les Terres de Vallorée</h2><p class="muted">Choisissez votre classe. Votre élément (Feu, Eau, Terre, Air) dépendra des points que vous y investirez.</p></div>
   <div class="classes">${Object.entries(CLASSES).map(([k,c])=>`<button class="cls${k===pick?" on":""}" data-a="pick" data-k="${k}">${heroSVG(k)}<h3>${c.name}</h3><span class="small muted">${c.desc}</span><ul>${c.spells.map(s=>`<li>${s.name} (niv. ${s.lvl}) : ${s.txt}</li>`).join("")}</ul></button>`).join("")}</div>
-  <div class="row"><input type="text" id="heroName" maxlength="20" value="${esc(S.name||"Aventurier")}" aria-label="Nom du personnage"><button class="btn pri" data-a="start" style="padding:9px 16px;font-size:14px">Commencer l'aventure</button></div></div>`;
+  <div class="row"><input type="text" id="heroName" maxlength="20" value="${esc(S.name||"Aventurier")}" aria-label="Nom du personnage"><button class="btn pri" data-a="start" style="padding:9px 16px;font-size:14px">Commencer l'aventure</button></div>${COMPTE.on()&&!COMPTE.logged()?`<p class="small muted" style="margin:10px 0 4px">Déjà un compte ? Connectez-vous pour reprendre votre partie.</p>`:""}${COMPTE.formHtml(true)}</div>`;
 }
 function showOffline(s){
   const h=Math.floor(s.sec/3600),m=Math.floor(s.sec%3600/60),res=Object.entries(s.res);
