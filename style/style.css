@@ -1257,3 +1257,12 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 /* Boss : boutons « Fabriquer la clé » et « Défier » côte à côte, case Boss auto lisible dans la barre de mode */
 .adv .advb{display:flex;flex-direction:column;gap:6px;flex:none}
 #modeBar .autot{color:var(--cream);text-shadow:1px 1px 0 var(--ink)}
+/* Barre de mode (zone) : état sur une ligne, boutons serrés en dessous */
+.hudl .modebar:has(.mbtop){flex-direction:column;align-items:stretch;gap:5px;padding:6px 8px}
+.modebar .mbtop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.modebar .mbtop .info{color:var(--cream);gap:8px}
+.modebar .mbtop .info b{color:var(--sun,#f2c14e)}
+.modebar .mbtop .info img{vertical-align:-3px}
+.modebar .mbtop .autot{margin:0}
+.modebar .mbbtns{display:flex;flex-wrap:wrap;gap:5px}
+.modebar .mbbtns .btn{flex:1 1 0;min-width:0;margin:0;padding:3px 6px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
