@@ -305,6 +305,8 @@ function heroArm(){if(!S||!S.cls||(S.opt&&S.opt.showArmor===false))return null;l
 const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].lvl>=PROF_MAX).length:0;
 /* Amélioration active : achetée dans cette vie, ou rendue permanente avec des éclats Oméga (gardée après chaque renaissance) */
 const up=id=>!!(S.up&&S.up[id]||S.upPerm&&S.upPerm[id]);
+/* Vente automatique : réglage par ressource (on : vendue automatiquement, oui par défaut ; keep : quantité toujours gardée) */
+const sellCfg=k=>(S.sellCfg&&S.sellCfg[k])||{},sellKeep=k=>Math.max(0,sellCfg(k).keep||0),sellAuto=k=>sellCfg(k).on!==false;
 const upPermCost=id=>{const u=UPGS.find(x=>x[0]===id);return u?Math.max(1,Math.round(Math.log10(u[3])*2-5)):0};
 const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l)*(CLASSES[S.cls]?.allyCost||1));
 const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100)*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);

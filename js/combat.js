@@ -13,7 +13,7 @@ function bagWeight(){const eq=new Set(Object.values(S.equip));let w=0;for(const 
 let fullWarn=0;
 function addRes(id,n,limitBag=false){if(!limitBag){if(n<=0)return 0;S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
   let room=Math.max(0,bagCap()-bagWeight());
-  if(room<n&&S.opt.autoSellFull&&up("vendeur")){const big=Object.keys(S.res).filter(k=>S.res[k]>0&&RES[k].kind!=="k"&&RES[k].kind!=="p").sort((a,b)=>S.res[b]-S.res[a])[0];if(big){const q=S.res[big],g=sellRes(big,q);log(`Sac plein : ${fmt(q)}× ${RES[big].name} vendus automatiquement (+${fmt(g)} écus).`,"g");room=Math.max(0,bagCap()-bagWeight())}}
+  if(room<n&&S.opt.autoSellFull&&up("vendeur")){const sur=k=>(S.res[k]||0)-sellKeep(k),big=Object.keys(S.res).filter(k=>RES[k]&&RES[k].kind!=="k"&&RES[k].kind!=="p"&&sellAuto(k)&&sur(k)>0).sort((a,b)=>sur(b)-sur(a))[0];if(big){const q=sur(big),g=sellRes(big,q);log(`Sac plein : ${fmt(q)}× ${RES[big].name} vendus automatiquement (+${fmt(g)} écus).`,"g");room=Math.max(0,bagCap()-bagWeight())}}
   n=Math.min(n,room);
   if(n<=0){if(S.time-fullWarn>30){fullWarn=S.time;log("Sac plein : vendez des ressources dans l'Inventaire pour continuer à ramasser.","r");if(fx)toast("Sac plein")}return 0}
   S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
