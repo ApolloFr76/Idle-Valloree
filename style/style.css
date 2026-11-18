@@ -1279,3 +1279,10 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 /* Vente automatique par ressource (inventaire) */
 .asell{align-items:center;gap:12px;flex-wrap:wrap}
 .asell .keepn{width:80px;margin-left:4px;padding:2px 6px;font:inherit;border:2px solid var(--ink);background:#fff8e6}
+/* Boutons ON / OFF des modes automatiques (barre au-dessus du combat) */
+.modebar .mbtogs{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+.modebar .mbtogs>.small{color:var(--cream);margin-right:2px}
+.modebar .tog{font:inherit;font-size:12px;line-height:1.2;padding:2px 7px;border:2px solid var(--ink);background:#5b4a63;color:#d9cfe2;cursor:pointer}
+.modebar .tog b{font-size:11px;margin-left:2px}
+.modebar .tog.on{background:#4f9a3a;color:#fff}
+.modebar .tog:hover{filter:brightness(1.12)}
