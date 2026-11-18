@@ -23,7 +23,7 @@ function pOpts(){
     ${sw("autoQuest","Quêtes automatiques","Amélioration Messager. Récupère tout seul la récompense des quêtes terminées.")}
     ${sw("autoFortune","Potion de fortune en donjon","Amélioration Flasque de fortune. Boit une potion de fortune au début de chaque donjon, s'il vous en reste.")}
     ${sw("autoDungeon","Donjon automatique","Entre automatiquement dans le donjon de la zone dès que l'amélioration Explorateur est achetée et que vous avez sa clé.")}
-    ${sw("autoSellFull","Vente automatique quand le sac est plein","Amélioration Colporteur. Vend la plus grosse pile de ressources, jamais les clés ni les potions.")}
+    ${sw("autoSellFull","Vente automatique quand le sac est plein","Amélioration Colporteur. Vend le plus gros surplus parmi les ressources cochées « Vente auto » (Inventaire, en cliquant une ressource), en gardant la quantité « Garder toujours ». Jamais les clés ni les potions.")}
     ${sw("confirmPrest","Confirmation avant un passage Oméga","")}
     ${sw("pauseHidden","Pause quand l'onglet est caché","Sinon le jeu continue en arrière-plan.")}
     ${sw("offline","Gains hors ligne","Chasse et récolte pendant que la page est fermée, jusqu'à 8 h.")}
