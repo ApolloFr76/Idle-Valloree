@@ -546,6 +546,8 @@ const CODES={
   "1uxvz21s8ls9c":{txt:"+2 000 niveaux",go:()=>{const n=2000;S.lvl+=n;S.pts+=n*PTS_PER_LVL;S.xp=0;checkUnlocks(true);mx("maxLvl",S.lvl);S.hp=stats().maxHp;drawSpells();drawZones();if(fx){sfx("level");FX.lvl(S.lvl)}return`+${fmt(n)} niveaux : niveau ${fmt(S.lvl)}`}},
   /* code de test : retour au niveau 1 (XP et points de caractéristiques remis à zéro) et éclats Oméga remis à zéro, utilisable à volonté */
   "c7enwfbewz34":{txt:"retour au niveau 1, éclats Oméga à zéro",go:()=>{S.lvl=1;S.xp=0;S.pts=0;S.alloc=fresh().alloc;S.souls=0;S.hp=stats().maxHp;drawSpells();drawZones();return"retour au niveau 1, éclats Oméga remis à zéro"}},
+  /* code de test : retour au niveau 1 (XP et points de caractéristiques remis à zéro), éclats Oméga conservés, utilisable à volonté */
+  "3rvzam1q8mxa2":{txt:"retour au niveau 1, éclats Oméga conservés",go:()=>{S.lvl=1;S.xp=0;S.pts=0;S.alloc=fresh().alloc;S.hp=stats().maxHp;drawSpells();drawZones();return"retour au niveau 1, éclats Oméga conservés ("+fmt(S.souls)+")"}},
 };
 /* Résultat d'un code : bulle + message sous le champ (Options > Sauvegarde), plus visible que la bulle seule. */
 let codeRes=null;
