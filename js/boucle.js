@@ -50,6 +50,8 @@ function tick(dt){VIE.tick(dt);
   else if(S.time>=(S.evNext??90)&&!document.hidden)startEvent();
   S.mkT=(S.mkT||0)+dt;if(S.mkT>=MK_STEP){S.mkT=0;marketTick();if(S.tab==="market")dirty=true}
   if(S.potCd>0)S.potCd-=dt;else if(S.autoPot&&up("potauto")&&S.ko<=0&&S.hp<st.maxHp*S.opt.potThreshold/100){const id=S.res.p_gsoin>0&&S.hp<st.maxHp*.15?"p_gsoin":S.res.p_soin>0?"p_soin":S.res.p_gsoin>0?"p_gsoin":null;if(id){drink(id,true);S.potCd=3}}
+  /* potions à effet cochées « Auto » : la suivante est bue dès que l'effet de la précédente se termine */
+  if(up("potauto")&&S.ko<=0&&S.autoBuff)for(const id in S.autoBuff){const r=RES[id];if(S.autoBuff[id]&&r&&r.fx&&r.fx.k&&S.res[id]>0&&!S.buffs.some(b=>b.n===r.name))drink(id,true)}
   if(S.pk){if(S.time>S.pk.until){S.pk=null;drawPk();S.pkNext=S.time+(PK_MIN*.6+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)}}
   else if(S.time>=(S.pkNext??20)&&S.ko<=0&&!document.hidden)spawnPk();
   if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t=Math.min(60,(+S.job.t||0)+dt);   /* plafond : une vieille sauvegarde avec un temps énorme ne fige plus le jeu */

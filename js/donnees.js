@@ -284,7 +284,7 @@ const UPGS=[
   ["rythme","Rythme","Combo maximum 150 au lieu de 100",30000],["sac2","Grand sac","+8 000 de poids",40000],["outils2","Outils de maître","Récolte 20 % plus rapide",60000],
   ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×1,5",5e5],["allie3","Bannière de guerre","Compagnons ×2",2e7],
   ["sp1","Sort automatique I","Votre 1er sort peut se lancer tout seul (case Auto)",5000],["sp2","Sort automatique II","Votre 2e sort peut se lancer tout seul (case Auto)",60000],["sp3","Sort automatique III","Votre 3e sort peut se lancer tout seul (case Auto)",6e5],
-  ["potauto","Potions automatiques","Boit une potion de soin tout seul sous le seuil de PV",10000],["cdr1","Concentration","Sorts 10 % plus rapides",25000],["cdr2","Maîtrise des arcanes","Sorts encore 10 % plus rapides",3e5],
+  ["potauto","Potions automatiques","Boit une potion de soin tout seul sous le seuil de PV, et enchaîne les potions à effet cochées « Auto » (sagesse, force…) dès que l'effet se termine",10000],["cdr1","Concentration","Sorts 10 % plus rapides",25000],["cdr2","Maîtrise des arcanes","Sorts encore 10 % plus rapides",3e5],
   ["bossauto","Défi automatique","Défie le boss tout seul dès que les 10 victoires sont faites",40000],
   ["dgauto","Explorateur","Entre tout seul dans le donjon de la zone dès que vous avez sa clé (case Donjon auto)",80000],
   ["vendeur","Colporteur","Vend la plus grosse pile de ressources quand le sac est plein (case dans Options)",15000],["qauto","Messager","Récupère tout seul la récompense des quêtes terminées (case dans Options)",30000],

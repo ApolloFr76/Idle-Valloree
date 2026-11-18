@@ -71,8 +71,11 @@ function drink(id,auto){const r=RES[id];if(!r||r.kind!=="p"||!(S.res[id]>0)||S.k
   else pkBuff(r.fx.k,r.fx.v,r.fx.d,r.name);
   if(!auto)log(`Vous buvez : ${r.name}.`,"w");dirty=true;drawPots()}
 let potSig="";
-function drawPots(){const ids=POTIONS.map(p=>p[0]).filter(id=>S.res[id]>0),sig=ids.map(id=>id+S.res[id]).join()+S.autoPot+up("potauto");if(sig===potSig)return;potSig=sig;
-  $("pots").innerHTML=ids.length||S.autoPot?ids.map(id=>`<button class="btn" data-a="drink" data-r="${id}" data-tip="r:${id}" style="--ic:${RES[id].col}" title="${RES[id].txt}"><span style="color:${RES[id].col}">${glyph("potion").replace("<svg",'<svg style="width:14px;height:14px;vertical-align:-2px"')}</span> ${RES[id].name} <span class="num muted">×${S.res[id]}</span></button>`).join("")+(up("potauto")?`<label class="autot" style="margin:0"><input type="checkbox" id="autoPot" ${S.autoPot?"checked":""}> Boire une potion de soin sous ${S.opt.potThreshold} % de PV</label>`:""):""}
+function drawPots(){const ids=POTIONS.map(p=>p[0]).filter(id=>S.res[id]>0),AB=S.autoBuff||{},heal1=ids.find(id=>RES[id].fx.heal),sig=ids.map(id=>id+S.res[id]+(AB[id]?"a":"")).join()+S.autoPot+up("potauto");if(sig===potSig)return;potSig=sig;
+  $("pots").innerHTML=ids.length||S.autoPot?ids.map(id=>{const b=`<button class="btn" data-a="drink" data-r="${id}" data-tip="r:${id}" style="--ic:${RES[id].col}" title="${RES[id].txt}"><span style="color:${RES[id].col}">${glyph("potion").replace("<svg",'<svg style="width:14px;height:14px;vertical-align:-2px"')}</span> ${RES[id].name} <span class="num muted">×${S.res[id]}</span></button>`;
+    if(!up("potauto"))return b;
+    if(RES[id].fx.k)return`<span class="potw">${b}<label class="autot potab" title="Boire la suivante dès que l'effet se termine"><input type="checkbox" data-autobuff="${id}" ${AB[id]?"checked":""}> Auto</label></span>`;
+    return id===heal1?`<span class="potw">${b}<label class="autot potab" title="Boire une potion de soin sous ${S.opt.potThreshold} % de PV"><input type="checkbox" id="autoPot" ${S.autoPot?"checked":""}> Auto</label></span>`:b}).join("")+(up("potauto")&&!heal1?`<label class="autot" style="margin:0"><input type="checkbox" id="autoPot" ${S.autoPot?"checked":""}> Boire une potion de soin sous ${S.opt.potThreshold} % de PV</label>`:""):""}
 
 /* ================= Événements ================= */
 function startEvent(){const e=EVENTS[rnd(0,EVENTS.length-1)];S.ev={id:e.id,until:S.time+EV_DUR};log(`Événement : <b style="color:${e.c}">${e.n}</b> pendant 2 minutes. ${e.txt}.`,"g");if(fx){toast(`${e.n} : ${e.txt}`);sfx("event")}drawWeather();dirty=true}
