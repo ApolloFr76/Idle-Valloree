@@ -129,4 +129,8 @@ function gainGather(pid,rid,quiet){
   n=addRes(rid,n);if(n)qProg("gather",rid,n);gainGatherXp(pid,rid,1,quiet); /* l'XP compte même sac plein */
   return n;
 }
+/* k récoltes d'un coup (métier très rapide ou retour d'absence) : un seul ajout au lieu de k boucles, pour ne pas figer le jeu */
+function gainGatherN(pid,rid,k,quiet){if(!(k>0))return 0;if(k<=5){let t=0;for(let i=0;i<k;i++)t+=gainGather(pid,rid,quiet);return t}
+  const p=S.jobs[pid],pd=Math.min(1,Math.min(.5,p.lvl/120)+talV("t_double")/100);const n=addRes(rid,k+Math.round(k*pd));if(n)qProg("gather",rid,n);
+  const ch=Math.min(20,k);for(let i=0;i<ch;i++)gainGatherXp(pid,rid,k/ch,quiet);return n}
 

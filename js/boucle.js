@@ -52,7 +52,8 @@ function tick(dt){VIE.tick(dt);
   if(S.potCd>0)S.potCd-=dt;else if(S.autoPot&&up("potauto")&&S.ko<=0&&S.hp<st.maxHp*S.opt.potThreshold/100){const id=S.res.p_gsoin>0&&S.hp<st.maxHp*.15?"p_gsoin":S.res.p_soin>0?"p_soin":S.res.p_gsoin>0?"p_gsoin":null;if(id){drink(id,true);S.potCd=3}}
   if(S.pk){if(S.time>S.pk.until){S.pk=null;drawPk();S.pkNext=S.time+(PK_MIN*.6+Math.random()*(PK_MAX-PK_MIN))*(up("aimant")?.7:1)*(1-talV("t_trefle")/100)}}
   else if(S.time>=(S.pkNext??20)&&S.ko<=0&&!document.hidden)spawnPk();
-  if(S.job){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t+=dt;while(S.job.t>=gt){S.job.t-=gt;gainGather(r.prof,r.id)}}
+  if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t=Math.min(60,(+S.job.t||0)+dt);   /* plafond : une vieille sauvegarde avec un temps énorme ne fige plus le jeu */
+    const k=Math.floor(S.job.t/gt);if(k>0){S.job.t-=k*gt;gainGatherN(r.prof,r.id,k)}}
   OUV.tick(dt);
 }
 function offline(sec){
@@ -68,7 +69,8 @@ function offline(sec){
   if(kills>0){sum.kills=kills;sum.xp=Math.round(kills*ms.xp*st.xpM);sum.ecus=gainEcus(kills*ms.ecus*(1+(st.pros-1)/2));S.kills+=kills;
     const dr=Math.floor(kills*.35*st.pros);z.mons.filter(m=>!m.extra).forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){const got=addRes(m.drop[0],n,true);if(got)sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+got}});
     fx=false;gainXp(sum.xp);fx=true}
-  if(S.job){const r=RES[S.job.r];let t=sec+S.job.t,tot=0,guard=0;while(guard++<20000){const gt=gatherTime(r.prof,r.tier);if(t<gt)break;t-=gt;tot+=gainGather(r.prof,r.id,true)}S.job.t=t;if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
+  if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier),t=sec+(+S.job.t||0),k=Math.min(20000,Math.floor(t/gt));   /* 20 000 récoltes max pendant l'absence, comme avant */
+    S.job.t=Math.min(gt,t-k*gt);const tot=gainGatherN(r.prof,r.id,k,true);if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
   OUV.offline(sec,sum);
   sum.danger=danger;return sum;
 }
