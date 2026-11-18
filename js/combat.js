@@ -11,9 +11,14 @@ function gainXp(x){
 const bagCap=()=>(1000+100*S.lvl+5000*profMaxN()+(up("sac1")?2000:0)+(up("sac2")?8000:0)+Math.round(talV("t_sac")))*(up("sacx")?2:1);
 function bagWeight(){const eq=new Set(Object.values(S.equip));let w=0;for(const k in S.res)w+=S.res[k]||0;S.items.forEach(i=>{if(!eq.has(i.u))w+=10});return w}
 let fullWarn=0;
+/* Vente auto (Colporteur, mode « Vente » sur ON) : quand le sac dépasse sa capacité, vend tout le surplus des ressources
+   cochées « Vente auto » (en gardant « Garder toujours »). Appelée chaque seconde par tick() et quand un butin déborde. */
+function autoSellFull(need=0){if(!S.opt.autoSellFull||!up("vendeur")||bagWeight()+need<=bagCap())return false;
+  const sur=k=>(S.res[k]||0)-sellKeep(k),L=Object.keys(S.res).filter(k=>RES[k]&&RES[k].kind!=="k"&&RES[k].kind!=="p"&&sellAuto(k)&&sur(k)>0);if(!L.length)return false;
+  let g=0,n=0;L.forEach(k=>{const q=sur(k);g+=sellRes(k,q);n+=q});log(`Sac plein : ${fmt(n)} ressources vendues automatiquement (${L.map(k=>RES[k].name).join(", ")}) : +${fmt(g)} écus.`,"g");if(fx)toast(`Vente auto : +${fmt(g)} écus`);return true}
 function addRes(id,n,limitBag=false){if(!limitBag){if(n<=0)return 0;S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
   let room=Math.max(0,bagCap()-bagWeight());
-  if(room<n&&S.opt.autoSellFull&&up("vendeur")){const sur=k=>(S.res[k]||0)-sellKeep(k),big=Object.keys(S.res).filter(k=>RES[k]&&RES[k].kind!=="k"&&RES[k].kind!=="p"&&sellAuto(k)&&sur(k)>0).sort((a,b)=>sur(b)-sur(a))[0];if(big){const q=sur(big),g=sellRes(big,q);log(`Sac plein : ${fmt(q)}× ${RES[big].name} vendus automatiquement (+${fmt(g)} écus).`,"g");room=Math.max(0,bagCap()-bagWeight())}}
+  if(room<n&&S.opt.autoSellFull&&up("vendeur")){autoSellFull(n);room=Math.max(0,bagCap()-bagWeight())}
   n=Math.min(n,room);
   if(n<=0){if(S.time-fullWarn>30){fullWarn=S.time;log("Sac plein : vendez des ressources dans l'Inventaire pour continuer à ramasser.","r");if(fx)toast("Sac plein")}return 0}
   S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}

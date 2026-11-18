@@ -57,7 +57,9 @@ function ensureQuests(){const d=today();if(!S.q||S.q.day!==d){S.q={day:d,list:[0
 function qProg(type,key,n=1){if(!S.q)return;S.q.list.forEach(q=>{if(q.done||q.type!==type)return;if(q.key!=null&&q.key!==key)return;q.have=Math.min(q.need,q.have+n);if(q.have>=q.need){q.done=true;if(S.opt.logQuests)log(`Quête terminée : ${q.txt}. Récupérez la récompense dans l'onglet Quêtes.`,"g");if(fx)toast("Quête terminée !")}dirty=true})}
 function marketTick(){S.mkPrev={...S.mk};Object.values(RES).forEach(r=>{if(r.kind==="k")return;const m=S.mk[r.id]||1;S.mk[r.id]=+Math.min(MK_MAX,Math.max(MK_MIN,m+(Math.random()-.5)*.25+(1-m)*.08)).toFixed(3)})}
 function trend(k){const a=mkOf(k),b=(S.mkPrev&&S.mkPrev[k])||1;return a>b+.005?"▲":a<b-.005?"▼":"="}
-function sellRes(k,n){n=Math.min(n,S.res[k]||0);if(n<=0)return 0;sfx("coin");let g=0;for(let i=0;i<n;i++){g+=priceOf(k);if(RES[k].kind!=="k")S.mk[k]=Math.max(MK_MIN,mkOf(k)-MK_SELL)}S.res[k]-=n;g=gainEcus(g);qProg("sell",null,g);return g}
+function sellRes(k,n){n=Math.min(n,S.res[k]||0);if(n<=0)return 0;sfx("coin");let g=0;
+  /* une fois le cours au plancher, le reste se vend d'un coup au même prix (une pile de milliards ne fige plus le jeu) */
+  for(let i=0;i<n;i++){if(RES[k].kind==="k"||mkOf(k)<=MK_MIN){g+=priceOf(k)*(n-i);break}g+=priceOf(k);S.mk[k]=Math.max(MK_MIN,mkOf(k)-MK_SELL)}S.res[k]-=n;g=gainEcus(g);qProg("sell",null,g);return g}
 function brew(id,n){const r=RES[id];let made=0;while(n-->0){if(S.jobs.herboriste.lvl<r.plvl||!r.recipe.every(([x,q])=>(S.res[x]||0)>=q))break;r.recipe.forEach(([x,q])=>S.res[x]-=q);S.res[id]=(S.res[id]||0)+1;made++;inc("brews");inc("crafts");qProg("craft");
     const J=S.jobs.herboriste;if(J.lvl<PROF_MAX){J.xp+=Math.round(20*Math.pow(r.tier+1,1.6));while(J.lvl<PROF_MAX&&J.xp>=pxNeed(J.lvl)){J.xp-=pxNeed(J.lvl);J.lvl++;log(`Herboriste niveau ${J.lvl} !`,"g")}}}
   if(made)toast(`${made}× ${r.name} préparée${made>1?"s":""}`);dirty=true;return made}

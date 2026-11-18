@@ -1,6 +1,6 @@
 /* Boucle de jeu (tick) : combat automatique, récolte, temps. */
 /* ================= Boucle ================= */
-let allyAcc=0,allyFT=0,clickAcc=0;
+let allyAcc=0,allyFT=0,clickAcc=0,autoSellT=0;
 const PLAYER_CPS_LIMIT=20,playerClickTimes=[];
 function playerClickAllowed(){
   const now=performance.now();
@@ -55,6 +55,7 @@ function tick(dt){VIE.tick(dt);
   if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t=Math.min(60,(+S.job.t||0)+dt);   /* plafond : une vieille sauvegarde avec un temps énorme ne fige plus le jeu */
     const k=Math.floor(S.job.t/gt);if(k>0){S.job.t-=k*gt;gainGatherN(r.prof,r.id,k)}}
   OUV.tick(dt);
+  autoSellT+=dt;if(autoSellT>=1){autoSellT=0;autoSellFull()}
 }
 function offline(sec){
   if(!S.cls)return null;
