@@ -229,6 +229,14 @@ ZONES.forEach((z,zi)=>{const [bn,bi,bc,br]=BOSSES[zi],base=z.mons[bi];
   MON["boss_"+zi]={...base,id:"boss_"+zi,name:bn,c:bc,el:z.el,ft:base.ft==="none"?"horns":base.ft,crown:true,boss:true,zone:zi,drop:["cle_"+zi,"Clé : "+DUNGEONS[zi]],bres:br};
   RES["cle_"+zi]={id:"cle_"+zi,name:"Clé : "+DUNGEONS[zi],kind:"k",zone:zi,price:30*(zi+1)};
   RES[br[0]]={id:br[0],name:br[1],kind:"d",zone:zi,boss:true,price:25+zi*20};});
+/* Clés de boss : pour défier le boss d'une zone il faut 10 victoires ET une clé de boss (utilisée au début du combat).
+   La clé se fabrique (butins des 3 monstres de base de la zone + métal du mineur) ou tombe très rarement (0,001 %) sur n'importe quel monstre de la zone. */
+const BKEY_DROP=1e-5;
+ZONES.forEach((z,zi)=>{const b=MON["boss_"+zi],dr=z.mons.filter(m=>!m.extra).slice(0,3).map(m=>m.drop[0]);
+  RES["bkey_"+zi]={id:"bkey_"+zi,name:"Clé de boss : "+b.name,kind:"k",bk:true,zone:zi,col:b.c,price:50*(zi+1),recipe:[...dr.map(d=>[d,5+3*zi]),[PROFS.mineur.res[zi][0],10+5*zi]]}});
+const bkeyN=zi=>S.res["bkey_"+zi]||0,bossReady=zi=>(S.zk[zi]||0)>=BOSS_KILLS&&bkeyN(zi)>0,bkeyCan=zi=>RES["bkey_"+zi].recipe.every(([x,q])=>(S.res[x]||0)>=q);
+function craftBkey(zi){const r=RES["bkey_"+zi];if(!r)return;if(!bkeyCan(zi)){toast("Il manque des ressources pour fabriquer cette clé",1);return}
+  r.recipe.forEach(([x,q])=>S.res[x]-=q);S.res[r.id]=(S.res[r.id]||0)+1;S.seen[r.id]=1;sfx("coin");log(`Vous fabriquez : ${r.name}.`,"g");toast(`${r.name} fabriquée`,1);dirty=true}
 /* Article devant le nom du monstre pour nommer sa panoplie (« du » par défaut) */
 const ART={ecorcin:"de l'",renardine:"de la ",crabouille:"de la ",meduline:"de la ",oursinet:"de l'",magmoule:"de la ",ombrelin:"de l'",neantille:"de la ",boss_2:"de la ",boss_6:"de l'",boss_7:"de la ",limaconne:"de la ",glandouille:"de la ",roseline:"de la ",libellune:"de la ",grisouille:"de la ",cactoche:"de la ",tortecaille:"de la ",cauchemire:"de la ",hiboulet:"de l'",herissoc:"de l'",anacondor:"de l'",albatrombe:"de l'",aurorin:"de l'",etincelot:"de l'",obsidien:"de l'",hippocampin:"de l'",anemonix:"de l'",astrolin:"de l'",abyssal:"de l'"};
 const SET_SLOTS={8:SLOTS.map(s=>s.id),6:["coiffe","cape","amulette","anneau","bottes","ceinture"],5:["coiffe","cape","amulette","bottes","ceinture"],4:["coiffe","cape","bottes","ceinture"],3:["coiffe","amulette","bottes"],2:["amulette","anneau"],boss:["arme","bouclier","amulette","anneau"]};
@@ -488,9 +496,9 @@ const dropCol=r=>{if(!DROPC){DROPC={};Object.values(MON).forEach(m=>{if(m.boss){
 const trMon=it=>it.id.startsWith("tr_")?MON[it.id.slice(3)]:it.id.startsWith("tb_")?MON["boss_"+it.id.slice(3)]:null;
 const itIcon=it=>it.img?`<img src="${it.img}" alt="">`:it.set&&MON[it.set]?`<img class="px" src="${PX.item(it.slot,MON[it.set].c)}" alt="">`:it.slot==="trophee"&&trMon(it)?`<img class="px" src="${PX.monster(trMon(it))}" alt="">`:it.slot==="familier"?`<img class="px" src="${it.look?PX.fam(it.id):PX.pet(ZCOL[it.z]||"#f08aa8")}" alt="">`:glyph(it.slot);
 const itCol=it=>it.slot==="familier"?"#f08aa8":it.slot==="trophee"?"#f0c35a":ZCOL[it.z];
-const resIcon=r=>r.img?`<img src="${r.img}" alt="">`:r.kind==="g"?`<img class="px" src="${PX.res(r.prof,r.tier)}" width="16" height="16" alt="">`:r.kind==="d"?`<img class="px" src="${PX.drop(dropKind(r.name),dropCol(r),r.rare||r.boss)}" width="16" height="16" alt="">`:r.kind==="k"?`<img class="px" src="${PX.key()}" width="16" height="16" alt="">`:r.kind==="p"?`<img class="px" src="${PX.potion(r.col)}" width="16" height="16" alt="">`:glyph(r.kind==="d"?"drop":r.kind==="k"?"cle":r.kind==="p"?"potion":r.prof);
-const kindLabel=r=>r.kind==="d"?"Butin de monstre":r.kind==="k"?"Clé de donjon":r.kind==="p"?"Potion":"Ressource · "+PROFS[r.prof].name;
-const resCol=r=>r.kind==="d"?ZCOL[r.zone]:r.kind==="k"?"#f0c35a":r.kind==="p"?r.col:PCOL[r.prof];
+const resIcon=r=>r.img?`<img src="${r.img}" alt="">`:r.kind==="g"?`<img class="px" src="${PX.res(r.prof,r.tier)}" width="16" height="16" alt="">`:r.kind==="d"?`<img class="px" src="${PX.drop(dropKind(r.name),dropCol(r),r.rare||r.boss)}" width="16" height="16" alt="">`:r.kind==="k"?`<img class="px" src="${r.bk?PX.bkey(r.col):PX.key()}" width="16" height="16" alt="">`:r.kind==="p"?`<img class="px" src="${PX.potion(r.col)}" width="16" height="16" alt="">`:glyph(r.kind==="d"?"drop":r.kind==="k"?"cle":r.kind==="p"?"potion":r.prof);
+const kindLabel=r=>r.kind==="d"?"Butin de monstre":r.kind==="k"?(r.bk?"Clé de boss":"Clé de donjon"):r.kind==="p"?"Potion":"Ressource · "+PROFS[r.prof].name;
+const resCol=r=>r.kind==="d"?ZCOL[r.zone]:r.kind==="k"?(r.bk?r.col:"#f0c35a"):r.kind==="p"?r.col:PCOL[r.prof];
 const XP_BASE_GROWTH=1.004,XP_ZONE_GROWTH=1.02,XP_ZONE_START=30,XP_ZONE_SPAN=300;
 const xpNeed=l=>{const zone=Math.min(XP_ZONE_SPAN,Math.max(0,l-XP_ZONE_START));return Math.floor(40*Math.pow(l,1.75)*Math.pow(XP_BASE_GROWTH,l)*Math.pow(XP_ZONE_GROWTH,zone)+60*l)};
 const PROF_TIME_TARGET=[3600,7200,14400,25200,36000,43200,54000,64800,72000,79200,90000,115200];

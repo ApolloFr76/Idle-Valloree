@@ -436,6 +436,11 @@ const PX=(()=>{
     else{s.part(col,q=>q.poly([[3,6],[6,2],[10,2],[13,6],[8,14]]),{lt:.6});s.part(lt,q=>{q.rect(6,3,4,1);q.line(4,6,12,6)},{flat:1})}
     if(rare){["#ffffff","#fff2a8"].forEach((c,i)=>{const x=i?13:2,y=i?12:2;s.set(x,y,c);s.set(x-1,y,c);s.set(x+1,y,c);s.set(x,y-1,c);s.set(x,y+1,c)})}
     s.outline(rare?"#8a4a08":INK);return cache[k]=s.url()}
+  /* clé de boss : anneau doré couronné serti d'une gemme à la couleur du boss, tige et panneton en fer sombre */
+  function bkey(col){const k="bkey"+col;if(cache[k])return cache[k];const s=new Spr(16,16),G="#f2c14e",IR="#5c6078";
+    s.part(IR,q=>{q.line(8,9,13,14,2);q.rect(12,11,3,1);q.rect(13,12,1,1);q.rect(10,13,1,2);q.rect(9,14,2,1)});
+    s.part(G,q=>{q.ell(5,6,3.8,3.8);q.clear(4,5,3,3);q.px(2,1);q.px(5,0);q.px(8,1);q.rect(2,2,7,1)},{lt:.35});
+    s.part(col,q=>q.ell(5,6,1.5,1.5),{lt:.5});s.outline();return cache[k]=s.url()}
   function key(){if(cache.key)return cache.key;const s=new Spr(16,16),G="#f7c948";s.part(G,q=>{q.ell(5,5,3.4,3.4);q.clear(4,4,2,2);q.line(7,7,12,12,2);q.rect(11,10,3,1);q.rect(9,12,1,2)});s.outline();return cache.key=s.url()}
   function potion(col){const k="po:"+col;if(cache[k])return cache[k];const s=new Spr(16,16);s.part("#dfeef5",q=>{q.rect(7,3,3,4);q.ell(8.5,10,4.6,4.4)},{lt:.6});s.part(col,q=>{q.ell(8.5,10.5,3.6,3.4);q.clear(0,0,16,9)});s.part(col,q=>q.rect(5,9,7,1),{flat:1});s.part("#8a5a34",q=>q.rect(6,1,5,2));s.set(6,8,"#ffffff");s.set(6,9,"#ffffff");s.outline();return cache[k]=s.url()}
   function pet(col){const k="pe:"+col;if(cache[k])return cache[k];const s=new Spr(16,16);s.part(col,q=>{q.poly([[3,7],[4,2],[7,5]]);q.poly([[13,7],[12,2],[9,5]])});s.part(col,q=>{q.ell(8,9,5.4,4.6);q.rect(4,11,9,3)},{lt:.5});s.set(6,8,"#1c1020");s.set(10,8,"#1c1020");s.set(6,9,"#1c1020");s.set(10,9,"#1c1020");s.set(8,11,"#1c1020");s.set(4,11,"#ff8a9a");s.set(12,11,"#ff8a9a");s.outline();SPR[k]=s;return cache[k]=s.url()}
@@ -808,7 +813,7 @@ const PX=(()=>{
   const beastFrames=(id,col,anim)=>{const k="bfs:"+id+col+anim;return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>beastF(id,col,anim,f)))};
   /* outils de dessin pour le monde en bandeau (js/monde.js) */
   const kit={Spr,prop,rng,rgb,mix,TH,LIGHT,DARK,INK};
-  return{kit,plant,fish,monster,hero,heroF,heroFrames,beastF,beastFrames,monFrames,petFrames,fam,famFrames,pickup,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
+  return{kit,plant,fish,monster,hero,heroF,heroFrames,bkey,beastF,beastFrames,monFrames,petFrames,fam,famFrames,pickup,img,item,res,drop,key,potion,pet,ground:id=>(TH[id]||TH.prairie).g[0]};
 })();
 
 function monsterSVG(m){return PX.img(PX.monster(m))}

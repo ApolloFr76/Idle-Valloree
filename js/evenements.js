@@ -16,6 +16,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"updates":showUpdates();break;
     case"pickup":takePk();break;
     case"mode":startMode(b.dataset.m,b.dataset.z!=null?+b.dataset.z:null);renderPanel();break;
+    case"craftBkey":craftBkey(+b.dataset.z);renderPanel();break;
     case"quit":endMode(false,"abandon");break;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;
     case"prestNo":prestConfirm=false;renderPanel();break;

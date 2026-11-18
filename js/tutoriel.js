@@ -23,7 +23,7 @@ const TIPS=[
   {id:"allies",c:()=>S.ecus>=50,t:"Compagnons",d:"Vous pouvez recruter votre premier compagnon. Il frappe tout seul, même quand vous n'êtes pas là.",tab:"allies"},
   {id:"quests",c:()=>S.lvl>=3,t:"Quêtes du jour",d:"Trois quêtes chaque jour, avec écus et XP à la clé. Terminez les trois pour gagner un éclat d'âme.",tab:"quests"},
   {id:"herbo",c:()=>S.lvl>=5,t:"Alchimie",d:"Le métier d'Herboriste permet de cueillir des herbes pour préparer des potions de soin et de bonus à l'Atelier.",tab:"metiers"},
-  {id:"boss",c:()=>(S.zk[S.zone]||0)>=BOSS_KILLS,t:"Un boss vous attend",d:"Vous avez battu assez de monstres : défiez le boss de la zone avant la fin du chrono (touche B). Il lâche la clé du donjon.",tab:"aventure"},
+  {id:"boss",c:()=>(S.zk[S.zone]||0)>=BOSS_KILLS,t:"Un boss vous attend",d:"Vous avez battu assez de monstres. Fabriquez la clé de boss (onglet Aventure) puis défiez le boss de la zone avant la fin du chrono (touche B). Il lâche la clé du donjon.",tab:"aventure"},
   {id:"shop",c:()=>S.ecus>=300,t:"Boutique",d:"Vos premiers achats définitifs sont abordables : gants renforcés, clic automatique, sac agrandi…",tab:"shop"},
   {id:"combo",c:()=>S.combo>=10,t:"Combo !",d:"Cliquer vite fait monter le combo, qui augmente vos dégâts. Il retombe si vous arrêtez de cliquer."},
   {id:"market",c:()=>Object.keys(S.res).filter(k=>S.res[k]>0).length>=4,t:"Le marché",d:"Les prix changent chaque minute, entre ×0,5 et ×2. Vendez quand le cours est haut !",tab:"market"},

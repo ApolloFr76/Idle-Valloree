@@ -91,7 +91,8 @@ function kill(){
       else if(first&&fx)toast(`Nouveau butin découvert : ${l.n}`)})}
   if(S.opt.logKills&&(S.opt.logLoot||!dropTxt))log(`${d.name} vaincu : <span class="x">+${fmt(xp)} XP</span>, <span class="g">+${fmt(ec)} écus</span>${dropTxt}`);
   S.mon=null;S.spawnT=.5;S.dots=[];sfx(d.boss?"boss":"kill");gainXp(xp);
-  if(mode==="zone")S.zk[S.zone]=Math.min(BOSS_KILLS,(S.zk[S.zone]||0)+1);
+  if(mode==="zone"){S.zk[S.zone]=Math.min(BOSS_KILLS,(S.zk[S.zone]||0)+1);
+    if(Math.random()<BKEY_DROP){const id="bkey_"+S.zone;S.res[id]=(S.res[id]||0)+1;S.seen[id]=1;log(`Butin exceptionnel : ${RES[id].name} !`,"g");toast(`Butin exceptionnel : ${RES[id].name} !`,1)}}
   if(mode==="boss"){inc("bosses");inc("bossesLife");(S.bossLife||(S.bossLife={}))[S.zone]=1;qProg("boss");S.zk[S.zone]=0;(S.zoneBosses||(S.zoneBosses={}))[S.zone]=1;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
   if(mode==="tour"){const f=S.tower.cur;if(f>S.tower.best){S.tower.best=f;const g=gainEcus(towerRec(f));log(`Tour : nouveau record, étage ${f} ! <span class="g">+${fmt(g)} écus</span>`,"g")}mx("tower",S.tower.best);S.tower.cur++;S.timer=towerTime();S.spawnT=.3}
   if(mode==="donjon"){S.dg.wave++;if(S.dg.wave>DG_WAVES){const zi=S.dg.z,z=ZONES[zi],g=gainEcus(farmGold(600)),got=[];
