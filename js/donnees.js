@@ -306,7 +306,9 @@ const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].l
 /* Amélioration active : achetée dans cette vie, ou rendue permanente avec des éclats Oméga (gardée après chaque renaissance) */
 const up=id=>!!(S.up&&S.up[id]||S.upPerm&&S.upPerm[id]);
 /* Vente automatique : réglage par ressource (on : vendue automatiquement, oui par défaut ; keep : quantité toujours gardée) */
-const sellCfg=k=>(S.sellCfg&&S.sellCfg[k])||{},sellKeep=k=>Math.max(0,sellCfg(k).keep||0),sellAuto=k=>sellCfg(k).on!==false;
+/* « Garder toujours » : 100 par défaut pour chaque ressource (0 si le joueur le choisit) */
+const SELL_KEEP_DEF=100;
+const sellCfg=k=>(S.sellCfg&&S.sellCfg[k])||{},sellKeep=k=>Math.max(0,sellCfg(k).keep??SELL_KEEP_DEF),sellAuto=k=>sellCfg(k).on!==false;
 /* Modes automatiques : [option, amélioration(s) qui le débloquent, nom court]. Chacun a son bouton ON / OFF au-dessus du combat dès qu'il est débloqué. */
 const AUTOS=[["autoClick",["auto1","auto2"],"Clic"],["autoFightBoss","bossauto","Boss"],["autoDungeon","dgauto","Donjon"],["autoTower","tourauto","Tour"],["autoZone","zoneauto","Monde"],["autoQuest","qauto","Quêtes"],["autoSellFull","vendeur","Vente"],["autoFortune","fortauto","Fortune"]];
 const autoOwned=a=>[].concat(a[1]).some(up);
