@@ -15,7 +15,7 @@ let fullWarn=0;
    cochées « Vente auto » (en gardant « Garder toujours »). Appelée chaque seconde par tick() et quand un butin déborde. */
 function autoSellFull(need=0){if(!S.opt.autoSellFull||!up("vendeur")||bagWeight()+need<=bagCap())return false;
   const sur=k=>(S.res[k]||0)-sellKeep(k),L=Object.keys(S.res).filter(k=>RES[k]&&RES[k].kind!=="k"&&RES[k].kind!=="p"&&sellAuto(k)&&sur(k)>0);if(!L.length)return false;
-  let g=0,n=0;L.forEach(k=>{const q=sur(k);g+=sellRes(k,q);n+=q});log(`Sac plein : ${fmt(n)} ressources vendues automatiquement (${L.map(k=>RES[k].name).join(", ")}) : +${fmt(g)} écus.`,"g");if(fx)toast(`Vente auto : +${fmt(g)} écus`);return true}
+  let g=0,n=0;L.forEach(k=>{const q=sur(k);g+=sellRes(k,q);n+=q});if(typeof offSell!=="undefined"&&offSell){offSell.n+=n;offSell.g+=g}log(`Sac plein : ${fmt(n)} ressources vendues automatiquement (${L.map(k=>RES[k].name).join(", ")}) : +${fmt(g)} écus.`,"g");if(fx)toast(`Vente auto : +${fmt(g)} écus`);return true}
 function addRes(id,n,limitBag=false){if(!limitBag){if(n<=0)return 0;S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
   let room=Math.max(0,bagCap()-bagWeight());
   if(room<n&&S.opt.autoSellFull&&up("vendeur")){autoSellFull(n);room=Math.max(0,bagCap()-bagWeight())}

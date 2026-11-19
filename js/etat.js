@@ -12,7 +12,14 @@ function fuseTrophies(){const by={};S.items.forEach(x=>{if(ITEMS[x.id]?.slot==="
   for(const id in by){const L=by[id];if(L.length<2)continue;const k=L.find(x=>eq.has(x.u))||L[0];L.forEach(x=>{if(x!==k){k.e=(k.e||0)+1+(x.e||0);drop.add(x)}})}
   if(drop.size){S.items=S.items.filter(x=>!drop.has(x));for(const k in S.equip)if([...drop].some(x=>x.u===S.equip[k]))S.equip[k]=null}}
 function load(){try{const r=localStorage.getItem(SAVE_KEY);if(r)return Object.assign(fresh(),JSON.parse(r))}catch(e){}return null}
-function save(){if(!S)return;S.last=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}}
+function save(){if(!S)return;S.last=Date.now();try{localStorage.setItem(SAVE_KEY,JSON.stringify(S))}catch(e){}if(S.cls&&Date.now()-bkLast()>BK_EVERY)backup("auto")}
+/* Sauvegardes de secours : les 3 dernières copies de la partie (une toutes les 15 min, et avant un import, une restauration ou une remise à zéro). */
+const BK_KEY="vallore-secours",BK_MAX=3,BK_EVERY=15*60e3;
+function bkList(){try{const L=JSON.parse(localStorage.getItem(BK_KEY)||"[]");return Array.isArray(L)?L:[]}catch(e){return[]}}
+function bkLast(){if(bkLast.t==null){const L=bkList();bkLast.t=L.length?L[0].t:0}return bkLast.t}
+function backup(why){if(!S||!S.cls)return;const L=bkList();L.unshift({t:Date.now(),why,lvl:S.lvl,cls:S.cls,name:S.name,prest:S.prest||0,d:JSON.stringify(S)});L.length=Math.min(L.length,BK_MAX);bkLast.t=Date.now();
+  while(L.length){try{localStorage.setItem(BK_KEY,JSON.stringify(L));return}catch(e){L.pop()}}}
+function bkLoad(i){const b=bkList()[i];if(!b)return false;let d;try{d=JSON.parse(b.d)}catch(e){return false}if(!d||!d.cls)return false;backup("restore");S=Object.assign(fresh(),d);save();return true}
 
 /* ================= Utilitaires ================= */
 const $=id=>document.getElementById(id);

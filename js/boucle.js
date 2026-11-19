@@ -59,6 +59,7 @@ function tick(dt){VIE.tick(dt);
   OUV.tick(dt);
   autoSellT+=dt;if(autoSellT>=1){autoSellT=0;autoSellFull()}
 }
+let offSell=null;   /* ventes automatiques comptées pendant le calcul hors ligne */
 function offline(sec){
   if(!S.cls)return null;
   if(arb("t7"))sec*=2;   /* Maître du temps : le temps hors ligne compte double */
@@ -67,16 +68,19 @@ function offline(sec){
   S.afkWeight=sec;
   if(S.mode!=="zone"){S.mode="zone";S.dg=null;S.timer=0;S.mon=null}
   const sum={sec,xp:0,ecus:0,kills:0,res:{}},st=stats(),z=ZONES[S.zone];
+  const qDone=()=>S.q?S.q.list.filter(q=>q.done).length:0,b0={lvl:S.lvl,jobs:Object.fromEntries(Object.entries(S.jobs).map(([k,j])=>[k,j.lvl])),q:qDone()};offSell={n:0,g:0};
   const lvl=Math.round((z.lvl[0]+Math.min(zoneTop(z),S.lvl+4))/2),ms=monsterStats(Math.max(z.lvl[0],lvl));
   const ef=z.mons.reduce((a,m)=>a+(1-monRes(m.el,st.el)/100),0)/z.mons.length,tk=ms.hp/(st.dps*ef+allyDps())+1.5,danger=ms.atk*st.def/2*tk>st.maxHp*1.5;
   const kills=danger?0:Math.floor(sec/tk*.5);
   if(kills>0){sum.kills=kills;sum.xp=Math.round(kills*ms.xp*st.xpM);sum.ecus=gainEcus(kills*ms.ecus*(1+(st.pros-1)/2));S.kills+=kills;
     const dr=Math.floor(kills*.35*st.pros);z.mons.filter(m=>!m.extra).forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){const got=addRes(m.drop[0],n,true);if(got)sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+got}});
+    const nm=z.mons.length;z.mons.forEach((m,i)=>{const n=Math.floor(kills/nm)+(i<kills%nm?1:0);if(n>0){qProg("kill",m.id,n);qProg("killEl",m.el,n)}});   /* les quêtes de chasse avancent aussi */
     fx=false;gainXp(sum.xp);fx=true}
   if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier),t=sec+(+S.job.t||0),k=Math.min(20000,Math.floor(t/gt));   /* 20 000 récoltes max pendant l'absence, comme avant */
     S.job.t=Math.min(gt,t-k*gt);const tot=gainGatherN(r.prof,r.id,k,true);if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
   OUV.offline(sec*(arb("r4")?2:1),sum);
   if(arb("m10")){const g=Math.floor(S.ecus*.01*Math.min(24,sec/3600));if(g>0){S.ecus+=g;sum.ecus=(sum.ecus||0)+g}}   /* Intérêts */
-  sum.danger=danger;return sum;
+  sum.danger=danger;sum.lvl=[b0.lvl,S.lvl];sum.jobs=Object.keys(b0.jobs).filter(k=>S.jobs[k]&&S.jobs[k].lvl>b0.jobs[k]).map(k=>[k,b0.jobs[k],S.jobs[k].lvl]);
+  sum.qNew=qDone()-b0.q;sum.sold=offSell;offSell=null;return sum;
 }
 

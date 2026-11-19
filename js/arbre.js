@@ -53,6 +53,10 @@ function arbLeave(k){const a=arbS();let g=0;ARB.filter(x=>x[8]===k&&a.own[x[0]])
   if(a.own.coeur){g+=1e9;delete a.own.coeur}if(a.echo){for(let i=0;i<a.echo;i++)g+=1e9*Math.pow(10,i);a.echo=0;delete a.own.echo}
   a.voies=a.voies.filter(v=>v!==k);S.souls+=g;log(`Vous quittez la voie ${k==="bp"?"de la Boutique permanente":"du "+ARB_V[k].nom} : ${fmt(g)} éclats rendus.`,"g");toast(`${fmt(g)} éclats rendus`);potSig="";mbSig=""}
 /* ---------- effets ---------- */
+/* Écho d'Oméga : nombre de rangs achetables d'un coup avec les éclats actuels, et achat de tous ces rangs. */
+function echoMaxN(){let s=S.souls,e=arbS().echo,k=0;while(k<1e3){const c=1e9*Math.pow(10,e+k);if(s<c)break;s-=c;k++}return k}
+function arbEchoMax(){if(!arb("coeur"))return;const k=echoMaxN();if(!k)return;const a=arbS();for(let i=0;i<k;i++){S.souls-=1e9*Math.pow(10,a.echo);a.echo++}a.own.echo=1;
+  sfx("level");log(`Arbre Oméga : Écho d'Oméga +${k} rangs (rang ${a.echo}).`,"g");S.hp=Math.min(S.hp,stats().maxHp);potSig="";mbSig="";drawSpells()}
 const arbEcho=()=>Math.pow(1.05,(S&&S.arb&&S.arb.echo)||0);
 const arbTrophies=()=>new Set((S.items||[]).filter(i=>ITEMS[i.id]&&ITEMS[i.id].slot==="trophee").map(i=>i.id)).size;
 /* compatibilité : les anciens talents sont lus à travers l'arbre */
@@ -109,7 +113,7 @@ function pArbre(){const a=arbS();if(!ARB_VUES.some(v=>v[0]===arbVue))arbVue="car
   const n=ARB_ID[arbSel]||ARB[0],st=arbState(n),c=arbCost(n);
   const need=n[0]==="coeur"?`Demande les 4 voies achetées en entier (${ARB_VK.filter(arbFull).length}/4 terminées)`:n[0]==="pacte"?`Niveau ${a.pacte}/3 · ${arbMaxV()} voie${arbMaxV()>1?"s":""} possible${arbMaxV()>1?"s":""}`:n[7].length?"Demande : "+n[7].map(p=>ARB_ID[p][4]).join(" ou "):"Premier achat de l'arbre";
   let act;if(n[0]==="pacte"&&arb("eveil")&&a.pacte<3)act=`<button class="btn pri" data-a="arbBuy" data-id="pacte" ${S.souls<c?"disabled":""}>Niveau ${a.pacte+1} · ${fmt(c)} <span class="soul"></span></button>`;
-  else if(n[0]==="echo"&&arb("coeur"))act=`<button class="btn pri" data-a="arbBuy" data-id="echo" ${S.souls<c?"disabled":""}>Rang ${a.echo+1} · ${fmt(c)} <span class="soul"></span></button>`;
+  else if(n[0]==="echo"&&arb("coeur")){const k=echoMaxN();act=`<button class="btn pri" data-a="arbBuy" data-id="echo" ${S.souls<c?"disabled":""}>Rang ${a.echo+1} · ${fmt(c)} <span class="soul"></span></button>${k>1?`<button class="btn" data-a="arbEchoMax" title="Achète tous les rangs que vos éclats permettent">Maximum · +${k} rangs</button>`:""}`}
   else if(st==="own")act=n[9]==="oath"?`<button class="btn" data-a="arbLeave" data-k="${n[8]}">Quitter cette voie (rend ses éclats)</button>`:`<span class="tag">Acquis</span>`;
   else if(st==="ok")act=`<button class="btn pri" data-a="arbBuy" data-id="${n[0]}" ${S.souls<c?"disabled":""}>Acheter · ${fmt(c)} <span class="soul"></span></button>`;
   else act=`<span class="small muted">${!arb("eveil")&&n[0]!=="eveil"?"Achetez d'abord l'Éveil d'Oméga":n[8]&&!a.voies.includes(n[8])?`Vous suivez déjà ${arbMaxV()} voie${arbMaxV()>1?"s":""} : achetez un niveau du Pacte des voies ou quittez une voie`:"Pas encore disponible"}</span>`;

@@ -25,6 +25,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"otabP":otabP=b.dataset.t;renderPanel(true);break;
     case"arbSel":{const id=b.dataset.id,t=Date.now();if(arbSel===id&&t-arbClickT<450){arbBuy(id);arbClickT=0}else arbClickT=t;arbSel=id;renderPanel(true);break}
     case"arbBuy":arbBuy(b.dataset.id);renderPanel(true);break;
+    case"arbEchoMax":arbEchoMax();renderPanel(true);break;
     case"arbLeave":arbLeave(b.dataset.k);renderPanel(true);break;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;
     case"prestNo":prestConfirm=false;renderPanel();break;
@@ -43,7 +44,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"tipOk":closeTip();break;
     case"tipGo":{const t=tipShown;if(t&&t.tab){S.tab=t.tab;UI.open(true);renderPanel()}closeTip();break}
     case"tipsReset":S.tips={};tipQ=[];toast("Les conseils réapparaîtront au fil du jeu",1);break;
-    case"otab":otab=b.dataset.t;renderPanel();break;
+    case"otab":otab=b.dataset.t;bkArm=-1;renderPanel();break;
     case"optSet":{const k=b.dataset.k,v=b.dataset.v;S.opt[k]=isNaN(+v)?v:+v;applyOpts();renderPanel();break}
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
     case"code":{const i=$("codeBox");useCode(i&&i.value);if(i)i.value="";break}
@@ -105,10 +106,12 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"ouvFire":{OUV.fire(+b.dataset.i);renderPanel();break}
     case"job":{const r=b.dataset.r;S.job=S.job&&S.job.r===r?null:{r,t:0};renderPanel();break}
     case"copy":{const t=$("exportBox");const done=()=>toast("Code de sauvegarde copié",1);try{navigator.clipboard.writeText(t.value).then(done,()=>{t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)})}catch(err){t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)}break}
-    case"import":{try{const d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))));if(!d||!d.cls)throw 0;S=Object.assign(fresh(),d);save();boot2();toast("Partie chargée",1)}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.",1)}break}
+    case"bkLoad":{const i=+b.dataset.i;if(bkArm!==i){bkArm=i;renderPanel(true);break}bkArm=-1;if(bkLoad(i)){boot2();toast("Sauvegarde de secours restaurée",1)}else toast("Cette sauvegarde de secours est illisible.",1);renderPanel(true);break}
+    case"bkNow":backup("manuel");toast("Copie de secours créée",1);renderPanel(true);break;
+    case"import":{try{const d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))));if(!d||!d.cls)throw 0;backup("import");S=Object.assign(fresh(),d);save();boot2();toast("Partie chargée",1)}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.",1)}break}
     case"reset":confirmReset=true;renderPanel();break;
     case"resetNo":confirmReset=false;renderPanel();break;
-    case"resetYes":confirmReset=false;S=fresh();try{localStorage.removeItem(SAVE_KEY)}catch(err){}showCreate();break;
+    case"resetYes":confirmReset=false;backup("reset");S=fresh();try{localStorage.removeItem(SAVE_KEY)}catch(err){}showCreate();break;
   }
 });
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){const v=+e.target.value;S.opt[k]=Number.isFinite(v)?v:OPT_DEF[k];const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});
