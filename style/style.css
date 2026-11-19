@@ -1442,3 +1442,29 @@ button,select,label,[data-a],a{cursor:pointer}
 .hchart .hp circle{fill:var(--xp);stroke:var(--bg2);stroke-width:2px;vector-effect:non-scaling-stroke;opacity:0}
 .hchart .hp:hover line,.hchart .hp:hover circle{opacity:1}
 .hfoot{display:flex;justify-content:space-between}
+/* Carte du monde au-dessus du menu des mondes (js/carte.js) */
+.wmap{width:100%;margin:0 0 4px}
+.wsvg{display:block;width:100%;height:auto;shape-rendering:crispEdges;overflow:visible}
+.wsvg .wbg{fill:#f3e0b0;stroke:var(--ink);stroke-width:2px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.wsvg .wsol{opacity:.55}
+.wsvg .wdec{pointer-events:none}
+.wsvg .wdec.fog{opacity:.35;filter:grayscale(1) sepia(.5)}
+.wsvg .wpath{fill:none;stroke:#7a4a26;stroke-width:2.5px;stroke-linejoin:round;shape-rendering:auto}
+.wsvg .wpath.off{stroke:#8a7050;stroke-width:1.5px;stroke-dasharray:3 3}
+.wsvg .wsq{stroke:var(--ink);stroke-width:1.5px}
+.wsvg .wnode.ok{cursor:pointer}
+.wsvg .wnode.ok:hover .wsq{stroke:var(--sun-d);stroke-width:2.5px}
+.wsvg .wnode.here .wsq{stroke:var(--sun);stroke-width:2.5px}
+.wsvg .wq{font:700 8px var(--display);fill:#5c4a3a;text-anchor:middle}
+.wsvg .wpole{fill:var(--ink)}
+.wsvg .wflag{fill:var(--sun);stroke:var(--ink);stroke-width:.6px}
+.wsvg .wtok{pointer-events:none}
+.wsvg .wtok ellipse{fill:rgba(0,0,0,.3)}
+.wsvg .wtok image{image-rendering:pixelated}
+/* Thèmes des panneaux (Options > Affichage) : Sombre = parchemin inversé (les images gardent leurs couleurs), Contraste élevé */
+html.th-sombre .card,html.th-sombre .ovc,html.th-sombre .goals,html.th-sombre .wmap{filter:invert(1) hue-rotate(180deg) brightness(.92)}
+html.th-sombre .card img,html.th-sombre .ovc img,html.th-sombre .goals img,html.th-sombre .card canvas,html.th-sombre .ovc canvas,html.th-sombre .wmap image,html.th-sombre .card .heroimg{filter:hue-rotate(-180deg) invert(1)}
+html.th-contraste{--fg:#1a0d06;--muted:#3e2614;--line:#4a2a14}
+html.th-contraste .muted,html.th-contraste .small.muted{color:#3e2614!important}
+html.th-contraste .card,html.th-contraste .ovc{background-image:none}
+html.th-contraste .btn{text-shadow:1px 1px 0 #000,-1px 0 0 #000}
