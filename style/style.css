@@ -1380,3 +1380,19 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 html,body{cursor:default;-webkit-user-select:none;user-select:none}
 input,textarea,[contenteditable]{cursor:text;-webkit-user-select:text;user-select:text}
 button,select,label,[data-a],a{cursor:pointer}
+
+/* Arbre Oméga (js/arbre.js) */
+.aboard{position:relative;overflow:auto;border:3px solid var(--ink);background:repeating-linear-gradient(#f9eecb 0 6px,#f1e1b6 6px 7px);max-height:70vh}
+.ainner{position:relative}.alinks{position:absolute;inset:0;pointer-events:none}
+.alane{position:absolute;color:#fff;border:3px solid var(--ink);font-size:14px;letter-spacing:1px;text-transform:uppercase;text-align:center;padding:1px 6px}
+.anode{position:absolute;width:120px;min-height:56px;background:#efeaff;border:3px solid #2e2350;border-left:6px solid var(--c);padding:3px 6px 4px;text-align:left;font:inherit;font-size:13px;line-height:1.1;color:var(--fg);cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.18)}
+.anode b{display:block;font-size:15px;font-weight:400}
+.anode .act{display:inline-flex;align-items:center;gap:3px;margin-top:3px;background:#d8cfbd;border:2px solid #9a8a78;font-size:12px;padding:0 4px}
+.anode .act.can{background:var(--sun,#f0c23a);border-color:#7a3408}.anode .act .soul{transform:scale(.7)}
+.anode.own{background:#d9f2cf;border-color:#2f6a22}.anode.own .act{background:#8a8a8a;border-color:#555;color:#fff}
+.anode.lock{background:#e4ddd0;color:#9a8a78;border-color:#b0a48e;border-left-color:#b0a48e;box-shadow:none}
+.anode.cap{box-shadow:0 0 0 3px var(--c),0 3px 0 rgba(0,0,0,.2)}.anode.first{background:#3b2a74;color:#fff;border-color:var(--ink)}.anode.first.lock{background:#e4ddd0;color:#9a8a78}
+.anode.fin{background:#2a1606;color:#ffd27a;border-color:#ffd27a}.anode.fin.lock{background:#e4ddd0;color:#9a8a78;border-color:#b0a48e}
+.anode.on{outline:3px solid #3b2a74;outline-offset:2px}
+.afiche{margin-top:8px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;background:var(--bg2);border:3px solid var(--ink);padding:8px 12px}
+.afiche .nm{font-size:19px;font-weight:400}
