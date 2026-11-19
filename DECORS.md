@@ -4,10 +4,13 @@ Seule la Prairie (zone 0) est réglée. Les autres zones passent par le même g�
 
 ## Où ça se passe
 
-- `js/monde.js`
-  - `makeLayers(zid)` génère les plans d'une zone, une seule fois par zone.
-  - `lowland()` génère la prairie sous les menus.
-  - `draw()` dessine chaque image ; la vie du décor est dans `updLife()` et `drawLife()`.
+- `js/biomes/` : un fichier par monde (`prairie.js`, `bois.js`, `marais.js`…). Chacun remplit `BIOME.<zid>`, la fonction
+  qui génère les plans de ce monde (une seule fois par zone), et le décor sous les menus (`lowland()` pour la Prairie,
+  `boisLow()`, `maraisLow()`…). Les outils communs (`wave`, `wset`, `wblit`, `deco`, hauteurs `FARH`, `MIDH`, `TM`…)
+  sont dans `js/biomes/outils.js` (objet `MK`). Un nouveau fichier de biome s'ajoute dans `index.html`, après
+  `outils.js` et avant `monde.js`.
+- `js/monde.js` : le moteur. `makeLayers(zid)` choisit `BIOME[zid]` (la Prairie en repli) ; `draw()` dessine chaque
+  image ; la vie du décor est dans `updLife()` et `drawLife()`.
 - `js/pixel.js` : `TH[zid]` contient le thème de chaque biome (couleurs `g`, `path`, `wall`, `wc`, `water`, `props`, `fl`). Les accessoires `prop.*` (tree, pine, rock, bush, crystal, cactus, reed, coral, pillar…) sont exposés par `PX.kit`.
 - `style/monde.css` : mise en page du bandeau, sans rien de propre aux biomes.
 
