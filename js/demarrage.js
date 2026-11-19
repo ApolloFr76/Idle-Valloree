@@ -29,7 +29,7 @@ function loop(){
     if(paused||(S.opt.pauseHidden&&document.hidden))dt=0;
     if(dt>120){const s=document.hidden?settleAfk():S.opt.offline?offline(dt):null;if(!document.hidden)S.afkWeight=0;if(s){boot2();if(s.kills||Object.keys(s.res).length)showOffline(s)}}
     else if(dt>0){fx=!document.hidden&&dt<1;const steps=Math.min(600,Math.ceil(dt/.2));for(let i=0;i<steps;i++)tick(dt/steps);fx=true}
-    live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests();checkTips();liveStats()}
+    live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests();checkTips();liveStats();histTick()}
     if(dirty&&now-lastPanel>600){lastPanel=now;renderPanel()}
   }
 }

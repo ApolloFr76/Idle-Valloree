@@ -98,8 +98,11 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"invSellNo":invSellArm=false;renderPanel(true);break;
     case"page":invP=Math.max(0,invP+ +b.dataset.d);renderPanel();break;
     case"unequip":delete S.equip[b.dataset.s];S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
-    case"sellStack":{const k=b.dataset.k,eq=new Set(Object.values(S.equip)),L=S.items.filter(x=>!eq.has(x.u)&&stackKey(x)===k);if(!L.length)break;const it=ITEMS[L[0].id],v=Math.round(it.price*(1+.2*(L[0].e||0))*sellMult()*rarOf(L[0]).m)*L.length;S.items=S.items.filter(x=>!L.includes(x));gainEcus(v);sfx("coin");selInv=null;toast(`${L.length}× ${it.name} vendus : +${fmt(v)} écus`);renderPanel();break}
-    case"sellItem":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u),it=ITEMS[i.id],v=Math.round(it.price*(1+.2*(i.e||0))*sellMult()*rarOf(i).m);S.items=S.items.filter(x=>x.u!==u);gainEcus(v);nextInStack(stackKey(i));toast(`${it.name} vendu : +${fmt(v)} écus`);renderPanel();break}
+    case"sellStack":{const k=b.dataset.k,eq=new Set(Object.values(S.equip)),L=S.items.filter(x=>!eq.has(x.u)&&stackKey(x)===k&&!isLk(x));if(!L.length)break;const it=ITEMS[L[0].id],v=Math.round(it.price*(1+.2*(L[0].e||0))*sellMult()*rarOf(L[0]).m)*L.length;S.items=S.items.filter(x=>!L.includes(x));gainEcus(v);sfx("coin");selInv=null;toast(`${L.length}× ${it.name} vendus : +${fmt(v)} écus`);renderPanel();break}
+    case"lockItem":{const i=S.items.find(x=>x.u===+b.dataset.u);if(i){if(i.lk)delete i.lk;else i.lk=1;selInv=selInv&&selInv[0]==="u"?"u:"+i.u:selInv;dirty=true}renderPanel(true);break}
+    case"ofSave":outfitSave(+b.dataset.i);renderPanel(true);break;
+    case"ofWear":outfitWear(+b.dataset.i);renderPanel();break;
+    case"sellItem":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u);if(!i||isLk(i))break;const it=ITEMS[i.id],v=Math.round(it.price*(1+.2*(i.e||0))*sellMult()*rarOf(i).m);S.items=S.items.filter(x=>x.u!==u);gainEcus(v);nextInStack(stackKey(i));toast(`${it.name} vendu : +${fmt(v)} écus`);renderPanel();break}
     case"ench":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u),it=ITEMS[i.id],e=i.e||0,cost=enchCost(i);if(S.ecus<cost||e>=10)break;S.ecus-=cost;
       if((arb("r6")&&e<5)||Math.random()<Math.max(.2,.9-.07*e)){i.e=e+1;inc("enchOk");mx("enchMax",i.e);toast(`Réussite ! ${it.name} +${i.e}`);log(`Enchantement réussi : ${it.name} +${i.e}.`,"g")}else{toast("L'enchantement a échoué. Les écus sont perdus.");inc("enchKo")}renderPanel();break}
     case"ouvHire":{OUV.hire(b.dataset.p);renderPanel();break}

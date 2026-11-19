@@ -29,7 +29,7 @@ document.addEventListener("pointerdown",()=>{ptrDown=true},true);
 addEventListener("pointerup",()=>{setTimeout(()=>{ptrDown=false},0)},true);
 addEventListener("pointercancel",()=>{ptrDown=false},true);
 /* Les objets identiques (même objet, même rareté, même enchantement) s'empilent dans le sac */
-const stackKey=i=>i.id+"|"+(i.e||0)+"|"+(i.r||0);
+const stackKey=i=>i.id+"|"+(i.e||0)+"|"+(i.r||0)+(i.lk?"|v":"");
 function nextInStack(key){const eq=new Set(Object.values(S.equip)),n=S.items.find(x=>!eq.has(x.u)&&stackKey(x)===key);selInv=n?"u:"+n.u:null}
 /* ================= Prochains objectifs (panneau toujours visible) ================= */
 function nextGoals(){const G=[],lp=n=>Math.min(1,(S.lvl-1+S.xp/xpNeed(S.lvl))/Math.max(1,n-1)),C=CLASSES[S.cls];
