@@ -887,7 +887,7 @@ html.rm .omegafx i,html.rm .fx.pt{display:none}
   .main>.card{min-height:0;overflow:auto;scrollbar-width:thin}
   #panelCard{display:flex;flex-direction:column;overflow:hidden}
   #panelCard>.tabs{flex:none}
-  #panel{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding-right:4px}
+  #panel{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding:4px 12px 14px 4px}
   #sideCard{display:flex;flex-direction:column;gap:10px}
   #sideCard .goals{margin-top:0;flex:none}
   #sideCard #pots{margin-top:0!important}
