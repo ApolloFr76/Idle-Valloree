@@ -2,7 +2,7 @@ let allocN=100;   /* nombre de points ajoutés par le bouton « +N » (champ en 
 /* Onglet Personnage. */
 function pPerso(){
   const st=stats(),C=CLASSES[S.cls],need=xpNeed(S.lvl);
-  let h=`<div class="sheet"><div class="shead">${emb(S.cls,56)}<div><h2>${esc(S.name)}</h2><div class="muted">${C.name}, niveau ${S.lvl}</div></div></div>
+  let h=`<div class="sheet"><div class="shead">${myBadge(56)}<div><h2>${esc(S.name)}</h2><div class="muted">${C.name}, niveau ${S.lvl}</div></div></div>
   <div class="ptabs"><button class="ptab${ptab==="resume"?" on":""}" data-a="ptab" data-t="resume">Résumé</button><button class="ptab${ptab==="details"?" on":""}" data-a="ptab" data-t="details">Détails</button><button class="ptab${ptab==="stats"?" on":""}" data-a="ptab" data-t="stats">Statistiques</button></div>`;
   if(ptab==="stats"){const T=S.st,t=Math.floor(T.time||0),hh=Math.floor(t/3600),mm=Math.floor(t%3600/60);
     const L=[["Temps de jeu",`${hh} h ${mm} min`],["Clics",fmt(T.clicks||0)],["Combo record",fmt(T.maxCombo||0)],["Dégâts infligés",fmt(T.dmg||0)],["Plus gros coup",fmt(T.maxHit||0)],["Dégâts des compagnons",fmt(T.allyDmg||0)],
