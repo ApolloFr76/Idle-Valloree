@@ -25,6 +25,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"otabP":otabP=b.dataset.t;renderPanel(true);break;
     case"arbSel":{const id=b.dataset.id,t=Date.now();if(arbSel===id&&t-arbClickT<450){arbBuy(id);arbClickT=0}else arbClickT=t;arbSel=id;renderPanel(true);break}
     case"arbBuy":arbBuy(b.dataset.id);renderPanel(true);break;
+    case"wmGo":goZone(+b.dataset.i);break;
     case"arbEchoMax":arbEchoMax();renderPanel(true);break;
     case"arbLeave":arbLeave(b.dataset.k);renderPanel(true);break;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;

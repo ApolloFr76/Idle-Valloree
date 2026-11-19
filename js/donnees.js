@@ -432,7 +432,7 @@ const OPT_DEF={
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
   potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,autoTower:true,autoQuest:true,autoZone:true,autoFortune:true,autoClick:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
-  keys:true,saveEvery:10,offline:true,showArmor:true};
+  keys:true,saveEvery:10,offline:true,showArmor:true,theme:"parchemin"};
 /* Rareté des objets fabriqués */
 const RAR=[{n:"Commun",c:"#5a4a3a",m:1},{n:"Rare",c:"#1f6fb8",m:1.15},{n:"Épique",c:"#7a3fc0",m:1.35},{n:"Légendaire",c:"#c2560a",m:1.6}];
 /* Chances de rareté (%) selon le score de forge (0 à 6 points), et sans mini-jeu */

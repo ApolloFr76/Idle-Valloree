@@ -9,7 +9,7 @@ function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)
 const ZBG=["#57b04a","#1f9a78","#8a9a2e","#8a6ac8","#f0962c","#3d9fe0","#6a86b8","#2fa84a","#1fb0c8","#e2502c","#a88ae0","#5a3f96"];
 function drawZones(){const bosses=S.zoneBosses||{},opts=ZONES.map((z,i)=>{const levelLock=S.lvl<z.lvl[0],bossLock=i>0&&!bosses[i-1],locked=levelLock||bossLock;return i>1&&levelLock?"":`<option value="${i}" style="background:${locked?"#a8977e":ZBG[i]};color:#fff8e6"${i===S.zone?" selected":""}${locked?" disabled":""}>${z.name} · Niv. ${z.lvl[0]}–${z.lvl[1]}${locked?" · verrouillée":""}</option>`}).join("");
   $("zones").innerHTML=`<label class="zsel"><span>Monde</span><select id="zoneSel" style="--zb:${ZBG[S.zone]}" data-tip="z:${S.zone}" aria-label="Choisir le monde">${opts}</select></label>`;
-  MONDE.zone(ZONES[S.zone].id)}
+  MONDE.zone(ZONES[S.zone].id);if(typeof CARTE!=="undefined")CARTE.draw()}
 /* Icône d'élément du monstre : un seul élément gardé d'un monstre à l'autre (mis à jour sur place),
    pour que l'info-bulle reste ouverte et que l'icône ne bouge pas quand les monstres meurent vite. */
 function monIco(){let e=$("mIco");if(!e){e=document.createElement("span");e.id="mIco";e.className="mico";$("mName").before(e)}return e}
