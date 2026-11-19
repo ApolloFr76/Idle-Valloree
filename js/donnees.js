@@ -332,9 +332,9 @@ const PREST_LVL=100;
    Le niveau du personnage est illimité. */
 const omegaN=()=>(S&&S.prest)||0;
 const lvlMax=()=>Infinity;
-/* Éclats gagnés depuis le début (dépensés ou non) : +25 % de dégâts chaque fois que ce total est multiplié par 10.
+/* Éclats gagnés depuis le début (dépensés ou non) : +12,5 % de dégâts chaque fois que ce total est multiplié par 10.
    Dépenser ne fait donc rien perdre, et le bonus reste raisonnable même avec des milliers de milliards d'éclats. */
-const SOUL_PCT=25;
+const SOUL_PCT=12.5;
 const soulBonus=()=>SOUL_PCT*Math.log10(1+((S&&S.soulsTotal)||0));
 const TALENTS={
   "Combat":[["t_force","Force brute","+10 % de dégâts",1],["t_prec","Précision","+2 % de critique",1],["t_vie","Vitalité ancestrale","+10 % de PV",2],["t_elem","Maîtrise élémentaire","Les faiblesses font +10 % de dégâts en plus",3]],
