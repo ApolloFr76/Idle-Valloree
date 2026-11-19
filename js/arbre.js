@@ -73,16 +73,37 @@ const arbGatherDiv=()=>arb("rcap")?3:1,ouvMax=()=>6+(arb("r1")?2:0),craftQ=q=>ar
 /* ---------- affichage (onglet Oméga > Arbre) ---------- */
 let arbSel="eveil";
 const ARB_COL={cb:"#c8402e",fo:"#d99a1e",rc:"#3f8f2e",tr:"#7a4fc0",om:"#ffd27a",bp:"#1f8a9a"};
-/* à l'ouverture, centre la vue sur le nœud choisi (le panneau est plus étroit que l'arbre) */
-function arbCenter(){const b=document.querySelector(".aboard");if(!b||b._arbInit)return;b._arbInit=1;const n=b.querySelector(`[data-id="${arbSel}"]`);if(n){b.scrollLeft=Math.max(0,n.offsetLeft-b.clientWidth/2+60);b.scrollTop=Math.max(0,n.offsetTop-40)}}
-function pArbre(){setTimeout(arbCenter,0);const a=arbS(),CW=132,RH=84,P=16,W=12*CW+P*2-12,H=11*RH+P*2,pos={};ARB.forEach(n=>pos[n[0]]={x:P+n[1]*CW,y:P+n[2]*RH+14});
-  let s=`<svg class="alinks" width="${W}" height="${H}" aria-hidden="true">`;
-  ARB.forEach(n=>n[7].forEach(p=>{const A=pos[p],B=pos[n[0]];const ax=A.x+60,ay=A.y+28,bx=B.x+60,by=B.y+28,my=n[2]-ARB_ID[p][2]>1?B.y-12:(ay+by)/2,st=arbState(n);
-    s+=`<path d="M${ax} ${ay} V${my} H${bx} V${by}" fill="none" stroke="${arb(p)&&st!=="lock"?"#2f6a22":st==="lock"?"#cdbf9f":"#6b5a9a"}" stroke-width="${arb(p)&&st!=="lock"?4:3}" ${n[0]==="coeur"?'stroke-dasharray="7 5"':""}/>`}));
-  s+="</svg>";
-  const lanes=Object.values(ARB_V).map(v=>`<div class="alane" style="left:${P+v.b*CW}px;top:${P+3*RH-14}px;width:${3*CW-12}px;background:${ARB_COL[v.c]}">${v.c==="bp"?v.nom:"Voie du "+v.nom}</div>`).join("")+`<div class="alane" style="left:${P}px;top:${P+RH+14}px;width:${CW-12}px;background:${ARB_COL.tr};padding:12px 4px">Tronc<br>commun</div>`;
-  const nodes=ARB.map(n=>{const st=arbState(n),c=arbCost(n),lbl=st==="own"?(n[0]==="pacte"?"Niveau 3 · max":"Acquis"):(n[0]==="echo"?"Rang "+a.echo+" · ":n[0]==="pacte"?"Niv. "+a.pacte+"/3 · ":"")+fmt(c);
-    return`<button class="anode ${st}${n[9]?" "+n[9]:""}${arbSel===n[0]?" on":""}" data-a="arbSel" data-id="${n[0]}" style="left:${pos[n[0]].x}px;top:${pos[n[0]].y}px;--c:${ARB_COL[n[3]]}"><b>${n[4]}</b><span class="act${st!=="own"&&S.souls>=c&&st==="ok"?" can":""}">${lbl}${st==="own"?"":` <span class="soul"></span>`}</span></button>`}).join("");
+/* Vue de l'arbre (menu déroulant) : "carte" = arbre entier en pastilles (par défaut), sinon une partie en grand :
+   tronc commun (tr), une voie (g, m, r, bp) ou le sommet (som). Le détail et l'achat sont dans la fiche sous l'arbre. */
+let arbVue="carte";
+const ARB_VUES=[["carte","Carte entière"],["tr","Tronc commun"],["g","Voie du Guerrier"],["m","Voie du Marchand"],["r","Voie de l'Artisan"],["bp","Boutique permanente"],["som","Sommet"]];
+const arbPart=k=>k==="tr"?ARB.filter(n=>!n[8]&&n[0]!=="coeur"&&n[0]!=="echo"):k==="som"?ARB.filter(n=>n[0]==="coeur"||n[0]==="echo"):ARB.filter(n=>n[8]===k);
+/* place des cases dans une vue en grand : [colonne, ligne] sur 3 colonnes */
+function arbPlace(k){if(k==="tr")return{eveil:[1,0],t5:[0,1],t6:[0,2],t7:[0,3],t1:[2,1],t2:[2,2],t3:[2,3],pacte:[1,2]};
+  if(k==="som")return{gcap:[0,0],mcap:[2,0],rcap:[0,1],bpcap:[2,1],coeur:[1,2],echo:[1,3]};
+  const b=ARB_V[k].b,p={};arbPart(k).forEach(n=>p[n[0]]=[n[1]-b,n[2]-3]);return p}
+/* liens entre cases : repère en unités (100 par colonne), étiré en CSS ; le trait garde son épaisseur */
+function arbLinks(list,pos,W,H,dy){let s=`<svg class="alinks" width="100%" height="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">`;
+  list.forEach(n=>n[7].forEach(p=>{const A=pos[p],B=pos[n[0]];if(!A||!B)return;const st=arbState(n),on=arb(p)&&st!=="lock",ay=A.y+dy,by=B.y+dy,my=B.y-A.y>dy*3.5?B.y-dy:(ay+by)/2;
+    s+=`<path d="M${A.x} ${ay} V${my} H${B.x} V${by}" fill="none" vector-effect="non-scaling-stroke" stroke="${on?"#2f6a22":st==="lock"?"#cdbf9f":"#6b5a9a"}" stroke-width="${on?3:2}"${n[0]==="coeur"?' stroke-dasharray="6 4"':""}/>`}));return s+"</svg>"}
+const arbLbl=(n,st,c)=>st==="own"?(n[0]==="pacte"?"Niveau 3 · max":"Acquis"):(n[0]==="echo"?"Rang "+arbS().echo+" · ":n[0]==="pacte"?"Niv. "+arbS().pacte+"/3 · ":"")+fmt(c);
+/* carte entière : 12 colonnes × 11 lignes de pastilles, place réservée au-dessus des voies pour leur nom */
+function arbCarte(){const Y=r=>r*100+(r>=3?40:0),W=1200,H=Y(10)+100,pos={};ARB.forEach(n=>pos[n[0]]={x:n[1]*100+50,y:Y(n[2])+50});
+  const pc=(x,y)=>`left:${x/W*100}%;top:${y/H*100}%`;
+  const lanes=Object.entries(ARB_V).map(([k,v])=>{const l=arbPart(k);return`<div class="alane" style="${pc(v.b*100+8,300)};width:${284/W*100}%;background:${ARB_COL[v.c]}">${k==="bp"?"Boutique":v.nom} ${l.filter(x=>arb(x[0])).length}/${l.length}</div>`}).join("");
+  const dots=ARB.map(n=>{const st=arbState(n),c=arbCost(n),can=st==="ok"&&S.souls>=c;
+    return`<button class="adot ${st}${can?" can":""}${n[9]?" "+n[9]:""}${arbSel===n[0]?" on":""}" data-a="arbSel" data-id="${n[0]}" title="${n[4]} · ${arbLbl(n,st,c)}" aria-label="${n[4]} : ${arbLbl(n,st,c)}" style="${pc(pos[n[0]].x,pos[n[0]].y)};--c:${ARB_COL[n[3]]}">${st==="own"?"✓":can?"+":""}</button>`}).join("");
+  return`<div class="aboard amap"><div class="ainner" style="aspect-ratio:${W}/${H}">${arbLinks(ARB,pos,W,H,0)}${lanes}${dots}</div></div>
+    <div class="alegend small muted"><span><i class="own"></i>Acquis</span><span><i class="can"></i>Achetable</span><span><i></i>Trop cher</span><span><i class="lock"></i>Verrouillé</span></div>`}
+/* une partie de l'arbre en grand (3 colonnes) : tient dans le panneau sans défiler */
+function arbZoom(k){const P=arbPlace(k),list=Object.keys(P).map(id=>ARB_ID[id]),RH=84,rows=Math.max(...Object.values(P).map(p=>p[1]))+1,W=300,H=rows*RH+12,pos={};
+  list.forEach(n=>{const[c,r]=P[n[0]];pos[n[0]]={x:c*100+50,y:8+r*RH}});
+  const nodes=list.map(n=>{const st=arbState(n),c=arbCost(n),[col]=P[n[0]];
+    return`<button class="anode ${st}${n[9]?" "+n[9]:""}${arbSel===n[0]?" on":""}" data-a="arbSel" data-id="${n[0]}" style="left:calc(${col*100/3}% + 5px);top:${pos[n[0]].y}px;width:calc(${100/3}% - 10px);--c:${ARB_COL[n[3]]}"><b>${n[4]}</b><span class="act${st!=="own"&&S.souls>=c&&st==="ok"?" can":""}">${arbLbl(n,st,c)}${st==="own"?"":` <span class="soul"></span>`}</span></button>`}).join("");
+  return`<div class="aboard azoom"><div class="ainner" style="height:${H}px">${arbLinks(list,pos,W,H,28)}${nodes}</div></div>`}
+function pArbre(){const a=arbS();if(!ARB_VUES.some(v=>v[0]===arbVue))arbVue="carte";
+  const opts=ARB_VUES.map(([k,nm])=>{const l=k==="carte"?ARB:arbPart(k);return`<option value="${k}"${arbVue===k?" selected":""}>${nm} · ${l.filter(x=>arb(x[0])).length}/${l.length}</option>`}).join("");
+  const board=`<label class="avue"><span>Vue</span><select id="arbVue" aria-label="Partie de l'arbre affichée">${opts}</select></label>`+(arbVue==="carte"?arbCarte():arbZoom(arbVue));
   const n=ARB_ID[arbSel]||ARB[0],st=arbState(n),c=arbCost(n);
   const need=n[0]==="coeur"?`Demande les 4 voies achetées en entier (${ARB_VK.filter(arbFull).length}/4 terminées)`:n[0]==="pacte"?`Niveau ${a.pacte}/3 · ${arbMaxV()} voie${arbMaxV()>1?"s":""} possible${arbMaxV()>1?"s":""}`:n[7].length?"Demande : "+n[7].map(p=>ARB_ID[p][4]).join(" ou "):"Premier achat de l'arbre";
   let act;if(n[0]==="pacte"&&arb("eveil")&&a.pacte<3)act=`<button class="btn pri" data-a="arbBuy" data-id="pacte" ${S.souls<c?"disabled":""}>Niveau ${a.pacte+1} · ${fmt(c)} <span class="soul"></span></button>`;
@@ -92,5 +113,5 @@ function pArbre(){setTimeout(arbCenter,0);const a=arbS(),CW=132,RH=84,P=16,W=12*
   else act=`<span class="small muted">${!arb("eveil")&&n[0]!=="eveil"?"Achetez d'abord l'Éveil d'Oméga":n[8]&&!a.voies.includes(n[8])?`Vous suivez déjà ${arbMaxV()} voie${arbMaxV()>1?"s":""} : achetez un niveau du Pacte des voies ou quittez une voie`:"Pas encore disponible"}</span>`;
   const vn=n[8]?(n[8]==="bp"?"voie de la Boutique permanente":"voie du "+ARB_V[n[8]].nom):"";
   return`<div class="sec"><p class="small muted" style="margin:0 0 6px">Achetez d'abord l'Éveil d'Oméga. Prêtez ensuite un serment parmi 4 voies ; le Pacte des voies en ouvre une de plus à chaque niveau. Le Cœur d'Oméga demande les 4 voies complètes. Quitter une voie rend ses éclats. Voies suivies : <b>${a.voies.length}/${arbMaxV()}</b>.</p>
-    <div class="aboard"><div class="ainner" style="width:${W}px;height:${H}px">${s}${lanes}${nodes}</div></div>
+    ${board}
     <div class="afiche"><div><b class="nm">${n[4]}</b>${vn?` <span class="small muted">· ${vn}</span>`:""}<div>${n[5]}</div><div class="small muted">${need}</div></div><div>${act}</div></div></div>`}
