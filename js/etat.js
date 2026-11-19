@@ -25,7 +25,15 @@ const fmt=n=>{n=Math.floor(n);if(n<0)return"-"+fmt(-n);const f=S&&S.opt&&S.opt.n
 const NUM_SUF=["","k","M","B","T","qu","Q","sx","Sp","Oc","No","Dc"];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let dirty=true, fx=true;
-function toast(msg,force){const tm=S&&S.opt&&S.opt.toasts;if(!force&&(tm==="none"||tm==="important"&&!/niveau|succès|boss|quête|trophée|éclat|donjon|record|légendaire|épique|braises|averse|tempête|secousses|dorée|étoilée|brume/i.test(msg)))return;const t=$("toast");t.textContent=msg;t.hidden=false;t.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.hidden=true,300)},2200)}
+/* Place la bulle là où elle ne cache rien : dans le décor libre à gauche du panneau ouvert, au-dessus de la barre de sorts ;
+   si le panneau occupe presque tout l'écran (fenêtre étroite, téléphone), en haut de l'écran. */
+function placeToast(t){const st=t.style;st.left=st.top=st.bottom=st.maxWidth="";t.classList.remove("ttop");
+  const pc=$("panelCard"),bar=document.querySelector(".abar"),W=innerWidth,H=innerHeight;let L=0,R=W;
+  const open=pc&&typeof UI!=="undefined"&&UI.o;if(open){const r=pc.getBoundingClientRect();if(r.width&&r.left<W)R=Math.max(0,r.left)}
+  if(R-L<260){t.classList.add("ttop");return}
+  const bt=bar&&bar.getBoundingClientRect(),y=bt&&bt.height&&bt.top>H/2?H-bt.top+8:18;
+  st.left=(L+R)/2+"px";st.bottom=y+"px";st.maxWidth=(R-L-24)+"px"}
+function toast(msg,force){const tm=S&&S.opt&&S.opt.toasts;if(!force&&(tm==="none"||tm==="important"&&!/niveau|succès|boss|quête|trophée|éclat|donjon|record|légendaire|épique|braises|averse|tempête|secousses|dorée|étoilée|brume/i.test(msg)))return;const t=$("toast");t.textContent=msg;t.hidden=false;placeToast(t);t.style.opacity=1;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.style.opacity=0;setTimeout(()=>t.hidden=true,300)},2200)}
 const LOG_MAX=60;
 function log(html,cls="w"){S.log.unshift({h:html,c:cls,t:Date.now()});S.log.length=Math.min(S.log.length,LOG_MAX);renderLog()}
 /* rejoue l'animation CSS d'une classe. La classe est retirée tout de suite et remise à l'image suivante,
