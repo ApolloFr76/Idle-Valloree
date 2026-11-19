@@ -1375,3 +1375,8 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 /* bulles : jamais cliquables, placées par placeToast() (etat.js) pour ne pas cacher le bas des panneaux */
 .toast{pointer-events:none}
 .toast.ttop{top:calc(8px + env(safe-area-inset-top,0px))!important;bottom:auto!important;left:50%!important}
+
+/* Jeu : flèche partout et pas de sélection de texte au clic ; seuls les champs de saisie gardent le curseur texte */
+html,body{cursor:default;-webkit-user-select:none;user-select:none}
+input,textarea,[contenteditable]{cursor:text;-webkit-user-select:text;user-select:text}
+button,select,label,[data-a],a{cursor:pointer}
