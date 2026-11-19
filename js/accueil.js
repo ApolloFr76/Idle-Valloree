@@ -31,7 +31,7 @@ const ACCUEIL=(()=>{
   function render(){if(!el)return;const keep={};el.querySelectorAll("input").forEach(i=>{keep[i.className||i.id]=i.value});const foc=document.activeElement&&el.contains(document.activeElement)?document.activeElement.className||document.activeElement.id:null;
     const L=COMPTE.logged(),k=hasHero()?S.cls:"guerrier";if(!L)online=null;else if(online===null&&!pinging)check();
     el.innerHTML=`<div class="accrib">Les Terres de Vallorée</div><div class="acchero">${heroSVG(k)}</div><div class="accbub">${L||hasHero()?(hasHero()?(L?"On y retourne ?":"On garde ma partie ?"):"Prêt pour l'aventure ?"):"Prêt pour l'aventure ?"}</div>
-      <div class="accboard"><h2 class="acctitle">${L?`Bon retour, <span class="acchl">${esc(COMPTE.pseudo())}</span>`:`Rejoignez <span class="acchl">Vallorée</span>`}</h2>${L?logged():guest()}</div>`;
+      <div class="accboard"><h2 class="acctitle">${L?`Bon retour, <span class="acchl">${esc(COMPTE.pseudo())}</span>`:`Rejoignez <span class="acchl">Vallorée</span>`}</h2>${L?logged():guest()}</div>${L?RANG.board():""}`;
     el.querySelectorAll("input").forEach(i=>{const v=keep[i.className||i.id];if(v!=null&&i.id!=="accName")i.value=v;else if(v!=null)i.value=v});
     if(foc){const f=el.querySelector("."+foc.split(" ")[0])||el.querySelector("#"+foc);if(f&&f.focus)f.focus()}}
   function check(){if(!COMPTE.on()||!COMPTE.logged()||pinging)return;online=null;pinging=true;COMPTE.ping().then(v=>{online=v;pinging=false;render()})}

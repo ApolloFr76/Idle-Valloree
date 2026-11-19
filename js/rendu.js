@@ -58,7 +58,7 @@ function live(){
 }
 
 /* --- Onglets --- */
-const TABS=[["perso","Personnage"],["inv","Inventaire"],["aventure","Aventure"],["allies","Compagnons"],["shop","Boutique"],["quests","Quêtes"],["market","Marché"],["prest","Oméga"],["coll","Collection"],["atelier","Atelier"],["metiers","Métiers"],["opts","Options"]];
+const TABS=[["perso","Personnage"],["inv","Inventaire"],["aventure","Aventure"],["allies","Compagnons"],["shop","Boutique"],["quests","Quêtes"],["market","Marché"],["prest","Oméga"],["coll","Collection"],["atelier","Atelier"],["metiers","Métiers"],["rank","Classement"],["opts","Options"]];
 function canCraft(it){return S.lvl>=it.lvl&&it.recipe.every(([r,q])=>(S.res[r]||0)>=craftQ(q))}
 /* ================= Glisser-déposer des objets vers les emplacements ================= */
 const DRAG={on:false,p:null,skip:0};
@@ -112,7 +112,7 @@ function renderPanel(force){if(DRAG.on){dirty=true;return}
   /* tiroir fermé : son contenu est invisible, il sera reconstruit à l'ouverture (UI.open) */
   if(!force&&!UI.o&&S.tab===UI.last){UI.stale=true;return}UI.stale=false;
   const sy=$("panel").scrollTop, open=[...document.querySelectorAll("details.set[open]")].map(d=>d.dataset.z);
-  $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";setHTML($("panel"),(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,opts:pOpts})[S.tab]||pPerso)());if(S.tab!==lastTabAnim){if(lastTabAnim)replayCls($("panel"),"tabin");lastTabAnim=S.tab}
+  $("panel").dataset.tab=S.tab;$("panel").dataset.sub=S.tab==="perso"?ptab:S.tab==="coll"?ctab:"";setHTML($("panel"),(({perso:pPerso,inv:pInv,aventure:pAdv,allies:pAllies,shop:pShop,prest:pPrest,coll:pColl,quests:pQuests,market:pMarket,atelier:pAtelier,metiers:pMetiers,rank:()=>RANG.html(),opts:pOpts})[S.tab]||pPerso)());if(S.tab!==lastTabAnim){if(lastTabAnim)replayCls($("panel"),"tabin");lastTabAnim=S.tab}
   open.forEach(z=>{const d=document.querySelector(`details.set[data-z="${z}"]`);if(d)d.open=true});
   $("panel").scrollTop=sy;UI.sync();
 }

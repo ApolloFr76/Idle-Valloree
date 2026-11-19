@@ -48,6 +48,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
     case"code":{const i=$("codeBox");useCode(i&&i.value);if(i)i.value="";break}
     case"accCreate":case"accLogin":case"accLogout":case"accPush":case"accUseRemote":case"accUseLocal":COMPTE.act(a,b);break;
+    case"rkTab":case"rkRefresh":RANG.act(a,b);break;
     case"accTab":case"accEye":case"accNew":case"accNewNo":case"accNewYes":case"accRetry":case"accGo":case"accHome":ACCUEIL.act(a,b);break;
     case"saveNow":save();lastSave=Date.now();toast("Partie enregistrée",1);break;
     case"pause":setPause(!paused);break;

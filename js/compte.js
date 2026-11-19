@@ -10,7 +10,7 @@ const COMPTE=(()=>{
   const on=()=>!!(SUPA.url&&SUPA.key),logged=()=>!!(acc&&acc.at&&acc.uid);
   const keep=()=>{try{acc?localStorage.setItem(ACC_KEY,JSON.stringify(acc)):localStorage.removeItem(ACC_KEY)}catch(e){}};
   const say=(t,ok)=>{msg=t;msgOk=!!ok;const L=document.querySelectorAll(".accMsg");L.forEach(m=>{m.textContent=t;m.className="small accMsg "+(ok?"accok":"accko")});if(!L.length&&t)toast(t,1)};
-  const rp=()=>{if(typeof ACC_OPEN!=="undefined"&&ACC_OPEN)ACCUEIL.render();else if(S&&S.cls&&S.tab==="opts")renderPanel(true)};
+  const rp=()=>{if(typeof ACC_OPEN!=="undefined"&&ACC_OPEN)ACCUEIL.render();else if(S&&S.cls&&(S.tab==="opts"||S.tab==="rank"))renderPanel(true)};
   const mail=p=>p.toLowerCase()+"@joueurs.idle-valloree.app";
   const okPseudo=p=>/^[A-Za-z0-9_-]{3,20}$/.test(p);
   const errTxt=j=>{const m=((j&&(j.msg||j.error_description||j.message||j.error))||"")+"";
@@ -31,7 +31,8 @@ const COMPTE=(()=>{
     if(!force){const r=await api(`/rest/v1/saves?user_id=eq.${acc.uid}&select=updated_at`,{},true);const u=r&&r[0]&&r[0].updated_at;
       if(u&&acc.syncAt&&new Date(u)>new Date(acc.syncAt)){const full=await remote();if(full&&!mine(full)){ask(full);return false}}}  /* une autre machine a sauvegardé entre-temps */
     save();acc.myLast=S.last;const r=await api("/rest/v1/saves?on_conflict=user_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=representation"},body:JSON.stringify({user_id:acc.uid,pseudo:acc.pseudo,data:JSON.stringify(S)})},true);
-    acc.syncAt=(r&&r[0]&&r[0].updated_at)||new Date().toISOString();keep();lastPush=Date.now();return true}
+    acc.syncAt=(r&&r[0]&&r[0].updated_at)||new Date().toISOString();keep();lastPush=Date.now();
+    if(typeof RANG!=="undefined")RANG.send().catch(()=>{});return true}   /* classement : ligne du joueur mise à jour à chaque envoi */
   /* partie envoyée par ce navigateur (repérée par l'heure de sauvegarde S.last) */
   const mine=row=>{try{return JSON.parse(row.data).last===acc.myLast}catch(e){return false}};
   const sum=d=>{try{const o=JSON.parse(d);return o&&o.cls?`${(CLASSES[o.cls]||{}).name||o.cls} niveau ${fmt(o.lvl||1)}${o.prest?" · Ω "+o.prest:""}`:"aucun personnage"}catch(e){return"?"}};
@@ -65,7 +66,7 @@ const COMPTE=(()=>{
     if(logged())return`<div class="accbox" id="accCreateBox"><span class="small">Connecté : <b>${esc(acc.pseudo)}</b></span></div>`;
     return`<div class="accbox" id="${start?"accCreateBox":"accBox"}"><div class="row accform"><input class="accP" type="text" maxlength="20" placeholder="Pseudo" autocomplete="username" spellcheck="false"><input class="accW" type="password" placeholder="Mot de passe" autocomplete="current-password">
       ${start?"":`<button class="btn pri" data-a="accCreate">Créer un compte</button>`}<button class="btn${start?" pri":""}" data-a="accLogin">Se connecter</button></div><div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`}
-  return{on,logged,formHtml,pseudo:()=>acc&&acc.pseudo||"",clearMsg:()=>{msg=""},
+  return{on,logged,formHtml,pseudo:()=>acc&&acc.pseudo||"",clearMsg:()=>{msg=""},uid:()=>acc&&acc.uid||null,call:(p,o)=>api(p,o,true),
     msgHtml:()=>`<div class="small accMsg ${msgOk?"accok":"accko"}" role="status">${esc(msg)}</div>`,
     /* le serveur répond-il ? (5 s maximum) */
     async ping(){try{const c=new AbortController();setTimeout(()=>c.abort(),5000);const r=await fetch(SUPA.url.replace(/\/$/,"")+"/auth/v1/health",{headers:{apikey:SUPA.key},signal:c.signal});return r.ok}catch(e){return false}},
