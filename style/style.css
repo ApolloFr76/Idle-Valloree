@@ -1371,3 +1371,7 @@ img.mgres{width:96px;height:96px;image-rendering:pixelated}
 /* Inventaire : recherche, rareté, vente groupée */
 .invtools{display:flex;gap:6px}.invtools input{flex:1;min-width:0}.invtools select{flex:none;width:auto}
 .invsell{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.invsell .btn{flex:1}.invsell.arm{border:2px solid var(--hp);padding:6px;background:rgba(198,58,46,.08)}.invsell.arm .small{flex-basis:100%}
+
+/* bulles : jamais cliquables, placées par placeToast() (etat.js) pour ne pas cacher le bas des panneaux */
+.toast{pointer-events:none}
+.toast.ttop{top:calc(8px + env(safe-area-inset-top,0px))!important;bottom:auto!important;left:50%!important}
