@@ -1468,3 +1468,18 @@ html.th-contraste{--fg:#1a0d06;--muted:#3e2614;--line:#4a2a14}
 html.th-contraste .muted,html.th-contraste .small.muted{color:#3e2614!important}
 html.th-contraste .card,html.th-contraste .ovc{background-image:none}
 html.th-contraste .btn{text-shadow:1px 1px 0 #000,-1px 0 0 #000}
+/* Profil : cadres en pixels et emblèmes (js/succes.js), classement */
+.pbadge{width:var(--s);height:var(--s);flex:none;display:inline-grid;place-items:center;vertical-align:middle;background:var(--bg);
+  border:max(2px,calc(var(--s)/14)) solid var(--c1);box-shadow:inset 0 0 0 max(1px,calc(var(--s)/18)) var(--c2),inset 0 0 0 max(2px,calc(var(--s)/9)) var(--c3)}
+.pbadge svg{width:58%;height:58%}
+.pbadge.pb-astral{background-image:radial-gradient(#fff2a8 1px,transparent 1.5px);background-size:calc(var(--s)/3) calc(var(--s)/3)}
+.pbadge.pb-omega{background-image:linear-gradient(135deg,rgba(201,168,255,.25),transparent 60%)}
+.shead .pbadge{margin-right:2px}
+.acctitle .pbadge{margin-right:8px;vertical-align:-6px}
+.rkn .pbadge{margin-right:6px;vertical-align:-5px}
+.pframes{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.pfr{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:var(--bg2);border:2px solid transparent;cursor:pointer;font:inherit;color:inherit}
+.pfr.on{border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--sun)}
+.pfr:disabled{cursor:not-allowed;opacity:.55}
+.pembs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:4px}
+.pembs>span{flex:0 0 100%}
