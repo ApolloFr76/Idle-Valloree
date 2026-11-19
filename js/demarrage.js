@@ -46,7 +46,8 @@ function start(data){
   /* Oméga rééquilibré : le bonus suit les éclats gagnés au total ; on reconstitue ce total pour les anciennes parties */
   if(!S.migOmega2){S.migOmega2=1;let sp=0;Object.keys(TAL).forEach(id=>{for(let k=0;k<Math.min(tal(id),1e5);k++)sp+=talCostAt(id,k)});Object.keys(S.upPerm||{}).forEach(id=>{if(S.upPerm[id])sp+=upPermCost(id)});
     S.soulsTotal=Math.max(S.soulsTotal||0,(S.souls||0)+sp);
-    if(S.prest)setTimeout(()=>log("Oméga rééquilibré : chaque éclat gagné donne +0,1 % de dégâts pour toujours, même dépensé, et les talents Force, Vitalité, Avarice, Doigts de fer et Commandant grandissent ×1,05 par rang après le 10e. Dépensez vos éclats !","g"),800)}
+    S.migOmega3=1;if(S.prest)setTimeout(()=>log("Oméga rééquilibré : les éclats gagnés depuis le début donnent +25 % de dégâts chaque fois que leur total est multiplié par 10, même dépensés, et les talents sans plafond gagnent la même valeur à chaque rang. Dépensez vos éclats !","g"),800)}
+  if(!S.migOmega3){S.migOmega3=1;if(S.prest)setTimeout(()=>log("Correction Oméga : le bonus des éclats gagnés est maintenant de +25 % de dégâts chaque fois que leur total est multiplié par 10, et chaque rang de talent sans plafond ajoute la même valeur. Les dégâts reviennent à un niveau normal.","g"),800)}
   /* talents achetés au-delà de leur rang max : rangs en trop remboursés en éclats ; métiers ramenés au niveau max */
   S.tal=S.tal||{};Object.keys(TAL).forEach(id=>{const m=talMaxR(id);if(tal(id)>m){let g=0;for(let k=m,e=Math.min(tal(id),m+1e5);k<e;k++)g+=talCostAt(id,k);S.souls=(S.souls||0)+(isFinite(g)?g:0);S.tal[id]=m}});
   Object.values(S.jobs||{}).forEach(j=>{if(j.lvl>PROF_MAX){j.lvl=PROF_MAX;j.xp=0}});

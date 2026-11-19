@@ -332,10 +332,10 @@ const PREST_LVL=100;
    Le niveau du personnage est illimité. */
 const omegaN=()=>(S&&S.prest)||0;
 const lvlMax=()=>Infinity;
-/* Éclats gagnés : +0,1 % de dégâts par éclat gagné depuis le début, dépensé ou non.
-   (Avant : +0,5 % par éclat gardé, ce qui rendait l'achat de talents inutile.) */
-const SOUL_PCT=.1;
-const soulBonus=()=>SOUL_PCT*((S&&S.soulsTotal)||0);
+/* Éclats gagnés depuis le début (dépensés ou non) : +25 % de dégâts chaque fois que ce total est multiplié par 10.
+   Dépenser ne fait donc rien perdre, et le bonus reste raisonnable même avec des milliers de milliards d'éclats. */
+const SOUL_PCT=25;
+const soulBonus=()=>SOUL_PCT*Math.log10(1+((S&&S.soulsTotal)||0));
 const TALENTS={
   "Combat":[["t_force","Force brute","+10 % de dégâts",1],["t_prec","Précision","+2 % de critique",1],["t_vie","Vitalité ancestrale","+10 % de PV",2],["t_elem","Maîtrise élémentaire","Les faiblesses font +10 % de dégâts en plus",3]],
   "Récolte":[["t_mains","Mains agiles","Récolte 8 % plus rapide",1],["t_double","Double récolte","Chance de récolte double",1],["t_sac","Poches sans fond","+1 500 de poids",2],["t_metier","Héritage des métiers","Les métiers repartent plus haut",3]],
@@ -351,11 +351,10 @@ const TALV={t_force:[10,0,"+# % de dégâts"],t_prec:[2,30,"+# % de critique"],t
   t_avar:[10,0,"+# % d'écus"],t_pros:[15,0,"+# Prospection"],t_trefle:[10,60,"Objets cliquables # % plus fréquents"],t_depart:[1000,0,"# écus au départ"],
   t_doigts:[25,0,"+# % de dégâts de clic"],t_combo:[30,90,"Combo baisse # % moins vite"],t_dore:[2,25,"# % de frappe dorée ×10"],t_cmd:[20,0,"+# % de dégâts des compagnons"]};
 const dimR=r=>r<=10?r:10+Math.log(1+.08*(r-10))/.08;
-/* Talents de pourcentage sans plafond : rangs 1 à 10 linéaires, puis chaque rang multiplie le bonus total par 1,05.
-   Les autres talents sans plafond (poids, prospection, écus de départ) ajoutent la même valeur à chaque rang. */
-const TAL_MULT=new Set(["t_force","t_vie","t_avar","t_doigts","t_cmd"]),TAL_GROW=1.05;
+/* Talents sans plafond : chaque rang ajoute la même valeur (plus de ralentissement après le rang 10).
+   Leur coût grandit de 4 % par rang, ce qui suffit à freiner sans faire exploser les bonus. */
 const talAt=(id,r)=>{const[v,cap]=TALV[id];if(r<=0)return 0;
-  if(!cap)return TAL_MULT.has(id)&&r>10?100*((1+10*v/100)*Math.pow(TAL_GROW,r-10)-1):v*r;
+  if(!cap)return v*r;
   const at=n=>cap*(1-Math.pow(1-v/cap,n)),n=Math.min(r,10),base=at(n);
   return r<=10?base:base+(at(10)-at(9))*(dimR(r)-10)};
 /* Plafonds utiles : au-delà, un rang de plus ne change plus rien, donc le talent affiche MAX et ne s'achète plus.
