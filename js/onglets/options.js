@@ -1,6 +1,10 @@
 /* Onglet Options (réglages, aide). */
 let confirmReset=false;
-let otab="aide";
+let otab="aide",bkArm=-1;
+const BK_WHY={auto:"automatique",import:"avant un import",restore:"avant une restauration",reset:"avant une nouvelle partie",manuel:"manuelle"};
+function bkHTML(){const L=bkList();return`<div class="sec"><h3>Sauvegardes de secours</h3><p class="small muted">Une copie de votre partie est gardée toutes les 15 minutes dans ce navigateur, ainsi qu'avant un import ou une nouvelle partie. Les ${BK_MAX} plus récentes sont conservées.</p>
+  ${L.length?`<div class="olist">${L.map((b,i)=>`<div class="orow"><div class="ol"><b>${new Date(b.t).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"})}</b><span>${esc(b.name||"")} · ${CLASSES[b.cls]?CLASSES[b.cls].name:""} niveau ${b.lvl}${b.prest?" · Ω "+b.prest:""} · ${BK_WHY[b.why]||b.why}${bkArm===i?`<br><b>Remplacer la partie actuelle par cette copie ?</b>`:""}</span></div><div class="oc">${bkArm===i?`<button class="btn dng" data-a="bkLoad" data-i="${i}">Oui, restaurer</button>`:`<button class="btn" data-a="bkLoad" data-i="${i}">Restaurer</button>`}</div></div>`).join("")}</div>`:`<p class="small muted">Aucune copie pour l'instant.</p>`}
+  <div class="row"><button class="btn" data-a="bkNow">Créer une copie maintenant</button></div></div>`}
 function applyOpts(){if(!S||!S.opt)return;const O=S.opt;document.documentElement.classList.toggle("rm",!!O.reduceMotion);const app=$("app");if(app)app.style.zoom=O.textSize/100;
   const h=$("hint");if(h)h.hidden=!O.showHint;setVol();if(AC)musicSync();if($("weather"))drawWeather();if($("log")&&S.log)renderLog();potSig=""}
 const optFmt=(k,v)=>(v=Number.isFinite(+v)?v:OPT_DEF[k],0)||k.startsWith("vol")?Math.round(v*100)+" %":k==="textSize"||k==="potThreshold"?v+" %":k==="forgeSpeed"?"×"+v:v;
@@ -66,7 +70,7 @@ function pOpts(){
     h+=`<div class="sec"><h3>Écran d'accueil</h3><p class="small muted">Revenir à l'écran de départ pour changer de compte ou commencer une nouvelle partie. La partie est enregistrée avant.</p><div class="row"><button class="btn" data-a="accHome">Écran d'accueil</button></div></div>`+COMPTE.html()+`<div class="sec"><h3>Sauvegarde automatique</h3><div class="olist">${seg("saveEvery","Fréquence","Enregistrée dans ce navigateur.",[[5,"5 s"],[10,"10 s"],[30,"30 s"],[60,"1 min"]])}<div class="orow"><div class="ol"><b>Enregistrer maintenant</b></div><div class="oc"><button class="btn pri" data-a="saveNow">Enregistrer</button></div></div></div></div>
     <div class="sec"><h3>Code cadeau</h3><p class="small muted">Entrez un code cadeau pour obtenir sa récompense.</p><div class="row"><input id="codeBox" type="text" placeholder="Votre code cadeau" autocomplete="off" spellcheck="false" style="flex:1;min-width:0"><button class="btn pri" data-a="code">Valider</button></div>${codeRes&&Date.now()-codeRes.at<20000?`<p class="codemsg ${codeRes.ok?"ok":"ko"}" id="codeMsg" role="status">${esc(codeRes.t)}</p>`:`<p class="codemsg" id="codeMsg" role="status" hidden></p>`}</div>
     <div class="sec"><h3>Exporter</h3><p class="small muted">Copiez ce code pour transférer votre partie ou la garder à l'abri.</p><textarea id="exportBox" readonly>${code}</textarea><div class="row"><button class="btn pri" data-a="copy">Copier le code</button></div></div>
-    <div class="sec"><h3>Importer</h3><textarea id="importBox" placeholder="Collez un code de sauvegarde ici"></textarea><div class="row"><button class="btn" data-a="import">Charger</button></div></div>
+    ${bkHTML()}<div class="sec"><h3>Importer</h3><textarea id="importBox" placeholder="Collez un code de sauvegarde ici"></textarea><div class="row"><button class="btn" data-a="import">Charger</button></div></div>
     <div class="sec"><h3>Réinitialiser</h3><div class="row"><button class="btn" data-a="optDefault">Réglages par défaut</button>${confirmReset?`<span class="small">Toute la progression sera effacée.</span><button class="btn dng" data-a="resetYes">Oui, tout effacer</button><button class="btn" data-a="resetNo">Annuler</button>`:`<button class="btn dng" data-a="reset">Nouvelle partie</button>`}</div></div>`}
   return h;
 }
