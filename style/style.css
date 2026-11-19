@@ -1424,3 +1424,21 @@ button,select,label,[data-a],a{cursor:pointer}
 @media (max-width:1100px){.accueil:has(.accrank) .acchero,.accueil:has(.accrank) .accbub{display:none}}
 /* Résumé d'absence : niveaux, métiers, quêtes, ventes */
 .offx{margin:6px 0 2px;padding-left:18px;display:grid;gap:3px}
+/* Inventaire : objets protégés (cadenas) et tenues enregistrées */
+.tile .lkb{position:absolute;top:11px;left:5px;width:10px;height:9px;background:var(--gold);border:2px solid var(--ink,#2a1a10);border-radius:2px;pointer-events:none}
+.tile .lkb::before{content:"";position:absolute;left:0;top:-7px;width:4px;height:5px;border:2px solid var(--ink,#2a1a10);border-bottom:0;border-radius:4px 4px 0 0}
+.outfits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:8px;background:var(--bg2);border-radius:14px;padding:8px}
+.outfits>span{grid-column:1/-1}
+.ofit{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ofit .btn{min-width:0;padding-left:4px;padding-right:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Statistiques : courbes de progression (un relevé par heure) */
+.hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:8px 0}
+.hchart{background:var(--bg2);border-radius:10px;padding:8px 10px}
+.hhead{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.hchart svg{display:block;width:100%;height:auto;overflow:visible}
+.hchart path{fill:none;stroke:var(--xp);stroke-width:2px;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.hchart .hbase{stroke:var(--line);stroke-width:1px;vector-effect:non-scaling-stroke}
+.hchart .hp line{stroke:var(--muted);stroke-width:1px;stroke-dasharray:2 2;vector-effect:non-scaling-stroke;opacity:0}
+.hchart .hp circle{fill:var(--xp);stroke:var(--bg2);stroke-width:2px;vector-effect:non-scaling-stroke;opacity:0}
+.hchart .hp:hover line,.hchart .hp:hover circle{opacity:1}
+.hfoot{display:flex;justify-content:space-between}
