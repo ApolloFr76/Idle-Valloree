@@ -1396,3 +1396,14 @@ button,select,label,[data-a],a{cursor:pointer}
 .anode.on{outline:3px solid #3b2a74;outline-offset:2px}
 .afiche{margin-top:8px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;background:var(--bg2);border:3px solid var(--ink);padding:8px 12px}
 .afiche .nm{font-size:19px;font-weight:400}
+/* Classement (js/classement.js) : onglet et encadré de l'écran d'accueil */
+.rktab td{padding:5px 8px;border-bottom:1px solid var(--line,rgba(0,0,0,.12))}.rktab tr.rkme td{background:rgba(240,194,58,.28)}
+.rkpos{width:34px;text-align:center}.rkm{display:inline-block;min-width:24px;padding:0 4px;border:2px solid var(--ink,#2e1a0c);color:#2e1a0c;text-align:center}
+.rk1{background:#f0c23a}.rk2{background:#cfd6dc}.rk3{background:#d98e4a}.rkyou{margin:8px 0 0}
+.accrank{position:fixed;top:24px;right:26px;width:min(380px,calc(100% - 32px));max-height:calc(100vh - 48px);overflow:auto;background:linear-gradient(#6b4423,#5a381c);border:4px solid #2e1a0c;box-shadow:inset 0 0 0 3px #8a5a2e,0 10px 0 rgba(0,0,0,.4);padding:14px 16px 16px;font-size:16px}
+.accrank .acctitle{font-size:22px;margin-bottom:8px}.accrank .rktabs button{font-size:13px;letter-spacing:.5px;padding:7px 2px}
+.accrank .rktab{margin-top:6px;font-size:16px}.accrank .rktab td{border-bottom:1px solid var(--a-line)}.accrank .muted{color:var(--a-mut)}.accrank .rktab tr.rkme td{background:rgba(240,194,58,.22)}
+.accrank p{margin:10px 0 0}
+@media (max-width:1100px){.accrank{position:relative;top:auto;right:auto;margin:0 0 30px 26px;width:min(480px,calc(100% - 32px));max-height:none}}
+@media (max-width:760px){.accrank{margin-left:16px}}
+@media (max-width:1100px){.accueil:has(.accrank) .acchero,.accueil:has(.accrank) .accbub{display:none}}
