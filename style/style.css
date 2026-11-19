@@ -1422,3 +1422,5 @@ button,select,label,[data-a],a{cursor:pointer}
 @media (max-width:1100px){.accrank{position:relative;top:auto;right:auto;margin:0 0 30px 26px;width:min(480px,calc(100% - 32px));max-height:none}}
 @media (max-width:760px){.accrank{margin-left:16px}}
 @media (max-width:1100px){.accueil:has(.accrank) .acchero,.accueil:has(.accrank) .accbub{display:none}}
+/* Résumé d'absence : niveaux, métiers, quêtes, ventes */
+.offx{margin:6px 0 2px;padding-left:18px;display:grid;gap:3px}
