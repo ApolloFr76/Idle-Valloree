@@ -1396,6 +1396,19 @@ button,select,label,[data-a],a{cursor:pointer}
 .anode.cap{box-shadow:0 0 0 3px var(--c),0 3px 0 rgba(0,0,0,.2)}.anode.first{background:#3b2a74;color:#fff;border-color:var(--ink)}.anode.first.lock{background:#e4ddd0;color:#9a8a78}
 .anode.fin{background:#2a1606;color:#ffd27a;border-color:#ffd27a}.anode.fin.lock{background:#e4ddd0;color:#9a8a78;border-color:#b0a48e}
 .anode.on{outline:3px solid #3b2a74;outline-offset:2px}
+/* arbre Oméga : menu de vue, carte entière en pastilles, vue en grand d'une partie (3 colonnes) */
+.avue{display:flex;align-items:center;gap:8px;margin:0 0 8px}.avue span{font-size:14px;letter-spacing:1px;text-transform:uppercase}.avue select{flex:1;min-width:0;width:auto;padding:6px 10px;font-size:15px}
+.aboard.amap,.aboard.azoom{overflow:visible;max-height:none;padding:6px}
+.aboard.amap{width:100%;max-width:520px;align-self:center;box-sizing:border-box}
+.amap .alane{font-size:10px;letter-spacing:0;padding:0 2px;border-width:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+.adot{position:absolute;width:calc(100% / 12 * .72);aspect-ratio:1;transform:translate(-50%,-50%);display:grid;place-items:center;padding:0;background:#efeaff;border:2px solid #2e2350;border-left:4px solid var(--c);font:inherit;font-size:13px;line-height:1;color:#2a1712;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.adot.own{background:#9fd68c;border-color:#2f6a22}.adot.can{background:var(--sun,#f0c23a);border-color:#7a3408}
+.adot.lock{background:#e4ddd0;color:#9a8a78;border-color:#b0a48e;border-left-color:#b0a48e;box-shadow:none}
+.adot.first,.adot.fin{border-radius:50%;border-left-width:2px}.adot.cap{box-shadow:0 0 0 2px var(--c)}
+.adot.on{outline:3px solid #3b2a74;outline-offset:2px;z-index:2}.adot:hover{z-index:3;filter:brightness(1.06)}
+.alegend{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin-top:6px}.alegend span{display:inline-flex;align-items:center;gap:5px}
+.alegend i{width:12px;height:12px;border:2px solid #2e2350;background:#efeaff}.alegend i.own{background:#9fd68c}.alegend i.can{background:var(--sun,#f0c23a)}.alegend i.lock{background:#e4ddd0;border-color:#b0a48e}
+.azoom .anode{min-height:58px;box-sizing:border-box}
 .afiche{margin-top:8px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;background:var(--bg2);border:3px solid var(--ink);padding:8px 12px}
 .afiche .nm{font-size:19px;font-weight:400}
 /* Classement (js/classement.js) : onglet et encadré de l'écran d'accueil */
