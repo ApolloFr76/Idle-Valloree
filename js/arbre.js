@@ -76,6 +76,8 @@ const ARB_COL={cb:"#c8402e",fo:"#d99a1e",rc:"#3f8f2e",tr:"#7a4fc0",om:"#ffd27a",
 /* Vue de l'arbre (menu déroulant) : "carte" = arbre entier en pastilles (par défaut), sinon une partie en grand :
    tronc commun (tr), une voie (g, m, r, bp) ou le sommet (som). Le détail et l'achat sont dans la fiche sous l'arbre. */
 let arbVue="carte";
+/* double-clic sur une case = achat (deux clics sur la même case en moins de 450 ms, voir case "arbSel" dans evenements.js) */
+let arbClickT=0;
 const ARB_VUES=[["carte","Carte entière"],["tr","Tronc commun"],["g","Voie du Guerrier"],["m","Voie du Marchand"],["r","Voie de l'Artisan"],["bp","Boutique permanente"],["som","Sommet"]];
 const arbPart=k=>k==="tr"?ARB.filter(n=>!n[8]&&n[0]!=="coeur"&&n[0]!=="echo"):k==="som"?ARB.filter(n=>n[0]==="coeur"||n[0]==="echo"):ARB.filter(n=>n[8]===k);
 /* place des cases dans une vue en grand : [colonne, ligne] sur 3 colonnes */
@@ -112,6 +114,6 @@ function pArbre(){const a=arbS();if(!ARB_VUES.some(v=>v[0]===arbVue))arbVue="car
   else if(st==="ok")act=`<button class="btn pri" data-a="arbBuy" data-id="${n[0]}" ${S.souls<c?"disabled":""}>Acheter · ${fmt(c)} <span class="soul"></span></button>`;
   else act=`<span class="small muted">${!arb("eveil")&&n[0]!=="eveil"?"Achetez d'abord l'Éveil d'Oméga":n[8]&&!a.voies.includes(n[8])?`Vous suivez déjà ${arbMaxV()} voie${arbMaxV()>1?"s":""} : achetez un niveau du Pacte des voies ou quittez une voie`:"Pas encore disponible"}</span>`;
   const vn=n[8]?(n[8]==="bp"?"voie de la Boutique permanente":"voie du "+ARB_V[n[8]].nom):"";
-  return`<div class="sec"><p class="small muted" style="margin:0 0 6px">Achetez d'abord l'Éveil d'Oméga. Prêtez ensuite un serment parmi 4 voies ; le Pacte des voies en ouvre une de plus à chaque niveau. Le Cœur d'Oméga demande les 4 voies complètes. Quitter une voie rend ses éclats. Voies suivies : <b>${a.voies.length}/${arbMaxV()}</b>.</p>
-    ${board}
-    <div class="afiche"><div><b class="nm">${n[4]}</b>${vn?` <span class="small muted">· ${vn}</span>`:""}<div>${n[5]}</div><div class="small muted">${need}</div></div><div>${act}</div></div></div>`}
+  return`<div class="sec"><p class="small muted" style="margin:0 0 6px">Achetez d'abord l'Éveil d'Oméga. Prêtez ensuite un serment parmi 4 voies ; le Pacte des voies en ouvre une de plus à chaque niveau. Le Cœur d'Oméga demande les 4 voies complètes. Quitter une voie rend ses éclats. Voies suivies : <b>${a.voies.length}/${arbMaxV()}</b>. Double-clic sur une case pour l'acheter.</p>
+    <div class="afiche"><div><b class="nm">${n[4]}</b>${vn?` <span class="small muted">· ${vn}</span>`:""}<div>${n[5]}</div><div class="small muted">${need}</div></div><div>${act}</div></div>
+    ${board}</div>`}
