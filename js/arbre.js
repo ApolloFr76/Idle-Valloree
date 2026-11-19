@@ -95,8 +95,8 @@ function arbCarte(){const Y=r=>r*100+(r>=3?40:0),W=1200,H=Y(10)+100,pos={};ARB.f
   const lanes=Object.entries(ARB_V).map(([k,v])=>{const l=arbPart(k);return`<div class="alane" style="${pc(v.b*100+8,300)};width:${284/W*100}%;background:${ARB_COL[v.c]}">${k==="bp"?"Boutique":v.nom} ${l.filter(x=>arb(x[0])).length}/${l.length}</div>`}).join("");
   const dots=ARB.map(n=>{const st=arbState(n),c=arbCost(n),can=st==="ok"&&S.souls>=c;
     return`<button class="adot ${st}${can?" can":""}${n[9]?" "+n[9]:""}${arbSel===n[0]?" on":""}" data-a="arbSel" data-id="${n[0]}" title="${n[4]} · ${arbLbl(n,st,c)}" aria-label="${n[4]} : ${arbLbl(n,st,c)}" style="${pc(pos[n[0]].x,pos[n[0]].y)};--c:${ARB_COL[n[3]]}">${st==="own"?"✓":can?"+":""}</button>`}).join("");
-  return`<div class="aboard amap"><div class="ainner" style="aspect-ratio:${W}/${H}">${arbLinks(ARB,pos,W,H,0)}${lanes}${dots}</div></div>
-    <div class="alegend small muted"><span><i class="own"></i>Acquis</span><span><i class="can"></i>Achetable</span><span><i></i>Trop cher</span><span><i class="lock"></i>Verrouillé</span></div>`}
+  return`<div class="alegend small muted"><span><i class="own"></i>Acquis</span><span><i class="can"></i>Achetable</span><span><i></i>Trop cher</span><span><i class="lock"></i>Verrouillé</span></div>
+    <div class="aboard amap"><div class="ainner" style="aspect-ratio:${W}/${H}">${arbLinks(ARB,pos,W,H,0)}${lanes}${dots}</div></div>`}
 /* une partie de l'arbre en grand (3 colonnes) : tient dans le panneau sans défiler */
 function arbZoom(k){const P=arbPlace(k),list=Object.keys(P).map(id=>ARB_ID[id]),RH=84,rows=Math.max(...Object.values(P).map(p=>p[1]))+1,W=300,H=rows*RH+12,pos={};
   list.forEach(n=>{const[c,r]=P[n[0]];pos[n[0]]={x:c*100+50,y:8+r*RH}});
