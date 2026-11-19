@@ -4,11 +4,15 @@ function pPerso(){
   const st=stats(),C=CLASSES[S.cls],need=xpNeed(S.lvl);
   let h=`<div class="sheet"><div class="shead">${myBadge(56)}<div><h2>${esc(S.name)}</h2><div class="muted">${C.name}, niveau ${S.lvl}</div></div></div>
   <div class="ptabs"><button class="ptab${ptab==="resume"?" on":""}" data-a="ptab" data-t="resume">Résumé</button><button class="ptab${ptab==="details"?" on":""}" data-a="ptab" data-t="details">Détails</button><button class="ptab${ptab==="stats"?" on":""}" data-a="ptab" data-t="stats">Statistiques</button></div>`;
-  if(ptab==="stats"){const T=S.st,t=Math.floor(T.time||0),hh=Math.floor(t/3600),mm=Math.floor(t%3600/60);
-    const L=[["Temps de jeu",`${hh} h ${mm} min`],["Clics",fmt(T.clicks||0)],["Combo record",fmt(T.maxCombo||0)],["Dégâts infligés",fmt(T.dmg||0)],["Plus gros coup",fmt(T.maxHit||0)],["Dégâts des compagnons",fmt(T.allyDmg||0)],
-      ["Monstres vaincus",fmt(S.kills)],["Boss vaincus",fmt(T.bosses||0)],["Donjons terminés",fmt(T.dungeons||0)],["Record de la tour",`Étage ${S.tower.best}`],["K.O. subis",fmt(T.deaths||0)],
-      ["Écus gagnés",fmt(T.ecus||0)],["XP gagnée",fmt(T.xp||0)],["Objets fabriqués",fmt(T.crafts||0)],["Enchantements réussis",`${fmt(T.enchOk||0)} / ${fmt((T.enchOk||0)+(T.enchKo||0))}`],["Meilleur enchantement",`+${T.enchMax||0}`],["Objets cliquables attrapés",fmt(S.pkN||0)]];
-    return h+`<div class="statgrid">${L.map(([a,b])=>`<div><span class="muted">${a}</span><b>${b}</b></div>`).join("")}</div>${histHTML()}</div>`}
+  /* Statistiques à vie (S.st, gardées au passage Oméga), rangées par thème */
+  if(ptab==="stats"){const T=S.st,n=k=>fmt(T[k]||0),t=Math.floor(T.time||0),hh=Math.floor(t/3600),mm=Math.floor(t%3600/60),born=S.born?new Date(S.born):null;
+    const G=[["Partie",[["Commencée le",born?born.toLocaleDateString("fr-FR"):"—"],["Temps de jeu",`${hh} h ${mm} min`],["Passages Oméga",fmt(S.prest||0)],["Éclats Oméga gagnés",fmt(S.soulsTotal||0)],["Niveau le plus haut",fmt(Math.max(S.lvl,T.maxLvl||0))],["Succès",`${fmt(Object.keys(S.ach||{}).length)} / ${ACH.length}`]]],
+      ["Combat",[["Monstres vaincus",fmt(S.kills)],["Monstres brillants",n("shinies")],["Boss vaincus",n("bosses")],["Donjons terminés",n("dungeons")],["Record de la tour",`Étage ${fmt(Math.max(S.tower.best,T.tower||0))}`],["K.O. subis",n("deaths")],
+        ["Dégâts infligés",n("dmg")],["Dégâts des compagnons",n("allyDmg")],["Plus gros coup",n("maxHit")],["Clics",n("clicks")],["Combo record",n("maxCombo")],["Charges de DoT posées",n("dotStacks")]]],
+      ["Richesses",[["Écus gagnés",n("ecus")],["XP gagnée",n("xp")],["Objets cliquables attrapés",fmt(S.pkN||0)],["Quêtes terminées",n("quests")]]],
+      ["Artisanat et métiers",[["Objets fabriqués",n("crafts")],["Objets légendaires forgés",n("legend")],["Enchantements réussis",`${n("enchOk")} / ${fmt((T.enchOk||0)+(T.enchKo||0))}`],["Meilleur enchantement",`+${T.enchMax||0}`],
+        ["Potions préparées",n("brews")],["Potions bues",n("potions")],["Poissons pêchés",n("fish")],["Poissons rares",n("fishRare")],["Poissons mythiques",n("fishMyth")],["Mini-jeux joués",n("minigames")]]]];
+    return h+G.map(([g,L])=>`<h4 class="stath">${g}</h4><div class="statgrid">${L.map(([a,b])=>`<div><span class="muted">${a}</span><b>${b}</b></div>`).join("")}</div>`).join("")+`${histHTML()}</div>`}
   if(ptab==="resume"){
     const row=(k,n,v)=>`<div class="srow" data-tip="s:${k}">${sico(k)}<span>${n}</span><span class="v num" style="grid-column:3/5">${v}</span></div>`;
     h+=`<div class="slist">

@@ -21,3 +21,9 @@ Desktop.ini
 # Notes de projet pour Claude (gardées en local)
 CLAUDE.md
 ANALYSE.md
+
+contexte-idle-valloree.md
+# Jeu assemblé pour la publication (outils/assembler.js)
+_site/
+node_modules/
+test-results/

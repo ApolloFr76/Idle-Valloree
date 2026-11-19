@@ -13,6 +13,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"pick":pick=b.dataset.k;S.name=$("heroName").value;showCreate();break;
     case"start":{S.cls=pick;S.name=($("heroName").value||"Aventurier").trim().slice(0,20)||"Aventurier";S.hp=stats().maxHp;$("ov").hidden=true;log(`Bienvenue, ${esc(S.name)}. La Prairie des Clochettes vous attend.`,"g");boot2();save();if(!S.tutoDone)setTimeout(tutoStart,400);break}
     case"closeOv":$("ov").hidden=true;break;
+    case"syncInfo":otab="save";S.tab="opts";UI.open(true);renderPanel(true);break;
     case"updates":showUpdates();break;
     case"pickup":takePk();break;
     case"mode":startMode(b.dataset.m,b.dataset.z!=null?+b.dataset.z:null);renderPanel();break;
@@ -114,7 +115,9 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"copy":{const t=$("exportBox");const done=()=>toast("Code de sauvegarde copié",1);try{navigator.clipboard.writeText(t.value).then(done,()=>{t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)})}catch(err){t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)}break}
     case"bkLoad":{const i=+b.dataset.i;if(bkArm!==i){bkArm=i;renderPanel(true);break}bkArm=-1;if(bkLoad(i)){boot2();toast("Sauvegarde de secours restaurée",1)}else toast("Cette sauvegarde de secours est illisible.",1);renderPanel(true);break}
     case"bkNow":backup("manuel");toast("Copie de secours créée",1);renderPanel(true);break;
-    case"import":{try{const d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))));if(!d||!d.cls)throw 0;backup("import");S=Object.assign(fresh(),d);save();boot2();toast("Partie chargée",1)}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.",1)}break}
+    case"import":{let d;try{d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))))}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.",1);break}
+      const pb=saveErr(d);if(pb){toast(`Cette sauvegarde est abîmée (${pb}) : elle n'a pas été chargée.`,1);break}
+      backup("import");S=migrate(fromData(d));S.opt=fixOpts(S.opt);applyOpts();save();boot2();toast("Partie chargée",1);break}
     case"reset":confirmReset=true;renderPanel();break;
     case"resetNo":confirmReset=false;renderPanel();break;
     case"resetYes":confirmReset=false;backup("reset");S=fresh();try{localStorage.removeItem(SAVE_KEY)}catch(err){}showCreate();break;
@@ -147,6 +150,6 @@ document.addEventListener("change",e=>{const ds=e.target.dataset||{};
   if(ds.keep!=null){S.sellCfg=S.sellCfg||{};const v=Math.max(0,Math.floor(+e.target.value||0));(S.sellCfg[ds.keep]=S.sellCfg[ds.keep]||{}).keep=v;e.target.value=v;renderPanel(true);return}
   if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.dataset&&e.target.dataset.autobuff){S.autoBuff=S.autoBuff||{};S.autoBuff[e.target.dataset.autobuff]=e.target.checked;potSig="";drawPots();return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;invSellArm=false;renderPanel();return}if(e.target.id==="invRar"){invRar=+e.target.value;invP=0;invSellArm=false;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
-document.addEventListener("visibilitychange",()=>{if(document.hidden){beginAfk();save()}else{const s=settleAfk();if(s){boot2();if(s.kills||Object.keys(s.res).length)showOffline(s)}}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden){beginAfk();save()}else{const s=settleAfk();if(s){boot2();if(comeShow(s))showOffline(s)}}});
 window.addEventListener("pagehide",()=>{beginAfk();save()});
 

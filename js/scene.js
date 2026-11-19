@@ -79,7 +79,7 @@ const SCENE=(()=>{
     const m=$("mon");if(m){for(const k in DOTS)m.classList.toggle("d-"+k,ks.includes(k))}}
   /* ---------- Boucle à 60 images/seconde ---------- */
   let winded=false;
-  function loop(){requestAnimationFrame(loop);if(!S||!S.cls||UI.covered())return;const t=now();
+  function loop(){if(!S||!S.cls||UI.covered())return;const t=now();
     const h=$("ahero");if(h&&!h.hidden){hero.el=h;frame(hero,t)}
     const mi=S.mon&&$("monBtn")&&$("monBtn").querySelector("img");if(mi){if(mon.el!==mi){mon.el=mi;mon.last=null;mon.cur="idle"}frame(mon,t);
       /* élan du monstre juste avant son coup */
@@ -90,7 +90,7 @@ const SCENE=(()=>{
     drawFam();if(famA.id&&!famA.el.hidden)frame(famA,t)}
 
   return{
-    init(){requestAnimationFrame(loop)},
+    init(){FRAME.add(loop)},
     hero(anim,hold=0){play(hero,anim,anim==="cast"?26:30,hold);if(famA.id&&anim==="atk"&&Math.random()<.5)play(famA,"atk",30)},
     /* « touché » n'interrompt pas l'élan d'attaque : sinon, en cliquant vite, on ne voit jamais le monstre frapper */
     monHurt(){if(mon.cur==="atk"&&now()-mon.t0<10*mon.fd)return;play(mon,"hurt",36)},

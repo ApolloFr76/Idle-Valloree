@@ -69,3 +69,12 @@ body.side-closed #sideCard>:not(.sidetog){display:none}
 #panel .detail.idock.nosel{position:static;min-height:0;box-shadow:inset 0 3px 0 rgba(255,255,255,.14),inset 0 -4px 0 rgba(0,0,0,.3)}
 /* téléphone : le sac passe avant le mannequin */
 @media (max-width:700px){.invsplit>.invR{order:-1}}
+
+/* ---------- Écran tactile : boutons d'au moins 44 px de haut, plus faciles à toucher du doigt ---------- */
+@media (pointer:coarse){
+  :root{--railh:64px}
+  .btn,.tab,.ptab,.otab,.seg>button,.osub>button,.accsec,.accgo,.acctabs>button,.dclose{min-height:44px}
+  #tabs.rail .tab{min-height:44px;display:flex;align-items:center}
+  #tabs.rail .tab.locked{justify-content:center}
+  .world .top .btn{min-width:44px;justify-content:center}
+}

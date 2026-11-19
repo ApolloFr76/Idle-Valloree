@@ -11,12 +11,16 @@ function placeSide(){const side=$("sideCard"),w=WIDE.matches;
 WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
 placeSide();
 let sceneOn=false;
-function boot2(){placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();if(!S.optV2){S.optV2=1;S.opt.forgeQte=true}mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+function boot2(){if(!S.sess)sessStart();placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+/* Retour après une absence de sec secondes : bilan de la session terminée (absence d'au moins 5 min), gains hors ligne,
+   puis nouvelle session. Renvoie le résumé à montrer (showOffline) ou null. */
+function comeBack(sec){const end=sec>=SESS_GAP,rec=end?sessRecap():null,sum=S.opt.offline&&sec>0?offline(sec):null;if(end)sessStart();
+  if(!sum&&!rec)return null;const s=sum||{sec,kills:0,res:{},none:1};s.rec=rec;return s}
+const comeShow=s=>!!s&&(s.kills>0||Object.keys(s.res).length>0||!!s.rec);
 function settleAfk(){
   if(!S||!S.cls||!S.afkSince)return null;
   const sec=Math.max(0,(Date.now()-S.afkSince)/1000);
-  let sum=null;
-  if(S.opt.offline&&sec>0)sum=offline(sec);
+  const sum=comeBack(sec);
   S.afkSince=0;
   S.afkWeight=0;
   save();
@@ -27,7 +31,7 @@ function loop(){
   const now=performance.now();let dt=(now-lastT)/1000;lastT=now;
   if(S&&S.cls){
     if(paused||(S.opt.pauseHidden&&document.hidden))dt=0;
-    if(dt>120){const s=document.hidden?settleAfk():S.opt.offline?offline(dt):null;if(!document.hidden)S.afkWeight=0;if(s){boot2();if(s.kills||Object.keys(s.res).length)showOffline(s)}}
+    if(dt>120){const s=document.hidden?settleAfk():comeBack(dt);if(!document.hidden)S.afkWeight=0;if(s){boot2();if(comeShow(s))showOffline(s)}}
     else if(dt>0){fx=!document.hidden&&dt<1;const steps=Math.min(600,Math.ceil(dt/.2));for(let i=0;i<steps;i++)tick(dt/steps);fx=true}
     live();if(now-lastAch>1000){lastAch=now;checkAch();ensureQuests();checkTips();liveStats();histTick()}
     if(dirty&&now-lastPanel>600){lastPanel=now;renderPanel()}
@@ -43,19 +47,19 @@ function start(data){
   S.zoneBosses=S.zoneBosses||{};for(let i=0;i<S.zone;i++)S.zoneBosses[i]=1;
   if(S.cls&&OLD_CLS[S.cls]){S.cls=OLD_CLS[S.cls];let r=0;for(const k in S.alloc)r+=S.alloc[k]||0;S.pts+=r;S.alloc=fresh().alloc;S.cds={};S.auto={};S.buffs=[];S.dots=[];
     setTimeout(()=>{log("Nouveau système d'éléments : votre classe a été convertie et vos points vous ont été rendus.","g");toast("Vos points de caractéristiques vous ont été rendus")},300)}
-  /* sorts et potions automatiques devenus payants : ceux qui les utilisaient déjà les gardent */
-  if(!S.migAuto){S.migAuto=1;S.up=S.up||{};if(S.cls&&CLASSES[S.cls])CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto&&S.auto[sp.id])S.up["sp"+(i+1)]=true});if(S.autoPot)S.up.potauto=true}
-  /* vente automatique devenue payante (Colporteur) : ceux qui l'avaient activée la gardent */
-  if(!S.migSell){S.migSell=1;S.up=S.up||{};if(S.opt&&S.opt.autoSellFull)S.up.vendeur=true}
+  /* migrations de la sauvegarde (MIG dans etat.js) : sorts et ventes automatiques devenus payants, etc. */
+  migrate(S);
   Object.values(S.jobs||{}).forEach(j=>{if(j.lvl>PROF_MAX){j.lvl=PROF_MAX;j.xp=0}});
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});
   Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});if(!Array.isArray(S.workers))S.workers=[];
   if(!S.seen){S.seen={};Object.keys(S.res||{}).forEach(k=>{if(S.res[k]>0)S.seen[k]=1});(S.items||[]).forEach(i=>S.seen[i.id]=1)}
+  /* premier lancement : on suit le réglage « réduire les animations » du système (le joueur peut le changer dans Options) */
+  if(S.opt.reduceMotion==null&&matchMedia("(prefers-reduced-motion: reduce)").matches){S.opt.reduceMotion=true;S.opt.shake=false}
   S.opt=fixOpts(S.opt);applyOpts();checkUnlocks(true);
   /* écran d'accueil d'abord : le jeu (temps hors ligne, boucles) ne démarre qu'en le quittant */
   ACCUEIL.open(()=>{
   if(!S.cls){showCreate();}
-  else{const away=(Date.now()-(S.afkSince||S.last||Date.now()))/1000;let sum=null;if(away>0&&S.opt.offline)sum=offline(away);S.afkSince=0;S.afkWeight=0;boot2();save();if(sum&&(sum.kills||Object.keys(sum.res).length))showOffline(sum)}
+  else{const away=Math.max(0,(Date.now()-(S.afkSince||S.last||Date.now()))/1000),sum=comeBack(away);S.afkSince=0;S.afkWeight=0;boot2();save();if(comeShow(sum))showOffline(sum)}
   lastT=performance.now();setInterval(loop,100);setInterval(()=>{if(Date.now()-lastSave>=(S.opt?.saveEvery||10)*1000){lastSave=Date.now();save()}},1000);
   });
 }

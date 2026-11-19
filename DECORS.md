@@ -11,7 +11,7 @@ Seule la Prairie (zone 0) est réglée. Les autres zones passent par le même g�
   `outils.js` et avant `monde.js`.
 - `js/monde.js` : le moteur. `makeLayers(zid)` choisit `BIOME[zid]` (la Prairie en repli) ; `draw()` dessine chaque
   image ; la vie du décor est dans `updLife()` et `drawLife()`.
-- `js/pixel.js` : `TH[zid]` contient le thème de chaque biome (couleurs `g`, `path`, `wall`, `wc`, `water`, `props`, `fl`). Les accessoires `prop.*` (tree, pine, rock, bush, crystal, cactus, reed, coral, pillar…) sont exposés par `PX.kit`.
+- `js/pixel-objets.js` : `TH[zid]` contient le thème de chaque biome (couleurs `g`, `path`, `wall`, `wc`, `water`, `props`, `fl`). Les accessoires `prop.*` (tree, pine, rock, bush, crystal, cactus, reed, coral, pillar…) sont exposés par `PX.kit`.
 - `style/monde.css` : mise en page du bandeau, sans rien de propre aux biomes.
 
 ## Les plans (pixels logiques ×4, le monstre fait 40 px)

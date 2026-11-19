@@ -44,6 +44,7 @@ function pOpts(){
   if(otab==="aff")h+=`<div class="sec"><h3>Affichage</h3><div class="olist">
     ${seg("theme","Thème des panneaux","",[["parchemin","Parchemin"],["sombre","Sombre"],["contraste","Contraste"]])}
     ${rng("textSize","Taille de l'interface","",80,130,5)}
+    ${seg("fps","Images par seconde","30 : animations un peu moins fluides, mais moins de calcul (batterie du téléphone).",[[60,"60"],[30,"30"]])}
     ${seg("numFmt","Format des nombres","Exemple : "+({short:"1,5 M",full:"1 500 000",sci:"1.50e6"})[O.numFmt],[["short","Abrégé"],["full","Complet"],["sci","Scientifique"]])}
     ${seg("dmgNums","Chiffres de dégâts","",[["all","Tous"],["crit","Critiques et soins"],["none","Aucun"]])}
     ${seg("logLines","Journal de combat","",[[0,"Masqué"],[4,"4 lignes"],[8,"8"],[15,"15"]])}

@@ -1,0 +1,12 @@
+{
+  "name": "idle-valloree",
+  "private": true,
+  "description": "Idle Vallorée : outils de développement seulement (le jeu lui-même n'a aucune dépendance).",
+  "scripts": {
+    "test": "playwright test",
+    "assembler": "node outils/assembler.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.0"
+  }
+}

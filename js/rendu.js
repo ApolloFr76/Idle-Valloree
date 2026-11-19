@@ -108,7 +108,7 @@ function renderPanel(force){if(DRAG.on){dirty=true;return}
   if(!S.cls)return;if(ptrDown&&!force){dirty=true;return}dirty=false;
   const anyCraft=Object.values(ITEMS).some(canCraft);
   if(!tabOpen(S.tab))S.tab="perso";
-  setHTML($("tabs"),TABS.map(([k,n])=>!tabOpen(k)?`<button class="tab locked" data-a="tabLocked" data-t="${k}" data-tip="lk:${k}" aria-label="Onglet verrouillé, niveau ${TAB_LOCK[k]}">${LOCK_SVG}</button>`:`<button class="tab${S.tab===k?" on":""}" data-a="tab" data-t="${k}">${n}${k==="perso"&&S.pts>0||k==="atelier"&&anyCraft||k==="aventure"&&(S.zk[S.zone]||0)>=BOSS_KILLS||k==="prest"&&soulsGain()>0&&!S.prest||k==="quests"&&S.q&&S.q.list.some(q=>q.done&&!q.claimed)?'<span class="dot"></span>':""}</button>`).join(""));
+  setHTML($("tabs"),TABS.map(([k,n])=>!tabOpen(k)?`<button class="tab locked" role="tab" aria-disabled="true" tabindex="-1" data-a="tabLocked" data-t="${k}" data-tip="lk:${k}" aria-label="Onglet verrouillé, niveau ${TAB_LOCK[k]}">${LOCK_SVG}</button>`:`<button class="tab${S.tab===k?" on":""}" role="tab" id="tab-${k}" aria-controls="panelCard" aria-selected="${S.tab===k}" tabindex="${S.tab===k?0:-1}" data-a="tab" data-t="${k}">${n}${k==="perso"&&S.pts>0||k==="atelier"&&anyCraft||k==="aventure"&&(S.zk[S.zone]||0)>=BOSS_KILLS||k==="prest"&&soulsGain()>0&&!S.prest||k==="quests"&&S.q&&S.q.list.some(q=>q.done&&!q.claimed)?'<span class="dot"></span>':""}</button>`).join(""));
   /* tiroir fermé : son contenu est invisible, il sera reconstruit à l'ouverture (UI.open) */
   if(!force&&!UI.o&&S.tab===UI.last){UI.stale=true;return}UI.stale=false;
   const sy=$("panel").scrollTop, open=[...document.querySelectorAll("details.set[open]")].map(d=>d.dataset.z);

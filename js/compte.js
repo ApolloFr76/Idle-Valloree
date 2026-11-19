@@ -6,28 +6,41 @@ const SUPA={url:"https://rnhpijbqenpnxnulfgyu.supabase.co",key:"sb_publishable_O
 const ACC_KEY="vallore-compte-v1",ACC_BACKUP="vallore-save-avant-compte",ACC_EVERY=30;
 const COMPTE=(()=>{
   let acc=null,busy=false,msg="",msgOk=false,lastPush=0,choice=null;
+  /* état de la synchronisation, montré par le petit bouton de l'en-tête (#syncBtn) : ok, busy (envoi), err (échec), off (pas de réseau) */
+  const sync={st:"",at:0,why:""};
+  const syncSet=(st,why)=>{sync.st=st;sync.why=why||"";if(st==="ok")sync.at=Date.now();syncDraw()};
+  function syncDraw(){const b=$("syncBtn");if(!b)return;const on_=on()&&logged()&&S&&S.cls;b.hidden=!on_;if(!on_)return;
+    const st=!navigator.onLine?"off":sync.st||"ok",T={ok:"Synchronisé",busy:"Envoi…",err:"Échec de l'envoi",off:"Hors ligne"};
+    const tip=st==="ok"?`Partie sauvegardée en ligne ${when(sync.at?new Date(sync.at).toISOString():acc.syncAt)}`:st==="off"?"Pas de connexion : la partie reste dans ce navigateur et partira au retour du réseau":st==="err"?`La sauvegarde en ligne a échoué${sync.why?" ("+sync.why+")":""}. Nouvel essai dans ${ACC_EVERY} s.`:"Envoi de la partie en cours";
+    b.className="btn sync s-"+st;b.title=tip;b.setAttribute("aria-label",T[st]+" : "+tip);const l=b.querySelector(".slbl");if(l)l.textContent=T[st]}
   try{acc=JSON.parse(localStorage.getItem(ACC_KEY)||"null")}catch(e){acc=null}
   const on=()=>!!(SUPA.url&&SUPA.key),logged=()=>!!(acc&&acc.at&&acc.uid);
   const keep=()=>{try{acc?localStorage.setItem(ACC_KEY,JSON.stringify(acc)):localStorage.removeItem(ACC_KEY)}catch(e){}};
   const say=(t,ok)=>{msg=t;msgOk=!!ok;const L=document.querySelectorAll(".accMsg");L.forEach(m=>{m.textContent=t;m.className="small accMsg "+(ok?"accok":"accko")});if(!L.length&&t)toast(t,1)};
-  const rp=()=>{if(typeof ACC_OPEN!=="undefined"&&ACC_OPEN)ACCUEIL.render();else if(S&&S.cls&&(S.tab==="opts"||S.tab==="rank"))renderPanel(true)};
+  const rp=()=>{syncDraw();if(typeof ACC_OPEN!=="undefined"&&ACC_OPEN)ACCUEIL.render();else if(S&&S.cls&&(S.tab==="opts"||S.tab==="rank"))renderPanel(true)};
   const mail=p=>p.toLowerCase()+"@joueurs.idle-valloree.app";
   const okPseudo=p=>/^[A-Za-z0-9_-]{3,20}$/.test(p);
   const errTxt=j=>{const m=((j&&(j.msg||j.error_description||j.message||j.error))||"")+"";
     if(/already|registered|exists/i.test(m))return"Ce pseudo est déjà pris.";if(/invalid login|credentials/i.test(m))return"Pseudo ou mot de passe incorrect.";
-    if(/password/i.test(m))return"Mot de passe trop faible (6 caractères minimum).";if(/rate|too many/i.test(m))return"Trop d'essais, réessayez dans quelques minutes.";
+    if(/password/i.test(m))return"Mot de passe trop faible (6 caractères minimum).";if(/rate|too many/i.test(m))return"Trop d'essais, réessayez dans quelques minutes.";if(/jwt|session/i.test(m))return"Session expirée, reconnectez-vous.";
     return m?"Erreur du serveur : "+m:"Impossible de joindre le serveur. Vérifiez votre connexion."};
-  async function api(path,opt={},auth){const h=Object.assign({apikey:SUPA.key,"Content-Type":"application/json"},opt.headers||{});
-    if(auth){await fresh_();if(!logged())throw{msg:"Session expirée, reconnectez-vous."};h.Authorization="Bearer "+acc.at}
+  async function api(path,opt={},auth,again){const h=Object.assign({apikey:SUPA.key,"Content-Type":"application/json"},opt.headers||{});
+    let used=null;if(auth){await fresh_();if(!logged())throw{msg:"Session expirée, reconnectez-vous."};used=acc.at;h.Authorization="Bearer "+used}
     const r=await fetch(SUPA.url.replace(/\/$/,"")+path,Object.assign({},opt,{headers:h}));const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+    /* jeton refusé (expiré plus tôt que prévu : horloge décalée, mise en veille…) : on le renouvelle et on réessaie une fois */
+    if(auth&&!again&&(r.status===401||/jwt expired|invalid jwt|PGRST301|PGRST303/i.test(t))&&acc&&acc.rt){if(acc.at===used)acc.exp=0;return api(path,opt,auth,true)}   /* déjà renouvelé par une autre requête : on réessaie seulement */
     if(!r.ok)throw j||{msg:"HTTP "+r.status};return j}
   function setSession(j,pseudo){acc={pseudo:pseudo||(acc&&acc.pseudo)||"",uid:j.user.id,at:j.access_token,rt:j.refresh_token,exp:Date.now()+((j.expires_in||3600)-120)*1000,syncAt:acc&&acc.uid===j.user.id?acc.syncAt:null};keep()}
-  async function fresh_(){if(!acc||!acc.rt||Date.now()<acc.exp)return;
-    try{const j=await api("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:acc.rt})});setSession(j)}
-    catch(e){acc=null;keep();say("Session expirée, reconnectez-vous.");rp();throw e}}
+  /* renouvellement du jeton : un seul à la fois (les requêtes qui arrivent pendant ce temps attendent le même) */
+  let refreshing=null;
+  function fresh_(){if(!acc||!acc.rt||Date.now()<acc.exp)return Promise.resolve();
+    return refreshing||(refreshing=(async()=>{
+      try{const j=await api("/auth/v1/token?grant_type=refresh_token",{method:"POST",body:JSON.stringify({refresh_token:acc.rt})});setSession(j)}
+      catch(e){acc=null;keep();say("Session expirée, reconnectez-vous.");rp();throw e}})().finally(()=>{refreshing=null}))}
   /* sauvegarde en ligne : une ligne par compte dans la table « saves » */
   async function remote(){const r=await api(`/rest/v1/saves?user_id=eq.${acc.uid}&select=data,updated_at`,{},true);return r&&r[0]||null}
-  async function push(force){if(!logged()||!S||!S.cls)return false;
+  async function push(force){if(!logged()||!S||!S.cls)return false;syncSet("busy");try{const r=await push_(force);syncSet(r?"ok":"");return r}catch(e){syncSet(navigator.onLine?"err":"off",errTxt(e).replace(/\.$/,""));throw e}}
+  async function push_(force){
     if(!force){const r=await api(`/rest/v1/saves?user_id=eq.${acc.uid}&select=updated_at`,{},true);const u=r&&r[0]&&r[0].updated_at;
       if(u&&acc.syncAt&&new Date(u)>new Date(acc.syncAt)){const full=await remote();if(full&&!mine(full)){ask(full);return false}}}  /* une autre machine a sauvegardé entre-temps */
     save();acc.myLast=S.last;const r=await api("/rest/v1/saves?on_conflict=user_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=representation"},body:JSON.stringify({user_id:acc.uid,pseudo:acc.pseudo,data:JSON.stringify(S)})},true);
@@ -66,7 +79,7 @@ const COMPTE=(()=>{
     if(logged())return`<div class="accbox" id="accCreateBox"><span class="small">Connecté : <b>${esc(acc.pseudo)}</b></span></div>`;
     return`<div class="accbox" id="${start?"accCreateBox":"accBox"}"><div class="row accform"><input class="accP" type="text" maxlength="20" placeholder="Pseudo" autocomplete="username" spellcheck="false"><input class="accW" type="password" placeholder="Mot de passe" autocomplete="current-password">
       ${start?"":`<button class="btn pri" data-a="accCreate">Créer un compte</button>`}<button class="btn${start?" pri":""}" data-a="accLogin">Se connecter</button></div><div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`}
-  return{on,logged,formHtml,pseudo:()=>acc&&acc.pseudo||"",clearMsg:()=>{msg=""},uid:()=>acc&&acc.uid||null,call:(p,o)=>api(p,o,true),
+  return{on,logged,formHtml,syncDraw,pseudo:()=>acc&&acc.pseudo||"",clearMsg:()=>{msg=""},uid:()=>acc&&acc.uid||null,call:(p,o)=>api(p,o,true),
     msgHtml:()=>`<div class="small accMsg ${msgOk?"accok":"accko"}" role="status">${esc(msg)}</div>`,
     /* le serveur répond-il ? (5 s maximum) */
     async ping(){try{const c=new AbortController();setTimeout(()=>c.abort(),5000);const r=await fetch(SUPA.url.replace(/\/$/,"")+"/auth/v1/health",{headers:{apikey:SUPA.key},signal:c.signal});return r.ok}catch(e){return false}},
@@ -84,7 +97,9 @@ const COMPTE=(()=>{
     }catch(e){say(errTxt(e))}},
     /* au démarrage : si une autre machine a sauvegardé plus récemment, on propose de la charger ; puis envoi régulier */
     async init(){if(!on())return;
-      setInterval(()=>{if(logged()&&!busy&&!choice&&Date.now()-lastPush>=ACC_EVERY*1000){lastPush=Date.now();push(false).catch(()=>{})}},5000);
+      setInterval(()=>{if(logged()&&!busy&&!choice&&Date.now()-lastPush>=ACC_EVERY*1000){lastPush=Date.now();push(false).catch(()=>{})}syncDraw()},5000);
+      /* retour du réseau : envoi tout de suite au lieu d'attendre le prochain tour */
+      addEventListener("online",()=>{syncDraw();if(logged()&&!busy&&!choice){lastPush=Date.now();push(false).catch(()=>{})}});addEventListener("offline",syncDraw);
       window.addEventListener("pagehide",()=>{if(!logged()||!S||!S.cls||choice||Date.now()>=acc.exp)return;acc.myLast=S.last;keep();
         try{fetch(SUPA.url.replace(/\/$/,"")+"/rest/v1/saves?on_conflict=user_id",{method:"POST",keepalive:true,headers:{apikey:SUPA.key,Authorization:"Bearer "+acc.at,"Content-Type":"application/json",Prefer:"resolution=merge-duplicates"},body:JSON.stringify({user_id:acc.uid,pseudo:acc.pseudo,data:JSON.stringify(S)})})}catch(e){}});
       if(!logged())return;lastPush=Date.now();
