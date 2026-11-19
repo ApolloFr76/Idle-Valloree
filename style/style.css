@@ -1406,7 +1406,7 @@ button,select,label,[data-a],a{cursor:pointer}
 .adot.lock{background:#e4ddd0;color:#9a8a78;border-color:#b0a48e;border-left-color:#b0a48e;box-shadow:none}
 .adot.first,.adot.fin{border-radius:50%;border-left-width:2px}.adot.cap{box-shadow:0 0 0 2px var(--c)}
 .adot.on{outline:3px solid #3b2a74;outline-offset:2px;z-index:2}.adot:hover{z-index:3;filter:brightness(1.06)}
-.alegend{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin-top:6px}.alegend span{display:inline-flex;align-items:center;gap:5px}
+.alegend{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;margin:0}.alegend span{display:inline-flex;align-items:center;gap:5px}
 .alegend i{width:12px;height:12px;border:2px solid #2e2350;background:#efeaff}.alegend i.own{background:#9fd68c}.alegend i.can{background:var(--sun,#f0c23a)}.alegend i.lock{background:#e4ddd0;border-color:#b0a48e}
 .azoom .anode{min-height:58px;box-sizing:border-box}
 .afiche{margin-top:8px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;background:var(--bg2);border:3px solid var(--ink);padding:8px 12px}
