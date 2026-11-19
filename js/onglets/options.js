@@ -5,7 +5,7 @@ const BK_WHY={auto:"automatique",import:"avant un import",restore:"avant une res
 function bkHTML(){const L=bkList();return`<div class="sec"><h3>Sauvegardes de secours</h3><p class="small muted">Une copie de votre partie est gardée toutes les 15 minutes dans ce navigateur, ainsi qu'avant un import ou une nouvelle partie. Les ${BK_MAX} plus récentes sont conservées.</p>
   ${L.length?`<div class="olist">${L.map((b,i)=>`<div class="orow"><div class="ol"><b>${new Date(b.t).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"})}</b><span>${esc(b.name||"")} · ${CLASSES[b.cls]?CLASSES[b.cls].name:""} niveau ${b.lvl}${b.prest?" · Ω "+b.prest:""} · ${BK_WHY[b.why]||b.why}${bkArm===i?`<br><b>Remplacer la partie actuelle par cette copie ?</b>`:""}</span></div><div class="oc">${bkArm===i?`<button class="btn dng" data-a="bkLoad" data-i="${i}">Oui, restaurer</button>`:`<button class="btn" data-a="bkLoad" data-i="${i}">Restaurer</button>`}</div></div>`).join("")}</div>`:`<p class="small muted">Aucune copie pour l'instant.</p>`}
   <div class="row"><button class="btn" data-a="bkNow">Créer une copie maintenant</button></div></div>`}
-function applyOpts(){if(!S||!S.opt)return;const O=S.opt;document.documentElement.classList.toggle("rm",!!O.reduceMotion);const app=$("app");if(app)app.style.zoom=O.textSize/100;
+function applyOpts(){if(!S||!S.opt)return;const O=S.opt,de=document.documentElement;de.classList.toggle("rm",!!O.reduceMotion);["sombre","contraste"].forEach(t=>de.classList.toggle("th-"+t,O.theme===t));const app=$("app");if(app)app.style.zoom=O.textSize/100;
   const h=$("hint");if(h)h.hidden=!O.showHint;setVol();if(AC)musicSync();if($("weather"))drawWeather();if($("log")&&S.log)renderLog();potSig=""}
 const optFmt=(k,v)=>(v=Number.isFinite(+v)?v:OPT_DEF[k],0)||k.startsWith("vol")?Math.round(v*100)+" %":k==="textSize"||k==="potThreshold"?v+" %":k==="forgeSpeed"?"×"+v:v;
 function pOpts(){
@@ -42,6 +42,7 @@ function pOpts(){
   </div></div>
   <div class="sec"><h3>Explication des onglets</h3><div class="olist">${Object.keys(TAB_LOCK).map(t=>`<div class="orow"><div class="ol"><b>${tabOpen(t)?tabName(t):"Onglet verrouillé"}</b><span>${tabOpen(t)?UNL_TXT[t]:`Se débloque au niveau ${TAB_LOCK[t]}.`}</span></div><div class="oc"><button class="btn" data-a="unlReplay" data-t="${t}" ${tabOpen(t)?"":"disabled"}>Revoir</button></div></div>`).join("")}</div></div>`;
   if(otab==="aff")h+=`<div class="sec"><h3>Affichage</h3><div class="olist">
+    ${seg("theme","Thème des panneaux","",[["parchemin","Parchemin"],["sombre","Sombre"],["contraste","Contraste"]])}
     ${rng("textSize","Taille de l'interface","",80,130,5)}
     ${seg("numFmt","Format des nombres","Exemple : "+({short:"1,5 M",full:"1 500 000",sci:"1.50e6"})[O.numFmt],[["short","Abrégé"],["full","Complet"],["sci","Scientifique"]])}
     ${seg("dmgNums","Chiffres de dégâts","",[["all","Tous"],["crit","Critiques et soins"],["none","Aucun"]])}
