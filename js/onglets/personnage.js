@@ -8,7 +8,7 @@ function pPerso(){
     const L=[["Temps de jeu",`${hh} h ${mm} min`],["Clics",fmt(T.clicks||0)],["Combo record",fmt(T.maxCombo||0)],["Dégâts infligés",fmt(T.dmg||0)],["Plus gros coup",fmt(T.maxHit||0)],["Dégâts des compagnons",fmt(T.allyDmg||0)],
       ["Monstres vaincus",fmt(S.kills)],["Boss vaincus",fmt(T.bosses||0)],["Donjons terminés",fmt(T.dungeons||0)],["Record de la tour",`Étage ${S.tower.best}`],["K.O. subis",fmt(T.deaths||0)],
       ["Écus gagnés",fmt(T.ecus||0)],["XP gagnée",fmt(T.xp||0)],["Objets fabriqués",fmt(T.crafts||0)],["Enchantements réussis",`${fmt(T.enchOk||0)} / ${fmt((T.enchOk||0)+(T.enchKo||0))}`],["Meilleur enchantement",`+${T.enchMax||0}`],["Objets cliquables attrapés",fmt(S.pkN||0)]];
-    return h+`<div class="statgrid">${L.map(([a,b])=>`<div><span class="muted">${a}</span><b>${b}</b></div>`).join("")}</div></div>`}
+    return h+`<div class="statgrid">${L.map(([a,b])=>`<div><span class="muted">${a}</span><b>${b}</b></div>`).join("")}</div>${histHTML()}</div>`}
   if(ptab==="resume"){
     const row=(k,n,v)=>`<div class="srow" data-tip="s:${k}">${sico(k)}<span>${n}</span><span class="v num" style="grid-column:3/5">${v}</span></div>`;
     h+=`<div class="slist">
@@ -41,3 +41,16 @@ function pPerso(){
   }
   return h+`</div>`;
 }
+/* Courbe de progression (Statistiques) : un relevé par heure dans S.hist, gardé 7 jours et conservé au passage Oméga. */
+const HIST_STEP=3600e3,HIST_KEEP=7*24*3600e3;
+const histNow=()=>({t:Date.now(),lvl:S.lvl,prest:S.prest||0,souls:S.soulsTotal||0,tour:(S.tower&&S.tower.best)||0,dps:Math.round(stats().dps||0)});
+function histTick(){if(!S||!S.cls)return;const h=Array.isArray(S.hist)?S.hist:(S.hist=[]),now=Date.now();if(h.length&&now-h[h.length-1].t<HIST_STEP)return;h.push(histNow());while(h.length&&now-h[0].t>HIST_KEEP)h.shift()}
+const HIST_C=[["lvl","Niveau",0],["souls","Éclats gagnés depuis le début",1],["tour","Record de la tour (partie en cours)",0],["dps","Dégâts par seconde",1]];
+function histChart(P,k,name,lg){const W=300,H=92,pl=4,pr=4,pt=16,pb=16,f=v=>lg?Math.log10(1+Math.max(0,v)):v,vs=P.map(p=>f(p[k]||0));let lo=Math.min(...vs),hi=Math.max(...vs);if(hi-lo<1e-9){hi=lo+1;lo=Math.max(0,lo-1)}
+  const t0=P[0].t,t1=P[P.length-1].t||t0+1,X=t=>pl+(W-pl-pr)*(t1>t0?(t-t0)/(t1-t0):1),Y=v=>pt+(H-pt-pb)*(1-(f(v)-lo)/(hi-lo)),pts=P.map(p=>[X(p.t),Y(p[k]||0)]);
+  const d="M"+pts.map(q=>q[0].toFixed(1)+" "+q[1].toFixed(1)).join("L"),last=P[P.length-1],dt=t=>new Date(t).toLocaleString("fr-FR",{weekday:"short",hour:"2-digit",minute:"2-digit"});
+  const hit=pts.map((q,i)=>{const x0=i?(pts[i-1][0]+q[0])/2:0,x1=i<pts.length-1?(q[0]+pts[i+1][0])/2:W;return`<g class="hp"><rect x="${x0.toFixed(1)}" y="0" width="${Math.max(1,x1-x0).toFixed(1)}" height="${H}" fill="transparent"></rect><line x1="${q[0].toFixed(1)}" x2="${q[0].toFixed(1)}" y1="${pt}" y2="${H-pb}"></line><circle cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="4"></circle><title>${i===pts.length-1?"Maintenant":dt(P[i].t)} : ${fmt(P[i][k]||0)}</title></g>`}).join("");
+  return`<div class="hchart"><div class="hhead"><span class="muted">${name}</span><b class="num">${fmt(last[k]||0)}</b></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${name} : de ${fmt(P[0][k]||0)} à ${fmt(last[k]||0)}">
+    <line class="hbase" x1="${pl}" x2="${W-pr}" y1="${H-pb}" y2="${H-pb}"></line><path d="${d}"></path>${hit}</svg><div class="hfoot small muted"><span>${P.length>1?dt(P[0].t):""}</span><span>maintenant</span></div></div>`}
+function histHTML(){const P=(Array.isArray(S.hist)?S.hist:[]).filter(p=>Date.now()-p.t<=HIST_KEEP).concat([histNow()]);
+  return`<div class="sec hist"><h3>Progression · 7 derniers jours</h3>${P.length<3?`<p class="small muted">La courbe se remplit au fil du jeu : un relevé par heure, gardé 7 jours.</p>`:""}<div class="hgrid">${HIST_C.map(([k,n,lg])=>histChart(P,k,n,lg)).join("")}</div><p class="small muted">Survolez une courbe pour voir les valeurs. Échelle logarithmique pour les éclats et les dégâts.</p></div>`}
