@@ -1,6 +1,6 @@
 /* Boucle de jeu (tick) : combat automatique, récolte, temps. */
 /* ================= Boucle ================= */
-let allyAcc=0,allyFT=0,clickAcc=0,autoSellT=0;
+let allyAcc=0,allyFT=0,clickAcc=0,autoSellT=0,ssMon=null;
 const PLAYER_CPS_LIMIT=20,playerClickTimes=[];
 function playerClickAllowed(){
   const now=performance.now();
@@ -31,7 +31,7 @@ function tick(dt){VIE.tick(dt);
       if(S.summ&&S.summ.length&&S.mon){S.summ=S.summ.filter(x=>x.until>S.time);S.summAcc=(S.summAcc||0)+dt;if(S.summAcc>=1){S.summAcc-=1;const v=S.summ.reduce((a,x)=>a+x.m,0)*st.hit;if(v>0)hitMon({v:Math.round(v),crit:false,r:0},"summon")}}
       if(S.mon){S.monT+=dt;const mA=2*(1+(S.mdot&&S.mdot.gelure?S.mdot.gelure.n*DOTS.gelure.slow:0));if(S.monT>=mA){S.monT-=mA;
         if(Math.random()<st.dodge){if(fx){floatNum("Esquive","heal hurt");FX.dodge()}}
-        else{const dmg=Math.max(1,Math.round(S.mon.atk*st.def*(.85+Math.random()*.3)));S.hp-=dmg;if(fx){floatNum("-"+fmt(dmg),"hurt");FX.monAtk()}
+        else{const dmg=Math.max(1,Math.round(S.mon.atk*st.def*(arb("g1")?.9:1)*(.85+Math.random()*.3)));S.hp-=dmg;if(S.hp<=0&&arb("g7")&&ssMon!==S.mon){ssMon=S.mon;S.hp=1;log("Second souffle : vous tenez bon à 1 PV !","g")}if(fx){floatNum("-"+fmt(dmg),"hurt");FX.monAtk()}
           if(S.hp<=0){S.hp=0;S.ko=5;S.buffs=[];S.dots=[];inc("deaths");if(fx)FX.ko();if(S.mode!=="zone"){endMode(false,"K.O.")}else{log(`${MON[S.mon.id].name} vous a mis K.O. Essayez une zone plus facile ou améliorez votre équipement.`,"r");S.mon.hp=S.mon.max;if(S.opt.koRetreat&&S.zone>0){S.zone--;S.mon=null;drawZones();log(`Retour automatique : ${ZONES[S.zone].name}.`,"w")}}}}}}
       CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto[sp.id]&&up("sp"+(i+1)))cast(sp,true)});
       /* Défi automatique (boutique) : boss lancé dès les 10 victoires ; 30 s d'attente après un échec */
@@ -61,6 +61,7 @@ function tick(dt){VIE.tick(dt);
 }
 function offline(sec){
   if(!S.cls)return null;
+  if(arb("t7"))sec*=2;   /* Maître du temps : le temps hors ligne compte double */
   const room=Math.max(0,bagCap()-bagWeight());
   sec=Math.min(Math.max(0,sec),room);
   S.afkWeight=sec;
@@ -74,7 +75,8 @@ function offline(sec){
     fx=false;gainXp(sum.xp);fx=true}
   if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier),t=sec+(+S.job.t||0),k=Math.min(20000,Math.floor(t/gt));   /* 20 000 récoltes max pendant l'absence, comme avant */
     S.job.t=Math.min(gt,t-k*gt);const tot=gainGatherN(r.prof,r.id,k,true);if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
-  OUV.offline(sec,sum);
+  OUV.offline(sec*(arb("r4")?2:1),sum);
+  if(arb("m10")){const g=Math.floor(S.ecus*.01*Math.min(24,sec/3600));if(g>0){S.ecus+=g;sum.ecus=(sum.ecus||0)+g}}   /* Intérêts */
   sum.danger=danger;return sum;
 }
 

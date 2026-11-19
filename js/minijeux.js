@@ -105,7 +105,7 @@ function mgEnd(score,why){const m=mg;if(!m||m.done)return;m.done=true;score=Math
     html=`<img class="px mgres" src="${PX.res(pid,RES[rid].tier)}" alt=""><h2 style="color:${col}">${score>=.95?"Parfait !":score>=.6?"Bien joué":score>=.3?"Pas mal":"Raté"}</h2><span class="small">Score ${Math.round(score*100)} % · <b>${got}× ${RES[rid].name}</b>${score>=.95?" (bonus ×1,5)":""}</span>`}
   $("ov").innerHTML=`<div class="ovc mg" style="text-align:center;align-items:center">${html}<div class="row" style="justify-content:center"><button class="btn pri" data-a="mgAgain" data-p="${pid}">Rejouer (${MG_CD} s)</button>${pid==="pecheur"?`<button class="btn" data-a="fishDex">Poissonnédia</button>`:""}<button class="btn" data-a="mgClose">Fermer</button></div></div>`;
   dirty=true}
-function gainProfXp(pid,x){const p=S.jobs[pid];if(p.lvl>=PROF_MAX)return;p.xp+=Math.round(x);while(p.lvl<PROF_MAX&&p.xp>=pxNeed(p.lvl)){p.xp-=pxNeed(p.lvl);p.lvl++;log(`${PROFS[pid].name} niveau ${p.lvl} !`,"g");const nu=UNLOCK.indexOf(p.lvl);if(nu>=0)log(`Nouvelle ressource : ${PROFS[pid].res[nu][1]}.`,"g")}}
+function gainProfXp(pid,x){const p=S.jobs[pid];if(p.lvl>=PROF_MAX)return;p.xp+=Math.round(x*(arb("r10")?3:1));while(p.lvl<PROF_MAX&&p.xp>=pxNeed(p.lvl)){p.xp-=pxNeed(p.lvl);p.lvl++;log(`${PROFS[pid].name} niveau ${p.lvl} !`,"g");const nu=UNLOCK.indexOf(p.lvl);if(nu>=0)log(`Nouvelle ressource : ${PROFS[pid].res[nu][1]}.`,"g")}}
 function mgClose(){mg=null;$("ov").hidden=true;renderPanel()}
 
 /* Manger un poisson : boost temporaire */

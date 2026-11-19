@@ -13,14 +13,14 @@ const OUV=(()=>{
   const time=w=>{const r=RES[w.r];return Math.max(.1,gatherRaw(r.prof,r.tier)*OUV_SLOW)};
   const best=pid=>{const J=S.jobs[pid];let t=0;UNLOCK.forEach((u,i)=>{if(J.lvl>=u)t=i});return PROFS[pid].res[t][0]};
   return{
-    MAX:OUV_MAX,cost,open,time,
+    get MAX(){return ouvMax()},cost,open,time,
     list:L,
     at:pid=>L().filter(w=>RES[w.r]&&RES[w.r].prof===pid),
     /* récolte pendant le jeu */
     tick(dt){L().forEach((w,i)=>{if(!w.r||!RES[w.r])return;const gt=time(w);w.t+=dt;while(w.t>=gt){const n=addRes(w.r,1);if(!n){w.t=gt;w.full=1;return}w.t-=gt;w.full=0;w.n=(w.n||0)+n;qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.5,true);if(fx)SITE.pop(i,"+"+n)}})},
     /* récolte pendant l'absence (budget AFK plafonné par la capacité disponible) */
     offline(sec,sum){L().forEach(w=>{if(!w.r||!RES[w.r])return;const gt=time(w),tot=sec+w.t,want=Math.floor(tot/gt);w.t=tot-want*gt;const n=want>0?addRes(w.r,want,true):0;w.full=n<want;w.n=(w.n||0)+n;if(n){qProg("gather",w.r,n);gainGatherXp(RES[w.r].prof,w.r,.5*n,true);sum.res[RES[w.r].name]=(sum.res[RES[w.r].name]||0)+n}})},
-    hire(pid){if(L().length>=OUV_MAX)return;const c=cost();if(S.ecus<c){toast(`Il faut ${fmt(c)} écus`);return}S.ecus-=c;
+    hire(pid){if(L().length>=ouvMax())return;const c=cost();if(S.ecus<c){toast(`Il faut ${fmt(c)} écus`);return}S.ecus-=c;
       const used=new Set(L().map(w=>w.name)),name=OUV_NAMES.find(n=>!used.has(n))||"Ouvrier";const w={name,look:L().length%OUV_LOOK.length,r:best(pid),t:0,n:0};L().push(w);
       sfx("coin");log(`${name} rejoint vos ouvriers (${PROFS[pid].name} : ${RES[w.r].name}).`,"g");toast(`${name} embauché`)},
     assign(i,rid){const w=L()[i];if(!w||!open(rid))return;if(w.r!==rid){w.r=rid;w.t=0;w.full=0}},

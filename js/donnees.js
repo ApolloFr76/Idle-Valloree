@@ -304,7 +304,7 @@ function heroArm(){if(!S||!S.cls||(S.opt&&S.opt.showArmor===false))return null;l
 /* Métiers au niveau max : chacun donne +10 % d'XP et +5 000 de poids */
 const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].lvl>=PROF_MAX).length:0;
 /* Amélioration active : achetée dans cette vie, ou rendue permanente avec des éclats Oméga (gardée après chaque renaissance) */
-const up=id=>!!(S.up&&S.up[id]||S.upPerm&&S.upPerm[id]);
+const up=id=>!!(S.up&&S.up[id]||typeof arbKeep==="function"&&arbKeep(id));  /* achats de boutique : de cette vie ou gardés par l'arbre Oméga */
 /* Vente automatique : réglage par ressource (on : vendue automatiquement, oui par défaut ; keep : quantité toujours gardée) */
 /* « Garder toujours » : 100 par défaut pour chaque ressource (0 si le joueur le choisit) */
 const SELL_KEEP_DEF=100;
@@ -314,17 +314,17 @@ const AUTOS=[["autoClick",["auto1","auto2"],"Clic"],["autoFightBoss","bossauto",
 const autoOwned=a=>[].concat(a[1]).some(up);
 const upPermCost=id=>{const u=UPGS.find(x=>x[0]===id);return u?Math.max(1,Math.round(Math.log10(u[3])*2-5)):0};
 const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l)*(CLASSES[S.cls]?.allyCost||1));
-const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*(1+talV("t_cmd")/100)*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
+const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*arbAllyMult()*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
 const allyDpsOf=(i,l,m=allyMult())=>l<=0?0:ALLIES[i][2]*.4*l*Math.pow(1.5,Math.floor(l/25))*m;
 const allyDps=()=>{const m=allyMult();return ALLIES.reduce((a,x,i)=>a+allyDpsOf(i,S.allies[x[0]]||0,m),0)};
 const clickMult=()=>(up("gants1")?2:1)*(up("gants2")?3:1)*(1+talV("t_doigts")/100);
 const comboMax=()=>up("rythme")?150:100;
 const inc=(k,n=1)=>{S.st[k]=(S.st[k]||0)+n};
 const mx=(k,v)=>{if(v>(S.st[k]||0))S.st[k]=v};
-const sellMult=()=>up("bourse")?1.25:1;
+const sellMult=()=>(up("bourse")?1.25:1)*arbSellMult();
 const mkOf=k=>(S.mk&&S.mk[k])||1;
 const priceOf=k=>Math.max(1,Math.round(RES[k].price*sellMult()*(RES[k].kind==="k"?1:mkOf(k))));
-function gainEcus(n){n=Math.round(n*(1+talV("t_avar")/100)*(1+.01*achN()));S.ecus+=n;inc("ecus",n);return n}
+function gainEcus(n){n=Math.round(n*(1+talV("t_avar")/100)*arbEcusMult()*(1+.01*achN()));S.ecus+=n;inc("ecus",n);return n}
 
 /* Renaissance et talents : [id, nom, effet, rangs max, coût de base en éclats] */
 const PREST_LVL=100;
@@ -335,7 +335,7 @@ const lvlMax=()=>Infinity;
 /* Éclats gagnés depuis le début (dépensés ou non) : +12,5 % de dégâts chaque fois que ce total est multiplié par 10.
    Dépenser ne fait donc rien perdre, et le bonus reste raisonnable même avec des milliers de milliards d'éclats. */
 const SOUL_PCT=12.5;
-const soulBonus=()=>SOUL_PCT*Math.log10(1+((S&&S.soulsTotal)||0));
+const soulBonus=()=>typeof arb==="function"&&arb("coeur")?SOUL_PCT*Math.log10(1+((S&&S.soulsTotal)||0)):0;  /* actif avec le Cœur d'Oméga */
 const TALENTS={
   "Combat":[["t_force","Force brute","+10 % de dégâts",1],["t_prec","Précision","+2 % de critique",1],["t_vie","Vitalité ancestrale","+10 % de PV",2],["t_elem","Maîtrise élémentaire","Les faiblesses font +10 % de dégâts en plus",3]],
   "Récolte":[["t_mains","Mains agiles","Récolte 8 % plus rapide",1],["t_double","Double récolte","Chance de récolte double",1],["t_sac","Poches sans fond","+1 500 de poids",2],["t_metier","Héritage des métiers","Les métiers repartent plus haut",3]],
@@ -364,7 +364,7 @@ const TAL_CAP={t_prec:95,t_double:100,t_combo:100,t_dore:100,t_trefle:90,t_metie
 const talCapV=id=>{const c=TAL_CAP[id];return c==null?Infinity:typeof c==="function"?c():c};
 const talMaxR=id=>{const c=talCapV(id);if(c===Infinity||talAt(id,1e6)<c)return Infinity;let lo=1,hi=1e6;while(lo<hi){const m=(lo+hi)>>1;if(talAt(id,m)>=c)hi=m;else lo=m+1}return lo};
 const talIsMax=id=>tal(id)>=talMaxR(id);
-const talV=id=>Math.min(talCapV(id),talAt(id,tal(id)));
+const talVold=id=>Math.min(talCapV(id),talAt(id,tal(id)));  /* anciens talents (remplacés par l'arbre Oméga, js/arbre.js) */
 const talTxt=(id,r)=>{const x=Math.min(talCapV(id),talAt(id,r)),f=TALV[id][2];return f.replace("#",x>=100?fmt(Math.round(x)):(Math.round(x*10)/10).toString().replace(".",","))};
 const talCostAt=(id,r)=>Math.ceil(TAL[id].cost*(r+1)*Math.pow(1.04,r));
 const talCost=id=>talCostAt(id,tal(id));
@@ -376,7 +376,7 @@ const talSpent=id=>{let n=0;for(let k=0;k<tal(id);k++)n+=talCostAt(id,k);return 
 const BOSS_SOULS=(()=>{const a=[];let v=10;for(let i=0;i<BOSSES.length;i++){if(i)v*=i<4?1.5:1.5+.1*(i-3);a.push(Math.round(v))}return a})();
 const bossSouls=()=>{let n=0;for(const i in S.bossLife||{})n+=BOSS_SOULS[i]||0;return n};
 const OMEGA_GROWTH=1.008;
-const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor(5*Math.pow(OMEGA_GROWTH,S.lvl-30))+bossSouls();
+const soulsGain=()=>S.lvl<PREST_LVL?0:Math.floor((5*Math.pow(OMEGA_GROWTH,S.lvl-30)+bossSouls())*(arb("m11")?1.1:1));
 /* Succès : chaque succès donne +1 % de dégâts et +1 % d'écus */
 const ROM=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 /* Icônes des succès : une par série (12×12 pixels) */

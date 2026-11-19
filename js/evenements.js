@@ -23,6 +23,9 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"quit":endMode(false,"abandon");break;
     case"upPerm":{const id=b.dataset.u,u=UPGS.find(x=>x[0]===id),c=upPermCost(id);S.upPerm=S.upPerm||{};if(!u||S.upPerm[id]||S.souls<c)break;S.souls-=c;S.upPerm[id]=true;sfx("level");log(`Amélioration permanente : ${u[1]} (gardée après chaque Oméga).`,"g");toast(`${u[1]} : permanente`,1);drawSpells();potSig="";mbSig="";renderPanel();break}
     case"otabP":otabP=b.dataset.t;renderPanel(true);break;
+    case"arbSel":arbSel=b.dataset.id;renderPanel(true);break;
+    case"arbBuy":arbBuy(b.dataset.id);renderPanel(true);break;
+    case"arbLeave":arbLeave(b.dataset.k);renderPanel(true);break;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;
     case"prestNo":prestConfirm=false;renderPanel();break;
     case"prestYes":prestConfirm=false;doPrestige();break;
@@ -65,7 +68,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"mkSell":{const k=b.dataset.r,g=sellRes(k,b.dataset.n==="all"?S.res[k]:+b.dataset.n);if(g)toast(`+${fmt(g)} écus`);renderPanel();break}
     case"ally":{const i=+b.dataset.i,id=ALLIES[i][0];let n=b.dataset.n==="max"?1e9:+b.dataset.n,bought=0;while(n-->0){const c=allyCost(i,S.allies[id]||0);if(S.ecus<c)break;S.ecus-=c;S.allies[id]=(S.allies[id]||0)+1;bought++}
       if(bought){const l=S.allies[id];if(Math.floor(l/25)>Math.floor((l-bought)/25))toast(`${ALLIES[i][1]} : dégâts doublés !`);if(l===bought)log(`${ALLIES[i][1]} rejoint votre groupe.`,"g")}else toast("Pas assez d'écus");renderPanel();break}
-    case"buy":{const u=UPGS.find(x=>x[0]===b.dataset.u);if(!u||up(u[0])||S.ecus<u[3])break;S.ecus-=u[3];S.up[u[0]]=true;sfx("coin");log(`Amélioration achetée : ${u[1]}.`,"g");toast(`${u[1]} : ${u[2]}`);renderPanel();break}
+    case"buy":{const u=UPGS.find(x=>x[0]===b.dataset.u);if(!u||up(u[0])||S.ecus<shopCost(u[3]))break;S.ecus-=shopCost(u[3]);S.up[u[0]]=true;sfx("coin");log(`Amélioration achetée : ${u[1]}.`,"g");toast(`${u[1]} : ${u[2]}`);renderPanel();break}
     case"zone":goZone(+b.dataset.i);break;
     case"cast":cast(CLASSES[S.cls].spells.find(s=>s.id===b.dataset.sp),false);break;
     case"ptab":ptab=b.dataset.t;renderPanel();break;
@@ -82,7 +85,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"atClose":atSel=null;renderPanel(true);break;
     case"noop":break;
     case"atSel":atSel=atSel===b.dataset.i?null:b.dataset.i;renderPanel();break;
-    case"craft":{const it=ITEMS[b.dataset.i];if(!canCraft(it))break;if(atSel){atSel=null;renderPanel(true)}it.recipe.forEach(([r,q])=>S.res[r]-=q);startForge(it);break}
+    case"craft":{const it=ITEMS[b.dataset.i];if(!canCraft(it))break;if(atSel){atSel=null;renderPanel(true)}it.recipe.forEach(([r,q])=>S.res[r]-=craftQ(q));startForge(it);break}
     case"equip":equipItem(+b.dataset.u,selSlot);renderPanel();break;
     case"selSlot":{const now=performance.now(),dbl=lastSel.v==="s:"+b.dataset.s&&now-lastSel.t<450;lastSel={v:"s:"+b.dataset.s,t:now};selSlot=b.dataset.s;selLast="slot";if(dbl&&S.equip[selSlot]){delete S.equip[selSlot];S.hp=Math.min(S.hp,stats().maxHp);toast("Objet retiré",1);lastSel={v:null,t:0}}renderPanel();break}
     case"selInv":{const v=b.dataset.v,now=performance.now(),dbl=lastSel.v===v&&now-lastSel.t<450;lastSel={v,t:now};selInv=v;selLast="inv";
@@ -96,7 +99,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"sellStack":{const k=b.dataset.k,eq=new Set(Object.values(S.equip)),L=S.items.filter(x=>!eq.has(x.u)&&stackKey(x)===k);if(!L.length)break;const it=ITEMS[L[0].id],v=Math.round(it.price*(1+.2*(L[0].e||0))*sellMult()*rarOf(L[0]).m)*L.length;S.items=S.items.filter(x=>!L.includes(x));gainEcus(v);sfx("coin");selInv=null;toast(`${L.length}× ${it.name} vendus : +${fmt(v)} écus`);renderPanel();break}
     case"sellItem":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u),it=ITEMS[i.id],v=Math.round(it.price*(1+.2*(i.e||0))*sellMult()*rarOf(i).m);S.items=S.items.filter(x=>x.u!==u);gainEcus(v);nextInStack(stackKey(i));toast(`${it.name} vendu : +${fmt(v)} écus`);renderPanel();break}
     case"ench":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u),it=ITEMS[i.id],e=i.e||0,cost=enchCost(i);if(S.ecus<cost||e>=10)break;S.ecus-=cost;
-      if(Math.random()<Math.max(.2,.9-.07*e)){i.e=e+1;inc("enchOk");mx("enchMax",i.e);toast(`Réussite ! ${it.name} +${i.e}`);log(`Enchantement réussi : ${it.name} +${i.e}.`,"g")}else{toast("L'enchantement a échoué. Les écus sont perdus.");inc("enchKo")}renderPanel();break}
+      if((arb("r6")&&e<5)||Math.random()<Math.max(.2,.9-.07*e)){i.e=e+1;inc("enchOk");mx("enchMax",i.e);toast(`Réussite ! ${it.name} +${i.e}`);log(`Enchantement réussi : ${it.name} +${i.e}.`,"g")}else{toast("L'enchantement a échoué. Les écus sont perdus.");inc("enchKo")}renderPanel();break}
     case"ouvHire":{OUV.hire(b.dataset.p);renderPanel();break}
     case"ouvFire":{OUV.fire(+b.dataset.i);renderPanel();break}
     case"job":{const r=b.dataset.r;S.job=S.job&&S.job.r===r?null:{r,t:0};renderPanel();break}

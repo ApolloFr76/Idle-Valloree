@@ -25,7 +25,7 @@ function takePk(){
   let msg="";
   const gold=m=>{const g=gainEcus(farmGold(120)*m);return`+${fmt(g)} écus`};
   const xp=()=>{if(S.lvl>=lvlMax())return gold(1);const x=Math.max(5,Math.round(xpNeed(S.lvl)*.06));gainXp(x);return`+${fmt(x)} XP`};
-  if(p.id==="coffre")msg=gold(1);
+  if(p.id==="coffre")msg=gold(arb("m6")?3:1);
   if(p.id==="etoile")msg=xp();
   if(p.id==="orbe"){pkBuff("dmg",3,15,"Frénésie");msg="Dégâts ×3 pendant 15 s"}
   if(p.id==="trefle"){pkBuff("pros",3,30,"Chance");msg="Prospection ×3 pendant 30 s"}
@@ -60,7 +60,7 @@ function trend(k){const a=mkOf(k),b=(S.mkPrev&&S.mkPrev[k])||1;return a>b+.005?"
 function sellRes(k,n){n=Math.min(n,S.res[k]||0);if(n<=0)return 0;sfx("coin");let g=0;
   /* une fois le cours au plancher, le reste se vend d'un coup au même prix (une pile de milliards ne fige plus le jeu) */
   for(let i=0;i<n;i++){if(RES[k].kind==="k"||mkOf(k)<=MK_MIN){g+=priceOf(k)*(n-i);break}g+=priceOf(k);S.mk[k]=Math.max(MK_MIN,mkOf(k)-MK_SELL)}S.res[k]-=n;g=gainEcus(g);qProg("sell",null,g);return g}
-function brew(id,n){const r=RES[id];let made=0;while(n-->0){if(S.jobs.herboriste.lvl<r.plvl||!r.recipe.every(([x,q])=>(S.res[x]||0)>=q))break;r.recipe.forEach(([x,q])=>S.res[x]-=q);S.res[id]=(S.res[id]||0)+1;made++;inc("brews");inc("crafts");qProg("craft");
+function brew(id,n){const r=RES[id];let made=0;while(n-->0){if(S.jobs.herboriste.lvl<r.plvl||!r.recipe.every(([x,q])=>(S.res[x]||0)>=q))break;r.recipe.forEach(([x,q])=>S.res[x]-=q);S.res[id]=(S.res[id]||0)+(arb("r9")?2:1);made++;inc("brews");inc("crafts");qProg("craft");
     const J=S.jobs.herboriste;if(J.lvl<PROF_MAX){J.xp+=Math.round(20*Math.pow(r.tier+1,1.6));while(J.lvl<PROF_MAX&&J.xp>=pxNeed(J.lvl)){J.xp-=pxNeed(J.lvl);J.lvl++;log(`Herboriste niveau ${J.lvl} !`,"g")}}}
   if(made)toast(`${made}× ${r.name} préparée${made>1?"s":""}`);dirty=true;return made}
 /* Récompense d'une quête du jour terminée (bouton ou amélioration Messager) */
@@ -68,7 +68,7 @@ function claimQuest(i){const q=S.q&&S.q.list[i];if(!q||!q.done||q.claimed)return
   if(S.q.list.every(x=>x.claimed)&&!S.q.bonus){S.q.bonus=true;S.souls++;S.soulsTotal=(S.soulsTotal||0)+1;log("Toutes les quêtes du jour sont terminées : +1 éclat d'âme !","g");toast("+1 éclat d'âme")}dirty=true}
 function drink(id,auto){const r=RES[id];if(!r||r.kind!=="p"||!(S.res[id]>0)||S.ko>0)return;const st=stats();S.res[id]--;inc("potions");
   if(r.fx.heal){const h=Math.round(st.maxHp*r.fx.heal);S.hp=Math.min(st.maxHp,S.hp+h);if(fx){floatNum("+"+fmt(h),"heal");FX.heal()}}
-  else pkBuff(r.fx.k,r.fx.v,r.fx.d,r.name);
+  else pkBuff(r.fx.k,r.fx.v,r.fx.d*(arb("r8")?2:1),r.name);
   if(!auto)log(`Vous buvez : ${r.name}.`,"w");dirty=true;drawPots()}
 let potSig="";
 function drawPots(){const ids=POTIONS.map(p=>p[0]).filter(id=>S.res[id]>0),AB=S.autoBuff||{},heal1=ids.find(id=>RES[id].fx.heal),sig=ids.map(id=>id+S.res[id]+(AB[id]?"a":"")).join()+S.autoPot+up("potauto");if(sig===potSig)return;potSig=sig;

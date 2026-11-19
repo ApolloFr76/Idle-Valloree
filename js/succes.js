@@ -3,10 +3,12 @@
 function checkAch(){let n=0;ACH.forEach(a=>{if(!S.ach[a.id]&&a.get()>=a.v){S.ach[a.id]=1;n++;log(`Succès débloqué : <b>${a.n}</b> (${a.txt}).`,"g");if(fx){toast(`Succès : ${a.n} · +1 % dégâts et écus`);FX.ach(a.n)}}});if(n)dirty=true}
 const clsCost=()=>5+5*(S.clsSwaps||0);
 function doPrestige(){
-  const g=soulsGain();if(g<=0)return;
-  const keep={cls:S.cls,name:S.name,st:S.st,best:S.best,fdex:S.fdex,ach:S.ach,tower:{best:0,cur:1},souls:S.souls+g,soulsTotal:(S.soulsTotal||0)+g,prest:(S.prest||0)+1,tal:S.tal,unl:S.unl,tips:S.tips,tutoDone:S.tutoDone,pkN:S.pkN,kills:S.kills,uid:S.uid,log:[],tab:"prest",time:S.time,auto:S.auto,opt:S.opt,q:S.q,mk:S.mk,mkPrev:S.mkPrev,autoPot:S.autoPot,autoBuff:S.autoBuff||{},upPerm:S.upPerm||{},sellCfg:S.sellCfg||{}};
+  const g=soulsGain();if(g<=0)return;const oldE=S.ecus||0,oldAl=S.allies||{},oldTw=S.tower||{best:0};
+  const keep={cls:S.cls,name:S.name,st:S.st,best:S.best,fdex:S.fdex,ach:S.ach,tower:{best:0,cur:1},souls:S.souls+g,soulsTotal:(S.soulsTotal||0)+g,prest:(S.prest||0)+1,tal:S.tal,arb:S.arb,unl:S.unl,tips:S.tips,tutoDone:S.tutoDone,pkN:S.pkN,kills:S.kills,uid:S.uid,log:[],tab:"prest",time:S.time,auto:S.auto,opt:S.opt,q:S.q,mk:S.mk,mkPrev:S.mkPrev,autoPot:S.autoPot,autoBuff:S.autoBuff||{},upPerm:S.upPerm||{},sellCfg:S.sellCfg||{}};
   for(const k in keep)if(keep[k]===undefined)delete keep[k];
-  S=Object.assign(fresh(),keep);S.st.bossesLife=0;S.ecus=Math.round(talV("t_depart"));
+  S=Object.assign(fresh(),keep);S.st.bossesLife=0;S.ecus=arb("m8")?Math.floor(oldE*.01):0;
+  /* arbre Oméga : départ rapide, vétéran, mémoire de la tour */
+  if(arb("t6")){S.lvl=50;S.pts=49*PTS_PER_LVL}if(arb("t1"))for(const k in oldAl)S.allies[k]=Math.floor(oldAl[k]*.1);if(arb("t2")){const b=Math.floor((oldTw.best||0)*.5);S.tower={best:b,cur:b+1}}
   const jl=Math.min(PROF_MAX,Math.max(1,Math.round(talV("t_metier"))));Object.values(S.jobs).forEach(j=>j.lvl=jl);
   S.hp=stats().maxHp;log(`Niveau Oméga ${S.prest} atteint : +${g} éclats Oméga. Une nouvelle vie commence.`,"g");toast(`Oméga ${S.prest} · +${g} éclats`);boot2();save();FX.omega(S.prest);
 }

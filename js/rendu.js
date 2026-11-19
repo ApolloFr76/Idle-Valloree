@@ -59,7 +59,7 @@ function live(){
 
 /* --- Onglets --- */
 const TABS=[["perso","Personnage"],["inv","Inventaire"],["aventure","Aventure"],["allies","Compagnons"],["shop","Boutique"],["quests","Quêtes"],["market","Marché"],["prest","Oméga"],["coll","Collection"],["atelier","Atelier"],["metiers","Métiers"],["opts","Options"]];
-function canCraft(it){return S.lvl>=it.lvl&&it.recipe.every(([r,q])=>(S.res[r]||0)>=q)}
+function canCraft(it){return S.lvl>=it.lvl&&it.recipe.every(([r,q])=>(S.res[r]||0)>=craftQ(q))}
 /* ================= Glisser-déposer des objets vers les emplacements ================= */
 const DRAG={on:false,p:null,skip:0};
 function dropEquip(u,k,from){const inst=S.items.find(x=>x.u===u);if(!inst)return;const it=ITEMS[inst.id];

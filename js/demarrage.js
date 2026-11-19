@@ -36,6 +36,10 @@ function loop(){
 function start(data){
   if(started)return;started=true;
   S=(data&&data.S)||load()||fresh();
+  /* Nouvel arbre Oméga : toutes les anciennes parties repartent de zéro (une copie est gardée dans vallore-save-avant-arbre) */
+  {let raw={};try{raw=JSON.parse(localStorage.getItem(SAVE_KEY)||"{}")||{}}catch(e){}
+   if(raw.cls&&raw.rz!==2){try{localStorage.setItem("vallore-save-avant-arbre",localStorage.getItem(SAVE_KEY))}catch(e){}const o=S.opt,n=S.name;S=fresh();if(o)S.opt=o;if(n)S.name=n;
+     setTimeout(()=>log("Nouvel arbre Oméga : toutes les parties repartent de zéro. Bonne aventure !","g"),600)}}
   S.zoneBosses=S.zoneBosses||{};for(let i=0;i<S.zone;i++)S.zoneBosses[i]=1;
   if(S.cls&&OLD_CLS[S.cls]){S.cls=OLD_CLS[S.cls];let r=0;for(const k in S.alloc)r+=S.alloc[k]||0;S.pts+=r;S.alloc=fresh().alloc;S.cds={};S.auto={};S.buffs=[];S.dots=[];
     setTimeout(()=>{log("Nouveau système d'éléments : votre classe a été convertie et vos points vous ont été rendus.","g");toast("Vos points de caractéristiques vous ont été rendus")},300)}
@@ -43,13 +47,6 @@ function start(data){
   if(!S.migAuto){S.migAuto=1;S.up=S.up||{};if(S.cls&&CLASSES[S.cls])CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto&&S.auto[sp.id])S.up["sp"+(i+1)]=true});if(S.autoPot)S.up.potauto=true}
   /* vente automatique devenue payante (Colporteur) : ceux qui l'avaient activée la gardent */
   if(!S.migSell){S.migSell=1;S.up=S.up||{};if(S.opt&&S.opt.autoSellFull)S.up.vendeur=true}
-  /* Oméga rééquilibré : le bonus suit les éclats gagnés au total ; on reconstitue ce total pour les anciennes parties */
-  if(!S.migOmega2){S.migOmega2=1;let sp=0;Object.keys(TAL).forEach(id=>{for(let k=0;k<Math.min(tal(id),1e5);k++)sp+=talCostAt(id,k)});Object.keys(S.upPerm||{}).forEach(id=>{if(S.upPerm[id])sp+=upPermCost(id)});
-    S.soulsTotal=Math.max(S.soulsTotal||0,(S.souls||0)+sp);
-    S.migOmega3=1;if(S.prest)setTimeout(()=>log("Oméga rééquilibré : les éclats gagnés depuis le début donnent +12,5 % de dégâts chaque fois que leur total est multiplié par 10, même dépensés, et les talents sans plafond gagnent la même valeur à chaque rang. Dépensez vos éclats !","g"),800)}
-  if(!S.migOmega3){S.migOmega3=1;if(S.prest)setTimeout(()=>log("Correction Oméga : le bonus des éclats gagnés est maintenant de +12,5 % de dégâts chaque fois que leur total est multiplié par 10, et chaque rang de talent sans plafond ajoute la même valeur. Les dégâts reviennent à un niveau normal.","g"),800)}
-  /* talents achetés au-delà de leur rang max : rangs en trop remboursés en éclats ; métiers ramenés au niveau max */
-  S.tal=S.tal||{};Object.keys(TAL).forEach(id=>{const m=talMaxR(id);if(tal(id)>m){let g=0;for(let k=m,e=Math.min(tal(id),m+1e5);k<e;k++)g+=talCostAt(id,k);S.souls=(S.souls||0)+(isFinite(g)?g:0);S.tal[id]=m}});
   Object.values(S.jobs||{}).forEach(j=>{if(j.lvl>PROF_MAX){j.lvl=PROF_MAX;j.xp=0}});
   ALLOC.forEach(k=>{if(S.alloc[k]==null)S.alloc[k]=0});
   Object.keys(PROFS).forEach(pid=>{if(!S.jobs[pid])S.jobs[pid]={lvl:1,xp:0}});if(!Array.isArray(S.workers))S.workers=[];
