@@ -275,12 +275,12 @@ const MONDE=(()=>{
     if(b){const p=Math.max(0,S.mon.hp/S.mon.max*100);$("bbFill").style.width=p+"%";SCENE.lag("bbLag",p);$("bbTxt").textContent=`${fmt(Math.max(0,S.mon.hp))} / ${fmt(S.mon.max)}`;$("bbName").textContent=(S.mon.shiny?"✦ ":"")+MON[S.mon.id].name}}
 
   /* ---------- Boucle ---------- */
-  function loop(t){if(!S||!S.cls)return;const dt=Math.min(.1,(t-(lastT||t))/1000);lastT=t;
-    if(UI.covered()){SITE.draw(t,dt);return}if(cv&&(cv.width!==W||!W))resize();draw(t,dt);updDrops(t);bossCheck();SITE.draw(t,dt)}
+  function loop(t){if(!S)return;const dt=Math.min(.1,(t-(lastT||t))/1000);lastT=t;
+    if(UI.covered()){SITE.draw(t,dt);return}if(!L)MONDE.zone(ZONES[(S&&S.zone)||0].id);if(cv&&(cv.width!==W||!W))resize();draw(t,dt);updDrops(t);bossCheck();SITE.draw(t,dt)}
 
   return{
     init(){cv=$("wcv");if(!cv)return;ctx=cv.getContext("2d");wc=document.createElement("canvas");wx=wc.getContext("2d");
-      if(window.ResizeObserver){ro=new ResizeObserver(resize);ro.observe($("arena"))}addEventListener("resize",resize);resize();FRAME.add(loop)},
+      if(window.ResizeObserver){ro=new ResizeObserver(resize);ro.observe($("arena"))}addEventListener("resize",resize);resize();if(!L)MONDE.zone(ZONES[(S&&S.zone)||0].id);draw(performance.now(),0);FRAME.add(loop)},
     /* changement de zone : nouveaux plans ; la couleur du sol sert de fond de page */
     zone(id){if(id===zid&&L)return;zid=id;L=makeLayers(id);birds=[];shadows=[];puffs=[];tumbles=[];gusts=[];flies=[];flakes=[];gulls=[];bolt=null;schools=[];jellies=[];plume=[];bombs=[];erupt=4;debris=[];drops.splice(0).forEach(d=>d.e.remove());
       const c=css(L.G[0]);document.body.style.backgroundImage="none";document.body.style.backgroundColor=c;document.documentElement.style.backgroundColor=c},

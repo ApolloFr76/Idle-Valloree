@@ -6,7 +6,8 @@ const UPDATE_LOGS=[
     "Compagnons : croissance du coût réduite (×1,10 par niveau au lieu de ×1,15), dégâts doublés tous les 25 niveaux et triplés tous les multiples de 100.",
     "Arbre Oméga : le nœud « Double récolte » (+50 %) s'applique aussi aux ouvriers (en ligne et hors ligne) ; « Grand atelier » affiche directement les quantités réduites dans l'Atelier et les info-bulles.",
     "Tour automatique (Grimpeur) : se désactive automatiquement en cas de défaite ou d'abandon ; Colporteur vend périodiquement le surplus au-dessus du seuil gardé.",
-    "Comptes et sauvegardes : code de secours à noter pour réinitialiser son mot de passe, signature d'intégrité des exports (V2) et protection serveur du classement."
+    "Comptes et sauvegardes : code de secours à noter pour réinitialiser son mot de passe, signature d'intégrité des exports (V2) et protection serveur du classement.",
+    "Création de personnage : le paysage animé de la Prairie s'affiche désormais en arrière-plan dès le choix de votre classe."
   ]},
   {date:"17 novembre 2026",title:"Nouvelle interface",items:[
     "Le monde occupe tout l'écran : les onglets sont à droite et s'ouvrent dans un panneau.",

@@ -115,7 +115,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"import":{try{const next=decodeSave($("importBox").value);backup("import");S=next;applyOpts();save();boot2();toast("Partie chargée",1)}catch(err){toast(err&&err.message||"Ce code de sauvegarde n'est pas valide.",1)}break}
     case"reset":confirmReset=true;renderPanel();break;
     case"resetNo":confirmReset=false;renderPanel();break;
-    case"resetYes":confirmReset=false;resetRun({keepOpts:false,keepName:false,backupKey:ACC_BACKUP});applyOpts();showCreate();break;
+    case"resetYes":confirmReset=false;resetRun({keepOpts:false,keepName:false,backupKey:ACC_BACKUP});applyOpts();$("ahero").hidden=true;$("pals").innerHTML="";$("queue").innerHTML="";drawMonster();showCreate();break;
   }
 });
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){const v=+e.target.value;S.opt[k]=Number.isFinite(v)?v:OPT_DEF[k];const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});

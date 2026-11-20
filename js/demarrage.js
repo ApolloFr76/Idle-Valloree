@@ -59,7 +59,7 @@ function start(data){
   S.opt=fixOpts(S.opt);applyOpts();checkUnlocks(true);
   /* écran d'accueil d'abord : le jeu (temps hors ligne, boucles) ne démarre qu'en le quittant */
   ACCUEIL.open(()=>{
-  if(!S.cls){showCreate();}
+  if(!S.cls){if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}MONDE.zone(ZONES[S.zone||0].id);showCreate();}
   else{const away=Math.max(0,(Date.now()-(S.afkSince||S.last||Date.now()))/1000),sum=comeBack(away);S.afkSince=0;boot2();save();if(comeShow(sum))showOffline(sum)}
   lastT=performance.now();setInterval(loop,100);setInterval(()=>{if(Date.now()-lastSave>=(S.opt?.saveEvery||10)*1000){lastSave=Date.now();save()}},1000);
   });
