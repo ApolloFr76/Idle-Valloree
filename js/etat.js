@@ -5,8 +5,10 @@ const OLD_TREE_BACKUP="vallore-save-avant-arbre";
 const MIG_RZ2_NOTICE_KEY="vallore-mig-rz2-notice";
 let S;
 function fresh(){return{v:SAVE_V,born:Date.now(),cls:null,name:"Aventurier",lvl:1,xp:0,pts:0,alloc:{vit:0,agi:0,sagesse:0,feu:0,eau:0,terre:0,air:0},ecus:0,hp:60,zone:0,mon:null,spawnT:0,
-  res:{},items:[],equip:{},uid:1,jobs:{bucheron:{lvl:1,xp:0},mineur:{lvl:1,xp:0},paysan:{lvl:1,xp:0},herboriste:{lvl:1,xp:0},pecheur:{lvl:1,xp:0}},job:null,fdex:{},mgCd:{},cds:{},auto:{},buffs:[],dots:[],
+  res:{},items:[],equip:{},skins:{},transmog:{},uid:1,jobs:{bucheron:{lvl:1,xp:0},mineur:{lvl:1,xp:0},paysan:{lvl:1,xp:0},herboriste:{lvl:1,xp:0},pecheur:{lvl:1,xp:0}},job:null,fdex:{},mgCd:{},cds:{},auto:{},buffs:[],dots:[],
   kills:0,pkN:0,seen:{},pkNext:20,pk:null,mode:"zone",zoneBosses:{},bossLife:{},zk:{},dg:null,timer:0,tower:{best:0,cur:1},allies:{},up:{},combo:0,comboT:0,best:{},st:{},souls:0,soulsTotal:0,prest:0,ach:{},q:null,mk:{},mkPrev:{},mkT:0,autoPot:false,autoBuff:{},arb:{own:{},voies:[],pacte:0,echo:0},rz:2,potCd:0,ev:null,evNext:90,opt:{},time:0,atkT:0,monT:0,ko:0,log:[],workers:[],tab:"perso",last:Date.now(),afkSince:0,hist:[],outfits:[],prof:{c:"bois",e:"cls"},sess:null}}
+/* Débloque l'apparence d'un objet (transmogrification) dès qu'il est obtenu */
+function unlockSkin(id){if(!S||!id)return;const it=ITEMS[id];if(!it||!it.set||!VIS_SLOTS.includes(it.slot))return;S.skins=S.skins||{};if(!S.skins[id]){S.skins[id]=1;dirty=true}}
 /* Trophée en double : fusionne avec celui qu'on a déjà (+1 rang). */
 function giveTrophy(id){const own=S.items.filter(x=>x.id===id);if(!own.length){S.items.push({u:S.uid++,id,e:0});return 0}
   const eq=new Set(Object.values(S.equip)),t=own.find(x=>eq.has(x.u))||own[0];t.e=(t.e||0)+1;mx("trophyRank",t.e);dirty=true;log(`${ITEMS[id].name} fusionné : rang ${t.e+1}.`,"g");return t.e}
@@ -73,13 +75,25 @@ function sanitizeSave(raw){
   if(Array.isArray(raw.items)){
     const seenU=new Set();
     for(const it of raw.items.slice(0,2000)){
-      if(!isPlainObj(it)||typeof it.id!=="string"||!Object.prototype.hasOwnProperty.call(ITEMS,it.id))continue;
+      if(!isPlainObj(it)||typeof it.id!=="string")continue;
+      const nid=typeof migrateItemId==="function"?migrateItemId(it.id,f.cls||"guerrier"):it.id;
+      if(!Object.prototype.hasOwnProperty.call(ITEMS,nid))continue;
       const u=clampInt(it.u,1,1e12);if(seenU.has(u))continue;seenU.add(u);
-      const item={u,id:it.id,e:clampInt(it.e,0,1000),r:clampInt(it.r,0,RAR.length-1)};
+      const item={u,id:nid,e:clampInt(it.e,0,1000),r:clampInt(it.r,0,RAR.length-1)};
       if(it.lk)item.lk=1;
       f.items.push(item);
+      const meta=ITEMS[nid];if(meta&&meta.set&&VIS_SLOTS.includes(meta.slot))f.skins[nid]=1;
       if(u>=f.uid)f.uid=u+1;
     }
+  }
+  for(const k of safeKeys(raw.skins)){
+    const nk=typeof migrateItemId==="function"?migrateItemId(k,f.cls||"guerrier"):k;
+    if(raw.skins[k]&&ITEMS[nk]&&ITEMS[nk].set&&VIS_SLOTS.includes(ITEMS[nk].slot))f.skins[nk]=1;
+  }
+  for(const sl of safeKeys(raw.transmog)){
+    if(!VIS_SLOTS.includes(sl)||typeof raw.transmog[sl]!=="string")continue;
+    const nk=typeof migrateItemId==="function"?migrateItemId(raw.transmog[sl],f.cls||"guerrier"):raw.transmog[sl];
+    if(f.skins[nk]&&ITEMS[nk]&&ITEMS[nk].slot===sl)f.transmog[sl]=nk;
   }
   const validU=new Set(f.items.map(x=>x.u));
   for(const sl of safeKeys(raw.equip))if(Object.prototype.hasOwnProperty.call(EQ,sl)&&validU.has(raw.equip[sl]))f.equip[sl]=raw.equip[sl];
@@ -183,7 +197,10 @@ const MIG={
     if(!s.migAuto){s.migAuto=1;if(s.cls&&CLASSES[s.cls])CLASSES[s.cls].spells.forEach((sp,i)=>{if(s.auto&&s.auto[sp.id])s.up["sp"+(i+1)]=true});if(s.autoPot)s.up.potauto=true}  /* sorts et potions automatiques devenus payants */
     if(!s.migSell){s.migSell=1;if(s.opt.autoSellFull)s.up.vendeur=true}   /* vente automatique devenue payante (Colporteur) */
     if(!s.optV2){s.optV2=1;s.opt.forgeQte=true}
-    if(!s.born)s.born=Math.min(s.last||Date.now(),Date.now()-(s.st&&s.st.time||0)*1000)}
+    if(!s.born)s.born=Math.min(s.last||Date.now(),Date.now()-(s.st&&s.st.time||0)*1000)},
+  /* 2 → 3 : panoplies de classe + garde-robe de transmogrification */
+  2:s=>{s.skins=s.skins||{};s.transmog=s.transmog||{};
+    if(Array.isArray(s.items))s.items.forEach(x=>{if(!x||!x.id)return;x.id=migrateItemId(x.id,s.cls||"guerrier");const it=ITEMS[x.id];if(it&&it.set&&VIS_SLOTS.includes(it.slot))s.skins[x.id]=1})}
 };
 const SAVE_V=1+Object.keys(MIG).length;
 function migrate(s){let v=Math.max(1,Math.floor(+s.v||1));while(v<SAVE_V){if(MIG[v])MIG[v](s);v++}s.v=Math.max(v,+s.v||1);return s}
@@ -197,7 +214,8 @@ function saveErr(d){const num=(v,min=0)=>typeof v==="number"&&Number.isFinite(v)
   if(d.zone!=null&&!ZONES[d.zone])return"zone inconnue";
   for(const k of["items","workers","log","hist","buffs","dots"])if(d[k]!=null&&!Array.isArray(d[k]))return`liste « ${k} » invalide`;
   for(const k of["res","equip","jobs","alloc","st","opt","allies","up","ach"])if(d[k]!=null&&!obj(d[k]))return`données « ${k} » invalides`;
-  if(d.items){d.items=d.items.filter(x=>obj(x)&&ITEMS[x.id]&&num(x.u));const U=new Set(d.items.map(x=>x.u));if(d.equip)for(const k in d.equip)if(d.equip[k]!=null&&!U.has(d.equip[k]))d.equip[k]=null}
+  if(d.items){d.items.forEach(x=>{if(obj(x)&&typeof x.id==="string"&&typeof migrateItemId==="function")x.id=migrateItemId(x.id,d.cls)});
+    d.items=d.items.filter(x=>obj(x)&&ITEMS[x.id]&&num(x.u));const U=new Set(d.items.map(x=>x.u));if(d.equip)for(const k in d.equip)if(d.equip[k]!=null&&!U.has(d.equip[k]))d.equip[k]=null}
   for(const k of["res","st","allies","alloc"])if(d[k])for(const r in d[k])if(typeof d[k][r]!=="number"||!Number.isFinite(d[k][r])||d[k][r]<0)d[k][r]=0;
   return""}
 function load(){try{const r=localStorage.getItem(SAVE_KEY);if(r){const raw=JSON.parse(r);raw._rawRz=raw.rz;return sanitizeSave(raw)}}catch(e){}return null}

@@ -11,7 +11,7 @@ const sellCfg=k=>(S.sellCfg&&S.sellCfg[k])||{},sellKeep=k=>Math.max(0,sellCfg(k)
 const AUTOS=[["autoClick",["auto1","auto2"],"Clic"],["autoFightBoss","bossauto","Boss"],["autoDungeon","dgauto","Donjon"],["autoTower","tourauto","Tour"],["autoZone","zoneauto","Monde"],["autoQuest","qauto","Quêtes"],["autoSellFull","vendeur","Vente"],["autoFortune","fortauto","Fortune"]];
 const autoOwned=a=>[].concat(a[1]).some(up);
 const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.1,l)*(CLASSES[S.cls]?.allyCost||1));
-const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*arbAllyMult()*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
+const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*arbAllyMult()*(CLASSES[S.cls]?.allyBonus||1)*(1+(typeof setAllyPct==="function"?setAllyPct():0)/100)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
 /* Compagnons : dégâts ×2 tous les 25 niveaux, et ×3 aux multiples de 100 (100, 200, 300…) */
 const allyDpsOf=(i,l,m=allyMult())=>{if(l<=0)return 0;const p25=Math.floor(l/25),p100=Math.floor(l/100);return ALLIES[i][2]*.4*l*Math.pow(2,p25-p100)*Math.pow(3,p100)*m};
 const allyDps=()=>{const m=allyMult();return ALLIES.reduce((a,x,i)=>a+allyDpsOf(i,S.allies[x[0]]||0,m),0)};

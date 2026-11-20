@@ -119,8 +119,8 @@ const MONS_X=[
 /* Panoplie des monstres en plus : de 2 à 6 pièces, tirées au hasard une fois pour toutes (d'après le nom du monstre) */
 const idRnd=(s,k)=>{let h=2166136261^k;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return((h>>>0)%1000)/1000};
 ZONES.forEach((z,i)=>(MONS_X[i]||[]).forEach(m=>z.mons.push({...m,extra:1,setN:2+Math.floor(idRnd(m.id,1)*5),setL:.15+idRnd(m.id,2)*.65})));
-/* Tirage d'un monstre de zone : une chance sur deux pour les monstres d'origine (matériaux de panoplie) */
-const pickMon=z=>{const b=z.mons.filter(m=>!m.extra),x=z.mons.filter(m=>m.extra),L=x.length&&Math.random()<.5?x:b;return L[Math.floor(Math.random()*L.length)]};
+/* Tirage d'un monstre de zone : les 8 créatures de la zone apparaissent à chances égales (chacune sert de matériau principal à une classe) */
+const pickMon=z=>z.mons[Math.floor(Math.random()*z.mons.length)];
 const PROFS = {
   bucheron:{name:"Bûcheron",verb:"Couper",res:[["frene","Frêne"],["chataignier","Châtaignier"],["noyer","Noyer"],["chene","Chêne"],["erable","Érable"],["if","If"],["bouleau","Bouleau"],["merisier","Merisier"],["orme","Orme"],["charme","Charme"],["ebene","Ébène"],["sequoia","Séquoia"]]},
   mineur:{name:"Mineur",verb:"Miner",res:[["fer","Fer"],["cuivre","Cuivre"],["etain","Étain"],["argent","Argent"],["or","Or"],["cobalt","Cobalt"],["zinc","Zinc"],["manganese","Manganèse"],["bauxite","Bauxite"],["platine","Platine"],["mithril","Mithril"],["obsidienne","Obsidienne"]]},
@@ -139,5 +139,5 @@ const SLOTS=[
   {id:"ceinture",name:"Ceinture",st:{vit:.5,puissance:.3},g:"mineur"},
   {id:"bouclier",name:"Bouclier",st:{vit:.7,agi:.2},g:"bucheron"},
 ];
-const STAT_LBL={feu:"Feu",eau:"Eau",terre:"Terre",air:"Air",vit:"Vitalité",puissance:"Puissance (tous éléments)",agi:"Agilité",sagesse:"Sagesse",crit:"% Critique",poison:"Poison",brulure:"Brûlure",gelure:"Gelure",saignement:"Saignement",prospection:"Prospection",dmg:"Dégâts",pctXp:"% d'XP",pctEcus:"% d'écus",pctDmg:"% de dégâts",pctSpd:"% de vitesse d'attaque"};
+const STAT_LBL={feu:"Feu",eau:"Eau",terre:"Terre",air:"Air",vit:"Vitalité",puissance:"Puissance (tous éléments)",agi:"Agilité",sagesse:"Sagesse",crit:"% Critique",poison:"Poison",brulure:"Brûlure",gelure:"Gelure",saignement:"Saignement",prospection:"Prospection",dmg:"Dégâts",pctXp:"% d'XP",pctEcus:"% d'écus",pctDmg:"% de dégâts",pctSpd:"% de vitesse d'attaque",pctSpell:"% de dégâts des sorts",pctDot:"% de dégâts sur la durée",pctAlly:"% de dégâts des compagnons",pctCdr:"% de recharge des sorts",pctDef:"% de dégâts subis en moins",pctLeech:"% de vol de vie",pctHp:"% de PV max"};
 const ALLOC=["vit","sagesse","agi","feu","eau","terre","air"];

@@ -28,149 +28,444 @@
     const hair=HAIRS[own?HCLS[cls]||0:hh%HAIRS.length];
     const cc=rgb(col),EM=Math.abs(cc[0]-242)+Math.abs(cc[1]-193)+Math.abs(cc[2]-78)<110?"#fff8e0":"#f2c14e",dk=mix(col,DARK,.42),lt=mix(col,"#ffffff",.45),skin="#f6cfa6",skD="#d99a7a",B="#1c1020",W="#ffffff";
     const ST="#c3cad6",STD="#8790a4",GO="#f2c14e",LE="#8a5a34",LED="#5c3a22",BONE="#f1e4bf",FUR="#8a6a45",RUNE="#d9c6ff",RED="#e8483c";
-    const robe=cls==="mage"||cls==="chrono"||cls==="invoc",caster=robe||cls==="peste";
-    /* armure portée (coiffe, cape, bottes, ceinture) : chaque pièce a un style et une couleur, dessinés dans la forme de la classe */
-    const AR=arm||{},AH=AR.coiffe,AC=AR.cape,AF=AR.bottes,AB=AR.ceinture,aDk=o=>mix(o.c,DARK,.4),aLt=o=>mix(o.c,"#ffffff",.42);
+    /* Teintes « pouilleux / débutant » quand aucun équipement n'est porté sur l'emplacement */
+    const RAG=mix(col,"#8a7a68",.55),RAGD=mix(RAG,DARK,.34),RAGP=mix(RAG,"#c6b292",.48),ROPE="#9a8258",ROPED="#6a5436";
+    const WOOD="#7e5a38",WOODD="#543a24",STONE="#7a7882",STONEL="#a8a6b0",RUST="#856852",RUSTL="#a2988e",OLDRAG="#5e4337",OLDLD="#3e2a22",SAND="#6a5440",SANDD="#483628";
+    /* Équipement dynamique (6 emplacements visibles + transmogrification + auras de haut niveau) */
+    const AR=arm||{},AH=AR.coiffe,AC=AR.cape,AW=AR.arme,AS=AR.bouclier,AB=AR.ceinture,AF=AR.bottes,AURA=AR.aura;
+    const bodyTheme=(AC&&AC.th)||null;
+    const robe=cls==="mage"||cls==="chrono"||(cls==="invoc"&&!!AC)||(AC&&(AC.cls==="mage"||AC.cls==="invoc")),caster=cls==="mage"||cls==="chrono"||cls==="invoc"||cls==="peste";
+    const bodyCol=bodyTheme?bodyTheme.pri:col,bodyDk=mix(bodyCol,DARK,.45),bodyLt=mix(bodyCol,"#ffffff",.4),bodyMet=bodyTheme?bodyTheme.met:ST,bodyAcc=bodyTheme?bodyTheme.acc:GO;
     const u=Math.max(0,T.dy[f]),up=()=>{g.oy=HP+u},dn=()=>{g.oy=HP};                 /* le buste respire, les pieds restent au sol */
     /* un calque : dessiné à part, cerné, puis posé sur le personnage */
-    const lay=fn=>{g=new Spr(s.w,s.h,HP,HP);fn();g.outline(ink);const p=g.p;for(let i=0;i<p.length;i++)if(p[i])s.p[i]=p[i];g=s};
+    const lay=(fn,oc=ink)=>{g=new Spr(s.w,s.h,HP,HP);fn();g.outline(oc);const p=g.p;for(let i=0;i<p.length;i++)if(p[i])s.p[i]=p[i];g=s};
     const sw=anim==="idle"?[0,0,0,1,1,1,1,0,0,0][f]:T.dx[f]>0?1:0;                   /* étoffes et cheveux qui suivent le mouvement */
+    const ph=f*Math.PI/5,bobF=Math.round(Math.sin(ph)*1.4);
     const R=Math.PI/180,idle=anim==="idle",rest=idle?(caster?44:cls==="gardien"?36:cls==="archer"?30:22):0;
     const aa=(T.arm[f]-rest)*R,sx=21.5,sy=14,AL=6,hx=sx+Math.cos(aa)*AL,hy=sy+Math.sin(aa)*AL;
     const wa=((T.w[f]??-90)+(idle&&(cls==="guerrier"||cls==="berserk")?13:0))*R,ux=Math.cos(wa),uy=Math.sin(wa),vx=-uy,vy=ux;
     const la=T.left?(180-T.arm[f])*R:(102+(T.arm[f]-90)*-.15)*R,lsx=9.5,lsy=14,lhx=lsx+Math.cos(la)*AL,lhy=lsy+Math.sin(la)*AL;
-    const SL={guerrier:STD,archer:col,mage:col,gardien:ST,peste:"#9a7448",chrono:col,berserk:skin,invoc:col}[cls]||col;
-    const GL={guerrier:STD,gardien:STD,archer:LE,berserk:LE}[cls]||skin;
+    const SL=bodyTheme
+      ?({guerrier:bodyMet,archer:bodyCol,mage:bodyCol,gardien:bodyMet,peste:bodyTheme.sec,chrono:bodyCol,berserk:skin,invoc:bodyCol}[cls]||bodyCol)
+      :({guerrier:skin,archer:skin,gardien:RAG,mage:RAG,peste:"#8c7656",chrono:RAG,berserk:skin,invoc:OLDRAG}[cls]||skin);
+    const GL=bodyTheme?({guerrier:bodyMet,gardien:bodyMet,archer:LE,berserk:LE}[cls]||skin):skin;
     const pull=cls==="archer"?((T.pull||[])[f]||0)*1.5:0;
     const hand=(x,y,c)=>{x=Math.round(x);y=Math.round(y);P(c,q=>q.rect(x-1,y-1,2,2),F);px(x,y,mix(c,DARK,.22))};
-    const W2=(a,b)=>[hx+ux*a+vx*b,hy+uy*a+vy*b],ln=(q,p0,p1,t)=>q.line(p0[0],p0[1],p1[0],p1[1],t);   /* repère de l'arme : a le long, b en travers */
-    const lim=L=>ux>.15?Math.min(L,(45.5-T.dx[f]-hx)/ux):L;                          /* portée de l'arme : raccourcie quand elle pointe droit devant, pour rester dans le cadre */
-    /* bâtons des lanceurs de sorts : hampe + tête propre à la classe. Au repos la main tient le bas du bâton, en action le milieu. */
+    const W2=(a,b)=>[hx+ux*a+vx*b,hy+uy*a+vy*b],ln=(q,p0,p1,t)=>q.line(p0[0],p0[1],p1[0],p1[1],t);
+    const lim=L=>ux>.15?Math.min(L,(45.5-T.dx[f]-hx)/ux):L;
     const grip=idle?0:[2,5,8,8,8,8,8,8,anim==="cast"?8:5,anim==="cast"?8:2][f];
-    const staff=()=>{const wood={mage:"#9a6a3c",peste:"#7a5232",chrono:"#5a6ab0",invoc:"#8a7ab8"}[cls],n=Math.min(19-grip,lim(27)-8),L=(a,b)=>W2(n+a,b),o=L(3.5,0);
-      P(wood,q=>ln(q,L(-28,0),L(0,0)),F);
-      if(cls==="mage"){P(GO,q=>{ln(q,L(0,-2),L(0,2));ln(q,L(0,-3),L(2,-3));ln(q,L(0,3),L(2,3))},F);P(lt,q=>q.ell(o[0],o[1],2.7,2.7),{lt:.75});px(o[0]-1,o[1]-1,W)}
-      if(cls==="peste"){P(wood,q=>{ln(q,L(0,0),L(3,-2));ln(q,L(3,-2),L(6,0));ln(q,L(6,0),L(6,3));ln(q,L(6,3),L(4,4));ln(q,L(4,4),L(2,3))},F);const e=L(3.5,1.5);
-        P("#8fe05a",q=>q.ell(e[0],e[1],1.5,1.5),{lt:.75});px(e[0],e[1]-1,W);P("#5fae4a",q=>[L(-2,2),L(-4,-2),L(-3,2)].forEach(a=>q.px(a[0],a[1])),F)}
-      if(cls==="chrono"){const e=L(4,0),cx=Math.round(e[0]),cy=Math.round(e[1]);P(GO,q=>{q.ell(cx,cy,3.4,3.4);q.clear(cx-1,cy-1,3,3)});px(cx,cy,GO);px(cx,cy-1,W);px(cx+1,cy,W)}
-      if(cls==="invoc"){P(wood,q=>{ln(q,L(0,-3),L(0,3));ln(q,L(0,-3),L(4,-4));ln(q,L(0,3),L(4,4))},F);
-        P("#b48aff",q=>{q.ell(o[0],o[1],2,2);[L(6.5,0),L(7.5,.8)].forEach(a=>q.px(a[0],a[1]))},{lt:.75});px(o[0],o[1],W)}};
 
-    /* ----- calque arrière : capes, carquois, crinières, bâton au repos, esprit de l'invocateur ----- */
+    /* ----- calque 0 : aura arrière animée (zones 6 à 11 : orage, magma, astral, néant violet/écarlate au niv. 1000) ----- */
+    if(AURA){
+      const a1=AURA.c1,a2=AURA.c2,aDk=mix(a1,DARK,.55),t4=AURA.tier>=4;
+      const pulse=Math.sin(ph);
+      if(t4){
+        /* Halo d'énergie menaçant qui pulse et monte autour du héros */
+        const pts=AURA.motif==="void"
+          ?[[3,26],[28,26],[2,17],[29,17],[5,8],[26,8],[10,-4],[21,-4]]
+          :[[4,27],[27,27],[3,18],[28,18],[6,9],[25,9],[11,-3],[20,-3]];
+        pts.forEach(([x,y],i)=>{
+          const dy=((f*2+i*3)%10)-4,dx=Math.round(Math.sin(ph+i)*1.3);
+          const ry=y-dy,rx=x+dx;
+          s.set(rx,ry,i%2?a2:a1);s.set(rx,ry+1,a1);
+          if(AURA.motif==="void"||AURA.motif==="magma"){s.set(rx,ry+2,aDk);if((f+i)%3===0)s.set(rx,ry-1,W)}
+        });
+        /* Flammes / volutes d'aura derrière les épaules et les pieds */
+        const fh=Math.round(4+pulse*1.5);
+        for(let i=0;i<5;i++){
+          const fx=5+i*5,fy=28-((f+i*2)%4);
+          s.set(fx,fy,a1);s.set(fx,fy-1,i%2?a2:a1);
+          if(AURA.motif==="void"){s.set(fx+1,fy-2,aDk);s.set(4,12-fh+(i%3),a1);s.set(27,12-fh+((i+1)%3),a2)}
+          if(AURA.motif==="astral"){const ang=ph+i*1.25;s.set(Math.round(15.5+Math.cos(ang)*13),Math.round(11+Math.sin(ang)*11),i%2?a2:W)}
+        }
+      }else{
+        /* Palier 3 : étincelles élémentaires ascendantes */
+        for(let i=0;i<5;i++){
+          const rx=4+((i*7+f)%24),ry=26-((f*2+i*5)%26);
+          s.set(rx,ry,i%2?a2:a1);if((f+i)%2===0)s.set(rx,ry+1,aDk);
+        }
+      }
+    }
+    if(AR.bossAura){px(15.5+Math.round(Math.sin(ph)*4),-10,GO);px(15.5-Math.round(Math.cos(ph)*5),-8,W)}
+
+    /* ----- rendu d'arme dynamique : arme abîmée/primitive sans équipement, ou arme forgée selon la classe + zone ----- */
+    const drawWeapon=(wCls,wObj)=>{
+      if(!wObj){
+        /* Armes de départ abîmées / primitives (hache en pierre, épée rouillée ébréchée, gourdin en bois, branches…) */
+        if(wCls==="guerrier"){
+          /* Épée courte rouillée et ébréchée */
+          P(WOODD,q=>ln(q,W2(-3,0),W2(1,0),2),F);px(...W2(-1,0),ROPE);
+          P(RUST,q=>ln(q,W2(2,-3),W2(2,3),2),F);
+          const e=lim(14.5);
+          P(RUSTL,q=>q.poly([W2(3,-1.5),W2(e-2.5,-1.4),W2(e,0),W2(e-2.5,1.4),W2(3,1.5)]),{dk:.4});
+          px(...W2(7,-1),RUST);px(...W2(10,1),RUST);px(...W2(11,-1),RUST);
+        }else if(wCls==="berserk"){
+          /* Hache en pierre grossièrement ligotée sur une branche */
+          const e=lim(16)-16;
+          P(WOOD,q=>ln(q,W2(-4,0),W2(14.5+e,0)),F);
+          P(STONE,q=>q.poly([W2(9.5+e,0),W2(7.5+e,4),W2(10+e,6.5),W2(14.5+e,6),W2(15.5+e,3),W2(13.5+e,0)]),{dk:.38});
+          P(STONEL,q=>ln(q,W2(10+e,5.8),W2(14+e,5.3)),F);
+          P(STONE,q=>q.poly([W2(10+e,0),W2(11.5+e,-2.5),W2(13+e,0)]),F);
+          P(ROPE,q=>{ln(q,W2(10.5+e,-1),W2(12.5+e,2));ln(q,W2(12.5+e,-1),W2(10.5+e,2))},F);
+        }else if(wCls==="gardien"){
+          /* Gourdin / maillet en bois abîmé avec un cerclage rouillé */
+          const e=lim(14)-14;
+          P(WOOD,q=>ln(q,W2(-3,0),W2(10+e,0)),F);
+          P(WOODD,q=>q.poly([W2(8.5+e,-3.2),W2(13.5+e,-3.2),W2(13.5+e,3.2),W2(8.5+e,3.2)]),{dk:.35});
+          P(RUST,q=>ln(q,W2(11+e,-3),W2(11+e,3)),F);
+        }else if(wCls==="archer"){
+          /* Arc rudimentaire en branche tordue + corde effilochée */
+          const ba=(idle?-70:-90)*R,ax=Math.cos(ba),ay=Math.sin(ba),bx=-ay,by=ax,Bw=(a,b)=>[hx+ax*a+bx*b,hy+ay*a+by*b];
+          P(WOOD,q=>{ln(q,Bw(8.5,-2.5),Bw(5,0));ln(q,Bw(5,0),Bw(0,1));ln(q,Bw(0,1),Bw(-5,0));ln(q,Bw(-5,0),Bw(-8.5,-2.5))},F);
+          P(ROPE,q=>{ln(q,Bw(8.5,-2.5),Bw(0,-2.5-pull));ln(q,Bw(0,-2.5-pull),Bw(-8.5,-2.5))},F);
+          if(pull>0){P(WOODD,q=>ln(q,Bw(0,-2.5-pull),Bw(0,6)),F);px(...Bw(0,7),STONE);px(...Bw(1,-2.5-pull),ROPE)}
+        }else{
+          /* Bâtons de fortune (branche nue, brindille sèche, tige rouillée, os fissuré) */
+          const n=Math.min(16-grip,lim(24)-8),L=(a,b)=>W2(n+a,b);
+          P(wCls==="invoc"?WOODD:WOOD,q=>ln(q,L(-25,0),L(0,0)),F);
+          if(wCls==="mage"){
+            P(WOOD,q=>{ln(q,L(-1,0),L(2.5,-2));ln(q,L(-1,0),L(2.5,2))},F);
+            px(...L(2.5,0),mix(col,W,.45));
+          }else if(wCls==="peste"){
+            P(WOODD,q=>{ln(q,L(0,0),L(3,-1.5));ln(q,L(1,0),L(2.5,2))},F);
+            px(...L(3,-2),"#6c8a50");px(...L(3,2),"#5c7844");
+          }else if(wCls==="chrono"){
+            P(RUST,q=>{ln(q,L(0,-1.5),L(3,-1.5));ln(q,L(3,-1.5),L(3,1.5));ln(q,L(3,1.5),L(0,1.5))},F);
+            px(...L(1.5,0),ROPE);
+          }else{
+            /* Invocateur : vieux bâton ligoté à un os fêlé */
+            P(ROPE,q=>ln(q,L(-2,-1),L(0,1)),F);
+            P("#cfc5b0",q=>{ln(q,L(0,-2),L(2.5,-2.5));ln(q,L(0,2),L(2.5,2.5));q.px(...L(1,0))},F);
+            if(f%3===0)px(...L(3,0),"#b8a0d8");
+          }
+        }
+        return;
+      }
+      const th=wObj.th,t=wObj.tier;
+      const wp=th.pri,ws=th.sec,wm=th.met,wa2=th.acc;
+      if(wCls==="guerrier"){
+        P(mix(wp,DARK,.45),q=>ln(q,W2(-3,0),W2(1,0),2),F);px(...W2(-4,0),wa2);
+        const e=lim(19.5+(t>=3?1.5:0));
+        P(wm,q=>q.poly([W2(3,-2-(t>=3?.4:0)),W2(e-3.5,-2),W2(e,0),W2(e-3.5,2),W2(3,2+(t>=3?.4:0))]),{dk:.32});
+        P(t>=3?wa2:W,q=>ln(q,W2(5,-.5),W2(e-4,-.5)),F);
+        P(wp,q=>ln(q,W2(2.5,-4-(t>=2?1:0)),W2(2.5,4+(t>=2?1:0)),2));
+        if(t>=4){px(...W2(e-1,0),W);px(...W2(e-4,1),wa2);if(f%2===0)px(...W2(e+1,0),wa2)}
+      }else if(wCls==="berserk"){
+        const e=lim(19.5)-19.5;
+        P(mix(ws,DARK,.4),q=>ln(q,W2(-5,0),W2(17.5+e,0)),F);
+        P(wm,q=>q.poly([W2(11+e,0),W2(6.5+e,5),W2(9+e,8.5+(t>=3?1:0)),W2(17+e,8.5+(t>=3?1:0)),W2(19.5+e,5),W2(15+e,0)]),{dk:.32});
+        P(t>=3?wa2:W,q=>ln(q,W2(10+e,7.8),W2(16+e,7.8)),F);
+        if(t>=2){
+          /* Double lame de berserker dès le palier 2 */
+          P(wm,q=>q.poly([W2(11.5+e,0),W2(8.5+e,-5),W2(15.5+e,-5),W2(14.5+e,0)]),{dk:.38});
+          if(t>=3)P(wa2,q=>ln(q,W2(9.5+e,-4.5),W2(14.5+e,-4.5)),F);
+        }else P(STD,q=>q.poly([W2(11.5+e,0),W2(13+e,-4),W2(14.5+e,0)]));
+        if(t>=4&&f%2===0){px(...W2(13+e,9.5),W);px(...W2(12+e,-5.5),wa2)}
+      }else if(wCls==="gardien"){
+        const e=lim(17)-17;
+        P(mix(ws,DARK,.35),q=>ln(q,W2(-4,0),W2(13+e,0)),F);
+        P(wm,q=>q.poly([W2(10+e,-4.5),W2(16+e,-4.5),W2(16+e,4.5),W2(10+e,4.5)]),{dk:.3});
+        P(wp,q=>ln(q,W2(13+e,-4),W2(13+e,4),2),F);
+        px(...W2(13+e,0),wa2);
+        if(t>=3){px(...W2(16.5+e,-4),wa2);px(...W2(16.5+e,4),wa2);px(...W2(17+e,0),W)}
+      }else if(wCls==="archer"){
+        const ba=(idle?-70:-90)*R,ax=Math.cos(ba),ay=Math.sin(ba),bx=-ay,by=ax,Bw=(a,b)=>[hx+ax*a+bx*b,hy+ay*a+by*b];
+        P(wp,q=>{ln(q,Bw(10,-3),Bw(7,0));ln(q,Bw(7,0),Bw(3,1));ln(q,Bw(3,1),Bw(-3,1));ln(q,Bw(-3,1),Bw(-7,0));ln(q,Bw(-7,0),Bw(-10,-3));ln(q,Bw(2,2),Bw(-2,2))},F);
+        P(t>=3?wa2:BONE,q=>{ln(q,Bw(10,-3),Bw(0,-3-pull));ln(q,Bw(0,-3-pull),Bw(-10,-3))},F);
+        if(t>=2){px(...Bw(10,-3),wm);px(...Bw(-10,-3),wm)}
+        if(pull>0){P("#e8dcc0",q=>ln(q,Bw(0,-3-pull),Bw(0,7)),F);px(...Bw(0,8),t>=2?wa2:ST);px(...Bw(0,9),t>=3?W:ST);px(...Bw(1,-3-pull),t>=2?wa2:RED);px(...Bw(-1,-3-pull),t>=2?wa2:RED)}
+      }else{
+        /* Bâtons / Sceptres (mage, peste, chrono, invoc) */
+        const wood=mix(wp,DARK,.3);
+        const n=Math.min(19-grip,lim(27)-8),L=(a,b)=>W2(n+a,b),o=L(3.5,0);
+        P(wood,q=>ln(q,L(-28,0),L(0,0)),F);
+        if(wCls==="mage"){
+          P(wm,q=>{ln(q,L(0,-2),L(0,2));ln(q,L(0,-3),L(2,-3));ln(q,L(0,3),L(2,3))},F);
+          P(wa2,q=>q.ell(o[0],o[1],2.6+(t>=3?.4:0),2.6+(t>=3?.4:0)),{lt:.75});px(o[0]-1,o[1]-1,W);
+          if(t>=3&&f%2===0)px(...L(7,0),wa2);
+        }else if(wCls==="peste"){
+          P(wood,q=>{ln(q,L(0,0),L(3,-2));ln(q,L(3,-2),L(6,0));ln(q,L(6,0),L(6,3));ln(q,L(6,3),L(4,4));ln(q,L(4,4),L(2,3))},F);
+          const e=L(3.5,1.5);P(wa2,q=>q.ell(e[0],e[1],1.7,1.7),{lt:.75});px(e[0],e[1]-1,W);
+          P(wp,q=>[L(-2,2),L(-4,-2),L(-3,2)].forEach(a=>q.px(a[0],a[1])),F);
+        }else if(wCls==="chrono"){
+          const e=L(4,0),cx=Math.round(e[0]),cy=Math.round(e[1]);
+          P(wm,q=>{q.ell(cx,cy,3.5,3.5);q.clear(cx-1,cy-1,3,3)});
+          px(cx,cy,wa2);px(cx+Math.round(Math.cos(ph)),cy+Math.round(Math.sin(ph)),W);px(cx,cy-1,wa2);
+        }else{
+          /* Invocateur : sceptre/faux rituelle cornue + flamme d'âme animée */
+          P(wm,q=>{ln(q,L(0,-3),L(0,3));ln(q,L(0,-3),L(4+(t>=3?1:0),-4.5));ln(q,L(0,3),L(4+(t>=3?1:0),4.5))},F);
+          P(wa2,q=>{q.ell(o[0],o[1],2.1+(t>=3?.4:0),2.1);[L(6.5,bobF*.3),L(7.5,.8)].forEach(a=>q.px(a[0],a[1]))},{lt:.75});px(o[0],o[1],W);
+        }
+      }
+    };
+    const effWCls=AW?AW.cls:cls,wIsStaff=effWCls==="mage"||effWCls==="peste"||effWCls==="chrono"||effWCls==="invoc";
+
+    /* ----- calque arrière : cape équipée (aucune cape gratuite sans objet), carquois, cheveux, bâton au repos, relique flottante ----- */
     lay(()=>{up();
-      /* cape de l'armure : la cape de la classe prend sa couleur ; les classes sans cape en reçoivent une, dont la longueur dépend du style */
-      const cc=AC?AC.c:null,cs=AC?AC.s:"";
-      if(AC&&!["gardien","guerrier","peste","invoc"].includes(cls)){const L=cs==="cuir"?19:cs==="robe"?26:23;P(cc,q=>{q.poly([[8,11],[15,11],[13,L-2],[4-sw,L+sw],[5,16]]);if(cs==="ecailles"){q.clear(6-sw,L-1+sw,1,1);q.clear(9-sw,L-2+sw,1,1)}})}
-      if(cls==="gardien")P(cc||col,q=>q.poly([[8,11],[15,11],[13,26],[4-sw,27],[5,17]]));
-      if(cls==="guerrier")P(cc||col,q=>{q.poly([[8,11],[15,11],[13,22],[4-sw,24+sw],[5,16]]);q.clear(6-sw,24+sw,1,1);q.clear(9-sw,23+sw,1,1)});
-      if(cls==="peste")P(cc?aDk(AC):dk,q=>{q.poly([[7,10],[15,10],[13,24],[5-sw,25],[5,16]]);q.clear(7-sw,25,1,1);q.clear(10-sw,25,1,1)});
-      if(cls==="invoc")P(cc?aDk(AC):mix(col,DARK,.6),q=>{q.poly([[7,10],[15,10],[13,26],[3-sw,27],[5,16]]);q.clear(5-sw,27,1,1);q.clear(8-sw,27,2,1)});
-      if(AC&&cs==="fourrure")P(aLt(AC),q=>q.rect(7,10,9,2));
-      if(cls==="archer"){P(hair,q=>q.poly([[8,4],[11,5],[9,13],[5-sw,15],[6-sw,11]]));P(LE,q=>q.poly([[5,11],[8,10],[11,19],[8,20]]));P(BONE,q=>{q.line(5,10,4,7);q.line(7,9,7,6)},F);px(4,6,RED);px(3,7,RED);px(7,5,RED);px(8,6,RED)}
-      if(cls==="mage")P(hair,q=>q.poly([[8,2],[12,2],[11,14],[5-sw,16],[6,8]]));
+      if(AC){
+        const c1=AC.th.pri,c2=AC.th.sec,cm=AC.th.met,ca=AC.th.acc,ct=AC.tier;
+        if(AC.boss){
+          /* Cape souveraine du Boss : large, majestueuse, épaulière dorée et liseré lumineux */
+          P(c1,q=>q.poly([[6,10],[16,10],[14,27],[2-sw,28],[4,16]]));
+          P(c2,q=>q.poly([[8,12],[14,12],[12,26],[5-sw,26]]),{dk:.15});
+          P(GO,q=>q.rect(6,10,10,2),F);
+          if(ct>=2)P(ca,q=>q.line(3-sw,27,13,26),F);
+        }else if(AC.cls==="berserk"){
+          /* Fourrure de bête sauvage */
+          P(c1,q=>{q.poly([[7,10],[16,10],[13,24],[4-sw,25],[5,16]]);q.clear(6-sw,25,1,1);q.clear(9-sw,24,1,1)});
+          P(c2,q=>q.rect(6,9,11,3));
+        }else if(AC.cls==="invoc"||AC.cls==="mage"){
+          /* Manteau / robe mystique longue + ourlet runique */
+          P(mix(c1,DARK,.35),q=>{q.poly([[7,10],[16,10],[13,27],[3-sw,28],[5,16]]);q.clear(5-sw,28,1,1);q.clear(9-sw,27,1,1)});
+          if(ct>=1)P(ca,q=>{q.px(5-sw,25);q.px(8-sw,26);q.px(11,25)},F);
+        }else{
+          P(c1,q=>{q.poly([[7,10],[15,10],[13,25],[4-sw,26+sw],[5,16]]);if(ct>=3)q.clear(7-sw,26+sw,1,1)});
+          P(cm,q=>q.rect(7,10,8,2),F);
+          if(ct>=2)P(ca,q=>q.line(5-sw,25,12,24),F);
+        }
+      }
+      if(cls==="archer"){P(hair,q=>q.poly([[8,4],[11,5],[9,13],[5-sw,15],[6-sw,11]]));P(AC?LE:WOODD,q=>q.poly([[5,11],[8,10],[11,19],[8,20]]));
+        if(AC){P(BONE,q=>{q.line(5,10,4,7);q.line(7,9,7,6)},F);px(4,6,RED);px(3,7,RED);px(7,5,RED);px(8,6,RED)}else{P(WOOD,q=>q.line(6,10,5,7),F);px(5,6,ROPE)}}
+      if(cls==="mage"&&!AH)P(hair,q=>q.poly([[8,2],[12,2],[11,14],[5-sw,16],[6,8]]));
       if(cls==="berserk")P(hair,q=>q.poly([[8,0],[12,0],[12,13],[8-sw,15],[4-sw,16],[5-sw,11],[5,7]]));
-      if(cls==="chrono")P(dk,q=>q.poly([[9,-3],[12,0],[9,10],[4-sw,13],[6,5]]));
-      if(caster&&anim!=="staff"&&anim!=="cast")staff();
-      if(cls==="invoc"){const wb=idle?[0,0,-1,-1,-1,0,0,1,1,1][f]:-1;dn();P("#c9a8ff",q=>{q.ell(1.5,5+wb,2,2);q.px(0,8+wb);q.px(1,9+wb)},{lt:.6});px(1,5+wb,B);px(3,5+wb,B)}});
+      if(wIsStaff&&anim!=="staff"&&anim!=="cast")drawWeapon(effWCls,AW);
+      /* Esprit de l'invocateur ou relique flottante (orbe, grimoire, cadran, fiole) animée image par image */
+      if(AS&&(AS.cls==="mage"||AS.cls==="invoc"||AS.cls==="chrono"||AS.cls==="peste")){
+        dn();const ox=2,oy=7+bobF,a1=AS.th.pri,a2=AS.th.acc,am2=AS.th.met;
+        if(AS.cls==="mage"){P(a2,q=>q.ell(ox,oy,2.6,2.6),{lt:.7});px(ox-1,oy-1,W);if(AS.tier>=2)P(am2,q=>{q.px(ox-3,oy+1);q.px(ox+3,oy-1)},F)}
+        if(AS.cls==="invoc"){P(a1,q=>q.rect(ox-2,oy-2,5,6));P(am2,q=>q.rect(ox-2,oy-2,1,6),F);px(ox,oy,a2);px(ox+1,oy+1,W)}
+        if(AS.cls==="chrono"){P(am2,q=>{q.ell(ox,oy,3,3);q.clear(ox-1,oy-1,3,3)});px(ox,oy,a2);px(ox+Math.round(Math.cos(ph)),oy+Math.round(Math.sin(ph)),W)}
+        if(AS.cls==="peste"){P("#d8eef5",q=>q.ell(ox,oy,2.4,2.6),{lt:.5});P(a2,q=>q.rect(ox-1,oy,3,2),F);px(ox,oy-3,am2)}
+      }else if(cls==="invoc"){const wb=idle?[0,0,-1,-1,-1,0,0,1,1,1][f]:-1;dn();
+        if(bodyTheme){P(bodyAcc,q=>{q.ell(1.5,5+wb,2,2);q.px(0,8+wb);q.px(1,9+wb)},{lt:.6});px(1,5+wb,B);px(3,5+wb,B)}
+        else{px(2,7+wb,"#b8a4d8");if(f%2===0)px(3,6+wb,"#dfd4f2")}}});
 
-    /* ----- calque du corps : bras arrière, jambes et bottes (ou bas de robe), buste ----- */
+    /* ----- calque du corps : bras arrière, jambes et bottes, buste (pouilleux sans cape/robe, armure/robe avec), ceinture ----- */
     lay(()=>{up();
       if(!(pull>0)){P(SL===skin?skD:mix(SL,DARK,.2),q=>q.line(lsx-.5,lsy,lhx-.5,lhy,2),SL===skin?F:undefined);hand(lhx,lhy+.5,GL===skin?skin:mix(GL,DARK,.2))}
+      /* Bouclier / brassard porté au bras arrière pour les non-Gardiens */
+      if(AS&&cls!=="gardien"&&(AS.cls==="guerrier"||AS.cls==="gardien"||AS.cls==="berserk"||AS.cls==="archer")){
+        const bx=Math.round(lhx-1),by=Math.round(lhy);
+        if(AS.cls==="archer"){P(AS.th.pri,q=>q.rect(bx-1,by-2,3,4));px(bx,by-1,AS.th.acc)}
+        else if(AS.cls==="berserk"){P(AS.th.pri,q=>q.ell(bx,by,3.4,3.4));P(AS.th.met,q=>q.ell(bx,by,1.4,1.4),F);if(AS.tier>=2)px(bx,by,AS.th.acc)}
+        else{P(AS.th.met,q=>q.poly([[bx-3,by-4],[bx+3,by-4],[bx+3,by+1],[bx,by+5],[bx-3,by+1]]));P(AS.th.pri,q=>q.poly([[bx-2,by-3],[bx+2,by-3],[bx+2,by],[bx,by+3.5],[bx-2,by]]));px(bx,by-1,AS.th.acc)}
+      }
       dn();const step=anim==="atk"||anim==="bash"?(f>=4&&f<=7?1:0):0;
-      if(robe){P(col,q=>{q.poly([[9,18],[21,18],[23,28],[7,28]]);if(cls==="invoc"){q.clear(8,28,1,1);q.clear(12,28,2,1);q.clear(18,28,1,1);q.clear(22,28,1,1)}});
-        if(cls==="mage"){P(GO,q=>q.rect(7,27,17,1),F);P(lt,q=>q.rect(15,20,1,7),F)}
-        if(cls==="chrono"){P(GO,q=>q.rect(7,27,17,1),F);P(dk,q=>q.rect(8,25,15,1),F)}
-        if(cls==="invoc")[9,13,17,21].forEach((x,i)=>px(x,25+i%2,RUNE));
-        P(AF?AF.c:cls==="chrono"?GO:"#4a3550",q=>{q.rect(10+step,29,4,1);q.rect(17+step,29,4,1)},F)}
-      else{const LG={guerrier:"#6a5a52",archer:"#8a6442",gardien:STD,peste:"#7a5636",berserk:skin}[cls]||"#6a5a52",BT={guerrier:ST,archer:LED,gardien:ST,peste:"#5c4028",berserk:FUR}[cls]||LED;
+      if(robe){
+        if(bodyTheme){
+          P(bodyCol,q=>{q.poly([[9,18],[21,18],[23,28],[7,28]]);if(cls==="invoc"){q.clear(8,28,1,1);q.clear(12,28,2,1);q.clear(18,28,1,1);q.clear(22,28,1,1)}});
+          if(cls==="mage"){P(bodyAcc,q=>q.rect(7,27,17,1),F);P(bodyLt,q=>q.rect(15,20,1,7),F)}
+          if(cls==="chrono"){P(bodyMet,q=>q.rect(7,27,17,1),F);P(bodyDk,q=>q.rect(8,25,15,1),F)}
+          if(cls==="invoc")[9,13,17,21].forEach((x,i)=>px(x,25+i%2,bodyAcc));
+        }else{
+          /* Robe d'apprenti effilochée et rapiécée (sans cape/robe équipée) */
+          P(RAG,q=>{q.poly([[9,18],[21,18],[22,27],[8,27]]);q.clear(9,27,2,1);q.clear(14,27,1,1);q.clear(19,27,2,1)});
+          P(RAGP,q=>q.rect(11,22,3,3),F);px(11,22,RAGD);px(13,24,RAGD);
+        }
+        P(AF?AF.th.pri:SAND,q=>{q.rect(10+step,29,4,1);q.rect(17+step,29,4,1)},F);
+        if(AF&&AF.tier>=2){px(11+step,29,AF.th.acc);px(18+step,29,AF.th.acc)}
+      }else{
+        const LG={guerrier:"#6a5a52",archer:"#785d44",gardien:bodyTheme?STD:"#6b6058",peste:"#6e563c",berserk:skin,invoc:"#483d46"}[cls]||"#6a5a52";
         P(LG,q=>{q.rect(10,21,5,5);q.rect(16+step,21,5,5)},LG===skin?SK:undefined);
-        const BT2=AF?(AF.s==="plaques"?ST:AF.s==="fourrure"||AF.s==="cuir"?aDk(AF):AF.c):BT;
-        P(BT2,q=>{q.rect(9,26,6,4);q.rect(16+step,26,6,4);q.px(22+step,28);q.px(22+step,29)});
-        if(cls==="archer")P(LE,q=>{q.rect(9,25,6,1);q.rect(16+step,25,6,1)},F);
-        if(cls==="guerrier"||cls==="gardien")P(col,q=>{q.rect(10,25,5,1);q.rect(16+step,25,5,1)},F);
-        if(cls==="berserk"&&!AF)P(BONE,q=>{q.rect(9,26,6,1);q.rect(16+step,26,6,1)},F);
-        /* détail des bottes selon le style */
-        if(AF){const s=AF.s;if(s==="plaques"||s==="cuir")P(AF.c,q=>{q.rect(9,26,6,1);q.rect(16+step,26,6,1)},F);if(s==="fourrure")P(aLt(AF),q=>{q.rect(9,26,6,2);q.rect(16+step,26,6,2)},F);
-          if(s==="ecailles")P(aDk(AF),q=>{q.px(11,28);q.px(13,28);q.px(18+step,28);q.px(20+step,28)},F);if(s==="cristal"){px(11,27,aLt(AF));px(18+step,27,aLt(AF))}}}
-      up();const chest=c=>P(c,q=>{q.rect(9,11,13,9);q.clear(9,11,1,1);q.clear(21,11,1,1)},c===skin?SK:undefined),belt=c=>{P(AB?AB.c:c,q=>q.rect(9,19,13,1),F);if(AB){const bk=AB.s==="plaques"?ST:AB.s==="cristal"?aLt(AB):AB.s==="robe"?GO:aDk(AB);px(15,19,bk);px(16,19,bk)}},skirt=(c,h,cut)=>P(c,q=>{q.rect(9,20,13,h);cut.forEach(x=>q.clear(x,19+h,1,1))});
-      if(cls==="guerrier"){chest(ST);P(STD,q=>{q.rect(10,16,11,1);q.rect(15,12,1,4)},F);skirt(col,3,[15]);belt(LED);px(15,19,GO);px(16,19,GO);P(col,q=>q.rect(11,11,9,3),{dk:.2});P(ST,q=>q.ell(9.5,12.5,2.3,2.1));px(9,12,GO)}
-      if(cls==="archer"){chest(col);P(LE,q=>q.line(10,12,20,18),F);skirt(col,3,[9,12,15,18,21]);belt(LED);px(14,19,GO);P(dk,q=>q.poly([[8,10],[23,10],[22,13],[9,13]]));px(15,11,GO);px(16,11,GO)}
-      if(cls==="mage"){chest(col);P(lt,q=>q.rect(15,13,1,6),F);belt(GO);P(dk,q=>q.poly([[7,10],[24,10],[22,14],[9,14]]));px(15,12,GO);px(16,12,GO)}
-      if(cls==="gardien"){chest(ST);P(col,q=>q.rect(13,12,5,11));P(EM,q=>{q.rect(15,13,1,5);q.rect(14,14,3,1)},F);P(ST,q=>{q.rect(9,20,4,3);q.rect(18,20,4,3)});P(LED,q=>{q.rect(9,19,4,1);q.rect(18,19,4,1)},F);P(ST,q=>q.ell(9,12.5,2.7,2.5))}
-      if(cls==="peste"){chest("#9a7448");skirt(col,3,[10,13,16,19]);belt("#4a7a3a");px(12,19,"#c94a5a");px(18,19,"#c94a5a");P(col,q=>q.poly([[7,10],[24,10],[23,13],[21,15],[18.5,13],[15.5,16],[12.5,13],[10,15],[8,13]]))}
-      if(cls==="chrono"){chest(col);belt(dk);P(GO,q=>q.poly([[8,10],[23,10],[15.5,15]]),F);P(col,q=>q.poly([[10,10],[21,10],[15.5,13]]),F);P(GO,q=>q.ell(15.5,16.5,1.6,1.6));px(15,16,B);px(16,17,B)}
-      if(cls==="berserk"){chest(skin);[[15,12],[15,13],[15,14],[11,15],[12,15],[13,15],[14,15],[16,15],[17,15],[18,15],[19,15],[15,17]].forEach(([x,y])=>px(x,y,skD));[[10,13],[11,14],[12,13]].forEach(([x,y])=>px(x,y,"#c8302a"));
-        P(LE,q=>q.line(10,11,20,18),F);skirt(col,4,[9,15,21]);belt(LED);px(15,19,BONE);px(16,19,BONE)}
-      if(cls==="invoc"){chest(col);belt(BONE);P(mix(col,DARK,.5),q=>q.poly([[7,10],[24,10],[23,14],[15.5,17],[8,14]]));[[15,12],[16,13],[15,14],[14,13]].forEach(([x,y])=>px(x,y,RUNE))}
-      /* archer : la main arrière tire la corde */
-      if(pull>0){const n=W2(0,-3-pull);P(col,q=>q.line(10,14,n[0]-1,n[1],2));hand(n[0],n[1],GL)}});
+        if(AF){
+          const BT2=AF.cls==="guerrier"||AF.cls==="gardien"?AF.th.met:AF.th.pri;
+          P(BT2,q=>{q.rect(9,26,6,4);q.rect(16+step,26,6,4);q.px(22+step,28);q.px(22+step,29)});
+          const cTrim=AF.cls==="berserk"?AF.th.sec:AF.th.pri;
+          P(cTrim,q=>{q.rect(9,26,6,1);q.rect(16+step,26,6,1)},F);
+          if(AF.tier>=2){px(11,27,AF.th.acc);px(18+step,27,AF.th.acc)}
+          if(AF.tier>=3){px(14,26,AF.th.met);px(21+step,26,AF.th.met)}
+        }else{
+          /* Sandales / bandes de toile usées (sans bottes équipées) */
+          P(SAND,q=>{q.rect(10,27,5,3);q.rect(16+step,27,5,3);q.px(21+step,29)});
+          P(SANDD,q=>{q.rect(10,29,5,1);q.rect(16+step,29,6,1);q.px(12,27);q.px(18+step,27)},F);
+        }
+      }
+      up();
+      const chest=c=>P(c,q=>{q.rect(9,11,13,9);q.clear(9,11,1,1);q.clear(21,11,1,1)},c===skin?SK:undefined);
+      const belt=c=>{
+        const bc=AB?AB.th.pri:(bodyTheme?c:ROPE);P(bc,q=>q.rect(9,19,13,1),F);
+        if(AB){const bk=AB.boss?GO:AB.th.met;px(15,19,bk);px(16,19,bk);if(AB.boss||AB.tier>=2){px(15,18,AB.th.acc);px(16,18,AB.th.acc)}}
+        else if(!bodyTheme){px(15,19,ROPED);px(15,20,ROPE)}
+      };
+      const skirt=(c,h,cut)=>P(c,q=>{q.rect(9,20,13,h);cut.forEach(x=>q.clear(x,19+h,1,1))});
+      if(bodyTheme){
+        /* Tenue complète de classe quand une cape/robe/armure est équipée */
+        if(cls==="guerrier"){chest(bodyMet);P(mix(bodyMet,DARK,.3),q=>{q.rect(10,16,11,1);q.rect(15,12,1,4)},F);skirt(bodyCol,3,[15]);belt(LED);if(!AB){px(15,19,GO);px(16,19,GO)}P(bodyCol,q=>q.rect(11,11,9,3),{dk:.2});P(bodyMet,q=>q.ell(9.5,12.5,2.4,2.2));px(9,12,bodyAcc)}
+        if(cls==="archer"){chest(bodyCol);P(LE,q=>q.line(10,12,20,18),F);skirt(bodyCol,3,[9,12,15,18,21]);belt(LED);if(!AB)px(14,19,GO);P(bodyDk,q=>q.poly([[8,10],[23,10],[22,13],[9,13]]));px(15,11,bodyAcc);px(16,11,bodyAcc)}
+        if(cls==="mage"){chest(bodyCol);P(bodyLt,q=>q.rect(15,13,1,6),F);belt(GO);P(bodyDk,q=>q.poly([[7,10],[24,10],[22,14],[9,14]]));px(15,12,bodyAcc);px(16,12,bodyAcc)}
+        if(cls==="gardien"){chest(bodyMet);P(bodyCol,q=>q.rect(13,12,5,11));P(bodyAcc,q=>{q.rect(15,13,1,5);q.rect(14,14,3,1)},F);P(bodyMet,q=>{q.rect(9,20,4,3);q.rect(18,20,4,3)});belt(LED);P(bodyMet,q=>q.ell(9,12.5,2.8,2.6))}
+        if(cls==="peste"){chest(bodyTheme.sec);skirt(bodyCol,3,[10,13,16,19]);belt("#4a7a3a");if(!AB){px(12,19,"#c94a5a");px(18,19,"#c94a5a")}P(bodyCol,q=>q.poly([[7,10],[24,10],[23,13],[21,15],[18.5,13],[15.5,16],[12.5,13],[10,15],[8,13]]))}
+        if(cls==="chrono"){chest(bodyCol);belt(bodyDk);P(bodyMet,q=>q.poly([[8,10],[23,10],[15.5,15]]),F);P(bodyCol,q=>q.poly([[10,10],[21,10],[15.5,13]]),F);P(bodyAcc,q=>q.ell(15.5,16.5,1.6,1.6));px(15,16,B);px(16,17,B)}
+        if(cls==="berserk"){chest(skin);[[15,12],[15,13],[15,14],[11,15],[12,15],[13,15],[14,15],[16,15],[17,15],[18,15],[19,15],[15,17]].forEach(([x,y])=>px(x,y,skD));[[10,13],[11,14],[12,13]].forEach(([x,y])=>px(x,y,"#c8302a"));
+          P(bodyTheme.sec,q=>q.line(10,11,20,18),F);skirt(bodyCol,4,[9,15,21]);belt(LED);if(!AB){px(15,19,BONE);px(16,19,BONE)}}
+        if(cls==="invoc"){chest(bodyCol);belt(BONE);P(mix(bodyCol,DARK,.5),q=>q.poly([[7,10],[24,10],[23,14],[15.5,17],[8,14]]));[[15,12],[16,13],[15,14],[14,13]].forEach(([x,y])=>px(x,y,bodyAcc))}
+      }else{
+        /* Tenue de départ « pouilleux » : t-shirt/tunique abîmée, toile rapiécée, cuir craquelé pour l'Invocateur */
+        if(cls==="guerrier"){
+          chest(RAG);P(RAGP,q=>q.rect(11,13,3,3),F);px(18,16,RAGD);px(19,15,RAGD);
+          skirt(RAG,2,[10,14,15,20]);belt(ROPE);
+        }
+        if(cls==="archer"){
+          chest(RAG);P(ROPE,q=>q.line(10,12,20,18),F);P(RAGP,q=>q.rect(16,12,3,2),F);
+          skirt(RAG,2,[9,12,16,19,21]);belt(ROPE);
+        }
+        if(cls==="mage"){
+          chest(RAG);P(RAGD,q=>q.rect(14,11,3,2),F);P(RAGP,q=>q.rect(17,14,3,3),F);px(12,16,RAGD);belt(ROPE);
+        }
+        if(cls==="gardien"){
+          chest(RAG);P(RAGP,q=>q.rect(11,12,4,4),F);P(RAGD,q=>{q.rect(16,13,3,1);q.rect(17,12,1,3)},F);
+          skirt(RAGD,2,[12,18]);belt(ROPE);
+        }
+        if(cls==="peste"){
+          chest("#8c7656");P(RAGP,q=>q.rect(10,13,4,3),F);P(RAG,q=>q.rect(16,15,3,3),F);
+          skirt("#7a6448",2,[10,13,17,20]);belt(ROPE);
+        }
+        if(cls==="chrono"){
+          chest(RAG);P(RAGD,q=>q.line(11,11,19,18),F);P(RAGP,q=>q.rect(11,15,3,2),F);belt(ROPE);
+        }
+        if(cls==="berserk"){
+          chest(skin);[[15,12],[15,13],[15,14],[11,15],[12,15],[13,15],[14,15],[16,15],[17,15],[18,15],[19,15],[15,17]].forEach(([x,y])=>px(x,y,skD));
+          [[10,13],[11,14],[12,13]].forEach(([x,y])=>px(x,y,"#a8322c"));
+          skirt(RAGD,3,[9,12,15,18,21]);P(RAGP,q=>q.rect(12,20,3,2),F);belt(ROPE);
+        }
+        if(cls==="invoc"){
+          /* Cuir abîmé et rapiécé (au lieu d'une grande robe de départ) */
+          chest(OLDRAG);P(OLDLD,q=>{q.line(11,12,14,15);q.line(18,13,16,17)},F);
+          P("#7a5c4a",q=>q.rect(11,15,3,3),F);px(12,15,ROPE);px(18,12,ROPE);px(17,16,ROPE);
+          skirt(OLDLD,3,[9,11,15,19,21]);belt(ROPE);
+        }
+      }
+      if(pull>0){const n=W2(0,-3-pull);P(bodyTheme?bodyCol:skin,q=>q.line(10,14,n[0]-1,n[1],2));hand(n[0],n[1],GL)}});
 
-    /* ----- calque du bras avant et de l'arme (posé derrière la tête quand le bras part en arrière) ----- */
+    /* ----- calque du bras avant et de l'arme (et bouclier du Gardien) ----- */
     const am=((T.arm[f]%360)+360)%360,behind=am>150&&am<300;
     const frontArm=()=>lay(()=>{up();
-      if(cls==="guerrier"){P(LED,q=>ln(q,W2(-3,0),W2(1,0),2),F);px(...W2(-4,0),GO);
-        const e=lim(19.5);P("#e4e9f0",q=>q.poly([W2(3,-2),W2(e-3.5,-2),W2(e,0),W2(e-3.5,2),W2(3,2)]),{dk:.32});P(W,q=>ln(q,W2(5,-.6),W2(e-4.5,-.6)),F);P(GO,q=>ln(q,W2(2.5,-4),W2(2.5,4),2))}
-      if(cls==="berserk"){const e=lim(19.5)-19.5;P("#7a4e2e",q=>ln(q,W2(-5,0),W2(17+e,0)),F);
-        P("#d5dae2",q=>q.poly([W2(11+e,0),W2(6.5+e,5),W2(9+e,8.5),W2(17+e,8.5),W2(19.5+e,5),W2(15+e,0)]),{dk:.32});P(W,q=>ln(q,W2(10+e,7.6),W2(16+e,7.6)),F);P(STD,q=>q.poly([W2(11.5+e,0),W2(13+e,-4),W2(14.5+e,0)]))}
-      if(caster&&(anim==="staff"||anim==="cast"))staff();
-      if(cls==="archer"){   /* arc : au repos il penche vers l'avant, pour tirer il est vertical */
-        const ba=(idle?-70:-90)*R,ax=Math.cos(ba),ay=Math.sin(ba),bx=-ay,by=ax,Bw=(a,b)=>[hx+ax*a+bx*b,hy+ay*a+by*b];
-        P("#9a6a3c",q=>{ln(q,Bw(10,-3),Bw(7,0));ln(q,Bw(7,0),Bw(3,1));ln(q,Bw(3,1),Bw(-3,1));ln(q,Bw(-3,1),Bw(-7,0));ln(q,Bw(-7,0),Bw(-10,-3));ln(q,Bw(2,2),Bw(-2,2))},F);
-        P(BONE,q=>{ln(q,Bw(10,-3),Bw(0,-3-pull));ln(q,Bw(0,-3-pull),Bw(-10,-3))},F);
-        if(pull>0){P("#e8dcc0",q=>ln(q,Bw(0,-3-pull),Bw(0,7)),F);px(...Bw(0,8),ST);px(...Bw(0,9),ST);px(...Bw(1,-3-pull),RED);px(...Bw(-1,-3-pull),RED)}}
-      P(SL,q=>q.line(sx-.5,sy,hx-.5,hy,2),SL===skin?SK:undefined);
-      if(cls==="gardien"){const cx=hx+3,cy=hy+1;P(ST,q=>q.poly([[cx-5,cy-8],[cx+5,cy-8],[cx+5,cy+2],[cx,cy+9],[cx-5,cy+2]]));P(col,q=>q.poly([[cx-3.5,cy-6.5],[cx+3.5,cy-6.5],[cx+3.5,cy+1.5],[cx,cy+7],[cx-3.5,cy+1.5]]));
-        P(EM,q=>{q.rect(cx-.5,cy-5,1,8);q.rect(cx-2.5,cy-3,5,1)},F);P(ST,q=>q.ell(sx+.5,sy-1.5,3,2.6));px(sx,sy-2,GO)}
-      else hand(hx,hy,GL);
-      if(cls==="guerrier"){P(ST,q=>q.ell(sx,sy-1.5,2.5,2.3));px(sx+1,sy-2,GO)}
-      if(cls==="berserk"){P(FUR,q=>q.ell(sx,sy-2,2.4,1.6),{lt:.5});px(sx+1,sy-4,BONE)}});
+      if(cls==="gardien"){
+        /* Gardien : arme derrière le bouclier + pavois équipé (ou planches fendues sans bouclier) */
+        if(AW||!AS)drawWeapon(effWCls,AW);
+        P(SL,q=>q.line(sx-.5,sy,hx-.5,hy,2));
+        const cx=hx+3,cy=hy+1;
+        if(AS){
+          const sm=AS.th.met,sp=AS.th.pri,sa=AS.th.acc,st2=AS.tier;
+          if(AS.cls==="berserk"){
+            P(sp,q=>q.ell(cx,cy,5.8,5.8));P(sm,q=>q.ell(cx,cy,2.2,2.2),F);if(st2>=2)px(cx,cy,sa);
+          }else{
+            P(sm,q=>q.poly([[cx-5,cy-8],[cx+5,cy-8],[cx+5,cy+2],[cx,cy+9],[cx-5,cy+2]]));
+            P(sp,q=>q.poly([[cx-3.5,cy-6.5],[cx+3.5,cy-6.5],[cx+3.5,cy+1.5],[cx,cy+7],[cx-3.5,cy+1.5]]));
+            P(sa,q=>{q.rect(cx-.5,cy-5,1,8);q.rect(cx-2.5,cy-3,5,1)},F);
+            if(st2>=3){px(cx-5,cy-8,sa);px(cx+5,cy-8,sa);px(cx,cy+9,W)}
+          }
+        }else{
+          /* Bouclier de départ en planches de bois fendues et clouées */
+          P(WOOD,q=>{q.rect(cx-3,cy-5,7,10);q.clear(cx+3,cy-5,1,2);q.clear(cx-3,cy+4,1,1)});
+          P(WOODD,q=>{q.line(cx-1,cy-5,cx-1,cy+4);q.line(cx+1,cy-4,cx+1,cy+4);q.rect(cx-3,cy-1,6,1)},F);
+          px(cx-2,cy-3,RUST);px(cx+2,cy-3,RUST);px(cx-2,cy+2,RUST);px(cx+2,cy+2,RUST);
+        }
+        if(bodyTheme){P(bodyMet,q=>q.ell(sx+.5,sy-1.5,3,2.6));px(sx,sy-2,bodyAcc)}
+      }else{
+        if(!wIsStaff||anim==="staff"||anim==="cast")drawWeapon(effWCls,AW);
+        P(SL,q=>q.line(sx-.5,sy,hx-.5,hy,2),SL===skin?SK:undefined);
+        hand(hx,hy,GL);
+        if(bodyTheme&&cls==="guerrier"){P(bodyMet,q=>q.ell(sx,sy-1.5,2.5,2.3));px(sx+1,sy-2,bodyAcc)}
+        if(bodyTheme&&cls==="berserk"){P(bodyTheme.sec,q=>q.ell(sx,sy-2,2.5,1.7),{lt:.5});px(sx+1,sy-4,bodyTheme.tier>=3?bodyAcc:BONE)}
+      }
+    });
     if(behind)frontArm();
 
-    /* ----- calque de la tête : visage, coiffure ou couvre-chef ----- */
+    /* ----- calque de la tête : visage + coiffe dynamique selon l'objet équipé (ou tête nue / ébouriffée par défaut) ----- */
     lay(()=>{up();
       const face=(c=skin,cx=15.5,cy=4.5,rx=6.6,ry=5.6)=>P(c,q=>q.ell(cx,cy,rx,ry),SK);
       const cap=(c,ry=4.8)=>P(c,q=>{q.ell(15.5,1.2,7.3,ry);q.clear(11,3,12,9);q.rect(8,3,3,5)});
-      let mouth=1,blush=1,EY=B;const hc=AH?AH.c:col;
-      if(cls==="guerrier"){face();P(hair,q=>{q.ell(15.5,1.2,7.3,4.8);q.clear(11,3,12,9);q.rect(8,3,3,5);q.poly([[8,2],[4,-3],[10,-2]]);q.poly([[9,-1],[8,-8],[14,-3]]);q.poly([[13,-3],[15,-8],[18,-3]]);q.poly([[17,-3],[21,-6],[22,-1]]);q.poly([[20,-1],[25,1],[22,3]]);q.px(12,3);q.px(16,3);q.px(17,3);q.px(21,3);q.px(22,3)});
-        P(hc,q=>q.rect(9,1,14,2));P(hc,q=>q.poly([[9,1],[9,3],[5-sw,6+sw],[4-sw,4+sw]]))}
-      if(cls==="archer"){face();cap(hair,4.4);P(hair,q=>{q.px(11,3);q.px(12,3);q.px(13,3);q.px(21,3);q.px(22,3);q.px(22,4)},F);
-        P(hc,q=>{q.poly([[8,0],[10,-6],[17,-7],[22,-1]]);q.poly([[6,2],[8,-1],[23,-1],[27,2],[23,2]])});P(AH?aDk(AH):dk,q=>q.rect(9,0,14,1),F);P(RED,q=>q.poly([[11,-5],[6,-11],[9,-11],[14,-6]]))}
-      if(cls==="mage"){face();P(hair,q=>{q.rect(8,2,3,9);q.rect(21,3,2,7);q.px(11,3);q.px(12,3);q.px(20,3)});
-        P(hc,q=>{q.poly([[9,0],[11,-6],[8,-11],[14,-9],[19,-5],[22,0]]);q.ell(15.5,1,10.5,1.4)});P(GO,q=>q.rect(10,-1,12,1),F);px(15,-4,GO);px(14,-3,GO);px(16,-3,GO);px(15,-3,W);px(15,-2,GO)}
-      if(cls==="gardien"){face();P(ST,q=>{q.ell(15.5,1.2,7.6,5.4);q.clear(11,3,11,9);q.rect(8,3,3,6);q.rect(21,2,2,6)});P(GO,q=>q.rect(8,2,15,1),F);P(STD,q=>q.rect(16,3,1,3),F);
-        P(hc,q=>q.poly([[11,-4],[15,-9],[20,-7],[15,-4],[9-sw,-2],[6-sw,3],[4-sw,0],[7-sw,-4]]))}
-      if(cls==="peste"){face();cap(hair,4.6);P(hair,q=>{q.rect(8,3,3,9);q.rect(21,3,2,8);q.px(11,3);q.px(12,3);q.px(20,3)});px(21,10,"#8fe05a");px(22,10,"#8fe05a");
-        P(BONE,q=>{q.line(11,-2,8,-7);q.line(8,-7,8,-10);q.line(9,-5,5,-8);q.line(20,-2,23,-7);q.line(23,-7,23,-10);q.line(22,-5,26,-8)},F);
-        P("#6fbf4a",q=>{q.ell(9.5,.5,1.6,1.3);q.ell(15.5,-.5,1.7,1.6);q.ell(21.5,.5,1.6,1.3)});P("#b8e86a",q=>{q.ell(12.5,0,1.4,1.2);q.ell(18.5,0,1.4,1.2)});px(15,1,"#c94a5a")}
-      if(cls==="chrono"){P(hc,q=>q.ell(15.5,2.5,8,7.6));P(GO,q=>q.ell(16,5.3,5.9,5.3),F);face(skin,16,5.5,5,4.4);
-        P("#ece6d6",q=>{q.rect(12,8,8,2);q.rect(13,10,6,2);q.rect(15,12,2,1)});px(15,8,skin);px(16,8,skin);mouth=0;P(GO,q=>{q.rect(14,-4,3,1);q.rect(15,-3,1,1);q.rect(14,-2,3,1)},F)}
-      if(cls==="berserk"){face();P(hair,q=>{q.rect(8,3,3,7);q.rect(21,3,2,6);q.rect(11,8,10,2);q.rect(12,10,8,1);q.px(13,11);q.px(16,11);q.px(18,11);q.clear(15,8,3,1)});
-        P(STD,q=>{q.ell(15.5,.8,7.4,4.6);q.clear(8,3,16,9)});P(AH?hc:LE,q=>q.rect(8,1,15,2));px(15,1,BONE);px(16,1,BONE);
-        P(BONE,q=>{q.poly([[10,0],[6,-2],[4,-9],[6,-9],[8,-4],[12,-2]]);q.poly([[21,0],[25,-2],[27,-9],[25,-9],[23,-4],[19,-2]])});
-        [[12,3],[13,3],[14,4],[20,3],[19,3],[18,4]].forEach(([x,y])=>px(x,y,B));[[11,7],[12,8],[21,7],[20,8]].forEach(([x,y])=>px(x,y,"#c8302a"));blush=0;mouth=0}
-      if(cls==="invoc"){P(mix(hc,DARK,.5),q=>{q.ell(15.5,2.5,8.2,7.8);q.poly([[10,-3],[7,-10],[13,-5]]);q.poly([[21,-3],[24,-10],[18,-5]])});P(col,q=>q.ell(16,5.3,5.9,5.3),F);P("#2a1a3e",q=>q.ell(16,5.5,5,4.4),F);
-        px(15,-2,RUNE);px(16,-3,RUNE);px(8,4,RUNE);px(23,4,RUNE);mouth=0;blush=0;EY=RUNE}
-      /* détail de la coiffe selon le style, posé sur le bandeau ou le couvre-chef de la classe */
-      if(AH){const by={guerrier:1,archer:0,mage:-1,gardien:2,peste:0,chrono:-3,berserk:1,invoc:-2}[cls]??0,s=AH.s,c1=AH.c,c2=aLt(AH);
-        if(s==="plaques")P(ST,q=>{q.px(10,by);q.px(14,by);q.px(17,by);q.px(21,by)},F);
-        if(s==="cuir")P(aDk(AH),q=>{q.px(23,by+1);q.px(24,by+2);q.px(23,by+3)},F);
-        if(s==="robe")P(GO,q=>{q.px(12,by);q.px(19,by)},F);
-        if(s==="ecailles")P(c2,q=>q.poly([[13.5,by],[17.5,by],[15.5,by-3]]));
-        if(s==="fourrure")P(c1,q=>{q.poly([[9,by],[11,by-4],[13,by]]);q.poly([[18,by],[20,by-4],[22,by]])});
-        if(s==="cristal")P(c2,q=>{q.poly([[11,by],[13,by],[12,by-2]]);q.poly([[14.5,by],[16.5,by],[15.5,by-3]]);q.poly([[18,by],[20,by],[19,by-2]])},{lt:.4})}
+      let mouth=1,blush=1,EY=B;
+      if(AH){
+        /* Coiffe équipée / transmogrifiée : adopte la silhouette de la classe de l'objet + palette et menace de la zone */
+        const hc=AH.th.pri,h2=AH.th.sec,hm=AH.th.met,ha=AH.th.acc,ht=AH.tier,hCls=AH.cls;
+        if(hCls==="invoc"){
+          P(mix(hc,DARK,.45),q=>{q.ell(15.5,2.5,8.4,8);q.poly([[10,-3],[6,-10-(ht>=3?2:0)],[13,-5]]);q.poly([[21,-3],[25,-10-(ht>=3?2:0)],[18,-5]])});
+          P(hc,q=>q.ell(16,5.3,5.9,5.3),F);P("#1c0e2e",q=>q.ell(16,5.5,5,4.4),F);
+          px(15,-2,ha);px(16,-3,ha);px(8,4,ha);px(23,4,ha);
+          if(ht>=3){px(7,-10,ha);px(24,-10,ha)}
+          mouth=0;blush=0;EY=ha;
+        }else if(hCls==="berserk"){
+          face();
+          if(cls==="berserk")P(hair,q=>{q.rect(11,8,10,2);q.rect(12,10,8,1);q.clear(15,8,3,1)});
+          P(hm,q=>{q.ell(15.5,.8,7.6,4.8);q.clear(8,3,16,9)});P(hc,q=>q.rect(8,1,15,2));
+          px(15,1,ha);px(16,1,ha);
+          const hornC=ht>=4?ha:h2;
+          P(hornC,q=>{q.poly([[10,0],[5,-2],[3,-9-(ht>=3?2:0)],[6,-9],[8,-4],[12,-2]]);q.poly([[21,0],[26,-2],[28,-9-(ht>=3?2:0)],[25,-9],[23,-4],[19,-2]])});
+          if(ht>=3){px(4,-10,W);px(27,-10,W)}
+          if(cls==="berserk"){blush=0;mouth=0}
+        }else if(hCls==="guerrier"){
+          face();
+          P(hm,q=>{q.ell(15.5,1.2,7.6,5.4);q.clear(11,3,11,9);q.rect(8,3,3,6);q.rect(21,3,2,5)});
+          P(hc,q=>q.rect(8,1,15,2));
+          P(ha,q=>q.poly([[11,-4],[15,-10-(ht>=3?2:0)],[20,-7],[15,-4],[9-sw,-2],[6-sw,3],[4-sw,0],[7-sw,-4]]));
+          if(ht>=3){px(8,2,ha);px(22,2,ha)}
+        }else if(hCls==="gardien"){
+          face();
+          P(hm,q=>{q.ell(15.5,1.2,7.8,5.6);q.clear(11,3,10,8);q.rect(8,3,3,7);q.rect(21,2,2,7)});
+          P(hc,q=>q.rect(8,2,15,1),F);P(hm,q=>q.rect(15,2,2,4),F);
+          P(ht>=2?ha:GO,q=>{q.rect(9,-2,13,2);q.px(10,-4);q.px(15,-5-(ht>=3?2:0));q.px(16,-5-(ht>=3?2:0));q.px(21,-4)},F);
+        }else if(hCls==="mage"){
+          face();P(hair,q=>{q.rect(8,3,3,7);q.rect(21,3,2,6)});
+          P(hc,q=>{q.poly([[9,0],[11,-6],[7,-12-(ht>=3?1:0)],[14,-9],[19,-5],[22,0]]);q.ell(15.5,1,10.8,1.5)});
+          P(hm,q=>q.rect(10,-1,12,1),F);px(15,-4,ha);px(14,-3,ha);px(16,-3,ha);px(15,-3,W);
+          if(ht>=3)px(7,-12,ha);
+        }else if(hCls==="archer"){
+          face();cap(hair,4.2);
+          P(hc,q=>{q.poly([[8,0],[10,-6],[17,-7],[22,-1]]);q.poly([[6,2],[8,-1],[23,-1],[27,2],[23,2]])});
+          P(mix(hc,DARK,.35),q=>q.rect(9,0,14,1),F);
+          P(ha,q=>q.poly([[11,-5],[5,-11-(ht>=3?1:0)],[9,-11],[14,-6]]));
+          if(ht>=3)px(6,-11,W);
+        }else if(hCls==="peste"){
+          face();cap(hair,4.5);P(hair,q=>{q.rect(8,3,3,8);q.rect(21,3,2,7)});
+          P(h2,q=>{q.line(11,-2,7,-8);q.line(7,-8,7,-11);q.line(9,-5,4,-8);q.line(20,-2,24,-8);q.line(24,-8,24,-11);q.line(22,-5,27,-8)},F);
+          P(hc,q=>{q.ell(9.5,.5,1.8,1.4);q.ell(15.5,-.5,1.9,1.7);q.ell(21.5,.5,1.8,1.4)});
+          px(15,0,ha);if(ht>=2){px(7,-11,ha);px(24,-11,ha)}
+        }else{
+          /* Chronomancien */
+          P(hc,q=>q.ell(15.5,2.5,8,7.6));P(hm,q=>q.ell(16,5.3,5.9,5.3),F);face(skin,16,5.5,5,4.4);
+          P(ha,q=>{q.rect(14,-4,3,1);q.rect(15,-3,1,1);q.rect(14,-2,3,1);if(ht>=2){q.px(10,-4);q.px(15,-7);q.px(21,-4)}},F);
+          if(cls==="chrono"){P("#ece6d6",q=>{q.rect(12,8,8,2);q.rect(13,10,6,2);q.rect(15,12,2,1)});mouth=0}
+        }
+        if(ht>=4&&hCls!=="invoc"){EY=ha}
+      }else{
+        /* Sans coiffe équipée : tête nue et cheveux ébouriffés de débutant (pas de chapeau, casque ni capuche gratuite) */
+        if(cls==="guerrier"){face();P(hair,q=>{q.ell(15.5,1.2,7.3,4.8);q.clear(11,3,12,9);q.rect(8,3,3,5);q.poly([[8,2],[5,-2],[10,-2]]);q.poly([[10,-1],[9,-6],[14,-3]]);q.poly([[14,-3],[16,-6],[19,-3]]);q.poly([[18,-3],[21,-5],[22,-1]]);q.px(12,3);q.px(16,3);q.px(21,3)});
+          P(RAGD,q=>q.rect(9,1,14,1),F);px(7-sw,3,RAGD)}
+        if(cls==="archer"){face();cap(hair,4.5);P(hair,q=>{q.px(11,3);q.px(12,3);q.px(13,3);q.px(17,3);q.px(21,3);q.px(22,3);q.px(22,4);q.poly([[11,-2],[13,-5],[16,-3]])},F)}
+        if(cls==="mage"){face();cap(hair,4.8);P(hair,q=>{q.rect(8,2,3,9);q.rect(21,3,2,7);q.px(11,3);q.px(12,3);q.px(20,3);q.poly([[13,-3],[15,-6],[17,-3]])})}
+        if(cls==="gardien"){face();cap(hair,4.6);P(hair,q=>{q.rect(8,3,3,6);q.rect(21,3,2,5);q.px(12,3);q.px(19,3);q.px(14,-3);q.px(17,-3)})}
+        if(cls==="peste"){face();cap(hair,4.7);P(hair,q=>{q.rect(8,3,3,9);q.rect(21,3,2,8);q.px(11,3);q.px(12,3);q.px(20,3)});
+          P(WOOD,q=>q.line(19,-2,23,-5),F);px(23,-6,"#6c8a50");px(22,-4,"#6c8a50")}
+        if(cls==="chrono"){face();cap(hair,4.6);P(hair,q=>{q.rect(8,3,3,7);q.rect(21,3,2,6);q.rect(12,8,8,2);q.rect(13,10,6,2);q.rect(15,12,2,1)});px(15,8,skin);px(16,8,skin);mouth=0}
+        if(cls==="berserk"){face();cap(hair,4.8);P(hair,q=>{q.rect(8,3,3,7);q.rect(21,3,2,6);q.rect(11,8,10,2);q.rect(12,10,8,1);q.px(13,11);q.px(16,11);q.px(18,11);q.clear(15,8,3,1);q.poly([[10,-2],[12,-6],[15,-3]]);q.poly([[16,-3],[19,-6],[21,-2]])});
+          [[12,3],[13,3],[14,4],[20,3],[19,3],[18,4]].forEach(([x,y])=>px(x,y,B));[[11,7],[12,8],[21,7],[20,8]].forEach(([x,y])=>px(x,y,"#a8322c"));blush=0;mouth=0}
+        if(cls==="invoc"){face();cap(hair,4.9);P(hair,q=>{q.rect(8,2,3,8);q.rect(21,3,2,7);q.px(11,3);q.px(12,3);q.px(15,3);q.px(20,3);q.px(21,3)});blush=0}
+      }
       [13,18].forEach(x=>{if(blink){px(x,6,EY);px(x+1,6,EY)}else{for(let y=4;y<7;y++){px(x,y,EY);px(x+1,y,EY)}px(x,4,W)}});
       if(blush){px(11,7,"#f29a8e");px(12,7,"#f29a8e");px(20,7,"#f29a8e");px(21,7,"#f29a8e")}
       if(mouth){px(16,8,"#c07a62");px(17,8,"#c07a62")}});
     if(!behind)frontArm();
+
+    /* ----- calque avant : étincelles d'aura flottantes (zones 6 à 11) ----- */
+    if(AURA&&AURA.tier>=3){
+      const nSp=AURA.tier>=4?5:2;
+      for(let i=0;i<nSp;i++){
+        const x=Math.round(6+((i*9+f*3)%20)),y=Math.round(28-((f*3+i*6)%30));
+        s.set(x,y,i%2===0?AURA.c2:AURA.c1);
+        if(AURA.tier>=4&&(f+i)%3===0)s.set(x,y-1,W);
+      }
+    }
     return s}
   /* image fixe du héros (40×44) : création du personnage, inventaire, visiteurs. pose : "" ou "blink" ("atk" et "up" renvoient une image d'animation) */
   function hero(cls,col,pose="",arm){
     const k="h:"+cls+col+pose+(arm?arm.k:"");if(cache[k])return cache[k];
     if(pose==="atk"||pose==="up")return cache[k]=heroF(cls,col,pose==="up"?"cast":"atk",pose==="up"?7:6,0,0,arm);   /* poses d'action : cadre large de 64 px */
     const s=heroSpr(cls,col,"idle",0,pose==="blink",arm);
-    /* cadre de 40 px : décalé vers la droite si l'arme dépasse (hache du Berserker), sans couper le corps à gauche */
+    /* cadre de 40 px centré sur le corps, légèrement décalé si une arme dépasse à droite */
     const W=s.w;let x0=W,x1=-1;for(let y=0;y<W;y++)for(let x=0;x<W;x++)if(s.p[y*W+x]){if(x<x0)x0=x;if(x>x1)x1=x}
-    const sh=Math.max(0,Math.min(x1-(HP-4+39),x0-(HP-4))),o=new Spr(40,44);o.shadow(19.5-sh,42,9,1.7);for(let y=0;y<44;y++)for(let x=0;x<40;x++){const c=s.p[(y+HP-12)*W+x+HP-4+sh];if(c)o.p[y*40+x]=c}
+    const sh=Math.max(0,Math.min(6,Math.min(x1-(HP-4+39),x0-(HP-4)))),o=new Spr(40,44);o.shadow(19.5-sh,42,9,1.7);for(let y=0;y<44;y++)for(let x=0;x<40;x++){const c=s.p[(y+HP-12)*W+x+HP-4+sh];if(c)o.p[y*40+x]=c}
     return cache[k]=o.url()}
   function heroF(cls,col,anim,f,blink,tight,arm){
     if(anim==="atk")anim=ATK[cls]||"atk";

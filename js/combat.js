@@ -30,7 +30,7 @@ function purgeDots(m){if(!S.mon||!S.mdot)return 0;const st=stats();let v=0;for(c
 const ECHO=[];
 function hitMon(r,kind){
   if(!S.mon||S.ko>0)return;dotProcs(r,kind);{const t=S.time;ECHO.push([t,r.v]);while(ECHO.length&&ECHO[0][0]<t-6)ECHO.shift()}
-  if(CLASSES[S.cls]?.leech&&(kind==="auto"||kind==="click"||kind==="spell")){const mh=(dotProcs.st||stats()).maxHp;S.hp=Math.min(mh,S.hp+mh*CLASSES[S.cls].leech)}if(fx&&(kind==="click"||kind==="auto"))heroAtk();S.mon.hp-=r.v;inc("dmg",r.v);mx("maxHit",r.v);if(kind==="click"||kind==="spell")sfx(r.crit?"crit":"hit");
+  {const stL=dotProcs.st||stats();if(stL.leech&&(kind==="auto"||kind==="click"||kind==="spell")){const mh=stL.maxHp;S.hp=Math.min(mh,S.hp+mh*stL.leech)}}if(fx&&(kind==="click"||kind==="auto"))heroAtk();S.mon.hp-=r.v;inc("dmg",r.v);mx("maxHit",r.v);if(kind==="click"||kind==="spell")sfx(r.crit?"crit":"hit");
   if(fx){floatNum((r.sup?"SUPER ":"")+fmt(r.v)+(r.crit?" !":""),(r.sup?"crit super ":r.crit?"crit ":"")+(kind==="dot"?"dot ":"")+(r.r<0?"eff":r.r>0?"resi":""));replayCls($("mon"),"hit");if((r.crit||r.v>S.mon.max*.2)&&kind!=="dot")VIE.ouch();if(r.crit&&(kind==="click"||kind==="spell")&&performance.now()-(hitMon.ct||0)>250){hitMon.ct=performance.now();FX.crit()}}
   if(S.mon.hp<=0)kill();
 }
@@ -94,20 +94,20 @@ function kill(){
   if(mode==="donjon"){S.dg.wave++;if(S.dg.wave>DG_WAVES){const zi=S.dg.z,z=ZONES[zi],g=gainEcus(farmGold(600)),got=[];
       z.mons.forEach(mm=>{const n=addRes(mm.drop[0],rnd(5,10));if(n)got.push(`${n}× ${mm.drop[1]}`)});
       if(Math.random()<.4){giveTrophy("tb_"+zi);got.push(ITEMS["tb_"+zi].name)}
-      /* Coffre garni (boutique) : un objet de panoplie de la zone en plus */
-      if(up("coffre")){const L=Object.values(ITEMS).filter(it=>it.z===zi&&it.set&&it.slot!=="trophee");if(L.length){const it=L[Math.floor(Math.random()*L.length)],rr=pickW([55,32,10,3]);S.items.push({u:S.uid++,id:it.id,e:0,r:rr});S.seen[it.id]=1;got.push(`<span style="color:${RAR[rr].c}">${it.name}</span>`)}}
+      /* Coffre garni (boutique) : un objet de panoplie de la zone en plus (classe du joueur ou boss) */
+      if(up("coffre")){const L=Object.values(ITEMS).filter(it=>it.z===zi&&it.set&&it.slot!=="trophee"&&(!it.cls||it.cls===S.cls));if(L.length){const it=L[Math.floor(Math.random()*L.length)],rr=pickW([55,32,10,3]);S.items.push({u:S.uid++,id:it.id,e:0,r:rr});unlockSkin(it.id);S.seen[it.id]=1;got.push(`<span style="color:${RAR[rr].c}">${it.name}</span>`)}}
       inc("dungeons");log(`Coffre du donjon ${DUNGEONS[zi]} : <span class="g">+${fmt(g)} écus</span>${got.length?", "+got.join(", "):""}`,"g");if(fx)toast(`Donjon terminé : +${fmt(g)} écus`);endMode(true)}}
 }
 function cast(sp,auto){
   if(S.ko>0||!S.mon||S.lvl<sp.lvl||(S.cds[sp.id]||0)>S.time)return;
-  const st=stats(),C=CLASSES[S.cls];S.cds[sp.id]=S.time+spCd(sp,st);
+  const st=stats(),sm=st.spellMult||1;S.cds[sp.id]=S.time+spCd(sp,st);
   if(fx)ANIM.spell(sp.id);const dl=ANIM.delay(sp.id);
   sp.fx.forEach(f=>{
-    if(f.t==="hit"){const r=roll(f.m*C.spellMult,st);if(dl)setTimeout(()=>{if(S.mon&&S.ko<=0)hitMon(r,"spell")},dl);else hitMon(r,"spell")}
+    if(f.t==="hit"){const r=roll(f.m*sm,st);if(dl)setTimeout(()=>{if(S.mon&&S.ko<=0)hitMon(r,"spell")},dl);else hitMon(r,"spell")}
     if(f.t==="dot"&&f.k){const n=f.n;if(dl)setTimeout(()=>addDot(f.k,n),dl);else addDot(f.k,n)}
-    else if(f.t==="dot")S.dots.push({m:f.m*C.spellMult,until:S.time+f.d,acc:0});
-    if(f.t==="summon"){S.summ=(S.summ||[]).filter(x=>x.until>S.time);for(let k=0;k<f.n;k++)S.summ.push({until:S.time+f.d,m:f.m*C.spellMult});if(fx&&typeof ANIM.summon==="function")ANIM.summon(f.n,f.d)}
-    if(f.t==="multi")for(let k=0;k<f.n;k++)setTimeout(()=>{if(S.mon&&S.ko<=0)hitMon(roll(f.m*C.spellMult,stats()),"spell")},(dl||0)+k*f.gap);
+    else if(f.t==="dot")S.dots.push({m:f.m*sm,until:S.time+f.d,acc:0});
+    if(f.t==="summon"){S.summ=(S.summ||[]).filter(x=>x.until>S.time);for(let k=0;k<f.n;k++)S.summ.push({until:S.time+f.d,m:f.m*sm});if(fx&&typeof ANIM.summon==="function")ANIM.summon(f.n,f.d)}
+    if(f.t==="multi")for(let k=0;k<f.n;k++)setTimeout(()=>{if(S.mon&&S.ko<=0)hitMon(roll(f.m*sm,stats()),"spell")},(dl||0)+k*f.gap);
     if(f.t==="echo"){const go=()=>{const t=S.time,v=ECHO.filter(e=>e[0]>=t-f.s).reduce((a,e)=>a+e[1],0);if(v>0){hitMon({v:Math.round(v),crit:false,r:0},"spell");if(fx)floatNum("Écho !","crit")}};if(dl)setTimeout(go,dl);else go()}
     if(f.t==="purge"){const go=()=>{const v=purgeDots(f.m);if(fx&&v>0)floatNum("Purge !","crit")};if(dl)setTimeout(go,dl);else go()}
     if(f.t==="heal"){const h=Math.round(st.maxHp*f.p);S.hp=Math.min(st.maxHp,S.hp+h);if(fx){floatNum("+"+fmt(h),"heal");FX.heal()}}

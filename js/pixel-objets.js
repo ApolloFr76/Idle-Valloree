@@ -12,18 +12,220 @@
     if(id==="oeuf"){s.part("#ffd45a",q=>{q.ell(8,8,5,6);q.ell(8,5,3.6,4)});s.part("#ff8ab0",q=>q.rect(5,6,2,2),{flat:1});s.part("#5ab4e8",q=>q.rect(9,9,2,2),{flat:1});s.part("#7fd35e",q=>q.rect(9,4,1,2),{flat:1});s.part("#ef7d4a",q=>q.rect(6,11,2,1),{flat:1})}
     s.outline();return cache[k]=s.url()}
 
-  /* ---------- Équipement (16×16), teinté à la couleur du monstre ---------- */
-  function item(slot,col){
-    const k="i:"+slot+col;if(cache[k])return cache[k];const s=new Spr(16,16),G="#f7c948",M="#dfe5ec",dk=mix(col,DARK,.4);
-    if(slot==="coiffe"){s.part(col,q=>{q.ell(8,8,5,5);q.clear(0,10,16,6)});s.part(dk,q=>q.rect(2,10,12,2));s.part(G,q=>q.rect(7,5,2,3),{flat:1});s.set(8,2,"#e8483c");s.set(8,1,"#e8483c")}
-    if(slot==="cape"){s.part(col,q=>q.poly([[5,2],[10,2],[13,14],[2,14]]));s.part(dk,q=>{q.line(6,5,5,13);q.line(9,5,10,13)},{flat:1});s.part(G,q=>q.rect(5,2,6,1),{flat:1})}
-    if(slot==="amulette"){s.part("#c9962a",q=>{q.px(3,1);q.px(4,3);q.px(5,5);q.px(6,7);q.px(12,1);q.px(11,3);q.px(10,5);q.px(9,7);q.px(3,2);q.px(12,2);q.px(4,4);q.px(11,4);q.px(5,6);q.px(10,6)},{flat:1});s.part(G,q=>q.ell(7.5,11,3.4,3.4));s.part(col,q=>q.rect(6,10,3,3))}
-    if(slot==="anneau"){s.part(G,q=>{q.ell(7.5,10,4.4,4.4);q.clear(6,8,4,4)});s.part(col,q=>{q.rect(6,2,4,4);q.clear(6,2,1,1);q.clear(9,2,1,1)},{lt:.6})}
-    if(slot==="bottes"){s.part(col,q=>{q.rect(4,3,5,9);q.rect(4,10,9,3);q.clear(12,10,1,1)});s.part(mix(col,LIGHT,.5),q=>q.rect(4,2,5,2),{flat:1});s.part("#4a342c",q=>q.rect(4,13,10,1),{flat:1})}
-    if(slot==="arme"){s.part(M,q=>q.line(12,2,6,8,2));s.part(col,q=>q.line(3,6,8,11,2));s.part("#7a4e2e",q=>q.line(4,10,2,12,2),{flat:1});s.set(2,14,G);s.set(1,14,G);s.set(2,13,G)}
-    if(slot==="ceinture"){s.part(col,q=>q.rect(1,6,14,4));s.part(G,q=>{q.rect(6,5,4,6);q.clear(7,7,2,2)});s.set(2,8,dk);s.set(12,8,dk)}
-    if(slot==="bouclier"){s.part(col,q=>q.poly([[3,2],[12,2],[12,8],[7.5,14],[3,8]]));s.part(G,q=>{q.rect(7,4,2,7);q.rect(5,6,6,2)},{flat:1})}
-    s.outline();return cache[k]=s.url()}
+  /* ---------- Équipement (16×16) : silhouette propre à chaque classe (+ Boss), palette et menace évolutives par zone ---------- */
+  function item(slot,col,it){
+    const k="i:"+(it&&it.id?it.id:slot+col);if(cache[k])return cache[k];
+    const s=new Spr(16,16),cls=(it&&it.cls)||(it&&it.boss?"boss":"guerrier"),boss=!!(it&&it.boss);
+    const th=(it&&typeof ZONE_STYLE!=="undefined"&&ZONE_STYLE[it.z])||{pri:col,sec:mix(col,LIGHT,.35),met:"#dfe5ec",acc:"#f7c948",tier:1,motif:"leaf"};
+    const P1=th.pri,P2=th.sec,MT=th.met,AC=th.acc,t=th.tier||0,z=it?it.z:0;
+    const DK=mix(P1,DARK,.45),LT=mix(P1,LIGHT,.45),GO=boss?"#ffd84a":(t>=3?AC:"#f2c14e"),W="#ffffff",F={flat:1};
+    const spark=(x,y,c=AC)=>{s.set(x,y,c);if(t>=4){s.set(x+1,y,W);s.set(x,y-1,c)}};
+
+    if(slot==="arme"){
+      if(cls==="berserk"){
+        /* Hache viking : manche diagonal + large fer courbé (double lame dès le palier 2, runes et aura au palier 3-4) */
+        s.part("#7a4e2e",q=>q.line(2,14,12,4,2),F);s.set(2,14,GO);
+        s.part(MT,q=>q.poly([[7,2],[13,2],[14,6],[11,10],[8,7]]),{lt:.45});
+        if(t>=2)s.part(MT,q=>q.poly([[4,6],[8,9],[5,12],[2,9]]),{lt:.35});
+        s.part(P1,q=>q.line(12,3,13,7),F);
+        if(t>=1)s.set(10,5,AC);
+        if(t>=3){s.set(13,2,AC);s.set(14,6,AC);s.set(11,9,AC)}
+        if(t>=4){s.set(13,4,W);s.set(9,4,AC);s.set(4,9,AC)}
+      }else if(cls==="guerrier"){
+        /* Épée / grande lame de champion */
+        s.part(MT,q=>{q.line(13,2,6,9,2);q.px(14,1)},{lt:.5});
+        if(t>=2)s.part(W,q=>q.line(13,2,8,7),F);
+        if(t>=3){s.set(11,2,AC);s.set(13,4,AC);s.set(9,6,AC)}
+        s.part(P1,q=>q.line(4,7,9,12,2));
+        if(t>=3){s.set(3,6,GO);s.set(10,13,GO)}
+        s.part("#6a4228",q=>q.line(5,10,2,13,2),F);s.set(2,14,GO);s.set(1,14,GO);s.set(6,9,AC);
+      }else if(cls==="archer"){
+        /* Arc recourbé + corde + flèche à pointe luisante */
+        s.part(P1,q=>{q.line(4,2,8,2);q.line(8,2,12,6);q.line(12,6,12,10);q.line(12,10,8,14);q.line(8,14,4,14)});
+        s.part(P2,q=>q.line(4,3,4,13),F);
+        s.part(MT,q=>q.line(3,8,13,8),F);s.part(AC,q=>{q.px(13,7);q.px(14,8);q.px(13,9);q.px(3,7);q.px(3,9)},F);
+        if(t>=2){s.set(11,4,MT);s.set(11,12,MT)}
+        if(t>=3){s.set(5,1,AC);s.set(5,15,AC);s.set(14,8,W)}
+      }else if(cls==="mage"){
+        /* Bâton arcanique couronné d'un orbe */
+        s.part("#7a4e2e",q=>q.line(3,14,10,7,2),F);
+        s.part(GO,q=>{q.rect(9,3,5,5);q.clear(10,4,3,3)},F);
+        s.part(AC,q=>q.ell(11.5,5.5,2.2,2.2),{lt:.7});s.set(11,4,W);
+        if(t>=2){s.set(8,3,MT);s.set(14,3,MT);s.set(14,8,MT)}
+        if(t>=3){s.set(11,1,AC);s.set(15,5,AC)}
+      }else if(cls==="gardien"){
+        /* Marteau de guerre massif */
+        s.part("#6a4a30",q=>q.line(3,14,10,7,2),F);s.set(2,14,GO);
+        s.part(MT,q=>q.poly([[6,4],[10,1],[15,6],[11,9]]),{lt:.45});
+        s.part(P1,q=>q.line(8,3,13,8),F);s.set(10,5,AC);
+        if(t>=2){s.set(14,2,GO);s.set(15,5,GO)}
+        if(t>=3){s.set(10,5,W);s.set(11,4,AC);s.set(9,6,AC)}
+      }else if(cls==="peste"){
+        /* Sceptre vénéneux noueux à fiole/gemme toxique */
+        s.part("#644428",q=>{q.line(3,14,10,7,2);q.line(10,7,8,3);q.line(8,3,12,2);q.line(12,2,14,5)},F);
+        s.part(AC,q=>q.ell(11,5.5,2,2),{lt:.6});s.set(10,5,W);
+        s.part(P1,q=>{q.px(6,10);q.px(8,11);q.px(7,4)},F);
+        if(t>=3){s.set(11,9,AC);s.set(14,6,AC)}
+      }else if(cls==="chrono"){
+        /* Sceptre-horloge / astrolabe */
+        s.part(MT,q=>q.line(3,14,9,8,2),F);
+        s.part(GO,q=>{q.ell(11,5,3.6,3.6);q.clear(10,4,3,3)});
+        s.part(P1,q=>q.rect(10,4,3,3),F);s.set(11,5,W);s.set(11,4,AC);s.set(12,5,AC);
+        if(t>=2){s.set(11,1,AC);s.set(15,5,AC)}
+      }else{
+        /* Invocateur : bâton d'âme cornu + flamme spectrale */
+        s.part(DK,q=>{q.line(3,14,10,7,2);q.line(8,5,7,2);q.line(12,8,15,7)},F);
+        s.part(P1,q=>{q.line(8,6,11,9)},F);
+        s.part(AC,q=>{q.ell(11.5,4.5,2.2,2.4);q.px(12,1)},{lt:.65});s.set(11,4,W);
+        if(t>=2){s.set(7,1,MT);s.set(15,6,MT)}
+        if(t>=3){s.set(13,2,AC);s.set(9,2,AC)}
+      }
+    }else if(slot==="coiffe"){
+      if(cls==="invoc"){
+        /* Capuche rituelle profonde + yeux lumineux */
+        s.part(P1,q=>{q.poly([[8,1],[13,5],[14,13],[2,13],[3,5]])});
+        if(t>=2)s.part(MT,q=>{q.poly([[4,5],[2,1],[6,3]]);q.poly([[12,5],[14,1],[10,3]])});
+        s.part("#170c24",q=>q.ell(8,8.5,3.5,3.5),F);
+        s.set(6,8,AC);s.set(10,8,AC);if(t>=3){s.set(8,4,AC);s.set(6,8,W);s.set(10,8,W)}
+      }else if(cls==="berserk"){
+        /* Casque viking à grandes cornes */
+        s.part(MT,q=>{q.ell(8,9,4.6,4.2);q.clear(0,11,16,5)});
+        s.part(P1,q=>q.rect(3,9,10,2));s.part(MT,q=>q.rect(7,9,2,4),F);
+        const hCol=t>=4?AC:P2;
+        s.part(hCol,q=>{q.poly([[4,8],[1,5],[1,2],[3,4],[5,7]]);q.poly([[12,8],[15,5],[15,2],[13,4],[11,7]])});
+        if(t>=3){s.set(8,6,AC);s.set(1,2,W);s.set(15,2,W)}
+      }else if(cls==="mage"){
+        /* Chapeau pointu d'arcaniste */
+        s.part(P1,q=>{q.poly([[8,1],[5,3],[4,10],[12,10],[11,5]]);q.ell(8,11,6.8,1.8)});
+        s.part(GO,q=>q.rect(4,9,8,1),F);s.set(8,6,AC);s.set(7,6,AC);
+        if(t>=2){s.set(8,5,W);s.set(10,8,AC)}
+        if(t>=3){s.set(4,2,AC);s.set(12,4,AC)}
+      }else if(cls==="archer"){
+        /* Capuche de traqueur + plume */
+        s.part(P1,q=>{q.poly([[8,2],[13,6],[13,12],[3,12],[3,6]])});
+        s.part(DK,q=>q.rect(4,10,8,2),F);
+        s.part(AC,q=>q.poly([[11,5],[15,1],[13,6]]),F);
+        if(t>=2)s.set(8,5,MT);
+        if(t>=3)s.set(15,1,W);
+      }else if(cls==="gardien"){
+        /* Grand heaume de bastion + couronne */
+        s.part(MT,q=>{q.rect(3,3,10,10);q.clear(3,3,1,1);q.clear(12,3,1,1)});
+        s.part(P1,q=>q.rect(7,4,2,8),F);s.part("#1a1024",q=>{q.rect(4,7,8,1);q.rect(7,8,2,3)},F);
+        s.part(GO,q=>{q.rect(3,3,10,1);if(t>=1){q.px(4,2);q.px(8,1);q.px(12,2)}},F);
+        if(t>=3){s.set(6,7,AC);s.set(9,7,AC)}
+      }else if(cls==="peste"){
+        /* Couronne de ramures et spores */
+        s.part(P2,q=>{q.line(5,9,2,4);q.line(2,4,2,1);q.line(4,6,1,5);q.line(11,9,14,4);q.line(14,4,14,1);q.line(12,6,15,5)},F);
+        s.part(P1,q=>q.rect(3,9,10,3));s.part(AC,q=>{q.px(5,9);q.px(8,8);q.px(11,9);if(t>=2){q.px(2,1);q.px(14,1)}},F);
+      }else if(cls==="chrono"){
+        /* Diadème / capuche temporelle à rayons */
+        s.part(P1,q=>{q.ell(8,9,5,4);q.clear(0,11,16,5)});
+        s.part(GO,q=>{q.rect(3,9,10,2);q.px(4,5);q.px(8,2);q.px(12,5);q.line(8,3,8,8)},F);
+        s.part(AC,q=>q.rect(7,6,2,2),F);if(t>=3)s.set(8,2,W);
+      }else{
+        /* Guerrier : heaume de champion à cimier */
+        s.part(MT,q=>{q.ell(8,8.5,5,4.8);q.clear(0,12,16,4)});
+        s.part("#1c1020",q=>q.rect(4,9,8,1),F);
+        s.part(P1,q=>q.poly([[7,1],[11,1],[10,5],[6,5]]));
+        s.part(AC,q=>{q.px(8,2);q.px(9,2);if(t>=2){q.px(3,7);q.px(13,7)}},F);
+        if(t>=3){s.set(3,6,MT);s.set(13,6,MT)}
+      }
+    }else if(slot==="cape"){
+      if(boss){
+        /* Cape souveraine du Boss : larges épaulières dorées + manteau majestueux */
+        s.part(P1,q=>q.poly([[3,3],[12,3],[15,14],[1,14]]));
+        s.part(P2,q=>q.poly([[6,4],[9,4],[11,14],[4,14]]),{dk:.2});
+        s.part(GO,q=>{q.rect(2,2,12,2);q.rect(6,4,4,2);q.px(2,1);q.px(8,1);q.px(13,1)},F);
+        s.part(AC,q=>{q.rect(7,4,2,2);if(t>=2)q.rect(2,13,12,1)},F);
+      }else if(cls==="invoc"||cls==="mage"){
+        /* Robe longue rituelle / étoilée avec manches */
+        s.part(P1,q=>{q.poly([[5,2],[10,2],[13,14],[2,14]]);q.rect(2,4,3,4);q.rect(11,4,3,4)});
+        s.part(DK,q=>q.rect(6,3,4,11),F);
+        s.part(AC,q=>{q.rect(7,4,2,8);q.rect(3,13,10,1)},F);
+        if(t>=3){s.set(7,5,W);s.set(8,9,W)}
+      }else if(cls==="berserk"){
+        /* Fourrure de bête sauvage */
+        s.part(P1,q=>q.poly([[4,3],[11,3],[14,13],[11,14],[8,12],[5,14],[2,13]]));
+        s.part(P2,q=>{q.rect(3,2,10,3);q.px(4,5);q.px(11,5)});
+        s.part(t>=3?AC:"#f1e4bf",q=>{q.px(6,4);q.px(9,4)},F);
+      }else{
+        /* Manteau de classe structuré */
+        s.part(P1,q=>q.poly([[4,2],[11,2],[14,14],[2,14]]));
+        s.part(DK,q=>{q.line(6,5,5,13);q.line(10,5,11,13)},F);
+        s.part(MT,q=>q.rect(4,2,8,2),F);s.set(7,3,AC);s.set(8,3,AC);
+        if(t>=2)s.part(AC,q=>q.rect(3,13,10,1),F);
+      }
+    }else if(slot==="bouclier"){
+      if(cls==="invoc"){
+        /* Grimoire occulte lié */
+        s.part(P1,q=>q.rect(3,2,10,12));s.part(DK,q=>q.rect(3,2,2,12),F);
+        s.part(MT,q=>{q.px(12,2);q.px(12,13);q.px(3,2);q.px(3,13)},F);
+        s.part(AC,q=>{q.ell(8.5,8,2.2,2.2)},{lt:.6});s.set(8,8,W);
+      }else if(cls==="mage"){
+        /* Orbe arcanique flottant */
+        s.part(AC,q=>q.ell(8,8,4.2,4.2),{lt:.7});s.set(6,6,W);s.set(7,6,W);
+        s.part(GO,q=>{q.line(2,10,14,6);q.px(8,2);q.px(8,14)},F);
+      }else if(cls==="chrono"){
+        /* Cadran céleste */
+        s.part(GO,q=>{q.ell(8,8,5.4,5.4);q.clear(5,5,6,6)});
+        s.part(P1,q=>q.ell(8,8,3.6,3.6));
+        s.part(AC,q=>{q.line(8,8,8,5);q.line(8,8,11,8)},F);s.set(8,8,W);
+      }else if(cls==="peste"){
+        /* Fiole-totem toxique */
+        s.part(MT,q=>q.rect(6,2,4,3));s.part("#d8eef5",q=>q.ell(8,9.5,4.4,4.2),{lt:.5});
+        s.part(AC,q=>{q.ell(8,10.5,3.2,3);q.clear(0,0,16,8)});s.set(6,9,W);
+        s.part(P1,q=>{q.line(4,7,12,12)},F);
+      }else if(cls==="berserk"){
+        /* Targe viking ronde cloutée */
+        s.part(P1,q=>q.ell(8,8,5.5,5.5));s.part(MT,q=>{q.ell(8,8,2.2,2.2);q.px(8,3);q.px(8,13);q.px(3,8);q.px(13,8)},F);
+        s.set(8,8,t>=2?AC:W);
+      }else if(cls==="archer"){
+        /* Brassard de tireur */
+        s.part(P1,q=>q.poly([[4,3],[11,3],[12,13],[5,13]]));
+        s.part(MT,q=>{q.rect(4,4,8,1);q.rect(5,11,7,1)},F);s.part(AC,q=>q.rect(7,6,2,4),F);
+      }else if(cls==="gardien"){
+        /* Pavois massif */
+        s.part(MT,q=>q.poly([[2,1],[13,1],[13,10],[7.5,15],[2,10]]));
+        s.part(P1,q=>q.poly([[4,3],[11,3],[11,9],[7.5,13],[4,9]]));
+        s.part(GO,q=>{q.rect(7,4,2,8);q.rect(5,6,6,2)},F);s.set(7,6,AC);
+      }else{
+        /* Guerrier : écu de champion */
+        s.part(P1,q=>q.poly([[3,2],[12,2],[12,8],[7.5,14],[3,8]]));
+        s.part(MT,q=>q.line(4,3,11,10,2),F);s.part(AC,q=>q.rect(7,6,2,3),F);
+      }
+    }else if(slot==="bottes"){
+      const heavy=cls==="guerrier"||cls==="gardien";
+      s.part(heavy?MT:P1,q=>{q.rect(4,3,5,9);q.rect(4,10,9,3);q.clear(12,10,1,1)});
+      s.part(cls==="berserk"?P2:heavy?P1:LT,q=>q.rect(4,2,5,2),F);
+      s.part("#3a2824",q=>q.rect(4,13,10,1),F);
+      if(t>=1)s.set(7,11,AC);
+      if(t>=3){s.set(4,5,AC);s.set(12,11,AC)}
+    }else if(slot==="ceinture"){
+      s.part(P1,q=>q.rect(1,6,14,4));
+      s.part(boss?GO:MT,q=>{q.rect(5,5,6,6);q.clear(7,7,2,2)});
+      s.part(AC,q=>q.rect(7,7,2,2),F);
+      if(boss){s.set(6,4,GO);s.set(9,4,GO);s.set(7,4,W)}
+      else if(cls==="berserk"){s.set(7,6,"#f1e4bf");s.set(8,6,"#f1e4bf")}
+      else if(t>=2){s.set(3,7,MT);s.set(12,7,MT)}
+    }else if(slot==="amulette"){
+      s.part(boss?GO:MT,q=>{q.px(3,1);q.px(4,3);q.px(5,5);q.px(6,7);q.px(12,1);q.px(11,3);q.px(10,5);q.px(9,7);q.px(3,2);q.px(12,2);q.px(4,4);q.px(11,4);q.px(5,6);q.px(10,6)},F);
+      s.part(boss?GO:MT,q=>q.ell(7.5,10.5,3.8,3.8));
+      s.part(P1,q=>q.ell(7.5,10.5,2.4,2.4));s.set(7,10,AC);s.set(8,10,AC);
+      if(boss||t>=3){s.set(7,9,W);s.set(7,6,AC)}
+    }else if(slot==="anneau"){
+      s.part(boss?GO:MT,q=>{q.ell(7.5,10,4.5,4.5);q.clear(6,8,4,4)});
+      s.part(P1,q=>{q.rect(5,2,6,4);q.clear(5,2,1,1);q.clear(10,2,1,1)},{lt:.5});
+      s.part(AC,q=>q.rect(7,3,2,2),F);if(boss||t>=3)s.set(7,3,W);
+    }
+
+    /* Aura & étincelles pour les zones de fin de jeu (palier 3-4) et les objets de Boss */
+    if(t>=4){
+      const a1=th.aura?th.aura[0]:AC,a2=th.aura?th.aura[1]:W;
+      s.set(1,1,a1);s.set(14,1,a2);s.set(1,14,a2);s.set(14,14,a1);
+      if(z===11){s.set(2,1,a2);s.set(14,2,a1)}
+    }else if(t===3||boss){spark(14,1,boss?"#ffd84a":AC)}
+    const outCol=z===11?"#3b125c":z===9?"#4a1408":z===10?"#241c4a":boss?"#523008":INK;
+    s.outline(outCol);return cache[k]=s.url()}
 
   /* ---------- Ressources de métier (16×16), une teinte par palier ---------- */
   const RC={pecheur:["#c8b08a","#8fb06a","#6fa35a","#b0643a","#e2b66a","#8fc7e0","#f2d94a","#5fae4a","#e8684a","#f0622c","#a8e8e0","#5a4fa8"],bucheron:["#c9a36a","#a8743e","#8a5a34","#b8864a","#d0703a","#7a8a4a","#e8dcc0","#b8503a","#9a7a5a","#c8b08a","#4a3a3a","#a84a2e"],

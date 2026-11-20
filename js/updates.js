@@ -1,5 +1,13 @@
 /* Notes de mise à jour accessibles depuis le bouton parchemin. */
 const UPDATE_LOGS=[
+  {date:"20 novembre 2026",title:"Panoplies de classe, pixel art évolutif et garde-robe",items:[
+    "Refonte des panoplies dans les 12 zones : chaque monde propose désormais 8 panoplies de classe complètes (8 pièces) et 1 panoplie de boss universelle (4 pièces). Combiner 4 pièces de votre classe et 4 pièces du boss forme le meilleur équipement de la zone.",
+    "Bonus de classe à 4 pièces : toutes les panoplies restent équipables par n'importe quelle classe, mais leur bonus signature de 4 pièces ne s'active que si vous jouez la classe correspondante.",
+    "Recettes de zone repensées : chaque monstre de la zone fournit le matériau principal d'une classe, complété par de petites quantités d'autres créatures et ressources de métiers. Les anciens équipements des sauvegardes existantes sont automatiquement convertis.",
+    "Pixel art unique et évolutif : chaque classe et chaque boss possède son propre style d'armes, coiffes, capes, boucliers et accessoires (hache viking et casque à cornes du Berserker, robe à capuche et bâton d'âme de l'Invocateur, etc.), de plus en plus imposants jusqu'aux auras animées du Néant au niveau 1000.",
+    "Apparence dynamique et Garde-robe : votre personnage affiche désormais en direct les 6 pièces visibles équipées (coiffe, cape, arme, bouclier, ceinture, bottes). Chaque pièce obtenue débloque définitivement son apparence (conservée après Oméga) pour personnaliser votre style depuis l'Inventaire.",
+    "Apparence de départ modeste : sans équipement, chaque classe commence désormais avec une tenue usée et des armes de fortune (cuir abîmé pour l'Invocateur, tuniques rapiécées, tête nue, hache en pierre pour le Berserker, épée rouillée, bouclier en planches…) afin de mettre pleinement en valeur vos armures forgées."
+  ]},
   {date:"19 novembre 2026",title:"Stockage AFK, équilibrage et sécurité",items:[
     "Stockage illimité en ligne : la capacité de stockage correspond désormais au nombre maximal de secondes où le jeu farm en AFK.",
     "Caractéristiques secondaires (Sagesse, Agilité, Terre) : retrait du plafond fixe, remplacé par une courbe à rendement décroissant asymptotique vers 90 % (60 % atteint à 8 000 points).",

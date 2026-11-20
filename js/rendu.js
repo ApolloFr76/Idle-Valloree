@@ -3,7 +3,7 @@
 function floatNum(txt,cls){const dn=S.opt&&S.opt.dmgNums;if(dn==="none"||dn==="crit"&&!/crit|heal/.test(cls))return;const e=document.createElement("div");e.className="float "+cls;e.textContent=txt;
   /* au-dessus du monstre (ou du héros quand il est touché), où qu'ils soient dans le monde */
   const a=$("arena"),tg=$(/hurt/.test(cls)?"ahero":"monBtn");if(tg&&a&&tg.getBoundingClientRect().width){const ar=a.getBoundingClientRect(),r=tg.getBoundingClientRect();e.style.left=(r.left-ar.left+r.width*(.25+Math.random()*.5))+"px";e.style.top=(r.top-ar.top+r.height*(.1+Math.random()*.3))+"px";e.style.bottom="auto"}else e.style.left=(cls==="hurt"?22+Math.random()*10:50+Math.random()*22)+"%";a.appendChild(e);setTimeout(()=>e.remove(),950)}
-function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)a.src=PX.hero(S.cls,C.col,"",heroArm())}$("heroBox").innerHTML=C?`${emb(S.cls)}<div><div class="nm">${esc(S.name)}</div><div class="sub">${C.name}</div></div>`:""}
+function drawHero(){const C=CLASSES[S.cls];{const a=$("ahero");a.hidden=!C;if(C)a.src=PX.hero(S.cls,C.col,"",heroArm())}$("heroBox").innerHTML=C?`${emb(S.cls)}<div><div class="nm">${esc(S.name)}</div><div class="sub">${C.name}</div></div>`:"";if(typeof CARTE!=="undefined")CARTE.draw()}
 /* Choix du monde : une liste déroulante (les mondes débloqués + le prochain, grisé) pour ne pas faire défiler la colonne */
 /* Couleur de chaque monde (mêmes teintes que les anciennes cases) */
 const ZBG=["#57b04a","#1f9a78","#8a9a2e","#8a6ac8","#f0962c","#3d9fe0","#6a86b8","#2fa84a","#1fb0c8","#e2502c","#a88ae0","#5a3f96"];
@@ -83,7 +83,7 @@ function dragEnd(e){const p=DRAG.p;if(!p||e.pointerId!==p.id)return;DRAG.p=null;
   const t=e.type==="pointerup"?document.elementFromPoint(e.clientX,e.clientY):null,sl=t&&t.closest("#panel .eslot"),gr=t&&t.closest("#panel .igrid");
   if(sl&&EQ[sl.dataset.s]){if(sl.dataset.s!==p.from)dropEquip(p.u,sl.dataset.s,p.from)}
   else if(gr&&p.from){delete S.equip[p.from];selSlot=null;S.hp=Math.min(S.hp,stats().maxHp)}
-  DRAG.skip=Date.now();dirty=true;ptrDown=false;renderPanel(true)}
+  DRAG.skip=Date.now();if(typeof drawHero==="function")drawHero();dirty=true;ptrDown=false;renderPanel(true)}
 document.addEventListener("pointerup",dragEnd);document.addEventListener("pointercancel",dragEnd);
 document.addEventListener("click",e=>{if(Date.now()-DRAG.skip<350){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener("dragstart",e=>{if(e.target.closest&&e.target.closest("#panel"))e.preventDefault()});
@@ -116,7 +116,7 @@ function renderPanel(force){if(DRAG.on){dirty=true;return}
   open.forEach(z=>{const d=document.querySelector(`details.set[data-z="${z}"]`);if(d)d.open=true});
   $("panel").scrollTop=sy;UI.sync();
 }
-function statsTxt(o){return Object.entries(o).map(([k,v])=>k==="crit"?`+${v} % critique`:`+${fmt(v)} ${STAT_LBL[k]}`).join(" · ")}
+function statsTxt(o){return Object.entries(o).map(([k,v])=>k==="crit"?`+${v} % critique`:k==="pctCdr"?`−${v} % recharge des sorts`:k==="pctDef"?`−${v} % dégâts subis`:k==="pctLeech"?`+${String(v).replace(".",",")} % vol de vie`:k.startsWith("pct")?`+${v} ${STAT_LBL[k]}`:`${v<0?"":"+"}${fmt(v)} ${STAT_LBL[k]}`).join(" · ")}
 let ptab="resume";
 const SI={vit:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M4 3h8v1h-8zM3 4h10v1h-10zM3 5h2v1h-2zM7 5h2v1h-2zM11 5h2v1h-2zM2 6h2v1h-2zM12 6h2v1h-2zM2 7h2v1h-2zM12 7h2v1h-2zM3 8h2v1h-2zM11 8h2v1h-2zM3 9h2v1h-2zM11 9h2v1h-2zM4 10h2v1h-2zM10 10h2v1h-2zM4 11h3v1h-3zM9 11h3v1h-3zM5 12h6v1h-6zM7 13h2v1h-2z"/>',
   puissance:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M8 1h2v1h-2zM8 2h2v1h-2zM7 3h3v1h-3zM6 4h4v1h-4zM5 5h5v1h-5zM4 6h3v1h-3zM8 6h6v1h-6zM4 7h2v1h-2zM8 7h5v1h-5zM3 8h5v1h-5zM10 8h2v1h-2zM2 9h6v1h-6zM9 9h3v1h-3zM6 10h5v1h-5zM6 11h4v1h-4zM6 12h3v1h-3zM6 13h2v1h-2zM6 14h2v1h-2z"/>',
@@ -136,7 +136,7 @@ function statBreak(){
   const C=CLASSES[S.cls],K=["vit","puissance","agi","sagesse","crit","prospection","dmg","feu","eau","terre","air","pctXp","pctEcus","pctDmg","poison","brulure","gelure","saignement"],o={};K.forEach(k=>o[k]={base:0,pts:0,eq:0,set:0});
   o.crit.base=5;o.prospection.base=100;for(const k in C.base)o[k].base+=C.base[k];for(const k in S.alloc)o[k].pts=S.alloc[k];
   equipped().forEach(i=>{const st=itemStats(i);for(const k in st)o[k].eq+=st[k]});
-  const sc=setCounts();for(const z in sc){const b=SETB(z);setSteps(z).forEach(n=>{if(sc[z]>=n)for(const k in b[n])if(o[k])o[k].set+=b[n][k]})}
+  const sc=setCounts();for(const z in sc){const tot=setTotal(z,sc[z],S.cls);for(const k in tot)if(o[k])o[k].set+=tot[k]}
   return o;
 }
 

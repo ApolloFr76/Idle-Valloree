@@ -84,13 +84,19 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"sell":{const k=b.dataset.r,n=b.dataset.n==="all"?S.res[k]:Math.min(+b.dataset.n,S.res[k]);if(n>0){const g=sellRes(k,n);if(n>1)toast(`${fmt(n)}× ${RES[k].name} vendus : +${fmt(g)} écus`)}renderPanel();break}
     case"mtab":mtab=b.dataset.p;renderPanel();break;
     case"atZone":atZone=+b.dataset.i;atSel=null;atOpen=null;renderPanel();break;
+    case"atClsF":atClsF=b.dataset.f;atSel=null;atOpen=null;renderPanel(true);break;
     case"atOpen":atOpen=atOpen===b.dataset.k?null:b.dataset.k;renderPanel();if(atOpen){const el=document.querySelector(".pset.open");if(el)el.scrollIntoView({block:"nearest"})}break;
     case"atClose":atSel=null;renderPanel(true);break;
     case"noop":break;
     case"atSel":atSel=atSel===b.dataset.i?null:b.dataset.i;renderPanel();break;
     case"craft":{const it=ITEMS[b.dataset.i];if(!canCraft(it))break;if(atSel){atSel=null;renderPanel(true)}it.recipe.forEach(([r,q])=>S.res[r]-=craftQ(q));startForge(it);break}
+    case"tmToggle":invMode=invMode==="transmog"?"bag":"transmog";renderPanel(true);break;
+    case"tmSlot":tmSlot=b.dataset.s;renderPanel(true);break;
+    case"tmPick":{const sl=b.dataset.s,id=b.dataset.i;if(VIS_SLOTS.includes(sl)&&ITEMS[id]&&ITEMS[id].slot===sl&&S.skins&&S.skins[id]){S.transmog=S.transmog||{};S.transmog[sl]=id;drawHero();dirty=true;renderPanel(true)}break}
+    case"tmClear":{const sl=b.dataset.s;if(S.transmog&&S.transmog[sl]){delete S.transmog[sl];drawHero();dirty=true;renderPanel(true)}break}
+    case"tmResetAll":{S.transmog={};drawHero();toast("Apparences réinitialisées",1);dirty=true;renderPanel(true);break}
     case"equip":equipItem(+b.dataset.u,selSlot);renderPanel();break;
-    case"selSlot":{const now=performance.now(),dbl=lastSel.v==="s:"+b.dataset.s&&now-lastSel.t<450;lastSel={v:"s:"+b.dataset.s,t:now};selSlot=b.dataset.s;selLast="slot";if(dbl&&S.equip[selSlot]){delete S.equip[selSlot];S.hp=Math.min(S.hp,stats().maxHp);toast("Objet retiré",1);lastSel={v:null,t:0}}renderPanel();break}
+    case"selSlot":{const now=performance.now(),dbl=lastSel.v==="s:"+b.dataset.s&&now-lastSel.t<450;lastSel={v:"s:"+b.dataset.s,t:now};selSlot=b.dataset.s;selLast="slot";if(dbl&&S.equip[selSlot]){delete S.equip[selSlot];S.hp=Math.min(S.hp,stats().maxHp);drawHero();toast("Objet retiré",1);lastSel={v:null,t:0}}renderPanel();break}
     case"selInv":{const v=b.dataset.v,now=performance.now(),dbl=lastSel.v===v&&now-lastSel.t<450;lastSel={v,t:now};selInv=v;selLast="inv";
       if(dbl){lastSel={v:null,t:0};if(v[0]==="u"){const inst=S.items.find(i=>i.u===+v.slice(2));if(inst){const it=ITEMS[inst.id];if(S.lvl<it.lvl)toast(`Niveau ${it.lvl} requis`,1);else{equipItem(inst.u,null);toast(`${it.name} équipé`,1)}}}else if(RES[v.slice(2)]?.kind==="p")drink(v.slice(2),false)}
       renderPanel();break}
@@ -98,7 +104,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"invSellAll":{if(!invSellArm){invSellArm=true;renderPanel(true);break}const v=invView(new Set(Object.values(S.equip)));invSellDo(invSellList(v.items,v.res));renderPanel(true);break}
     case"invSellNo":invSellArm=false;renderPanel(true);break;
     case"page":invP=Math.max(0,invP+ +b.dataset.d);renderPanel();break;
-    case"unequip":delete S.equip[b.dataset.s];S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
+    case"unequip":delete S.equip[b.dataset.s];S.hp=Math.min(S.hp,stats().maxHp);drawHero();renderPanel();break;
     case"sellStack":{const k=b.dataset.k,eq=new Set(Object.values(S.equip)),L=S.items.filter(x=>!eq.has(x.u)&&stackKey(x)===k&&!isLk(x));if(!L.length)break;const it=ITEMS[L[0].id],v=Math.round(it.price*(1+.2*(L[0].e||0))*sellMult()*rarOf(L[0]).m)*L.length;S.items=S.items.filter(x=>!L.includes(x));gainEcus(v);sfx("coin");selInv=null;toast(`${L.length}× ${it.name} vendus : +${fmt(v)} écus`);renderPanel();break}
     case"lockItem":{const i=S.items.find(x=>x.u===+b.dataset.u);if(i){if(i.lk)delete i.lk;else i.lk=1;selInv=selInv&&selInv[0]==="u"?"u:"+i.u:selInv;dirty=true}renderPanel(true);break}
     case"ofSave":outfitSave(+b.dataset.i);renderPanel(true);break;
@@ -143,7 +149,7 @@ document.addEventListener("change",e=>{const ds=e.target.dataset||{};
   if(e.target.id==="arbVue"){arbVue=e.target.value;if(arbVue!=="carte"&&!arbPlace(arbVue)[arbSel])arbSel=Object.keys(arbPlace(arbVue))[0];renderPanel(true);return}
   if(ds.sell){S.sellCfg=S.sellCfg||{};(S.sellCfg[ds.sell]=S.sellCfg[ds.sell]||{}).on=e.target.checked;renderPanel(true);return}
   if(ds.keep!=null){S.sellCfg=S.sellCfg||{};const v=Math.max(0,Math.floor(+e.target.value||0));(S.sellCfg[ds.keep]=S.sellCfg[ds.keep]||{}).keep=v;e.target.value=v;renderPanel(true);return}
-  if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.dataset&&e.target.dataset.autobuff){S.autoBuff=S.autoBuff||{};S.autoBuff[e.target.dataset.autobuff]=e.target.checked;potSig="";drawPots();return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;invSellArm=false;renderPanel();return}if(e.target.id==="invRar"){invRar=+e.target.value;invP=0;invSellArm=false;renderPanel();return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
+  if(e.target.id==="zoneSel"){goZone(+e.target.value);e.target.blur();return}if(e.target.dataset&&e.target.dataset.ouv!=null){OUV.assign(+e.target.dataset.ouv,e.target.value);renderPanel();return}if(e.target.id==="autoPot"){S.autoPot=e.target.checked;potSig="";return}if(e.target.dataset&&e.target.dataset.autobuff){S.autoBuff=S.autoBuff||{};S.autoBuff[e.target.dataset.autobuff]=e.target.checked;potSig="";drawPots();return}if(e.target.id==="invSub"){invSub=e.target.value;invP=0;invSellArm=false;renderPanel();return}if(e.target.id==="invRar"){invRar=+e.target.value;invP=0;invSellArm=false;renderPanel();return}if(e.target.id==="tmZone"){tmZone=+e.target.value;renderPanel(true);return}if(e.target.id==="tmCls"){tmCls=e.target.value;renderPanel(true);return}const b=e.target.closest('[data-a="auto"]');if(b){S.auto[b.dataset.s]=b.checked}});
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden){beginAfk();save()}else{const s=settleAfk();if(s){boot2();if(comeShow(s))showOffline(s)}}});
 window.addEventListener("pagehide",()=>{beginAfk();save()});

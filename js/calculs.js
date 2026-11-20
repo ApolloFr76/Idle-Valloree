@@ -10,27 +10,29 @@ function enchCost(inst){
 function equipped(){return Object.values(S.equip).map(u=>S.items.find(i=>i.u===u)).filter(Boolean)}
 function setCounts(eq=equipped()){const c={};eq.forEach(i=>{const it=ITEMS[i.id];if(it.noSet||!it.set)return;[it.set,...(it.also||[])].forEach(k=>c[k]=(c[k]||0)+1)});return c}
 function stats(){
-  const C=CLASSES[S.cls],s={vit:0,puissance:0,agi:0,sagesse:0,crit:5,prospection:100,dmg:0,feu:0,eau:0,terre:0,air:0,pctXp:0,pctEcus:0,pctDmg:0,pctSpd:0,poison:0,brulure:0,gelure:0,saignement:0};
-  const add=o=>{for(const k in o)s[k]+=o[k]};
+  const C=CLASSES[S.cls],s={vit:0,puissance:0,agi:0,sagesse:0,crit:5,prospection:100,dmg:0,feu:0,eau:0,terre:0,air:0,pctXp:0,pctEcus:0,pctDmg:0,pctSpd:0,pctSpell:0,pctDot:0,pctAlly:0,pctCdr:0,pctDef:0,pctLeech:0,pctHp:0,poison:0,brulure:0,gelure:0,saignement:0};
+  const add=o=>{for(const k in o)s[k]=(s[k]||0)+o[k]};
   const eq=equipped();add(C.base);add(S.alloc);eq.forEach(i=>add(itemStats(i)));
-  const sc=setCounts(eq);for(const z in sc){const b=SETB(z);setSteps(z).forEach(n=>{if(sc[z]>=n)add(b[n])})}
-  s.prospection+=2*secN("eau",s.eau);s.crit+=secN("air",s.air)/2;s.critBonus=.02*secN("feu",s.feu);s.cdRed=secN("sagesse",s.sagesse)/100;s.dbl=secN("agi",s.agi)/100;s.resPct=secN("terre",s.terre)/100;
+  const sc=setCounts(eq);for(const z in sc)add(setTotal(z,sc[z],S.cls));
+  s.prospection+=2*secN("eau",s.eau);s.crit+=secN("air",s.air)/2;s.critBonus=.02*secN("feu",s.feu);s.cdRed=Math.min(.85,secN("sagesse",s.sagesse)/100+s.pctCdr/100);s.dbl=secN("agi",s.agi)/100;s.resPct=secN("terre",s.terre)/100;
   let bd=1,bdef=1,bspd=1,bcrit=0,bpros=1,bxp=1,bdot=1;S.buffs.forEach(b=>{if(b.k==="dot")bdot*=b.v;if(b.k==="pros")bpros*=b.v;if(b.k==="xp")bxp*=b.v;if(b.k==="dmg")bd*=b.v;if(b.k==="def")bdef*=b.v;if(b.k==="spd")bspd*=b.v;if(b.k==="crit")bcrit+=b.v});
   s.crit+=talV("t_prec");s.prospection+=Math.round(talV("t_pros"));
-  s.maxHp=Math.round((50+8*S.lvl+2*s.vit)*C.hpMult*(1+talV("t_vie")/100)*arbHpMult()*(1+secN("vit",s.vit)/100));
+  s.maxHp=Math.round((50+8*S.lvl+2*s.vit)*C.hpMult*(1+talV("t_vie")/100)*arbHpMult()*(1+secN("vit",s.vit)/100)*(1+s.pctHp/100));
   s.el="neutre";let best=0;["feu","eau","terre","air"].forEach(e=>{if(s[e]>best){best=s[e];s.el=e}});
   s.elPow=(s.el==="neutre"?0:s[s.el])+s.puissance;
   if(C.rage&&s.maxHp>0)bd*=1+C.rage*Math.max(0,Math.min(1,1-S.hp/s.maxHp));   /* Berserker : ×(1 + 2 × PV perdus) */
   s.hit=(5+S.lvl*1.5+s.dmg)*(1+s.elPow/100)*bd*C.dmgMult*(1+s.pctDmg/100)*(1+towerPct(S.tower?.best||0)/100)*(1+talV("t_force")/100)*arbDmgMult(s)*(1+soulBonus()/100)*(1+.01*achN())*(S.ev&&EVENTS.find(e=>e.id===S.ev.id)?.el===s.el?1.3:1);
+  s.spellMult=(C.spellMult||1)*(1+s.pctSpell/100);
+  s.leech=(C.leech||0)+s.pctLeech/100;
   /* DoT : chance d'en poser à chaque coup (stat / (stat + 400), 50 % max) et dégâts par charge et par seconde */
   s.dotC={};s.dotPer={};for(const k in DOTS){const v=s[k]||0;s.dotC[k]=Math.min(.5,v/(v+400));if(C.autoDot===k)s.dotC[k]=1;
-    s.dotPer[k]=(s.hit*.15*(1+Math.sqrt(v)/20)*(C.dotMult||1)+allyDps()*.02)*DOTS[k].k*bdot}   /* racine : la stat compte sans exploser à haut niveau */
+    s.dotPer[k]=(s.hit*.15*(1+Math.sqrt(v)/20)*(C.dotMult||1)*(1+s.pctDot/100)+allyDps()*.02)*DOTS[k].k*bdot}   /* racine : la stat compte sans exploser à haut niveau */
   s.critC=Math.min(100,s.crit+bcrit);
   /* Super critique : la chance de critique au-delà de 100 % (jusqu'à 200 %) devient la chance qu'un critique soit « super » (dégâts critiques ×2) */
   s.superC=Math.max(0,Math.min(100,s.crit+bcrit-100));s.critShow=Math.min(200,s.crit+bcrit);   /* affichage : de 0 à 200 % */s.critM=+(C.critMult+s.critBonus+(arb("g3")?.2:0)).toFixed(2);
   s.interval=Math.max(.3,1.3/(1+s.agi/150)/Math.max(.2,1+s.pctSpd/100))/bspd;
   s.dodge=Math.min(.6,s.agi/(s.agi+400)*C.dodgeMult);
-  s.pctXp+=fishN();s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*arbXpMult()*bxp*(evOn("nuit")?1.5:1)*(1+.1*profMaxN());s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
+  s.pctXp+=fishN();s.prospection=Math.round(s.prospection*bpros);s.def=C.def*bdef*(1-s.resPct)*Math.max(.2,1-s.pctDef/100);s.regen=C.regen;s.xpM=(1+s.sagesse/100)*(1+s.pctXp/100)*(1+.1*omegaN())*arbXpMult()*bxp*(evOn("nuit")?1.5:1)*(1+.1*profMaxN());s.pros=s.prospection/100;s.pctEcus+=10*omegaN();
   s.dps=s.hit*(1+s.critC/100*(s.critM*(1+s.superC/100)-1))*(1+s.dbl)/s.interval;
   /* estimation des DoT en continu (charges moyennes entretenues par les coups) ajoutée aux dégâts/s */
   {const hps=(1+s.dbl)/s.interval;s.dotDps=0;for(const k in DOTS){const n=Math.min(DOTS[k].max,s.dotC[k]*hps*DOTS[k].d);s.dotDps+=n*s.dotPer[k]}s.dps+=s.dotDps}

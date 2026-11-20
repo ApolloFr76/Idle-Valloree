@@ -62,7 +62,7 @@ const TR_ST=["vit","puissance","agi","sagesse","prospection","crit"];
 ZONES.forEach((z,zi)=>{const a=TR_ST[zi%6],b=TR_ST[(zi+2)%6],v=k=>k==="crit"?2+zi:Math.round(budget(zi)*.5);ITEMS["tb_"+zi]={id:"tb_"+zi,z:zi,slot:"trophee",kind:"Trophée de boss",name:"Trophée : "+BOSSES[zi][0],stats:{[a]:v(a),[b]:v(b)},recipe:[],lvl:1,price:150*(zi+1)**2,noSet:true,noEnch:true}});
 Object.values(MON).filter(m=>!m.boss).forEach((m,i,A)=>{const z=m.zone,k=TR_ST[(m.extra?A.filter(o=>!o.extra).length+A.filter(o=>o.extra).indexOf(m):A.filter(o=>!o.extra).indexOf(m))%6];ITEMS["tr_"+m.id]={id:"tr_"+m.id,z,slot:"trophee",kind:"Trophée",name:"Trophée : "+m.name,stats:{[k]:k==="crit"?1+Math.floor(z/2):Math.max(2,Math.round(budget(z)*(k==="prospection"?.5:.3)))},recipe:[],lvl:1,price:40*(z+1)**2,noSet:true,noEnch:true}});
 /* Emplacements d'équipement */
-const EQ={coiffe:{n:"Coiffe",t:"coiffe"},cape:{n:"Cape",t:"cape"},arme:{n:"Bâton",t:"arme"},bottes:{n:"Bottes",t:"bottes"},
+const EQ={coiffe:{n:"Coiffe",t:"coiffe"},cape:{n:"Cape",t:"cape"},arme:{n:"Arme",t:"arme"},bottes:{n:"Bottes",t:"bottes"},
   amulette:{n:"Amulette",t:"amulette"},anneau:{n:"Anneau",t:"anneau"},anneau2:{n:"Anneau",t:"anneau"},ceinture:{n:"Ceinture",t:"ceinture"},bouclier:{n:"Bouclier",t:"bouclier"},familier:{n:"Monture",t:"familier"}};
 for(let i=0;i<6;i++)EQ["trophee"+i]={n:"Trophée",t:"trophee"};
 const DOLL_L=["amulette","anneau","anneau2","ceinture","bottes"],DOLL_R=["coiffe","arme","bouclier","cape","familier"],DOLL_B=[0,1,2,3,4,5].map(i=>"trophee"+i);
@@ -94,8 +94,8 @@ const dropKind=n=>/plume|aile/i.test(n)?"feather":/laine|touffe|fourrure|poil|pe
 let DROPC=null;
 const dropCol=r=>{if(!DROPC){DROPC={};Object.values(MON).forEach(m=>{if(m.boss){if(m.bres)DROPC[m.bres[0]]=m.c}else{DROPC[m.drop[0]]=m.c;(typeof LOOT!=="undefined"&&LOOT[m.id]||[]).forEach(l=>{if(!l.item&&!DROPC[l.id])DROPC[l.id]=m.c})}})}return DROPC[r.id]||ZCOL[r.zone]||"#c9a36a"};
 const trMon=it=>it.id.startsWith("tr_")?MON[it.id.slice(3)]:it.id.startsWith("tb_")?MON["boss_"+it.id.slice(3)]:null;
-const itIcon=it=>it.img?`<img src="${it.img}" alt="">`:it.set&&MON[it.set]?`<img class="px" src="${PX.item(it.slot,MON[it.set].c)}" alt="">`:it.slot==="trophee"&&trMon(it)?`<img class="px" src="${PX.monster(trMon(it))}" alt="">`:it.slot==="familier"?`<img class="px" src="${it.look?PX.fam(it.id):PX.pet(ZCOL[it.z]||"#f08aa8")}" alt="">`:glyph(it.slot);
-const itCol=it=>it.slot==="familier"?"#f08aa8":it.slot==="trophee"?"#f0c35a":ZCOL[it.z];
+const itIcon=it=>it.img?`<img src="${it.img}" alt="">`:it.set&&SETS[it.set]?`<img class="px" src="${PX.item(it.slot,itCol(it),it)}" alt="">`:it.slot==="trophee"&&trMon(it)?`<img class="px" src="${PX.monster(trMon(it))}" alt="">`:it.slot==="familier"?`<img class="px" src="${it.look?PX.fam(it.id):PX.pet(ZCOL[it.z]||"#f08aa8")}" alt="">`:glyph(it.slot);
+const itCol=it=>it.slot==="familier"?"#f08aa8":it.slot==="trophee"?"#f0c35a":(ZONE_STYLE[it.z]&&ZONE_STYLE[it.z].pri)||ZCOL[it.z];
 const resIcon=r=>r.img?`<img src="${r.img}" alt="">`:r.kind==="g"?`<img class="px" src="${PX.res(r.prof,r.tier)}" width="16" height="16" alt="">`:r.kind==="d"?`<img class="px" src="${PX.drop(dropKind(r.name),dropCol(r),r.rare||r.boss)}" width="16" height="16" alt="">`:r.kind==="k"?`<img class="px" src="${r.bk?PX.bkey(r.col):PX.key()}" width="16" height="16" alt="">`:r.kind==="p"?`<img class="px" src="${PX.potion(r.col)}" width="16" height="16" alt="">`:glyph(r.kind==="d"?"drop":r.kind==="k"?"cle":r.kind==="p"?"potion":r.prof);
 const kindLabel=r=>r.kind==="d"?"Butin de monstre":r.kind==="k"?(r.bk?"Clé de boss":"Clé de donjon"):r.kind==="p"?"Potion":"Ressource · "+PROFS[r.prof].name;
 const resCol=r=>r.kind==="d"?ZCOL[r.zone]:r.kind==="k"?(r.bk?r.col:"#f0c35a"):r.kind==="p"?r.col:PCOL[r.prof];

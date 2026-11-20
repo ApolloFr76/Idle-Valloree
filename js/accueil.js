@@ -9,7 +9,7 @@ const ACCUEIL=(()=>{
   const ago=t=>{if(!t)return"";const s=(Date.now()-t)/1000;return s<60?"à l'instant":s<3600?`il y a ${Math.floor(s/60)} min`:s<86400?`il y a ${Math.floor(s/3600)} h`:`le ${new Date(t).toLocaleDateString("fr-FR")}`};
   const hasHero=()=>!!(S&&S.cls&&CLASSES[S.cls]);
   function saveBox(where){if(!hasHero())return`<div class="accsave"><div><b>Aucun héros pour l'instant</b><span>Choisissez une classe pour commencer.</span></div></div>`;
-    return`<div class="accsave">${heroSVG(S.cls)}<div><b>${esc(S.name||"Aventurier")} · ${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}${S.prest?" · Ω "+S.prest:""}</b><span>${where} ${ago(ACC_LAST||S.last)}</span></div></div>`}
+    return`<div class="accsave">${heroSVG(S.cls,typeof heroArm==="function"?heroArm():null)}<div><b>${esc(S.name||"Aventurier")} · ${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}${S.prest?" · Ω "+S.prest:""}</b><span>${where} ${ago(ACC_LAST||S.last)}</span></div></div>`}
   const pw=(cls,ph,ac)=>`<div class="accin"><input class="${cls}" type="${showPw?"text":"password"}" placeholder="${ph}" autocomplete="${ac}"><button type="button" class="acceye" data-a="accEye">${showPw?"Cacher":"Afficher"}</button></div>`;
   const newBlock=()=>confirmNew?`<div class="accconf">Une nouvelle partie remplace ${COMPTE.logged()?"celle du compte":"celle de ce navigateur"} (${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}). Une copie de secours est gardée dans ce navigateur.
       <div class="accrow"><button class="accsec" data-a="accNewYes">Oui, recommencer</button><button class="accsec" data-a="accNewNo">Annuler</button></div></div>`
@@ -37,7 +37,7 @@ const ACCUEIL=(()=>{
     if(COMPTE.on())h+=`<div class="accdot"><i></i>Sauvegarde en ligne disponible</div>`;return h}
   function render(){if(!el)return;const keep={};el.querySelectorAll("input").forEach(i=>{keep[i.className||i.id]=i.value});const foc=document.activeElement&&el.contains(document.activeElement)?document.activeElement.className||document.activeElement.id:null;
     const L=COMPTE.logged(),k=hasHero()?S.cls:"guerrier";if(!L)online=null;else if(online===null&&!pinging)check();
-    el.innerHTML=`<div class="accrib">Les Terres de Vallorée</div><div class="acchero">${heroSVG(k)}</div><div class="accbub">${L||hasHero()?(hasHero()?(L?"On y retourne ?":"On garde ma partie ?"):"Prêt pour l'aventure ?"):"Prêt pour l'aventure ?"}</div>
+    el.innerHTML=`<div class="accrib">Les Terres de Vallorée</div><div class="acchero">${heroSVG(k,hasHero()&&typeof heroArm==="function"?heroArm():null)}</div><div class="accbub">${L||hasHero()?(hasHero()?(L?"On y retourne ?":"On garde ma partie ?"):"Prêt pour l'aventure ?"):"Prêt pour l'aventure ?"}</div>
       <div class="accboard"><h2 class="acctitle">${L?`${S&&S.cls?myBadge(34):""}Bon retour, <span class="acchl">${esc(COMPTE.pseudo())}</span>`:`Rejoignez <span class="acchl">Vallorée</span>`}</h2>${L?logged():guest()}</div>${L?RANG.board():""}`;
     el.querySelectorAll("input").forEach(i=>{const v=keep[i.className||i.id];if(v!=null&&i.id!=="accName")i.value=v;else if(v!=null)i.value=v});
     if(foc){const f=el.querySelector("."+foc.split(" ")[0])||el.querySelector("#"+foc);if(f&&f.focus)f.focus()}}

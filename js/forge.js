@@ -17,8 +17,8 @@ const forgePos=f=>{const ph=((performance.now()-f.t0)/1000*f.speed*100)%200;retu
 function forgeStrike(){const f=forge;if(!f||f.done)return;f.pos=forgePos(f);const d=Math.abs(f.pos-f.zone),p=d<=3.5?2:d<=11?1:0;f.pts.push(p);sfx(p?"anvil":"anvilBad");
   if(f.pts.length>=3){forgeFinish(false);return}{const p=forgePos(f);f.speed*=1.3;const T=2/f.speed,ph=p/100*T/2;f.t0=performance.now()-ph*1000}f.zone=rnd(12,88);drawForge()}
 function forgeFinish(skip){const f=forge;if(!f||f.done)return;f.done=true;const sc=f.pts.reduce((a,b)=>a+b,0),W=skip?(up("forgex")?FORGE_FAST:FORGE_SKIP):FORGE_W[sc],it=f.it;let r=pickW(W);if(arb("m4"))r=Math.max(r,pickW(W));if(arb("r3"))r=Math.min(3,r+1);
-  const u=S.uid++,inst={u,id:it.id,e:0,r};S.items.push(inst);inc("crafts");qProg("craft");if(r===3)inc("legend");mx("bestRar",r);
-  const fs=freeSlot(it),cur=S.equip[fs];if(fs)S.equip[fs]=u;
+  const u=S.uid++,inst={u,id:it.id,e:0,r};S.items.push(inst);unlockSkin(it.id);inc("crafts");qProg("craft");if(r===3)inc("legend");mx("bestRar",r);
+  const fs=freeSlot(it),cur=S.equip[fs];if(fs){S.equip[fs]=u;if(typeof drawHero==="function")drawHero()}
   log(`Vous fabriquez : <span style="color:${RAR[r].c}">${it.name} (${RAR[r].n})</span>${skip?"":` · score ${sc}/6`}.`,"g");if(r>=2){sfx("level");FX.flash(RAR[r].c)}else sfx("coin");
   if(!S.opt.forgeQte){toast(`${it.name} ${RAR[r].n.toLowerCase()}${fs?" fabriqué et équipé":" fabriqué"}`);forge=null;renderPanel();return}
   $("ov").innerHTML=`<div class="ovc forge" style="text-align:center;align-items:center"><span class="small muted">${skip?"Forgé sans mini-jeu":`Score : ${sc} / 6`}</span><h2 style="color:${RAR[r].c}">${RAR[r].n}</h2><div class="iname" style="color:${RAR[r].c};font-size:17px">${it.name}</div><div class="istats">${statsTxt(itemStats(inst))}</div><span class="small muted">${fs?"Équipé automatiquement.":"Rangé dans l'Inventaire."}</span><button class="btn pri" data-a="forgeClose" style="padding:9px 20px">Continuer</button></div>`;

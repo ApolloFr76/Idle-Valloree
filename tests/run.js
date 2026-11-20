@@ -228,7 +228,9 @@ function loadGameContext() {
     for (const k of [
       "SAVE_KEY", "OLD_TREE_BACKUP", "MIG_RZ2_NOTICE_KEY", "ACC_BACKUP",
       "SEC_STEP", "SEC_ASYMP", "secPct", "fmtPct", "secN", "secTxt",
-      "UPGS", "ALLIES", "ZONES", "RES", "ITEMS", "CLASSES", "OPT_DEF", "SELL_KEEP_DEF",
+      "UPGS", "ALLIES", "ZONES", "RES", "ITEMS", "SETS", "SLOTS", "CLS_KEYS", "VIS_SLOTS", "BOSS_SLOTS", "ZONE_STYLE",
+      "CLASSES", "OPT_DEF", "SELL_KEEP_DEF", "PX", "setTotal", "setClsBonus", "setClsActive", "setBox", "heroArm",
+      "migrateItemId", "unlockSkin", "itCol", "statsTxt", "tipItem", "pAtelier", "pInv", "doPrestige", "allyDps",
       "allyCost", "allyDpsOf", "bagCap", "addRes", "autoSellFull", "offline", "tick",
       "OUV", "craftQ", "fresh", "arb", "up", "talV", "shopCost", "stats", "dur", "monRes",
       "startMode", "endMode", "sanitizeSave", "sanitizeLogHtml", "encodeSave", "decodeSave",
@@ -469,11 +471,12 @@ test("10. D.2 MONDE generates all 12 biome layers cleanly & D monRes without S.t
   `, ctx);
 });
 
-test("11. Updates log includes 19 novembre 2026 entry & dead symbols absent", () => {
+test("11. Updates log includes latest overhaul + 19 novembre 2026 entry & dead symbols absent", () => {
   vm.runInContext(`
-    if (!Array.isArray(UPDATE_LOGS) || UPDATE_LOGS[0].date !== "19 novembre 2026" || UPDATE_LOGS[0].items.length < 5) {
-      throw new Error("UPDATE_LOGS top entry missing or incomplete");
-    }
+    if (!Array.isArray(UPDATE_LOGS) || UPDATE_LOGS.length < 2) throw new Error("UPDATE_LOGS missing entries");
+    if (UPDATE_LOGS[0].items.length < 4) throw new Error("Latest UPDATE_LOGS entry incomplete");
+    const nov19 = UPDATE_LOGS.find(u => u.date === "19 novembre 2026");
+    if (!nov19 || nov19.items.length < 5) throw new Error("19 novembre 2026 UPDATE_LOGS entry missing or incomplete");
   `, ctx);
 
   const dead = ["PRIM_OK", "bagWeight", "afkWeight", "TALENTS", "upPerm", "heroBlink", "blinkT", "bossesLife", "fullWarn", "w.full", "limitBag"];
@@ -484,6 +487,177 @@ test("11. Updates log includes 19 novembre 2026 entry & dead symbols absent", ()
       assert.ok(!new RegExp("\\b" + sym.replace(".", "\\.") + "\\b").test(txt), `Dead symbol ${sym} found in ${f}`);
     }
   }
+});
+
+test("12. 108 Class & Boss sets (12 zones × 9 sets), 8 class slots + 4 boss slots, valid hybrid recipes", () => {
+  vm.runInContext(`
+    const setKeys = Object.keys(SETS);
+    if (setKeys.length !== 108) throw new Error("Expected 108 sets, got " + setKeys.length);
+    for (let zi = 0; zi < ZONES.length; zi++) {
+      const seenMons = new Set();
+      for (const cls of CLS_KEYS) {
+        const k = "c_" + zi + "_" + cls;
+        const T = SETS[k];
+        if (!T || T.boss || T.n !== 8 || T.cls !== cls) throw new Error("Bad class set: " + k);
+        seenMons.add(T.mon);
+        for (const sl of SLOTS) {
+          const id = T.ids[sl.id];
+          const it = ITEMS[id];
+          if (!it || it.slot !== sl.id || it.cls !== cls || it.set !== k) throw new Error("Missing class item: " + k + "/" + sl.id);
+          if (!it.recipe || it.recipe.length < 2) throw new Error("Recipe too short for " + id);
+          for (const [rid, q] of it.recipe) {
+            if (!RES[rid] || !(q > 0)) throw new Error("Invalid recipe ingredient " + rid + " in " + id);
+          }
+        }
+      }
+      if (seenMons.size !== 8) throw new Error("Zone " + zi + " should map 8 distinct monsters to 8 classes, got " + seenMons.size);
+      const bk = "boss_" + zi, TB = SETS[bk];
+      if (!TB || !TB.boss || TB.n !== 4 || TB.cls !== null) throw new Error("Bad boss set: " + bk);
+      const bSlots = Object.keys(TB.ids).sort().join(",");
+      if (bSlots !== [...BOSS_SLOTS].sort().join(",")) throw new Error("Boss slots mismatch in zone " + zi + ": " + bSlots);
+      for (const sl of BOSS_SLOTS) {
+        const it = ITEMS[TB.ids[sl]];
+        if (!it || !it.boss || it.recipe.length < 2) throw new Error("Invalid boss item: " + bk + "/" + sl);
+        for (const [rid, q] of it.recipe) {
+          if (!RES[rid] || !(q > 0)) throw new Error("Invalid boss recipe ingredient " + rid);
+        }
+      }
+    }
+  `, ctx);
+});
+
+test("13. Optimal 4 Class + 4 Boss > 8 Class across all 8 classes, and 4p class bonus is class-gated", () => {
+  vm.runInContext(`
+    function evalBuild(cls, zi, useBoss) {
+      S = fresh(); S.cls = cls; S.lvl = ZONES[zi].lvl[1]; S.allies = { rat: 25, ecuyer: 15 };
+      const cSet = SETS["c_" + zi + "_" + cls];
+      const bSet = SETS["boss_" + zi];
+      let uid = 1;
+      for (const sl of SLOTS) {
+        const id = (useBoss && bSet.ids[sl.id]) ? bSet.ids[sl.id] : cSet.ids[sl.id];
+        S.items.push({ u: uid, id, r: 2, e: 0 });
+        S.equip[sl.id] = uid++;
+      }
+      const st = stats();
+      const dotSum = Object.values(st.dotPer || {}).reduce((a, b) => a + b, 0);
+      const effPower = st.dps * (1 + (st.spellMult - 1) * 0.6) + allyDps() + dotSum * 1.5;
+      return { st, effPower };
+    }
+    for (const zi of [0, 5, 11]) {
+      for (const cls of CLS_KEYS) {
+        const b8 = evalBuild(cls, zi, false);
+        const b44 = evalBuild(cls, zi, true);
+        if (!(b44.effPower > b8.effPower)) {
+          throw new Error("4+4 did not beat 8-class for " + cls + " in zone " + zi + " (" + b44.effPower.toFixed(1) + " vs " + b8.effPower.toFixed(1) + ")");
+        }
+      }
+    }
+    // Class bonus gating: Guerrier wearing 4 Mage pieces should NOT get Mage's pctSpell/pctCdr
+    const mKey = "c_5_mage";
+    const tWrong = setTotal(mKey, 4, "guerrier");
+    const tRight = setTotal(mKey, 4, "mage");
+    if (tWrong.pctSpell || tWrong.pctCdr) throw new Error("Class bonus leaked to wrong class");
+    if (!(tRight.pctSpell > 0 && tRight.pctCdr > 0)) throw new Error("Class bonus missing for matching class");
+  `, ctx);
+});
+
+test("14. Legacy save migration converts old items cleanly, auto-unlocks skins, and Omega preserves skins/transmog", () => {
+  vm.runInContext(`{
+    const raw = {
+      cls: "berserk", lvl: 50, name: "Ragnar",
+      items: [
+        { u: 10, id: "z0_arme", r: 3, e: 4, lk: 1 },
+        { u: 11, id: "s_pompon_coiffe", r: 2, e: 2 },
+        { u: 12, id: "s_boss_0_arme", r: 3, e: 5 },
+        { u: 13, id: "s_boss_0_amulette", r: 3, e: 3 }
+      ],
+      equip: { arme: 10, coiffe: 11, amulette: 13 },
+      outfits: [{ eq: { arme: 10, amulette: 13 } }]
+    };
+    const migrated = sanitizeSave(raw);
+    const byU = u => migrated.items.find(x => x.u === u);
+    if (byU(10).id !== "c_0_berserk_arme" || byU(10).r !== 3 || byU(10).e !== 4 || !byU(10).lk) throw new Error("z0_arme migration failed");
+    if (byU(11).id !== "c_0_berserk_coiffe" || byU(11).e !== 2) throw new Error("s_pompon_coiffe migration failed");
+    if (byU(12).id !== "c_0_berserk_arme") throw new Error("s_boss_0_arme fallback migration failed");
+    if (byU(13).id !== "s_boss_0_amulette" || byU(13).r !== 3) throw new Error("s_boss_0_amulette migration failed");
+    if (!migrated.skins["c_0_berserk_arme"] || !migrated.skins["c_0_berserk_coiffe"]) throw new Error("Visible skins not auto-unlocked on migration");
+    if (migrated.skins["s_boss_0_amulette"]) throw new Error("Non-visible amulet should not enter skins");
+    if (migrated.equip.arme !== 10 || migrated.outfits[0].eq.amulette !== 13) throw new Error("Equip/outfits not preserved");
+
+    // Omega prestige preserves skins & transmog
+    S = migrated; S.lvl = 60; S.transmog = { arme: "c_0_berserk_arme" }; S.souls = 10; S.soulsTotal = 10; S.zone = 3; S.st.kills = 500;
+    doPrestige();
+    if (!S.skins["c_0_berserk_arme"] || S.transmog.arme !== "c_0_berserk_arme") throw new Error("Prestige wiped skins or transmog");
+  }`, ctx);
+});
+
+test("15. Transmogrification overrides heroArm without changing stats & pixel art renders all classes + Zone 11 auras", () => {
+  vm.runInContext(`{
+    S = fresh(); S.cls = "invoc"; S.lvl = 1000;
+    S.items.push({ u: 1, id: "c_0_invoc_arme", r: 0, e: 0 }, { u: 2, id: "c_0_invoc_coiffe", r: 0, e: 0 });
+    S.equip = { arme: 1, coiffe: 2 };
+    unlockSkin("c_11_berserk_arme");
+    unlockSkin("c_11_invoc_coiffe");
+    unlockSkin("s_boss_11_cape");
+    const stBefore = stats();
+    const armBefore = heroArm();
+    if (armBefore.aura !== null) throw new Error("Zone 0 gear should have no high-tier aura");
+    S.transmog = { arme: "c_11_berserk_arme", coiffe: "c_11_invoc_coiffe", cape: "s_boss_11_cape" };
+    const stAfter = stats();
+    const armAfter = heroArm();
+    if (stAfter.dps !== stBefore.dps || stAfter.maxHp !== stBefore.maxHp) throw new Error("Transmog altered combat stats");
+    if (armAfter.k === armBefore.k || !armAfter.aura || armAfter.aura.c1 !== "#8b2cf5" || armAfter.aura.motif !== "void" || !armAfter.bossAura) {
+      throw new Error("Transmog failed to apply Zone 11 void + boss aura in heroArm");
+    }
+    // Render 16x16 items & 64x64 animated hero sprites across classes and zones
+    for (const cls of CLS_KEYS) {
+      for (const sl of SLOTS) {
+        const it = ITEMS["c_11_" + cls + "_" + sl.id];
+        const url = PX.item(it.slot, itCol(it), it);
+        if (!url || !(url.startsWith("blob:") || url.startsWith("data:image/png"))) throw new Error("PX.item failed for " + it.id);
+      }
+      const frames = PX.heroFrames(cls, CLASSES[cls].col, "idle", 0, armAfter);
+      if (!Array.isArray(frames) || frames.length !== 10) throw new Error("PX.heroFrames failed for " + cls);
+      const baseIdle = PX.heroFrames(cls, CLASSES[cls].col, "idle", 0, null);
+      const baseAtk = PX.heroFrames(cls, CLASSES[cls].col, "atk", 0, null);
+      if (!Array.isArray(baseIdle) || baseIdle.length !== 10 || !Array.isArray(baseAtk) || baseAtk.length !== 10) {
+        throw new Error("Unequipped PX.heroFrames failed for " + cls);
+      }
+    }
+    for (const sl of BOSS_SLOTS) {
+      const bit = ITEMS["s_boss_11_" + sl];
+      const url = PX.item(bit.slot, itCol(bit), bit);
+      if (!url || !(url.startsWith("blob:") || url.startsWith("data:image/png"))) throw new Error("PX.item failed for " + bit.id);
+    }
+  }`, ctx);
+});
+
+test("16. Atelier & Inventory UI (including Wardrobe) render cleanly without errors", () => {
+  vm.runInContext(`{
+    S = fresh(); S.cls = "berserk"; S.lvl = 50;
+    unlockSkin("c_0_berserk_arme");
+    unlockSkin("s_boss_0_cape");
+    S.transmog = { arme: "c_0_berserk_arme" };
+    atClsF = "mine";
+    const hMine = pAtelier();
+    if (!hMine.includes("Panoplie du Berserker") || !hMine.includes("Boss · toutes classes")) throw new Error("Atelier mine view missing expected sets");
+    atClsF = "all";
+    const hAll = pAtelier();
+    if (!hAll.includes("Panoplie de l'Invocateur")) throw new Error("Atelier all view missing other class sets");
+    invMode = "bag";
+    const hBag = pInv();
+    if (!hBag.includes('data-a="tmToggle"')) throw new Error("Inventory missing Wardrobe button");
+    invMode = "transmog"; tmSlot = "arme";
+    const hTm = pInv();
+    if (!hTm.includes("Garde-robe") || !hTm.includes("c_0_berserk_arme")) throw new Error("Wardrobe did not render unlocked weapon skin");
+    const tipUnl = tipItem(ITEMS["c_0_berserk_arme"], null);
+    if (!tipUnl.includes("Berserker") || !tipUnl.includes("Garde-robe")) throw new Error("Unlocked item tooltip missing class/skin info");
+    const tipLock = tipItem(ITEMS["c_11_berserk_arme"], null);
+    if (!tipLock.includes("Berserker") || !tipLock.includes("Apparence débloquée à l'obtention")) throw new Error("Locked item tooltip missing class/skin info");
+    if (statsTxt({ pctDef: 15, pctCdr: 12, pctLeech: 2.5 }) !== "−15 % dégâts subis · −12 % recharge des sorts · +2,5 % vol de vie") {
+      throw new Error("statsTxt formatting mismatch: " + statsTxt({ pctDef: 15, pctCdr: 12, pctLeech: 2.5 }));
+    }
+  }`, ctx);
 });
 
 const failed = results.filter(r => !r.ok);
