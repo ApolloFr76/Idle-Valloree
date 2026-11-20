@@ -71,7 +71,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"mkSell":{const k=b.dataset.r,g=sellRes(k,b.dataset.n==="all"?S.res[k]:+b.dataset.n);if(g)toast(`+${fmt(g)} écus`);renderPanel();break}
     case"ally":{const i=+b.dataset.i,id=ALLIES[i][0];let n=b.dataset.n==="max"?1e9:+b.dataset.n,bought=0;while(n-->0){const c=allyCost(i,S.allies[id]||0);if(S.ecus<c)break;S.ecus-=c;S.allies[id]=(S.allies[id]||0)+1;bought++}
       if(bought){const l=S.allies[id],l0=l-bought;if(Math.floor(l/100)>Math.floor(l0/100))toast(`${ALLIES[i][1]} : dégâts triplés !`);else if(Math.floor(l/25)>Math.floor(l0/25))toast(`${ALLIES[i][1]} : dégâts doublés !`);if(l===bought)log(`${ALLIES[i][1]} rejoint votre groupe.`,"g")}else toast("Pas assez d'écus");renderPanel();break}
-    case"buy":{const u=UPGS.find(x=>x[0]===b.dataset.u);if(!u||up(u[0])||S.ecus<shopCost(u[3]))break;S.ecus-=shopCost(u[3]);S.up[u[0]]=true;sfx("coin");log(`Amélioration achetée : ${u[1]}.`,"g");toast(`${u[1]} : ${u[2]}`);renderPanel();break}
+    case"buy":{const u=UPGS.find(x=>x[0]===b.dataset.u);if(!u||up(u[0])||S.ecus<shopCost(u[3]))break;S.ecus-=shopCost(u[3]);S.up[u[0]]=true;sfx("coin");log(`Amélioration achetée : ${u[1]}.`,"g");toast(`${u[1]} : ${u[2]}`);potSig="";mbSig="";drawSpells();drawPots();drawModeBar();renderPanel();break}
     case"zone":goZone(+b.dataset.i);break;
     case"cast":cast(CLASSES[S.cls].spells.find(s=>s.id===b.dataset.sp),false);break;
     case"ptab":ptab=b.dataset.t;renderPanel();break;
@@ -82,7 +82,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"alloc":{const k=b.dataset.k;const n=Math.min(S.pts,b.dataset.n==="custom"?allocN:+b.dataset.n);if(n<=0)break;S.alloc[k]+=n;S.pts-=n;dirty=true;renderPanel();break}
     case"respec":ALLOC.forEach(k=>{S.pts+=S.alloc[k];S.alloc[k]=0});S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
     case"sell":{const k=b.dataset.r,n=b.dataset.n==="all"?S.res[k]:Math.min(+b.dataset.n,S.res[k]);if(n>0){const g=sellRes(k,n);if(n>1)toast(`${fmt(n)}× ${RES[k].name} vendus : +${fmt(g)} écus`)}renderPanel();break}
-    case"mtab":mtab=b.dataset.p;renderPanel();break;
+    case"mtab":mtab=b.dataset.p;if(typeof SITE!=="undefined")SITE.preview(null);renderPanel();break;
     case"atZone":atZone=+b.dataset.i;atSel=null;atOpen=null;renderPanel();break;
     case"atClsF":atClsF=b.dataset.f;atSel=null;atOpen=null;renderPanel(true);break;
     case"atOpen":atOpen=atOpen===b.dataset.k?null:b.dataset.k;renderPanel();if(atOpen){const el=document.querySelector(".pset.open");if(el)el.scrollIntoView({block:"nearest"})}break;
@@ -113,6 +113,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"ench":{const u=+b.dataset.u,i=S.items.find(x=>x.u===u),it=ITEMS[i.id],e=i.e||0,cost=enchCost(i);if(S.ecus<cost||e>=10)break;S.ecus-=cost;
       if((arb("r6")&&e<5)||Math.random()<Math.max(.2,.9-.07*e)){i.e=e+1;inc("enchOk");mx("enchMax",i.e);toast(`Réussite ! ${it.name} +${i.e}`);log(`Enchantement réussi : ${it.name} +${i.e}.`,"g")}else{toast("L'enchantement a échoué. Les écus sont perdus.");inc("enchKo")}renderPanel();break}
     case"ouvHire":{OUV.hire(b.dataset.p);renderPanel();break}
+    case"ouvLook":{OUV.cycleLook(+b.dataset.i);renderPanel();break}
     case"ouvFire":{OUV.fire(+b.dataset.i);renderPanel();break}
     case"job":{const r=b.dataset.r;S.job=S.job&&S.job.r===r?null:{r,t:0};renderPanel();break}
     case"copy":{const t=$("exportBox");const done=()=>toast("Code de sauvegarde copié",1);try{navigator.clipboard.writeText(t.value).then(done,()=>{t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)})}catch(err){t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)}break}
@@ -153,4 +154,6 @@ document.addEventListener("change",e=>{const ds=e.target.dataset||{};
 $("monBtn").addEventListener("pointerdown",e=>{if(!S.cls||!S.mon||S.ko>0)return;e.preventDefault();FX.pt(e);doClick(false)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden){beginAfk();save()}else{const s=settleAfk();if(s){boot2();if(comeShow(s))showOffline(s)}}});
 window.addEventListener("pagehide",()=>{beginAfk();save()});
+document.addEventListener("mouseover",e=>{if(typeof SITE==="undefined"||!e.target||!e.target.closest)return;const b=e.target.closest(".mr:not(:disabled)");if(b&&b.dataset.r)SITE.preview(b.dataset.r)});
+document.addEventListener("mouseout",e=>{if(typeof SITE==="undefined"||!e.target||!e.target.closest)return;const b=e.target.closest(".mr");if(b&&(!e.relatedTarget||!e.relatedTarget.closest||!e.relatedTarget.closest(".mr")))SITE.preview(null)});
 

@@ -11,12 +11,26 @@ function placeSide(){const side=$("sideCard"),w=WIDE.matches;
 WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
 placeSide();
 let sceneOn=false;
-function boot2(){if(!S.sess)sessStart();placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+/* BOOST DE TEST TEMPORAIRE (niveau 100, métiers 120, milliards d'écus & d'éclats Oméga, toutes les ressources) : à retirer avant publication */
+function applyTestBoost(){
+  if(!S||!S.cls||S._testBoostV>=2)return;
+  if(S.lvl<100){S.pts=(S.pts||0)+(100-S.lvl)*PTS_PER_LVL;S.lvl=100;S.xp=0}
+  Object.keys(PROFS).forEach(pid=>{S.jobs[pid]={lvl:PROF_MAX,xp:0}});
+  S.ecus=Math.max(S.ecus||0,1e12);
+  S.souls=Math.max(S.souls||0,1e12);
+  S.soulsTotal=Math.max(S.soulsTotal||0,S.souls);
+  S.prest=Math.max(S.prest||0,1);
+  S.res=S.res||{};S.seen=S.seen||{};
+  Object.keys(RES).forEach(id=>{S.res[id]=Math.max(S.res[id]||0,5000);S.seen[id]=1});
+  S._test100=1;S._testBoostV=2;checkUnlocks(true);S.hp=stats().maxHp;save();
+}
+function boot2(){applyTestBoost();if(!S.sess)sessStart();placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
 /* Retour après une absence de sec secondes : bilan de la session terminée (absence d'au moins 5 min), gains hors ligne,
    puis nouvelle session. Renvoie le résumé à montrer (showOffline) ou null. */
+const AFK_POPUP_MIN=300;
 function comeBack(sec){const end=sec>=SESS_GAP,rec=end?sessRecap():null,sum=S.opt.offline&&sec>0?offline(sec):null;if(end)sessStart();
-  if(!sum&&!rec)return null;const s=sum||{sec,kills:0,res:{},none:1};s.rec=rec;return s}
-const comeShow=s=>!!s&&(s.kills>0||Object.keys(s.res).length>0||!!s.rec);
+  if(!sum&&!rec)return null;const s=sum||{sec,rawSec:sec,kills:0,res:{},none:1};s.rec=rec;return s}
+const comeShow=s=>!!s&&(s.rawSec??s.sec)>=AFK_POPUP_MIN&&(s.kills>0||Object.keys(s.res).length>0||!!s.rec);
 function settleAfk(){
   if(!S||!S.cls||!S.afkSince)return null;
   const sec=Math.max(0,(Date.now()-S.afkSince)/1000);

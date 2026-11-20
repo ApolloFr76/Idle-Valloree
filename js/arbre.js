@@ -51,7 +51,7 @@ function arbBuy(id){const n=ARB_ID[id];if(!n||arbState(n)!=="ok"&&!(id==="echo"&
 /* quitter une voie : ses nœuds (et le Cœur, l'Écho) sont rendus en éclats */
 function arbLeave(k){const a=arbS();let g=0;ARB.filter(x=>x[8]===k&&a.own[x[0]]).forEach(x=>{g+=x[6];delete a.own[x[0]]});
   if(a.own.coeur){g+=1e9;delete a.own.coeur}if(a.echo){for(let i=0;i<a.echo;i++)g+=1e9*Math.pow(10,i);a.echo=0;delete a.own.echo}
-  a.voies=a.voies.filter(v=>v!==k);S.souls+=g;log(`Vous quittez la voie ${k==="bp"?"de la Boutique permanente":"du "+ARB_V[k].nom} : ${fmt(g)} éclats rendus.`,"g");toast(`${fmt(g)} éclats rendus`);potSig="";mbSig=""}
+  a.voies=a.voies.filter(v=>v!==k);S.souls+=g;log(`Vous quittez la voie ${k==="bp"?"de la Boutique permanente":"du "+ARB_V[k].nom} : ${fmt(g)} éclats rendus.`,"g");toast(`${fmt(g)} éclats rendus`);potSig="";mbSig="";drawSpells()}
 /* ---------- effets ---------- */
 /* Écho d'Oméga : nombre de rangs achetables d'un coup avec les éclats actuels, et achat de tous ces rangs. */
 function echoMaxN(){let s=S.souls,e=arbS().echo,k=0;while(k<1e3){const c=1e9*Math.pow(10,e+k);if(s<c)break;s-=c;k++}return k}

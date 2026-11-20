@@ -517,4 +517,362 @@
       if(P.open)s.part(gl,q=>q.px(18+x,20+y-a),{flat:1})}
     s.outline();s.shadow(pad?16:12,pad?29:22,6,1.2);return cache[k]=s.url()}
   const beastFrames=(id,col,anim)=>{const k="bfs:"+id+col+anim;return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>beastF(id,col,anim,f,1)),cache[k].sc="1.333",cache[k])};
-  Object.assign(PX,{hero,heroF,heroFrames,beastF,beastFrames})})();
+
+  /* ---------- Outils de métier (5 métiers × 12 paliers de ressources) & 10 designs de PNJ ouvriers ---------- */
+  /* Palette par métier et palier 0..11 : [lame/tête, bord/ornement, manche, éclat/gemme] */
+  const TOOL_PAL={
+    bucheron:[
+      ["#9aa2b0","#cfd6e2","#a68052","#d8e2ee"], /* 0 Frêne */
+      ["#b08862","#e2b482","#845430","#f0c898"], /* 1 Châtaignier */
+      ["#7e8a74","#b4c498","#5c4028","#d8ecaa"], /* 2 Noyer */
+      ["#b8c2d0","#ffd468","#7a5432","#fff0a8"], /* 3 Chêne */
+      ["#d85830","#ffa242","#945630","#ffe488"], /* 4 Érable */
+      ["#48866e","#8cd8b8","#4c3424","#ff5c5c"], /* 5 If */
+      ["#dce4ec","#ffffff","#e6dfd0","#92e0b4"], /* 6 Bouleau */
+      ["#d66488","#ffb8d4","#8e4234","#ffe6f4"], /* 7 Merisier */
+      ["#5ca072","#96e4ac","#745e46","#d8ffe0"], /* 8 Orme */
+      ["#e45824","#ffc444","#3a2c2c","#fff49c"], /* 9 Charme / Volcan */
+      ["#6c86b8","#c8e4ff","#282436","#ffffff"], /* 10 Ébène */
+      ["#9e3cd4","#ff78e8","#54203c","#ffe0ff"]  /* 11 Séquoia */
+    ],
+    mineur:[
+      ["#a8b2c0","#e0e6f0","#86603c","#ffffff"], /* 0 Fer */
+      ["#de7e38","#ffb878","#7a5234","#56d8b4"], /* 1 Cuivre */
+      ["#c2ccd6","#f0f6fc","#6c5a48","#ffffff"], /* 2 Étain */
+      ["#e4eef8","#ffffff","#624e42","#a8dcff"], /* 3 Argent */
+      ["#f2be34","#fff098","#7a4a24","#ffffff"], /* 4 Or */
+      ["#3872e8","#98d4ff","#485474","#e4f8ff"], /* 5 Cobalt */
+      ["#8eb0c4","#dcf4ff","#586472","#ffffff"], /* 6 Zinc */
+      ["#c85c94","#ffb6dc","#503a4c","#ffe6f4"], /* 7 Manganèse */
+      ["#dc6c3e","#ffc294","#6e3c28","#fff0c8"], /* 8 Bauxite */
+      ["#eef6ff","#ff9c3c","#3c2c34","#fff4a8"], /* 9 Platine */
+      ["#5cece0","#ffffff","#465272","#b8ffff"], /* 10 Mithril */
+      ["#6e30c8","#ff68e0","#26183a","#ffe0ff"]  /* 11 Obsidienne */
+    ],
+    paysan:[
+      ["#aeb6c2","#f2ce50","#9e7a3c","#fff2a8"], /* 0 Blé */
+      ["#c4ae72","#f0dc8c","#8e763e","#fff8cc"], /* 1 Orge */
+      ["#c2c09a","#f2e8b4","#7a7242","#ffffff"], /* 2 Avoine */
+      ["#72b84a","#c0f47c","#5a422c","#e6ffaa"], /* 3 Houblon */
+      ["#d49242","#ffe090","#8e6232","#fff6c8"], /* 4 Seigle */
+      ["#64b0f4","#c2e8ff","#487e58","#fff4a4"], /* 5 Lin */
+      ["#f6cc36","#fff088","#4a8e38","#ff9e2c"], /* 6 Maïs */
+      ["#e0b468","#fff0b4","#5e843c","#ffffff"], /* 7 Millet */
+      ["#dceef4","#9ef0f8","#5a9446","#ffffff"], /* 8 Riz */
+      ["#d84e3c","#ffac48","#7a2e2c","#fff4a8"], /* 9 Sarrasin */
+      ["#d4b472","#a8e4ff","#6a5c46","#ffffff"], /* 10 Épeautre */
+      ["#e04892","#ffc2ff","#4c225a","#ffffff"]  /* 11 Quinoa */
+    ],
+    herboriste:[
+      ["#58b448","#a8f078","#6c5234","#d8ffaa"], /* 0 Ortie */
+      ["#8cb8a0","#c4a0f4","#5c685e","#ece0ff"], /* 1 Sauge */
+      ["#42d48e","#b8ffe0","#3c6a52","#ffffff"], /* 2 Menthe */
+      ["#9ee054","#fff478","#5c7436","#ffffff"], /* 3 Mélisse */
+      ["#e6f0ff","#ffd44a","#507458","#ffffff"], /* 4 Edelweiss */
+      ["#b460d8","#ecc0ff","#8c643c","#fff0ff"], /* 5 Mandragore */
+      ["#8e66f0","#e0ccff","#4a6c4c","#ffffff"], /* 6 Lavande */
+      ["#68b448","#ffe898","#745034","#fff8cc"], /* 7 Thym */
+      ["#643298","#d49aff","#364c38","#f4d8ff"], /* 8 Belladone */
+      ["#e64438","#ffd468","#b88a3c","#fff4a8"], /* 9 Ginseng */
+      ["#ff6ec4","#ffe878","#3a7a4c","#ffffff"], /* 10 Orchidée */
+      ["#f078c8","#fff2a8","#2a6060","#d8ffff"]  /* 11 Lotus */
+    ],
+    pecheur:[
+      ["#c49862","#8cd0ff","#8a623a","#ffffff"], /* 0 Prairie */
+      ["#72a878","#b8f098","#5c442c","#d6ff78"], /* 1 Bois */
+      ["#649a80","#a8e0b8","#4c4832","#d8f8cc"], /* 2 Marais */
+      ["#949eb8","#ffd86a","#5a483c","#fff4b0"], /* 3 Mines */
+      ["#e6a844","#7cf0f8","#a46c36","#fff4b8"], /* 4 Dunes */
+      ["#9ed8fc","#ffffff","#5888b8","#d8ffff"], /* 5 Givre */
+      ["#7898c0","#ffe870","#485468","#ffffff"], /* 6 Falaises */
+      ["#3cc484","#d2ff7a","#6a5232","#a8ffe0"], /* 7 Jungle */
+      ["#ff7c94","#8ef4ff","#d2aa6a","#ffffff"], /* 8 Récifs */
+      ["#ff6822","#ffe05a","#3c282a","#fff6b0"], /* 9 Volcan */
+      ["#8ca8f0","#e8f4ff","#504878","#ffd888"], /* 10 Ruines */
+      ["#b84cf0","#68f4ff","#2e1848","#ffb0ff"]  /* 11 Abîme */
+    ]
+  };
+
+  /* 10 designs de PNJ ouvriers uniques (coiffure, couvre-chef, peau, vêtements, accessoires) */
+  const WORKER_LOOKS=[
+    {skin:"#f6cfa6",hair:"#6a3a22",hat:"beanie",hc:"#c84438",top:"#b84238",top2:"#7c2a24",bot:"#58483c",acc:"#8a5a34",beard:"full"},       /* 0 Gaston : bonnet rouge & flanelle */
+    {skin:"#f8d6b2",hair:"#e8c25a",hat:"straw",hc:"#e6c468",top:"#8a74b8",top2:"#f2ead8",bot:"#6a5488",acc:"#4888d4",hairSty:"braid"},     /* 1 Margot : chapeau de paille & tablier */
+    {skin:"#ecc098",hair:"#3c2824",hat:"goggles",hc:"#3e7c4c",top:"#c88e46",top2:"#6e4428",bot:"#4a3c34",acc:"#f2c14e",hairSty:"spiky"},   /* 2 Baptiste : bandana & lunettes de mineur */
+    {skin:"#fae0c4",hair:"#c4542c",hat:"wreath",hc:"#52a848",top:"#649468",top2:"#8c623c",bot:"#684c38",acc:"#ffd268",hairSty:"bun"},      /* 3 Lison : couronne de feuilles & chignon */
+    {skin:"#f2c8a2",hair:"#e8e4dc",hat:"beret",hc:"#486284",top:"#8c3648",top2:"#ece2ce",bot:"#404658",acc:"#f2c14e",beard:"stache"},      /* 4 Firmin : béret & moustache blanche */
+    {skin:"#d89e72",hair:"#3a2420",hat:"scarf",hc:"#e86858",top:"#ebe4d0",top2:"#446ea8",bot:"#365688",acc:"#f2c14e",hairSty:"twins"},     /* 5 Rosalie : foulard noué & salopette */
+    {skin:"#f0c49c",hair:"#b85228",hat:"ushanka",hc:"#b89c74",top:"#5a7248",top2:"#d8c4a0",bot:"#4c3e30",acc:"#9a7a4c",beard:"short"},     /* 6 Anselme : toque fourrée & barbe rousse */
+    {skin:"#f6d2ae",hair:"#262230",hat:"bucket",hc:"#e8b434",top:"#2e5484",top2:"#e8b434",bot:"#243e62",acc:"#e8b434",hairSty:"bob"},       /* 7 Perrine : bob jaune & ciré marin */
+    {skin:"#c88a60",hair:"#282028",hat:"flatcap",hc:"#4e5462",top:"#ede8dc",top2:"#6e4c36",bot:"#3e3c46",acc:"#e8ba48",beard:"goatee"},    /* 8 Hector : casquette plate & gilet */
+    {skin:"#f4d4be",hair:"#cfd6e6",hat:"hood",hc:"#6c3e78",top:"#d6c4a4",top2:"#6c3e78",bot:"#4c3456",acc:"#7cd898",hairSty:"side"}         /* 9 Jeanne : capuche prune & besace */
+  ];
+
+  /* Icône 16×16 d'un outil de métier selon la dernière ressource débloquée (palier 0..11) */
+  function tool(pid,tier){
+    const t=Math.max(0,Math.min(11,tier|0)),k="tl:"+pid+":"+t;
+    if(cache[k])return cache[k];
+    const pal=(TOOL_PAL[pid]||TOOL_PAL.bucheron)[t],hd=pal[0],tr=pal[1],ha=pal[2],gl=pal[3];
+    const s=new Spr(16,16),W="#ffffff",F={flat:1};
+    let outCol=t>=11?"#341054":t>=9?"#5a1c0a":INK;
+    if(pid==="bucheron"){
+      s.part(ha,q=>q.line(3,13,11,5,2));
+      if(t>=3)s.part(tr,q=>{q.px(4,12);q.px(8,8)},F);
+      s.part(hd,q=>{q.poly([[8,3],[12,2],[14,6],[11,10],[8,7]]);if(t>=6)q.poly([[7,6],[4,3],[8,2]])},{lt:.55});
+      s.part(tr,q=>{q.line(12,2,14,6);q.line(14,6,11,10)},F);
+      if(t>=5)s.set(10,5,gl);if(t>=9){s.set(13,3,W);s.set(3,4,gl);s.set(13,11,gl)}
+    }else if(pid==="mineur"){
+      s.part(ha,q=>q.line(3,13,11,5,2));
+      if(t>=3)s.part(tr,q=>{q.px(5,11);q.px(7,9)},F);
+      s.part(hd,q=>{q.poly([[4,3],[9,3],[13,7],[13,12],[10,9],[8,6],[5,5]]);if(t>=6)q.rect(9,4,3,3)},{lt:.55});
+      s.part(tr,q=>{q.px(4,3);q.px(13,12);q.line(8,4,12,8)},F);
+      if(t>=5)s.set(10,5,gl);if(t>=9){s.set(10,5,W);s.set(4,2,gl);s.set(14,11,gl)}
+    }else if(pid==="paysan"){
+      s.part(ha,q=>{q.line(3,14,10,4,2);q.px(5,9);q.px(4,8)});
+      s.part(hd,q=>{q.poly([[9,3],[3,3],[2,6],[6,5],[10,6]]);if(t>=6)q.poly([[9,3],[13,5],[11,7]])},{lt:.55});
+      s.part(tr,q=>{q.line(3,3,9,3);q.px(2,5)},F);
+      if(t>=5)s.set(9,4,gl);if(t>=9){s.set(3,3,W);s.set(13,4,gl);s.set(2,8,gl)}
+    }else if(pid==="herboriste"){
+      s.part(ha,q=>q.line(3,13,7,9,2));
+      s.part(hd,q=>{q.poly([[6,9],[5,5],[8,2],[13,3],[13,7],[11,5],[8,5],[8,8]]);if(t>=6)q.px(13,8)},{lt:.55});
+      s.part(tr,q=>{q.line(8,2,13,3);q.px(5,5)},F);
+      if(t>=4)s.set(6,10,gl);if(t>=9){s.set(11,3,W);s.set(13,10,gl);s.set(4,3,gl)}
+    }else{
+      /* Canne à pêche : tige flexible + moulinet + fil + flotteur/leurre */
+      s.part(ha,q=>{q.line(2,13,8,6,2);q.line(8,6,12,2)});
+      s.part(hd,q=>{q.ell(5.5,11,1.8,1.8);if(t>=4)q.px(10,4)},{lt:.5});
+      s.part(W,q=>q.line(12,3,12,9),F);
+      s.part(tr,q=>q.ell(12,11,2.2,2.4),{lt:.55});
+      s.set(12,10,gl);if(t>=6)s.set(11,10,W);if(t>=9){s.set(14,8,gl);s.set(10,13,gl)}
+    }
+    if(t>=10){s.set(2,2,gl);s.set(14,13,gl)}
+    s.outline(outCol);return cache[k]=s.url()}
+
+  /* Sprite animé d'un PNJ ouvrier (64×64 avec marge HP=16, exactement aligné sur heroSpr) */
+  function workerSpr(look,pid,tier,anim,f){
+    const L=WORKER_LOOKS[((look|0)%WORKER_LOOKS.length+WORKER_LOOKS.length)%WORKER_LOOKS.length];
+    const t=Math.max(0,Math.min(11,tier|0));
+    const prof=pid&&TOOL_PAL[pid]?pid:null;
+    const useAnim=anim==="atk"?(prof==="pecheur"||prof==="herboriste"?"staff":"atk"):"idle";
+    const T=HA[useAnim]||HA.idle,s=new Spr(32+2*HP,32+2*HP,HP,HP),F={flat:1},SK={dk:.17,lt:.3};
+    const ink=mix(L.top,INK,.84),skin=L.skin,skD=mix(skin,DARK,.24),B="#1c1020",W="#ffffff";
+    let g=s;const P=(c,fn,o)=>g.part(c,fn,o),px=(x,y,c)=>g.set(Math.round(x),Math.round(y),c);
+    const u=Math.max(0,T.dy[f]),up=()=>{g.oy=HP+u},dn=()=>{g.oy=HP};
+    const lay=(fn,oc=ink)=>{g=new Spr(s.w,s.h,HP,HP);fn();g.outline(oc);const p=g.p;for(let i=0;i<p.length;i++)if(p[i])s.p[i]=p[i];g=s};
+    const sw=useAnim==="idle"?[0,0,0,1,1,1,1,0,0,0][f]:T.dx[f]>0?1:0;
+    const ph=f*Math.PI/5,R=Math.PI/180,idle=useAnim==="idle",rest=idle?(prof==="pecheur"?36:24):0;
+    const aa=(T.arm[f]-rest)*R,sx=21.5,sy=14,AL=6,hx=sx+Math.cos(aa)*AL,hy=sy+Math.sin(aa)*AL;
+    const wa=((T.w[f]??-90)+(idle?12:0))*R,ux=Math.cos(wa),uy=Math.sin(wa),vx=-uy,vy=ux;
+    const la=(104+(T.arm[f]-90)*-.18)*R,lsx=9.5,lsy=14,lhx=lsx+Math.cos(la)*AL,lhy=lsy+Math.sin(la)*AL;
+    const hand=(x,y,c)=>{x=Math.round(x);y=Math.round(y);P(c,q=>q.rect(x-1,y-1,2,2),F);px(x,y,mix(c,DARK,.22))};
+    const W2=(a,b)=>[hx+ux*a+vx*b,hy+uy*a+vy*b],ln=(q,p0,p1,w)=>q.line(p0[0],p0[1],p1[0],p1[1],w);
+    const lim=len=>ux>.15?Math.min(len,(45.5-T.dx[f]-hx)/ux):len;
+
+    /* Dessin de l'outil du métier attribué, adapté au palier de la dernière ressource débloquée (0..11) */
+    const drawTool=()=>{
+      if(!prof)return;
+      const pal=TOOL_PAL[prof][t],hd=pal[0],tr=pal[1],ha=pal[2],gl=pal[3];
+      if(prof==="bucheron"){
+        const e=lim(17)-17;
+        P(ha,q=>ln(q,W2(-4,0),W2(14.5+e,0)),F);
+        if(t>=3)P(tr,q=>{ln(q,W2(-3,0),W2(-1,0),2);ln(q,W2(5,0),W2(6,0),2)},F);
+        P(hd,q=>q.poly([W2(9.5+e,0),W2(8+e,4.2),W2(11+e,6.8),W2(15.5+e,6.2),W2(16+e,3),W2(14+e,0)]),{dk:.35});
+        P(tr,q=>ln(q,W2(11+e,6.2),W2(15.2+e,5.6)),F);
+        if(t>=6){
+          /* Hache à double tranchant aux paliers avancés */
+          P(hd,q=>q.poly([W2(10+e,0),W2(9+e,-3.8),W2(13.5+e,-4.2),W2(14.5+e,0)]),{dk:.35});
+          P(tr,q=>ln(q,W2(9.5+e,-3.6),W2(13.2+e,-3.8)),F);
+        }else{
+          P(hd,q=>q.poly([W2(10.5+e,0),W2(12+e,-2.4),W2(13.5+e,0)]),{dk:.35});
+        }
+        if(t>=5)px(...W2(12+e,2.5),gl);
+        if(t>=9){px(...W2(14.5+e,4.5),W);px(...W2(13+e,7.2+Math.sin(ph)),gl)}
+      }else if(prof==="mineur"){
+        const e=lim(16)-16;
+        P(ha,q=>ln(q,W2(-4,0),W2(14+e,0)),F);
+        if(t>=3)P(tr,q=>ln(q,W2(11+e,-1.5),W2(11+e,1.5),2),F);
+        /* Double pointe courbée de pioche */
+        P(hd,q=>q.poly([W2(12.5+e,-1),W2(11.5+e,-6.5),W2(8.5+e,-7.5),W2(10+e,-3),W2(10+e,3),W2(8.5+e,7.5),W2(11.5+e,6.5),W2(12.5+e,1)]),{dk:.35});
+        P(tr,q=>{ln(q,W2(11.5+e,-6.2),W2(8.8+e,-7.2));ln(q,W2(11.5+e,6.2),W2(8.8+e,7.2))},F);
+        if(t>=6)P(gl,q=>q.ell(...W2(12+e,0),1.5,1.5),F);
+        if(t>=9){px(...W2(9+e,-7),W);px(...W2(9+e,7),gl)}
+      }else if(prof==="paysan"){
+        const e=lim(18.5)-18.5;
+        P(ha,q=>{ln(q,W2(-5,0),W2(16+e,0));ln(q,W2(4,0),W2(5,2.8))},F);
+        /* Grande lame courbe de faux */
+        P(hd,q=>q.poly([W2(15.5+e,0),W2(14.5+e,4.5),W2(11+e,8.5),W2(6.5+e,10),W2(9.5+e,6.5),W2(12.5+e,2.5),W2(13+e,0)]),{dk:.35});
+        P(tr,q=>{ln(q,W2(14.8+e,4.2),W2(11+e,8.2));ln(q,W2(11+e,8.2),W2(6.8+e,9.6))},F);
+        if(t>=6)P(tr,q=>q.poly([W2(15+e,0),W2(17.5+e,-2),W2(15.5+e,-2.5)]),F);
+        if(t>=5)px(...W2(13.5+e,2),gl);
+        if(t>=9){px(...W2(8+e,9),W);px(...W2(12+e,8+Math.cos(ph)),gl)}
+      }else if(prof==="herboriste"){
+        const e=lim(13.5)-13.5;
+        P(ha,q=>ln(q,W2(-3,0),W2(5+e,0),2),F);
+        /* Faucille en croissant fin */
+        P(hd,q=>q.poly([W2(5+e,0),W2(7+e,-3.5),W2(11+e,-4),W2(13+e,0),W2(11.5+e,4.5),W2(8+e,5.5),W2(9.5+e,2.5),W2(10.5+e,-1),W2(7.5+e,-1.5)]),{dk:.32});
+        P(tr,q=>{ln(q,W2(11+e,-3.8),W2(13+e,0));ln(q,W2(13+e,0),W2(11.2+e,4.2))},F);
+        if(t>=4)P(gl,q=>q.ell(...W2(4+e,0),1.4,1.4),F);
+        if(t>=9){px(...W2(12.5+e,0),W);px(...W2(9+e,5.5),gl)}
+      }else{
+        /* Canne à pêche + moulinet + fil souple + flotteur qui oscille */
+        const e=lim(19.5)-19.5;
+        P(ha,q=>{ln(q,W2(-4,0),W2(11+e,0),2);ln(q,W2(11+e,0),W2(18.5+e,1))},F);
+        P(hd,q=>q.ell(...W2(2.5,1.8),1.7,1.7),{lt:.45});
+        if(t>=4){px(...W2(8+e,0),tr);px(...W2(14+e,.5),tr)}
+        const tip=W2(18.5+e,1),sway=Math.round(Math.sin(ph)*1.5)+(useAnim==="staff"?2:0);
+        const bx=Math.min(44,Math.round(tip[0]+sway)),by=Math.min(28,Math.round(tip[1]+8));
+        P(W,q=>q.line(tip[0],tip[1],bx,by),F);
+        P(tr,q=>q.ell(bx,by+1,1.8,2),{lt:.5});
+        px(bx,by,gl);if(t>=9){px(bx+1,by+2,W);px(bx-1,by-1,gl)}
+      }
+    };
+
+    /* Calque arrière : cheveux longs / tresse / capelette / capuche */
+    lay(()=>{up();
+      if(L.hairSty==="braid"){P(L.hair,q=>{q.poly([[8,4],[11,5],[9,15],[6-sw,17],[7-sw,11]])});px(7-sw,16,L.acc)}
+      if(L.hairSty==="twins"){P(L.hair,q=>{q.ell(7-sw,7,2.4,3.4);q.ell(24+sw,7,2.4,3.4)});px(9,5,L.hc);px(22,5,L.hc)}
+      if(L.hairSty==="side"){P(L.hair,q=>q.poly([[8,3],[11,4],[9,14],[6-sw,15]]));px(7-sw,13,L.acc)}
+      if(L.hat==="wreath"){P(L.top,q=>q.poly([[6,10],[16,10],[13,20],[4-sw,20]]));P(L.acc,q=>q.line(5-sw,19,12,19),F)}
+      if(L.hat==="hood"){P(L.hc,q=>q.poly([[6,10],[16,10],[13,22],[4-sw,23]]));P(L.acc,q=>q.px(6-sw,21),F)}
+    });
+
+    /* Calque corps : bras arrière, jambes, chaussures, tenue propre au PNJ */
+    lay(()=>{up();
+      const slCol=L.hat==="bucket"?L.top:L.hat==="flatcap"?L.top:L.hat==="scarf"?L.top:L.top;
+      P(mix(slCol,DARK,.18),q=>q.line(lsx-.5,lsy,lhx-.5,lhy,2));hand(lhx,lhy+.5,skin);
+      dn();const step=useAnim==="atk"&&(f>=4&&f<=7)?1:0;
+      if(L.hat==="straw"){
+        /* Robe + tablier de fermière */
+        P(L.top,q=>q.poly([[9,18],[21,18],[23,28],[7,28]]));
+        P(L.top2,q=>q.rect(12,18,7,9));
+        P(L.bot,q=>{q.rect(10+step,28,4,2);q.rect(17+step,28,4,2)},F);
+      }else{
+        P(L.bot,q=>{q.rect(10,21,5,5);q.rect(16+step,21,5,5)});
+        const bootC=L.hat==="bucket"?L.acc:mix(L.bot,DARK,.45);
+        P(bootC,q=>{q.rect(9,26,6,4);q.rect(16+step,26,6,4);q.px(22+step,28);q.px(22+step,29)});
+      }
+      up();
+      P(L.top,q=>{q.rect(10,10,11,11);q.rect(9,11,13,9)});
+      if(L.hat==="beanie"){
+        /* Chemise à carreaux + bretelles */
+        P(L.top2,q=>{q.rect(10,13,11,1);q.rect(10,17,11,1);q.rect(15,10,1,10)},F);
+        P(L.acc,q=>{q.rect(12,10,2,10);q.rect(18,10,2,10)},F);
+      }else if(L.hat==="goggles"){
+        /* Tablier de cuir épais */
+        P(L.top2,q=>{q.rect(11,13,9,9);q.line(12,10,12,13);q.line(18,10,18,13)});
+        px(15,15,L.acc);
+      }else if(L.hat==="scarf"){
+        /* Salopette denim + t-shirt rayé */
+        P("#d4c8b4",q=>{q.rect(10,12,11,1);q.rect(10,15,11,1)},F);
+        P(L.top2,q=>{q.rect(11,14,9,8);q.rect(12,10,2,4);q.rect(18,10,2,4)});
+        px(12,14,L.acc);px(18,14,L.acc);
+      }else if(L.hat==="beret"||L.hat==="flatcap"){
+        /* Gilet boutonné sur chemise */
+        P(L.top2,q=>{q.rect(10,11,4,9);q.rect(17,11,4,9)});
+        px(14,13,L.acc);px(14,16,L.acc);px(14,19,L.acc);
+      }else if(L.hat==="ushanka"){
+        /* Manteau fourré */
+        P(L.top2,q=>{q.rect(10,10,11,2);q.rect(10,19,11,2)},F);
+        P(L.acc,q=>q.rect(10,16,11,2),F);
+      }else if(L.hat==="bucket"){
+        /* Ciré marin à boutons jaunes */
+        P(L.top2,q=>{q.rect(10,10,11,2);q.px(15,13);q.px(15,16);q.px(15,19)},F);
+      }else if(L.hat==="wreath"||L.hat==="hood"){
+        /* Bandoulière et sacoche d'artisan */
+        P(L.top2,q=>q.line(11,10,20,20,2),F);
+        P(L.acc,q=>q.rect(18,18,3,3));
+      }else{
+        P(L.top2,q=>q.rect(12,14,7,7));
+      }
+      P(mix(L.bot,DARK,.35),q=>q.rect(10,19,11,2),F);px(15,19,L.acc);px(16,19,L.acc);
+    });
+
+    /* Calque tête : visage, yeux, coiffure/barbe, couvre-chef unique */
+    lay(()=>{up();
+      P(skin,q=>{q.ell(15.5,5,6.8,5.6);q.rect(10,6,11,4)},SK);
+      P(L.hair,q=>{q.ell(15.5,1.2,7.2,4.4);q.clear(10,3,12,8);q.rect(8,3,3,5);q.rect(20,3,3,5)});
+      if(L.hairSty==="spiky")P(L.hair,q=>{q.poly([[11,-1],[13,-5],[15,-1]]);q.poly([[15,-1],[17,-5],[19,-1]])});
+      if(L.hairSty==="bun")P(L.hair,q=>q.ell(15.5,-3,3,2.5));
+      if(L.hairSty==="bob")P(L.hair,q=>{q.rect(8,3,3,8);q.rect(20,3,3,8)});
+
+      /* Couvre-chef propre à chaque PNJ */
+      if(L.hat==="beanie"){
+        P(L.hc,q=>{q.ell(15.5,0,7.2,4.6);q.clear(8,2,16,4);q.rect(8,1,15,2)});
+        P(mix(L.hc,W,.35),q=>q.ell(15.5,-4.2,2.2,2));
+      }else if(L.hat==="straw"){
+        P(L.hc,q=>{q.rect(5,1,21,2);q.ell(15.5,-1,5.6,3.2);q.clear(9,1,13,3)});
+        P(L.acc,q=>q.rect(10,0,11,1),F);
+      }else if(L.hat==="goggles"){
+        P(L.hc,q=>q.rect(8,0,15,3));
+        P(L.acc,q=>{q.rect(11,-1,4,3);q.rect(16,-1,4,3)});
+        P("#9ee8ff",q=>{q.rect(12,0,2,1);q.rect(17,0,2,1)},F);
+      }else if(L.hat==="wreath"){
+        P(L.hc,q=>{q.rect(9,0,13,2);q.px(10,-1);q.px(15,-1);q.px(20,-1)});
+        px(12,0,L.acc);px(18,0,"#ff8ea8");
+      }else if(L.hat==="beret"){
+        P(L.hc,q=>{q.ell(14,-1,8.2,3.4);q.px(14,-5)});
+      }else if(L.hat==="scarf"){
+        P(L.hc,q=>{q.ell(15.5,0,7.2,3.8);q.clear(9,2,14,4);q.poly([[20,0],[24,-2],[23,2]])});
+      }else if(L.hat==="ushanka"){
+        P(L.hc,q=>{q.rect(8,-3,15,5);q.rect(7,2,3,5);q.rect(21,2,3,5)});
+        P(L.top2,q=>q.rect(10,-1,11,3));
+      }else if(L.hat==="bucket"){
+        P(L.hc,q=>{q.rect(7,1,17,2);q.rect(9,-2,13,3)});
+        P(L.top,q=>q.rect(9,0,13,1),F);
+      }else if(L.hat==="flatcap"){
+        P(L.hc,q=>{q.ell(14.5,-1,7.5,3);q.rect(14,1,10,2)});
+      }else if(L.hat==="hood"){
+        P(L.hc,q=>{q.ell(15.5,2,8,7);q.clear(10,2,12,8)});
+        P(L.acc,q=>{q.px(15,-4);q.px(9,3);q.px(22,3)},F);
+      }
+
+      /* Yeux + expressions + barbes/moustaches */
+      [13,18].forEach(x=>{for(let y=4;y<7;y++){px(x,y,B);px(x+1,y,B)}px(x,4,W)});
+      if(L.beard==="full"){
+        P(L.hair,q=>{q.rect(11,8,10,3);q.rect(12,11,8,2);q.rect(14,13,4,1)});
+      }else if(L.beard==="short"){
+        P(L.hair,q=>{q.rect(11,8,10,2);q.rect(13,10,6,1)});
+      }else if(L.beard==="stache"){
+        P(L.hair,q=>{q.rect(12,7,8,2);q.px(11,8);q.px(20,8)});
+      }else if(L.beard==="goatee"){
+        P(L.hair,q=>{q.rect(14,9,4,2);q.rect(15,11,2,1)});
+      }else{
+        px(11,7,"#f0988c");px(20,7,"#f0988c");px(16,8,"#b8745e");px(17,8,"#b8745e");
+      }
+    });
+
+    /* Calque bras avant + outil de métier */
+    lay(()=>{up();
+      drawTool();
+      P(L.top,q=>q.line(sx,sy,hx,hy,2));hand(hx,hy,skin);
+    });
+
+    /* Particules lumineuses autour de l'outil aux très hauts paliers (9..11) */
+    if(prof&&t>=9){
+      const gl=TOOL_PAL[prof][t][3];
+      for(let i=0;i<3;i++){
+        const rx=Math.round(hx+ux*(8+i*3)+Math.sin(ph+i)*2),ry=Math.round(hy+uy*(8+i*3)-((f+i*3)%4));
+        if(rx>=0&&ry>=0&&rx<s.w&&ry<s.h)s.set(rx,ry,i%2?W:gl);
+      }
+    }
+    return s}
+
+  function workerF(look,pid,tier,anim,f){
+    const Lidx=((look|0)%WORKER_LOOKS.length+WORKER_LOOKS.length)%WORKER_LOOKS.length;
+    const t=Math.max(0,Math.min(11,tier|0)),p=pid||"none";
+    const useAnim=anim==="atk"?(p==="pecheur"||p==="herboriste"?"staff":"atk"):"idle";
+    const k="wf:"+Lidx+":"+p+":"+t+":"+useAnim+":"+f;if(cache[k])return cache[k];
+    const T=HA[useAnim]||HA.idle,s=workerSpr(Lidx,pid,t,anim,f);
+    const W=s.w,N=32+2*HP,o=new Spr(N,N),ox=T.dx[f],oy=Math.min(0,T.dy[f]);
+    o.shadow(15.5+HP,30+HP,9,1.7);
+    for(let y=0;y<W;y++)for(let x=0;x<W;x++){const c=s.p[y*W+x];if(c){const X=x+ox,Y=y+oy;if(X>=0&&Y>=0&&X<N&&Y<N)o.p[Y*N+X]=c}}
+    return cache[k]=o.url()}
+
+  const workerFrames=(look,pid,tier,anim)=>{
+    const Lidx=((look|0)%WORKER_LOOKS.length+WORKER_LOOKS.length)%WORKER_LOOKS.length;
+    const t=Math.max(0,Math.min(11,tier|0)),p=pid||"none";
+    const k="wfs:"+Lidx+":"+p+":"+t+":"+anim;
+    return cache[k]||(cache[k]=Array.from({length:10},(_,f)=>workerF(Lidx,pid,t,anim,f)),cache[k].sc=((32+2*HP)/32).toFixed(3),cache[k])};
+
+  const workerPortrait=(look,pid,tier)=>workerF(look,pid,tier,"idle",0);
+
+  Object.assign(PX,{hero,heroF,heroFrames,beastF,beastFrames,tool,workerF,workerFrames,workerPortrait,WORKERS_N:WORKER_LOOKS.length})})();

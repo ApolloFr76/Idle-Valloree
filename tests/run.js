@@ -132,6 +132,7 @@ function makeDomEnv() {
     return els.get(id);
   };
 
+  const listeners = new Map();
   return {
     body: makeEl("body"),
     head: makeEl("head"),
@@ -143,8 +144,9 @@ function makeDomEnv() {
     querySelectorAll: () => [],
     createElement: tag => makeEl(tag),
     elementFromPoint: () => null,
-    addEventListener: () => {},
-    removeEventListener: () => {}
+    addEventListener: (t, fn) => { if (!listeners.has(t)) listeners.set(t, []); listeners.get(t).push(fn); },
+    removeEventListener: (t, fn) => { if (listeners.has(t)) listeners.set(t, listeners.get(t).filter(x => x !== fn)); },
+    dispatchEvent: ev => { for (const fn of (listeners.get(ev.type) || [])) fn(ev); }
   };
 }
 
@@ -189,7 +191,7 @@ function loadGameContext() {
     atob: s => Buffer.from(s, "base64").toString("binary"),
     crypto: webcrypto,
     Blob: class Blob { constructor(parts) { this.parts = parts; } },
-    URL: { createObjectURL: () => "blob:test", revokeObjectURL: () => {} },
+    URL: { createObjectURL: b => { const a = b && b.parts && b.parts[0]; let h = 2166136261; if (a && a.length) for (let i = 0; i < a.length; i++) h = Math.imul(h ^ a[i], 16777619); return "blob:" + (h >>> 0).toString(16); }, revokeObjectURL: () => {} },
     innerWidth: 1280,
     innerHeight: 800,
     performance: { now: () => 1000 },
@@ -234,7 +236,7 @@ function loadGameContext() {
       "allyCost", "allyDpsOf", "bagCap", "addRes", "autoSellFull", "offline", "tick",
       "OUV", "craftQ", "fresh", "arb", "up", "talV", "shopCost", "stats", "dur", "monRes",
       "startMode", "endMode", "sanitizeSave", "sanitizeLogHtml", "encodeSave", "decodeSave",
-      "resetRun", "COMPTE", "RANG", "ACCUEIL", "MONDE", "SITE", "UPDATE_LOGS", "fx", "mbSig", "CHARGE"
+      "resetRun", "COMPTE", "RANG", "ACCUEIL", "MONDE", "SITE", "UPDATE_LOGS", "fx", "mbSig", "CHARGE", "comeBack", "comeShow", "PROFS", "pMetiers", "dropKind", "dropCol", "resIcon", "OUV_LOOK"
     ]) {
       try { globalThis[k] = eval(k); } catch {}
     }
@@ -656,6 +658,150 @@ test("16. Atelier & Inventory UI (including Wardrobe) render cleanly without err
     if (!tipLock.includes("Berserker") || !tipLock.includes("Apparence débloquée à l'obtention")) throw new Error("Locked item tooltip missing class/skin info");
     if (statsTxt({ pctDef: 15, pctCdr: 12, pctLeech: 2.5 }) !== "−15 % dégâts subis · −12 % recharge des sorts · +2,5 % vol de vie") {
       throw new Error("statsTxt formatting mismatch: " + statsTxt({ pctDef: 15, pctCdr: 12, pctLeech: 2.5 }));
+    }
+    // Buying Sort automatique I immediately replaces "Auto : boutique" with the Auto checkbox
+    S.ecus = 100000;
+    drawSpells();
+    if (!$("spells").innerHTML.includes("Auto : boutique")) throw new Error("Expected 'Auto : boutique' before buying sp1");
+    const buyBtn = { dataset: { a: "buy", u: "sp1" }, closest(sel) { return sel === "[data-a]" ? this : null; } };
+    document.dispatchEvent({ type: "click", target: buyBtn });
+    if (!S.up.sp1 || !$("spells").innerHTML.includes('id="auto-b1"')) {
+      throw new Error("Buying sp1 did not immediately update #spells with Auto checkbox");
+    }
+    // AFK popup only shows after >= 5 minutes (300 s), shorter absences still credit silently
+    S.opt.offline = true;
+    S.hp = stats().maxHp;
+    const shortAfk = comeBack(20);
+    if (!shortAfk || shortAfk.kills <= 0 || comeShow(shortAfk)) throw new Error("AFK popup should not show after 20 s");
+    const almostAfk = comeBack(299);
+    if (!almostAfk || almostAfk.kills <= 0 || comeShow(almostAfk)) throw new Error("AFK popup should not show after 299 s");
+    const longAfk = comeBack(300);
+    if (!longAfk || !comeShow(longAfk)) throw new Error("AFK popup should show at 300 s (5 min)");
+  }`, ctx);
+});
+
+test("17. All 60 profession material icons & 60 biome gathering scenes render uniquely", () => {
+  vm.runInContext(`{
+    S = fresh(); S.cls = "guerrier"; S.lvl = 1000;
+    for (const pid of Object.keys(PROFS)) {
+      S.jobs[pid] = { lvl: 120, xp: 0 };
+      const icons = new Set();
+      for (let t = 0; t < 12; t++) {
+        const u = PX.res(pid, t);
+        if (!u || !(u.startsWith("blob:") || u.startsWith("data:image/png"))) throw new Error("PX.res failed for " + pid + ":" + t);
+        icons.add(u);
+        const sc = SITE.scene(pid, t);
+        if (!sc || !sc.cv || sc.cv.width !== SITE.W || sc.cv.height !== SITE.H || !sc.bio || sc.bio.id !== ZONES[t].id) {
+          throw new Error("SITE.scene biome mismatch for " + pid + ":" + t);
+        }
+      }
+      if (icons.size !== 12) throw new Error("Expected 12 unique icons for " + pid + ", got " + icons.size);
+    }
+    S.job = { r: "obsidienne", t: 0 };
+    mtab = "mineur";
+    const hm = pMetiers();
+    if (!hm.includes('data-r="obsidienne"') || !hm.includes("Abîme de Nuitombre")) {
+      throw new Error("pMetiers did not bind chantier canvas to active resource and biome");
+    }
+  }`, ctx);
+});
+
+test("18. All 144 monster & boss drop icons map accurately and render with unique pixel art", () => {
+  vm.runInContext(`{
+    const drops = Object.values(RES).filter(r => r.kind === "d");
+    if (drops.length !== 144) throw new Error("Expected 144 monster/boss drops, got " + drops.length);
+    const expected = {
+      rune: "rune",
+      x_lanternix: "flame",
+      b_rouage: "gear",
+      sablier_fige: "hourglass",
+      pince: "pincer",
+      x_trefloche: "clover",
+      x_glaconnet: "icicle",
+      oeil_tempete: "eye",
+      x_grimoireau: "scroll",
+      fossile_visq: "fossil",
+      x_bambouin: "vine",
+      x_dendrobulle: "vial",
+      b_braise: "heart",
+      b_vide: "void"
+    };
+    for (const [id, want] of Object.entries(expected)) {
+      const got = dropKind(RES[id].name, id);
+      if (got !== want) throw new Error("dropKind(" + id + ") expected " + want + ", got " + got);
+    }
+    const hashes = new Map();
+    const dupes = [];
+    for (const r of drops) {
+      const u = PX.drop(dropKind(r.name, r.id), dropCol(r), r.rare || r.boss, r.id);
+      if (!u || !(u.startsWith("blob:") || u.startsWith("data:image/png"))) throw new Error("PX.drop failed for " + r.id);
+      if (!resIcon(r).includes(u)) throw new Error("resIcon mismatch for " + r.id);
+      if (hashes.has(u)) dupes.push(r.id + "==" + hashes.get(u));
+      else hashes.set(u, r.id);
+    }
+    if (hashes.size !== 144) {
+      throw new Error("Expected 144 unique drop icons out of 144, got " + hashes.size + " (dupes: " + dupes.join(", ") + ")");
+    }
+  }`, ctx);
+});
+
+test("19. 10 distinct PNJ worker designs & 5 profession tools adapting to last unlocked resource and assigned job", () => {
+  vm.runInContext(`{
+    S = fresh(); S.cls = "guerrier"; S.ecus = 1e9;
+    if (OUV_LOOK.length !== 10 || PX.WORKERS_N !== 10) throw new Error("Expected 10 PNJ worker looks");
+    // 1. All 10 PNJ designs render distinctly for the same profession/tier
+    const lookHashes = new Set();
+    for (let i = 0; i < 10; i++) {
+      const p = PX.workerPortrait(i, "bucheron", 0);
+      if (!p || !(p.startsWith("blob:") || p.startsWith("data:image/png"))) throw new Error("workerPortrait failed for look " + i);
+      lookHashes.add(p);
+      const frIdle = PX.workerFrames(i, "mineur", 5, "idle");
+      const frAtk = PX.workerFrames(i, "pecheur", 11, "atk");
+      if (frIdle.length !== 10 || frAtk.length !== 10) throw new Error("workerFrames failed for look " + i);
+    }
+    if (lookHashes.size !== 10) throw new Error("Expected 10 unique PNJ worker designs, got " + lookHashes.size);
+
+    // 2. All 5 professions × 12 unlocked resource tiers = 60 distinct tool icons
+    const toolHashes = new Set();
+    for (const pid of Object.keys(PROFS)) {
+      for (let t = 0; t < 12; t++) {
+        const u = PX.tool(pid, t);
+        if (!u || !(u.startsWith("blob:") || u.startsWith("data:image/png"))) throw new Error("PX.tool failed for " + pid + ":" + t);
+        toolHashes.add(u);
+      }
+    }
+    if (toolHashes.size !== 60) throw new Error("Expected 60 unique profession tool icons, got " + toolHashes.size);
+
+    // 3. Tool adapts to last unlocked resource tier AND switches when worker changes profession
+    S.jobs.bucheron = { lvl: 1, xp: 0 };
+    S.jobs.mineur = { lvl: 110, xp: 0 };
+    S.jobs.pecheur = { lvl: 60, xp: 0 };
+    OUV.hire("bucheron");
+    const w = OUV.list()[0];
+    const pWood0 = OUV.portrait(w);
+    if (OUV.toolTier("bucheron") !== 0 || OUV.toolName("bucheron") !== "Hache de Frêne") throw new Error("Unexpected tier 0 axe name");
+    S.jobs.bucheron.lvl = 110;
+    const pWood11 = OUV.portrait(w);
+    if (pWood11 === pWood0) throw new Error("Worker tool did not evolve when profession unlocked higher resource");
+    if (OUV.toolName("bucheron") !== "Hache de Séquoia") throw new Error("Unexpected tier 11 axe name: " + OUV.toolName("bucheron"));
+
+    // Assign same worker to Mineur -> tool switches to Pioche en Obsidienne
+    OUV.assign(0, "fer");
+    const pMine11 = OUV.portrait(w);
+    if (pMine11 === pWood11) throw new Error("Worker tool did not change when reassigned to mineur");
+    // Assign same worker to Pecheur -> tool switches to Canne d'Orage (tier 6 at lvl 60)
+    OUV.assign(0, "p_goujon");
+    const pFish6 = OUV.portrait(w);
+    if (pFish6 === pMine11 || pFish6 === pWood11) throw new Error("Worker tool did not change when reassigned to pecheur");
+    // Cycle PNJ look updates appearance cleanly
+    const prevLook = w.look;
+    OUV.cycleLook(0);
+    if (w.look !== (prevLook + 1) % 10) throw new Error("OUV.cycleLook did not advance look index");
+    // pMetiers renders tool badge & worker look button cleanly
+    mtab = "mineur";
+    const hm = pMetiers();
+    if (!hm.includes("Pioche en Obsidienne") || !hm.includes('data-a="ouvLook"')) {
+      throw new Error("pMetiers missing tool badge or worker portrait cycler");
     }
   }`, ctx);
 });
