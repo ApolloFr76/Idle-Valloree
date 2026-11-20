@@ -11,16 +11,7 @@ function placeSide(){const side=$("sideCard"),w=WIDE.matches;
 WIDE.addEventListener?WIDE.addEventListener("change",placeSide):WIDE.addListener(placeSide);
 placeSide();
 let sceneOn=false;
-/* CORRECTIF TEMPORAIRE : annule le boost de test sur les sauvegardes touchées (une seule fois) */
-function applyTestBoost(){
-  if(!S||!S.cls||S._testFix2)return;
-  const boosted=!S._testFixV&&(S.ecus>=1e12||S.souls>=1e12);
-  if(!boosted&&!S._testFixV)return;
-  if(boosted){S.ecus=0;S.res={};S.souls=220;S.soulsTotal=220}
-  Object.keys(PROFS).forEach(pid=>{S.jobs[pid]={lvl:pid==="mineur"?50:1,xp:0}});
-  S._testFixV=1;S._testFix2=1;checkUnlocks(true);save();
-}
-function boot2(){applyTestBoost();if(!S.sess)sessStart();placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
+function boot2(){if(!S.sess)sessStart();placeSide();VIE.init();if(!sceneOn){sceneOn=true;SCENE.init();MONDE.init()}fuseTrophies();mbSig="";potSig="";drawWeather();drawPk();drawHero();drawZones();if(!S.mon)spawn();else drawMonster();drawSpells();renderLog();dirty=true;renderPanel();live()}
 /* Retour après une absence de sec secondes : bilan de la session terminée (absence d'au moins 5 min), gains hors ligne,
    puis nouvelle session. Renvoie le résumé à montrer (showOffline) ou null. */
 const AFK_POPUP_MIN=300;
