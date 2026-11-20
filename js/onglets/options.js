@@ -23,15 +23,15 @@ function pOpts(){
     ${sw("koRetreat","Reculer d'une zone après un K.O.","Évite d'enchaîner les K.O. pendant votre absence.")}
     ${sw("autoFightBoss","Combat automatique des boss","Lance automatiquement le boss dès que l'amélioration est achetée et que les 10 victoires sont obtenues.")}
     ${sw("autoClick","Clic automatique","Améliorations Clic automatique I et II. Frappe le monstre toute seule.")}
-    ${sw("autoTower","Tour automatique","Amélioration Grimpeur. Relance la tour 3 s après sa fin, depuis 80 % du record.")}
+    ${sw("autoTower","Tour automatique","Amélioration Grimpeur. Relance la tour tant que vous gagnez (depuis 80 % du record). Une défaite ou un abandon coupe l'automatisme.")}
     ${sw("autoZone","Monde suivant automatique","Amélioration Éclaireur. Passe au monde suivant dès que son boss est battu et que vous avez le niveau.")}
     ${sw("autoQuest","Quêtes automatiques","Amélioration Messager. Récupère tout seul la récompense des quêtes terminées.")}
     ${sw("autoFortune","Potion de fortune en donjon","Amélioration Flasque de fortune. Boit une potion de fortune au début de chaque donjon, s'il vous en reste.")}
     ${sw("autoDungeon","Donjon automatique","Entre automatiquement dans le donjon de la zone dès que l'amélioration Explorateur est achetée et que vous avez sa clé.")}
-    ${sw("autoSellFull","Vente automatique quand le sac est plein","Amélioration Colporteur. Vend le plus gros surplus parmi les ressources cochées « Vente auto » (Inventaire, en cliquant une ressource), en gardant la quantité « Garder toujours ». Jamais les clés ni les potions.")}
+    ${sw("autoSellFull","Vente automatique du surplus","Amélioration Colporteur. Vend périodiquement le surplus des ressources cochées « Vente auto » (Inventaire, en cliquant une ressource) au-dessus de la quantité « Garder toujours ». Jamais les clés ni les potions.")}
     ${sw("confirmPrest","Confirmation avant un passage Oméga","")}
     ${sw("pauseHidden","Pause quand l'onglet est caché","Sinon le jeu continue en arrière-plan.")}
-    ${sw("offline","Gains hors ligne","Chasse et récolte pendant que la page est fermée, jusqu'à 8 h.")}
+    ${sw("offline","Gains hors ligne","Chasse et récolte pendant que la page est fermée, sur la durée de votre stockage AFK.")}
   </div></div>`;
   if(otab==="aide")h+=`<div class="sec"><h3>Aide</h3><div class="olist">
     <div class="orow"><div class="ol"><b>Visite guidée</b><span>Présentation de tout l'écran en ${TUTO.length} étapes.</span></div><div class="oc"><button class="btn pri" data-a="tutoReplay">Revoir la visite</button></div></div>
@@ -68,7 +68,7 @@ function pOpts(){
   <div class="sec"><h3>Événements</h3><p class="small muted">Toutes les 4 à 8 minutes, pendant 2 minutes :</p>${EVENTS.map(e=>`<div class="small"><b style="color:${e.c}">${e.n}</b> · ${e.txt}</div>`).join("")}</div>`;
   if(otab==="clavier"){const K=[["Espace|A","Frapper le monstre"],["1|2|3","Lancer les sorts"],["E","Attraper l'objet cliquable"],["S","Boire une potion de soin"],["B","Défier le boss"],["Échap","Quitter boss, donjon ou tour"],["P","Pause"],["C|I|V|F|O","Personnage, Inventaire, Aventure, Forge, Options"]];
     h+=`<div class="sec"><h3>Clavier</h3><div class="olist">${sw("keys","Raccourcis clavier","À la forge, Espace frappe toujours.")}</div><div class="keys">${K.map(([k,t])=>`<div><span>${k.split("|").map(x=>`<kbd>${x}</kbd>`).join(" ")}</span><span class="muted">${t}</span></div>`).join("")}</div></div>`}
-  if(otab==="save"){let code="";try{code=btoa(unescape(encodeURIComponent(JSON.stringify(S))))}catch(e){}
+  if(otab==="save"){let code="";try{code=encodeSave(S)}catch(e){}
     h+=`<div class="sec"><h3>Écran d'accueil</h3><p class="small muted">Revenir à l'écran de départ pour changer de compte ou commencer une nouvelle partie. La partie est enregistrée avant.</p><div class="row"><button class="btn" data-a="accHome">Écran d'accueil</button></div></div>`+COMPTE.html()+`<div class="sec"><h3>Sauvegarde automatique</h3><div class="olist">${seg("saveEvery","Fréquence","Enregistrée dans ce navigateur.",[[5,"5 s"],[10,"10 s"],[30,"30 s"],[60,"1 min"]])}<div class="orow"><div class="ol"><b>Enregistrer maintenant</b></div><div class="oc"><button class="btn pri" data-a="saveNow">Enregistrer</button></div></div></div></div>
     <div class="sec"><h3>Code cadeau</h3><p class="small muted">Entrez un code cadeau pour obtenir sa récompense.</p><div class="row"><input id="codeBox" type="text" placeholder="Votre code cadeau" autocomplete="off" spellcheck="false" style="flex:1;min-width:0"><button class="btn pri" data-a="code">Valider</button></div>${codeRes&&Date.now()-codeRes.at<20000?`<p class="codemsg ${codeRes.ok?"ok":"ko"}" id="codeMsg" role="status">${esc(codeRes.t)}</p>`:`<p class="codemsg" id="codeMsg" role="status" hidden></p>`}</div>
     <div class="sec"><h3>Exporter</h3><p class="small muted">Copiez ce code pour transférer votre partie ou la garder à l'abri.</p><textarea id="exportBox" readonly>${code}</textarea><div class="row"><button class="btn pri" data-a="copy">Copier le code</button></div></div>

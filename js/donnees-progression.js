@@ -1,5 +1,5 @@
-/* Données du jeu (3/4) : métiers, automatismes, Oméga et talents, succès, bestiaire, potions, quêtes, marché, réglages par défaut (OPT_DEF). */
-/* Métiers au niveau max : chacun donne +10 % d'XP et +5 000 de poids */
+/* Données du jeu (3/4) : métiers, automatismes, Oméga, succès, bestiaire, potions, quêtes, marché, réglages par défaut (OPT_DEF). */
+/* Métiers au niveau max : chacun donne +10 % d'XP et +5 000 s de stockage AFK */
 const profMaxN=()=>S&&S.jobs?Object.keys(PROFS).filter(k=>S.jobs[k]&&S.jobs[k].lvl>=PROF_MAX).length:0;
 /* Amélioration active : achetée dans cette vie, ou rendue permanente avec des éclats Oméga (gardée après chaque renaissance) */
 const up=id=>!!(S.up&&S.up[id]||typeof arbKeep==="function"&&arbKeep(id));  /* achats de boutique : de cette vie ou gardés par l'arbre Oméga */
@@ -10,12 +10,12 @@ const sellCfg=k=>(S.sellCfg&&S.sellCfg[k])||{},sellKeep=k=>Math.max(0,sellCfg(k)
 /* Modes automatiques : [option, amélioration(s) qui le débloquent, nom court]. Chacun a son bouton ON / OFF au-dessus du combat dès qu'il est débloqué. */
 const AUTOS=[["autoClick",["auto1","auto2"],"Clic"],["autoFightBoss","bossauto","Boss"],["autoDungeon","dgauto","Donjon"],["autoTower","tourauto","Tour"],["autoZone","zoneauto","Monde"],["autoQuest","qauto","Quêtes"],["autoSellFull","vendeur","Vente"],["autoFortune","fortauto","Fortune"]];
 const autoOwned=a=>[].concat(a[1]).some(up);
-const upPermCost=id=>{const u=UPGS.find(x=>x[0]===id);return u?Math.max(1,Math.round(Math.log10(u[3])*2-5)):0};
-const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.15,l)*(CLASSES[S.cls]?.allyCost||1));
+const allyCost=(i,l)=>Math.round(ALLIES[i][3]*Math.pow(1.1,l)*(CLASSES[S.cls]?.allyCost||1));
 const allyMult=()=>(up("allie1")?1.5:1)*(up("allie2")?1.5:1)*(up("allie3")?2:1)*arbAllyMult()*(CLASSES[S.cls]?.allyBonus||1)*S.buffs.filter(b=>b.k==="ally").reduce((a,b)=>a*b.v,1);
-const allyDpsOf=(i,l,m=allyMult())=>l<=0?0:ALLIES[i][2]*.4*l*Math.pow(1.5,Math.floor(l/25))*m;
+/* Compagnons : dégâts ×2 tous les 25 niveaux, et ×3 aux multiples de 100 (100, 200, 300…) */
+const allyDpsOf=(i,l,m=allyMult())=>{if(l<=0)return 0;const p25=Math.floor(l/25),p100=Math.floor(l/100);return ALLIES[i][2]*.4*l*Math.pow(2,p25-p100)*Math.pow(3,p100)*m};
 const allyDps=()=>{const m=allyMult();return ALLIES.reduce((a,x,i)=>a+allyDpsOf(i,S.allies[x[0]]||0,m),0)};
-const clickMult=()=>(up("gants1")?2:1)*(up("gants2")?3:1)*(1+talV("t_doigts")/100);
+const clickMult=()=>(up("gants1")?2:1)*(up("gants2")?3:1);
 const comboMax=()=>up("rythme")?150:100;
 const inc=(k,n=1)=>{S.st[k]=(S.st[k]||0)+n};
 const mx=(k,v)=>{if(v>(S.st[k]||0))S.st[k]=v};
@@ -24,49 +24,17 @@ const mkOf=k=>(S.mk&&S.mk[k])||1;
 const priceOf=k=>Math.max(1,Math.round(RES[k].price*sellMult()*(RES[k].kind==="k"?1:mkOf(k))));
 function gainEcus(n){n=Math.round(n*(1+talV("t_avar")/100)*arbEcusMult()*(1+.01*achN()));S.ecus+=n;inc("ecus",n);return n}
 
-/* Renaissance et talents : [id, nom, effet, rangs max, coût de base en éclats] */
+/* Renaissance Oméga */
 const PREST_LVL=100;
 /* Bonus Oméga : chaque passage Oméga donne +10 % d'XP et +10 % d'écus.
    Le niveau du personnage est illimité. */
 const omegaN=()=>(S&&S.prest)||0;
 const lvlMax=()=>Infinity;
-/* Éclats gagnés depuis le début (dépensés ou non) : +12,5 % de dégâts chaque fois que ce total est multiplié par 10.
+/* Éclats gagnés depuis le début (dépensés ou non) : +12,5 % de dégâts chaque fois que ce total est multipliés par 10.
    Dépenser ne fait donc rien perdre, et le bonus reste raisonnable même avec des milliers de milliards d'éclats. */
 const SOUL_PCT=12.5;
 const soulBonus=()=>typeof arb==="function"&&arb("coeur")?SOUL_PCT*Math.log10(1+((S&&S.soulsTotal)||0)):0;  /* actif avec le Cœur d'Oméga */
-const TALENTS={
-  "Combat":[["t_force","Force brute","+10 % de dégâts",1],["t_prec","Précision","+2 % de critique",1],["t_vie","Vitalité ancestrale","+10 % de PV",2],["t_elem","Maîtrise élémentaire","Les faiblesses font +10 % de dégâts en plus",3]],
-  "Récolte":[["t_mains","Mains agiles","Récolte 8 % plus rapide",1],["t_double","Double récolte","Chance de récolte double",1],["t_sac","Poches sans fond","+1 500 de poids",2],["t_metier","Héritage des métiers","Les métiers repartent plus haut",3]],
-  "Fortune":[["t_avar","Avarice","+10 % d'écus",1],["t_pros","Prospecteur","+15 Prospection",1],["t_trefle","Chanceux","Objets cliquables 10 % plus fréquents",2],["t_depart","Bourse de départ","Recommencer avec des écus",2]],
-  "Clic":[["t_doigts","Doigts de fer","+25 % de dégâts de clic",1],["t_combo","Combo durable","Le combo baisse 30 % moins vite",1],["t_dore","Frappe dorée","Chance qu'un clic fasse ×10",2],["t_cmd","Commandant","+20 % de dégâts des compagnons",2]],
-};
-const TAL={};Object.entries(TALENTS).forEach(([br,l])=>l.forEach((t,i)=>TAL[t[0]]={id:t[0],n:t[1],txt:t[2],cost:t[3],br,i,prev:i?l[i-1][0]:null}));
-const tal=id=>(S.tal&&S.tal[id])||0;
-/* Rangs illimités : [valeur du 1er rang, cible de rendement initial (0 = linéaire), format].
-   Après 10 rangs, tous les talents continuent avec un rendement décroissant. */
-const TALV={t_force:[10,0,"+# % de dégâts"],t_prec:[2,30,"+# % de critique"],t_vie:[10,0,"+# % de PV"],t_elem:[10,50,"+# % sur les faiblesses"],
-  t_mains:[8,60,"Récolte # % plus rapide"],t_double:[6,50,"+# % de récolte double"],t_sac:[1500,0,"+# de poids"],t_metier:[5,60,"Métiers au niveau #"],
-  t_avar:[10,0,"+# % d'écus"],t_pros:[15,0,"+# Prospection"],t_trefle:[10,60,"Objets cliquables # % plus fréquents"],t_depart:[1000,0,"# écus au départ"],
-  t_doigts:[25,0,"+# % de dégâts de clic"],t_combo:[30,90,"Combo baisse # % moins vite"],t_dore:[2,25,"# % de frappe dorée ×10"],t_cmd:[20,0,"+# % de dégâts des compagnons"]};
 const dimR=r=>r<=10?r:10+Math.log(1+.08*(r-10))/.08;
-/* Talents sans plafond : chaque rang ajoute la même valeur (plus de ralentissement après le rang 10).
-   Leur coût grandit de 4 % par rang, ce qui suffit à freiner sans faire exploser les bonus. */
-const talAt=(id,r)=>{const[v,cap]=TALV[id];if(r<=0)return 0;
-  if(!cap)return v*r;
-  const at=n=>cap*(1-Math.pow(1-v/cap,n)),n=Math.min(r,10),base=at(n);
-  return r<=10?base:base+(at(10)-at(9))*(dimR(r)-10)};
-/* Plafonds utiles : au-delà, un rang de plus ne change plus rien, donc le talent affiche MAX et ne s'achète plus.
-   Mains agiles : jusqu'à ce que l'ouvrier le plus lent (ressource la plus longue, sans outils) récolte en 0,1 s. */
-const TAL_CAP={t_prec:95,t_double:100,t_combo:100,t_dore:100,t_trefle:90,t_metier:PROF_MAX,
-  t_mains:()=>100*(1-.1/((3+1.2*(UNLOCK.length-1))*(typeof OUV_SLOW!=="undefined"?OUV_SLOW:2)))};
-const talCapV=id=>{const c=TAL_CAP[id];return c==null?Infinity:typeof c==="function"?c():c};
-const talMaxR=id=>{const c=talCapV(id);if(c===Infinity||talAt(id,1e6)<c)return Infinity;let lo=1,hi=1e6;while(lo<hi){const m=(lo+hi)>>1;if(talAt(id,m)>=c)hi=m;else lo=m+1}return lo};
-const talIsMax=id=>tal(id)>=talMaxR(id);
-const talVold=id=>Math.min(talCapV(id),talAt(id,tal(id)));  /* anciens talents (remplacés par l'arbre Oméga, js/arbre.js) */
-const talTxt=(id,r)=>{const x=Math.min(talCapV(id),talAt(id,r)),f=TALV[id][2];return f.replace("#",x>=100?fmt(Math.round(x)):(Math.round(x*10)/10).toString().replace(".",","))};
-const talCostAt=(id,r)=>Math.ceil(TAL[id].cost*(r+1)*Math.pow(1.04,r));
-const talCost=id=>talCostAt(id,tal(id));
-const talSpent=id=>{let n=0;for(let k=0;k<tal(id);k++)n+=talCostAt(id,k);return n};
 /* Éclats d'un passage Oméga : 5 × 1,008^(niveau − 30), plus la valeur de chaque boss de zone vaincu dans cette vie (une seule fois chacun).
    La courbe du niveau reste ancrée au niveau 30 même si la renaissance n'ouvre qu'au niveau PREST_LVL.
    Boss : 10 éclats pour le premier, puis ×1,5 par boss jusqu'au 4e ; à partir du 5e, l'écart de niveau entre zones se creuse,
@@ -128,6 +96,6 @@ function fixOpts(o){o=Object.assign({},OPT_DEF,o||{});for(const k in OPT_DEF){co
 const OPT_DEF={
   sfx:true,music:false,vol:.5,volSfx:.8,volMusic:.5,hitSfx:true,
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
-  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,autoTower:true,autoQuest:true,autoZone:true,autoFortune:true,autoClick:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
+  potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,autoTower:false,autoQuest:true,autoZone:true,autoFortune:true,autoClick:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
   keys:true,saveEvery:10,offline:true,showArmor:true,theme:"parchemin",fps:60};

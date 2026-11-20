@@ -17,7 +17,7 @@ const ARB_V={g:{nom:"Guerrier",c:"cb",b:0,e:["Serment du Guerrier","Choisit la v
      ["Collectionneur","+2 % d'écus par trophée différent possédé."],["Bourse de départ","Chaque nouvelle vie commence avec 1 % des écus de la précédente."],["Clés dorées","Clés de boss 2 fois plus fréquentes."],
      ["Intérêts","Hors ligne, vos écus rapportent 1 % par heure (24 h au plus)."],["Éclats dorés","+10 % d'éclats à chaque Oméga."]],cap:["Main de Midas","Écus ×5 et ventes ×2. Sommet de la voie."]},
  r:{nom:"Artisan",c:"rc",b:6,e:["Serment de l'Artisan","Choisit la voie de l'Artisan. Récolte 50 % plus rapide."],
-  n:[["Contremaître","+2 ouvriers maximum."],["Poches sans fond","Sac ×2."],["Forge bénie","À la forge, la rareté monte d'un cran."],
+  n:[["Contremaître","+2 ouvriers maximum."],["Poches sans fond","Stockage AFK ×2."],["Forge bénie","À la forge, la rareté monte d'un cran."],
      ["Ouvriers infatigables","Hors ligne, les ouvriers travaillent 2 fois plus."],["Double récolte","+50 % de chance de récolte double, ouvriers compris."],["Maître forgeron","Les enchantements réussissent toujours jusqu'à +5."],
      ["Héritage des métiers","Les métiers repartent au niveau 60 après un Oméga."],["Herboriste savant","Les potions durent 2 fois plus longtemps."],["Alchimie","Chaque potion préparée en donne 2."],
      ["Mini-jeux experts","XP de métier des mini-jeux ×3."],["Grand atelier","Fabriquer un objet demande 2 fois moins de ressources."]],cap:["Récolte éternelle","Récolte et ouvriers 3 fois plus rapides. Sommet de la voie."]},

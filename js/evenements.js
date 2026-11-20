@@ -22,7 +22,6 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"bkeyOpen":bkeyPop=+b.dataset.z;bkeyDraw();break;
     case"bkeyClose":bkeyPop=null;$("ov").hidden=true;break;
     case"quit":endMode(false,"abandon");break;
-    case"upPerm":{const id=b.dataset.u,u=UPGS.find(x=>x[0]===id),c=upPermCost(id);S.upPerm=S.upPerm||{};if(!u||S.upPerm[id]||S.souls<c)break;S.souls-=c;S.upPerm[id]=true;sfx("level");log(`Amélioration permanente : ${u[1]} (gardée après chaque Oméga).`,"g");toast(`${u[1]} : permanente`,1);drawSpells();potSig="";mbSig="";renderPanel();break}
     case"otabP":otabP=b.dataset.t;renderPanel(true);break;
     case"arbSel":{const id=b.dataset.id,t=Date.now();if(arbSel===id&&t-arbClickT<450){arbBuy(id);arbClickT=0}else arbClickT=t;arbSel=id;renderPanel(true);break}
     case"arbBuy":arbBuy(b.dataset.id);renderPanel(true);break;
@@ -32,8 +31,6 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"prestAsk":if(!S.opt.confirmPrest){doPrestige();break}prestConfirm=true;renderPanel();break;
     case"prestNo":prestConfirm=false;renderPanel();break;
     case"prestYes":prestConfirm=false;doPrestige();break;
-    case"talent":{const id=b.dataset.t,T=TAL[id];if(T.prev&&!tal(T.prev))break;if(talIsMax(id))break;const c=talCost(id);if(S.souls<c)break;S.souls-=c;S.tal[id]=tal(id)+1;S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break}
-    case"talReset":{let r=0;for(const id in S.tal)if(TAL[id])r+=talSpent(id);S.souls+=r;S.tal={};toast(`${r} éclats rendus`);renderPanel();break}
     case"ctab":ctab=b.dataset.t;renderPanel();break;
     case"pfC":{const c=CADRE_ID[b.dataset.k];if(cadreOk(c)){profS().c=c[0];dirty=true}renderPanel(true);break}
     case"pfE":profS().e=b.dataset.k;dirty=true;renderPanel(true);break;
@@ -52,9 +49,9 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"optSet":{const k=b.dataset.k,v=b.dataset.v;S.opt[k]=isNaN(+v)?v:+v;applyOpts();renderPanel();break}
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
     case"code":{const i=$("codeBox");useCode(i&&i.value);if(i)i.value="";break}
-    case"accCreate":case"accLogin":case"accLogout":case"accPush":case"accUseRemote":case"accUseLocal":COMPTE.act(a,b);break;
+    case"accCreate":case"accLogin":case"accLogout":case"accPush":case"accUseRemote":case"accUseLocal":case"accRecover":case"accGenRec":case"accCopyRec":case"accOptMode":COMPTE.act(a,b);break;
     case"rkTab":case"rkRefresh":RANG.act(a,b);break;
-    case"accTab":case"accEye":case"accNew":case"accNewNo":case"accNewYes":case"accRetry":case"accGo":case"accHome":ACCUEIL.act(a,b);break;
+    case"accTab":case"accEye":case"accNew":case"accNewNo":case"accNewYes":case"accRetry":case"accGo":case"accHome":case"accDismissMig":case"accExportOld":ACCUEIL.act(a,b);break;
     case"saveNow":save();lastSave=Date.now();toast("Partie enregistrée",1);break;
     case"pause":setPause(!paused);break;
     case"forgeHit":break; /* géré au pointerdown, plus précis */
@@ -73,7 +70,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"qReroll":{if(!S.q||S.q.reroll<1)break;const i=+b.dataset.i;if(S.q.list[i].done)break;S.q.list[i]=makeQuest();S.q.reroll--;renderPanel();break}
     case"mkSell":{const k=b.dataset.r,g=sellRes(k,b.dataset.n==="all"?S.res[k]:+b.dataset.n);if(g)toast(`+${fmt(g)} écus`);renderPanel();break}
     case"ally":{const i=+b.dataset.i,id=ALLIES[i][0];let n=b.dataset.n==="max"?1e9:+b.dataset.n,bought=0;while(n-->0){const c=allyCost(i,S.allies[id]||0);if(S.ecus<c)break;S.ecus-=c;S.allies[id]=(S.allies[id]||0)+1;bought++}
-      if(bought){const l=S.allies[id];if(Math.floor(l/25)>Math.floor((l-bought)/25))toast(`${ALLIES[i][1]} : dégâts doublés !`);if(l===bought)log(`${ALLIES[i][1]} rejoint votre groupe.`,"g")}else toast("Pas assez d'écus");renderPanel();break}
+      if(bought){const l=S.allies[id],l0=l-bought;if(Math.floor(l/100)>Math.floor(l0/100))toast(`${ALLIES[i][1]} : dégâts triplés !`);else if(Math.floor(l/25)>Math.floor(l0/25))toast(`${ALLIES[i][1]} : dégâts doublés !`);if(l===bought)log(`${ALLIES[i][1]} rejoint votre groupe.`,"g")}else toast("Pas assez d'écus");renderPanel();break}
     case"buy":{const u=UPGS.find(x=>x[0]===b.dataset.u);if(!u||up(u[0])||S.ecus<shopCost(u[3]))break;S.ecus-=shopCost(u[3]);S.up[u[0]]=true;sfx("coin");log(`Amélioration achetée : ${u[1]}.`,"g");toast(`${u[1]} : ${u[2]}`);renderPanel();break}
     case"zone":goZone(+b.dataset.i);break;
     case"cast":cast(CLASSES[S.cls].spells.find(s=>s.id===b.dataset.sp),false);break;
@@ -82,7 +79,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"tab":if(!tabOpen(b.dataset.t))break;if(b.closest("#tabs")&&S.tab===b.dataset.t&&UI.o){UI.open(false);break}S.tab=b.dataset.t;confirmReset=false;dirty=true;UI.open(true);renderPanel();break;
     case"drawerClose":UI.open(false);break;
     case"sideTog":UI.toggleSide();break;
-    case"alloc":{const k=b.dataset.k;let n=Math.min(S.pts,b.dataset.n==="custom"?allocN:+b.dataset.n);if(SEC[k]?.cap&&!PRIM_OK[k]){const room=SEC[k].cap*SEC_STEP-(stats()[k]||0);n=Math.min(n,room);if(n<=0){toast("Bonus secondaire déjà au maximum");break}}S.alloc[b.dataset.k]+=n;S.pts-=n;dirty=true;renderPanel();break}
+    case"alloc":{const k=b.dataset.k;const n=Math.min(S.pts,b.dataset.n==="custom"?allocN:+b.dataset.n);if(n<=0)break;S.alloc[k]+=n;S.pts-=n;dirty=true;renderPanel();break}
     case"respec":ALLOC.forEach(k=>{S.pts+=S.alloc[k];S.alloc[k]=0});S.hp=Math.min(S.hp,stats().maxHp);renderPanel();break;
     case"sell":{const k=b.dataset.r,n=b.dataset.n==="all"?S.res[k]:Math.min(+b.dataset.n,S.res[k]);if(n>0){const g=sellRes(k,n);if(n>1)toast(`${fmt(n)}× ${RES[k].name} vendus : +${fmt(g)} écus`)}renderPanel();break}
     case"mtab":mtab=b.dataset.p;renderPanel();break;
@@ -115,12 +112,10 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"copy":{const t=$("exportBox");const done=()=>toast("Code de sauvegarde copié",1);try{navigator.clipboard.writeText(t.value).then(done,()=>{t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)})}catch(err){t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)}break}
     case"bkLoad":{const i=+b.dataset.i;if(bkArm!==i){bkArm=i;renderPanel(true);break}bkArm=-1;if(bkLoad(i)){boot2();toast("Sauvegarde de secours restaurée",1)}else toast("Cette sauvegarde de secours est illisible.",1);renderPanel(true);break}
     case"bkNow":backup("manuel");toast("Copie de secours créée",1);renderPanel(true);break;
-    case"import":{let d;try{d=JSON.parse(decodeURIComponent(escape(atob($("importBox").value.trim()))))}catch(err){toast("Ce code de sauvegarde n'est pas valide. Vérifiez qu'il est complet.",1);break}
-      const pb=saveErr(d);if(pb){toast(`Cette sauvegarde est abîmée (${pb}) : elle n'a pas été chargée.`,1);break}
-      backup("import");S=migrate(fromData(d));S.opt=fixOpts(S.opt);applyOpts();save();boot2();toast("Partie chargée",1);break}
+    case"import":{try{const next=decodeSave($("importBox").value);backup("import");S=next;applyOpts();save();boot2();toast("Partie chargée",1)}catch(err){toast(err&&err.message||"Ce code de sauvegarde n'est pas valide.",1)}break}
     case"reset":confirmReset=true;renderPanel();break;
     case"resetNo":confirmReset=false;renderPanel();break;
-    case"resetYes":confirmReset=false;backup("reset");S=fresh();try{localStorage.removeItem(SAVE_KEY)}catch(err){}showCreate();break;
+    case"resetYes":confirmReset=false;resetRun({keepOpts:false,keepName:false,backupKey:ACC_BACKUP});applyOpts();showCreate();break;
   }
 });
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.opt;if(k&&e.target.type==="range"){const v=+e.target.value;S.opt[k]=Number.isFinite(v)?v:OPT_DEF[k];const o=$("ov_"+k);if(o)o.textContent=optFmt(k,S.opt[k]);applyOpts()}});

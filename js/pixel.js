@@ -121,7 +121,7 @@ const ELG={feu:'<path fill="currentColor" stroke="none" shape-rendering="crispEd
   air:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M8 0h2v1h-2zM7 1h5v1h-5zM6 2h3v1h-3zM10 2h2v1h-2zM6 3h2v1h-2zM10 3h2v1h-2zM2 4h10v1h-10zM1 5h10v1h-10zM1 8h13v1h-13zM2 9h13v1h-13zM9 10h2v1h-2zM13 10h2v1h-2zM1 11h6v1h-6zM9 11h6v1h-6zM1 12h6v1h-6zM10 12h4v1h-4zM11 13h2v1h-2z"/>',
   neutre:'<path fill="currentColor" stroke="none" shape-rendering="crispEdges" transform="scale(1.5)" d="M7 2h2v1h-2zM5 3h6v1h-6zM4 4h3v1h-3zM9 4h3v1h-3zM3 5h2v1h-2zM11 5h2v1h-2zM3 6h2v1h-2zM11 6h2v1h-2zM2 7h2v1h-2zM12 7h2v1h-2zM2 8h2v1h-2zM12 8h2v1h-2zM3 9h2v1h-2zM11 9h2v1h-2zM3 10h2v1h-2zM11 10h2v1h-2zM4 11h3v1h-3zM9 11h3v1h-3zM5 12h6v1h-6zM7 13h2v1h-2z"/>'};
 const elChip=(e,txt)=>`<span class="elc" data-tip="el:${e}" style="--c:${ELEMS[e].c}"><svg viewBox="0 0 24 24" aria-hidden="true">${ELG[e]}</svg>${txt??ELEMS[e].n}</span>`;
-function monRes(monEl,atk){if(atk==="neutre")return 0;if(BEATS[atk]===monEl)return RES_WEAK-(S&&S.tal?talV("t_elem"):0);if(atk===monEl)return RES_SELF;if(BEATS[monEl]===atk)return RES_STRONG;return 0}
+function monRes(monEl,atk){if(atk==="neutre")return 0;if(BEATS[atk]===monEl)return RES_WEAK-(S?talV("t_elem"):0);if(atk===monEl)return RES_SELF;if(BEATS[monEl]===atk)return RES_STRONG;return 0}
 const weakTo=e=>Object.keys(BEATS).find(k=>BEATS[k]===e);
 function heroSVG(k,arm){return PX.img(PX.hero(k,CLASSES[k].col,"",arm),"herofig")}
 const emb=(k,size=40)=>`<span class="emb" style="width:${size}px;height:${size}px;background:${shade(CLASSES[k].col,-.55)};color:${CLASSES[k].col}"><svg viewBox="0 0 24 24">${EMB[k]}</svg></span>`;

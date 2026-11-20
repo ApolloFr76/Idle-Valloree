@@ -96,9 +96,9 @@ function fishHold(on){if(mg&&mg.pid==="pecheur")mg.hold=on}
 function mgEnd(score,why){const m=mg;if(!m||m.done)return;m.done=true;score=Math.max(0,Math.min(1,score));S.mgCd=S.mgCd||{};S.mgCd[m.pid]=S.time+MG_CD;inc("minigames");
   const pid=m.pid,J=S.jobs[pid];let html="",col="var(--gold)";
   if(pid==="pecheur"){if(score>=1&&m.fish){const f=m.fish,r=RES[f.id],cm=Math.round(f.cm*(.7+Math.random()*.6)),d=fdex(),e=d[f.id]||(d[f.id]={n:0,cm:0}),first=!e.n;e.n++;e.cm=Math.max(e.cm,cm);
-      const n=addRes(f.id,1);gainProfXp(pid,[30,90,300,1500][f.rk]*Math.pow(f.t+1,1.4));if(f.rk)inc("fishRare");inc("fish");
+      addRes(f.id,1);gainProfXp(pid,[30,90,300,1500][f.rk]*Math.pow(f.t+1,1.4));if(f.rk)inc("fishRare");inc("fish");
       col=["var(--gold)","#8ad4ff","#ffd84a","#ff8ab0"][f.rk];log(`Pêche : ${r.name} (${cm} cm)${first?" · nouvelle espèce au Poissonnédia !":""}`,"g");if(f.rk===3){sfx("level");FX.flash("#ff8ab0");setTimeout(()=>FX.flash("#8ad4ff"),250);setTimeout(()=>FX.flash("#ffd84a"),500);toast("Poisson MYTHIQUE pêché : "+r.name+" !",1);inc("fishMyth")}else if(f.rk===2){sfx("level");FX.flash("#ffd84a")}else sfx("coin");
-      html=`<img class="px mgres" src="${PX.fish(f.col,f.rk,f.t)}" alt=""><h2 style="color:${col}">${r.name}</h2><span class="small">${["Commun","Rare","Légendaire","✦ Mythique ✦"][f.rk]} · ${cm} cm${first?" · <b>nouvelle espèce !</b>":""}</span><span class="small muted">Se mange pour ${f.txt} pendant ${Math.round(f.d/60)} min.${n?"":" Sac plein : poisson relâché."}</span>`}
+      html=`<img class="px mgres" src="${PX.fish(f.col,f.rk,f.t)}" alt=""><h2 style="color:${col}">${r.name}</h2><span class="small">${["Commun","Rare","Légendaire","✦ Mythique ✦"][f.rk]} · ${cm} cm${first?" · <b>nouvelle espèce !</b>":""}</span><span class="small muted">Se mange pour ${f.txt} pendant ${Math.round(f.d/60)} min.</span>`}
     else html=`<h2>Raté</h2><span class="small muted">${why||"Le poisson s'est échappé."}</span>`}
   else{const L=J.lvl,tier=Math.max(0,UNLOCK.filter(u=>u<=L).length-1),rid=S.job&&RES[S.job.r].prof===pid?S.job.r:PROFS[pid].res[tier][0];let n=Math.round(2+10*score);if(score>=.95)n=Math.round(n*1.5);
     let got=0;for(let i=0;i<n;i++)got+=gainGather(pid,rid,true);sfx(score>=.6?"coin":"anvilBad");log(`${MG_INFO[pid].n} : ${got}× ${RES[rid].name} (score ${Math.round(score*100)} %).`,"g");

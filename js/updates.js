@@ -1,5 +1,13 @@
 /* Notes de mise à jour accessibles depuis le bouton parchemin. */
 const UPDATE_LOGS=[
+  {date:"19 novembre 2026",title:"Stockage AFK, équilibrage et sécurité",items:[
+    "Stockage illimité en ligne : la capacité de stockage correspond désormais au nombre maximal de secondes où le jeu farm en AFK.",
+    "Caractéristiques secondaires (Sagesse, Agilité, Terre) : retrait du plafond fixe, remplacé par une courbe à rendement décroissant asymptotique vers 90 % (60 % atteint à 8 000 points).",
+    "Compagnons : croissance du coût réduite (×1,10 par niveau au lieu de ×1,15), dégâts doublés tous les 25 niveaux et triplés tous les multiples de 100.",
+    "Arbre Oméga : le nœud « Double récolte » (+50 %) s'applique aussi aux ouvriers (en ligne et hors ligne) ; « Grand atelier » affiche directement les quantités réduites dans l'Atelier et les info-bulles.",
+    "Tour automatique (Grimpeur) : se désactive automatiquement en cas de défaite ou d'abandon ; Colporteur vend périodiquement le surplus au-dessus du seuil gardé.",
+    "Comptes et sauvegardes : code de secours à noter pour réinitialiser son mot de passe, signature d'intégrité des exports (V2) et protection serveur du classement."
+  ]},
   {date:"17 novembre 2026",title:"Nouvelle interface",items:[
     "Le monde occupe tout l'écran : les onglets sont à droite et s'ouvrent dans un panneau.",
     "Inventaire : la fiche de l'objet et le bouton « Équiper » s'affichent juste sous le sac.",

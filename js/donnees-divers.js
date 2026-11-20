@@ -4,14 +4,16 @@ const RAR=[{n:"Commun",c:"#5a4a3a",m:1},{n:"Rare",c:"#1f6fb8",m:1.15},{n:"Épiqu
 /* Chances de rareté (%) selon le score de forge (0 à 6 points), et sans mini-jeu */
 const FORGE_W=[[90,10,0,0],[80,17,3,0],[70,24,6,0],[55,32,11,2],[40,37,18,5],[25,38,27,10],[10,32,38,20]],FORGE_SKIP=[75,20,5,0],FORGE_FAST=[0,70,25,5];
 const rarOf=i=>RAR[(i&&i.r)||0];
-/* Bonus secondaires des caractéristiques : un palier tous les 5 points (équipement compris) */
-const SEC_STEP=5;
-const PRIM_OK={};const lockA=(k,st)=>!!(SEC[k]?.cap&&!PRIM_OK[k]&&secMax(k,st[k]));
-const secMax=(k,v)=>SEC[k]&&SEC[k].cap&&secN(k,v)>=SEC[k].cap;
-const SEC={vit:{f:n=>`+${n} % de PV max`},sagesse:{cap:30,f:n=>`-${n} % de recharge des sorts`},agi:{cap:40,f:n=>`${n} % de chance d'attaquer deux fois`},
-  feu:{f:n=>`+${2*n} % de dégâts critiques`},eau:{f:n=>`+${2*n} Prospection`},terre:{cap:40,f:n=>`-${n} % de dégâts subis`},air:{f:n=>`+${(n/2).toString().replace(".",",")} % de critique`}};
-const secN=(k,v)=>{const n=Math.floor(Math.max(0,v||0)/SEC_STEP);return SEC[k].cap?Math.min(SEC[k].cap,n):n};
-const secTxt=(k,v)=>SEC[k]?SEC[k].f(secN(k,v))+(SEC[k].cap&&secN(k,v)>=SEC[k].cap?" (max)":""):"";
+/* Bonus secondaires des caractéristiques : un palier tous les 5 points (équipement compris).
+   Sagesse, Agilité et Terre suivent une courbe à rendement décroissant asymptotique vers 90 % :
+   les premiers points donnent le plus (+1 % par palier au départ), 60 % reste long (8 000 points), et 90 % n'est jamais dépassé. */
+const SEC_STEP=5,SEC_ASYMP=90;
+const secPct=n=>n<=0?0:SEC_ASYMP*(1-Math.pow(1+n/20,-.25));
+const fmtPct=x=>x.toFixed(1).replace(/\.0$/,"").replace(".",",");
+const SEC={vit:{f:n=>`+${n} % de PV max`},sagesse:{asymp:1,f:n=>`-${fmtPct(n)} % de recharge des sorts`},agi:{asymp:1,f:n=>`${fmtPct(n)} % de chance d'attaquer deux fois`},
+  feu:{f:n=>`+${2*n} % de dégâts critiques`},eau:{f:n=>`+${2*n} Prospection`},terre:{asymp:1,f:n=>`-${fmtPct(n)} % de dégâts subis`},air:{f:n=>`+${(n/2).toString().replace(".",",")} % de critique`}};
+const secN=(k,v)=>{const n=Math.floor(Math.max(0,v||0)/SEC_STEP);return SEC[k]&&SEC[k].asymp?secPct(n):n};
+const secTxt=(k,v)=>SEC[k]?SEC[k].f(secN(k,v)):"";
 /* Événements et météo */
 const EVENTS=[
   {id:"braises",n:"Pluie de braises",txt:"Les attaques de Feu font +30 % de dégâts",el:"feu",c:"#ff8a4a"},

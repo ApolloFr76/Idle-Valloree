@@ -4,9 +4,9 @@ function checkAch(){let n=0;ACH.forEach(a=>{if(!S.ach[a.id]&&a.get()>=a.v){S.ach
 const clsCost=()=>5+5*(S.clsSwaps||0);
 function doPrestige(){
   const g=soulsGain();if(g<=0)return;const oldE=S.ecus||0,oldAl=S.allies||{},oldTw=S.tower||{best:0};
-  const keep={cls:S.cls,name:S.name,st:S.st,sess:S.sess,born:S.born,best:S.best,fdex:S.fdex,ach:S.ach,tower:{best:0,cur:1},souls:S.souls+g,soulsTotal:(S.soulsTotal||0)+g,prest:(S.prest||0)+1,tal:S.tal,arb:S.arb,unl:S.unl,tips:S.tips,tutoDone:S.tutoDone,pkN:S.pkN,kills:S.kills,uid:S.uid,log:[],tab:"prest",time:S.time,auto:S.auto,opt:S.opt,q:S.q,mk:S.mk,mkPrev:S.mkPrev,autoPot:S.autoPot,autoBuff:S.autoBuff||{},upPerm:S.upPerm||{},sellCfg:S.sellCfg||{},hist:S.hist||[],prof:S.prof};
+  const keep={cls:S.cls,name:S.name,st:S.st,sess:S.sess,born:S.born,best:S.best,fdex:S.fdex,ach:S.ach,tower:{best:0,cur:1},souls:S.souls+g,soulsTotal:(S.soulsTotal||0)+g,prest:(S.prest||0)+1,arb:S.arb,unl:S.unl,tips:S.tips,tutoDone:S.tutoDone,pkN:S.pkN,kills:S.kills,uid:S.uid,log:[],tab:"prest",time:S.time,auto:S.auto,opt:S.opt,q:S.q,mk:S.mk,mkPrev:S.mkPrev,autoPot:S.autoPot,autoBuff:S.autoBuff||{},sellCfg:S.sellCfg||{},hist:S.hist||[],prof:S.prof};
   for(const k in keep)if(keep[k]===undefined)delete keep[k];
-  S=Object.assign(fresh(),keep);S.st.bossesLife=0;S.ecus=arb("m8")?Math.floor(oldE*.01):0;
+  S=Object.assign(fresh(),keep);S.ecus=arb("m8")?Math.floor(oldE*.01):0;
   /* arbre Oméga : départ rapide, vétéran, mémoire de la tour */
   if(arb("t6")){S.lvl=50;S.pts=49*PTS_PER_LVL}if(arb("t1"))for(const k in oldAl)S.allies[k]=Math.floor(oldAl[k]*.1);if(arb("t2")){const b=Math.floor((oldTw.best||0)*.5);S.tower={best:b,cur:b+1}}
   const jl=Math.min(PROF_MAX,Math.max(1,Math.round(talV("t_metier"))));Object.values(S.jobs).forEach(j=>j.lvl=jl);

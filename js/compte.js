@@ -5,7 +5,7 @@
 const SUPA={url:"https://rnhpijbqenpnxnulfgyu.supabase.co",key:"sb_publishable_ObErez9O4g8TiGqsClH8vw_5phhmuAK"};  /* clé publique : sans danger, les règles de la table protègent les sauvegardes */
 const ACC_KEY="vallore-compte-v1",ACC_BACKUP="vallore-save-avant-compte",ACC_EVERY=30;
 const COMPTE=(()=>{
-  let acc=null,busy=false,msg="",msgOk=false,lastPush=0,choice=null;
+  let acc=null,busy=false,msg="",msgOk=false,lastPush=0,choice=null,optMode="login";
   /* état de la synchronisation, montré par le petit bouton de l'en-tête (#syncBtn) : ok, busy (envoi), err (échec), off (pas de réseau) */
   const sync={st:"",at:0,why:""};
   const syncSet=(st,why)=>{sync.st=st;sync.why=why||"";if(st==="ok")sync.at=Date.now();syncDraw()};
@@ -22,8 +22,31 @@ const COMPTE=(()=>{
   const okPseudo=p=>/^[A-Za-z0-9_-]{3,20}$/.test(p);
   const errTxt=j=>{const m=((j&&(j.msg||j.error_description||j.message||j.error))||"")+"";
     if(/already|registered|exists/i.test(m))return"Ce pseudo est déjà pris.";if(/invalid login|credentials/i.test(m))return"Pseudo ou mot de passe incorrect.";
+    if(/recovery|code de secours/i.test(m))return"Pseudo ou code de secours invalide.";
     if(/password/i.test(m))return"Mot de passe trop faible (6 caractères minimum).";if(/rate|too many/i.test(m))return"Trop d'essais, réessayez dans quelques minutes.";if(/jwt|session/i.test(m))return"Session expirée, reconnectez-vous.";
     return m?"Erreur du serveur : "+m:"Impossible de joindre le serveur. Vérifiez votre connexion."};
+  /* Code de secours (VAL-XXXX-XXXX-XXXX) : généré localement, hashé côté serveur (set_recovery_code), permet de réinitialiser le mot de passe */
+  const REC_ALPH="23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+  function genRecoveryCode(){
+    const b=new Uint8Array(12);
+    if(typeof crypto!=="undefined"&&crypto.getRandomValues)crypto.getRandomValues(b);
+    else for(let i=0;i<12;i++)b[i]=Math.floor(Math.random()*256);
+    let s="";for(let i=0;i<12;i++)s+=REC_ALPH[b[i]%32];
+    return`VAL-${s.slice(0,4)}-${s.slice(4,8)}-${s.slice(8,12)}`;
+  }
+  async function saveRecoveryCode(){
+    const code=genRecoveryCode();
+    await api("/rest/v1/rpc/set_recovery_code",{method:"POST",body:JSON.stringify({p_code:code})},true);
+    return code;
+  }
+  function showRecoveryModal(pseudo,code,isNew=true){
+    const o=$("ov");if(!o)return;o.hidden=false;
+    o.innerHTML=`<div class="ovc" style="max-width:480px"><h2>${isNew?"Votre code de secours":"Nouveau code de secours"}</h2>
+      <p class="small">Notez soigneusement ce code pour le compte <b>${esc(pseudo)}</b>. Il est le <b>seul moyen</b> de changer votre mot de passe si vous l'oubliez (aucun e-mail n'est demandé).</p>
+      <div class="reccode" id="recCodeBox" style="font-family:var(--display);font-size:22px;letter-spacing:1.5px;text-align:center;padding:12px;margin:8px 0;background:var(--bg2);border:3px solid var(--ink);user-select:all">${esc(code)}</div>
+      <p class="small muted">Ce code ne sera plus jamais réaffiché. Si vous l'utilisez pour réinitialiser votre mot de passe, un nouveau code vous sera donné.</p>
+      <div class="row" style="justify-content:space-between"><button class="btn" data-a="accCopyRec" data-c="${esc(code)}">Copier le code</button><button class="btn pri" data-a="closeOv">J'ai noté mon code</button></div></div>`;
+  }
   async function api(path,opt={},auth,again){const h=Object.assign({apikey:SUPA.key,"Content-Type":"application/json"},opt.headers||{});
     let used=null;if(auth){await fresh_();if(!logged())throw{msg:"Session expirée, reconnectez-vous."};used=acc.at;h.Authorization="Bearer "+used}
     const r=await fetch(SUPA.url.replace(/\/$/,"")+path,Object.assign({},opt,{headers:h}));const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
@@ -56,7 +79,8 @@ const COMPTE=(()=>{
     <div class="accchoix"><button class="btn pri" data-a="accUseRemote"><b>Partie du compte</b><span class="small">${sum(row.data)}<br>sauvegardée ${when(row.updated_at)}</span></button>
     <button class="btn" data-a="accUseLocal"><b>Partie de ce navigateur</b><span class="small">${S&&S.cls?sum(JSON.stringify({cls:S.cls,lvl:S.lvl,prest:S.prest})):"aucun personnage"}<br>elle remplacera celle du compte</span></button></div>
     <p class="small muted">L'autre partie est gardée de côté dans ce navigateur (copie de secours).</p></div>`}
-  function useData(d,at){try{const cur=localStorage.getItem(SAVE_KEY);if(cur)localStorage.setItem(ACC_BACKUP,cur);localStorage.setItem(SAVE_KEY,d)}catch(e){say("Impossible d'écrire la sauvegarde dans ce navigateur.");return}
+  function useData(d,at){let clean;try{clean=JSON.stringify(migrate(sanitizeSave(JSON.parse(d))))}catch(e){say("La sauvegarde en ligne est invalide ou corrompue.");return}
+    try{const cur=localStorage.getItem(SAVE_KEY);if(cur)localStorage.setItem(ACC_BACKUP,cur);localStorage.setItem(SAVE_KEY,clean)}catch(e){say("Impossible d'écrire la sauvegarde dans ce navigateur.");return}
     acc.syncAt=at;keep();S=null;location.reload()}
   /* après connexion : pas de partie en ligne → on envoie celle-ci ; sinon on charge ou on demande */
   async function afterLogin(){const r=await remote();
@@ -71,15 +95,38 @@ const COMPTE=(()=>{
     try{const j=kind==="create"?await api("/auth/v1/signup",{method:"POST",body:JSON.stringify({email:mail(p),password:pw,data:{pseudo:p}})})
                                :await api("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email:mail(p),password:pw})});
       if(!j||!j.access_token){say("Compte créé mais la connexion est refusée : la confirmation par e-mail doit être désactivée dans Supabase.");return}
-      acc=null;setSession(j,p);if(kind==="create"){await push(true);say(`Compte « ${p} » créé. Votre partie actuelle y est sauvegardée.`,1)}else await afterLogin();
-      if(iw)iw.value="";}
+      acc=null;setSession(j,p);if(kind==="create"){await push(true);let code=null;try{code=await saveRecoveryCode()}catch(e){}say(`Compte « ${p} » créé. Votre partie actuelle y est sauvegardée.`,1);if(code)setTimeout(()=>showRecoveryModal(p,code,true),80)}else await afterLogin();
+      if(iw)iw.value="";if(iw2)iw2.value="";}
     catch(e){if(kind==="create"&&acc){say("Compte créé, mais l'envoi de la partie a échoué : "+errTxt(e),0)}else{acc=null;keep();say(errTxt(e))}}
     finally{busy=false;rp()}}
+  async function recover(box){
+    if(busy)return;
+    const ip=box&&box.querySelector(".accP"),ic=box&&box.querySelector(".accRec"),iw=box&&box.querySelector(".accW"),iw2=box&&box.querySelector(".accW2");
+    const p=((ip||{}).value||"").trim(),code=((ic||{}).value||"").trim().toUpperCase(),pw=(iw||{}).value||"";
+    if(!okPseudo(p)){say("Pseudo : 3 à 20 caractères, lettres sans accent, chiffres, - ou _.");return}
+    if(code.replace(/[^A-Z0-9]/g,"").length<12){say("Entrez votre code de secours (ex. VAL-XXXX-XXXX-XXXX).");return}
+    if(pw.length<6){say("Nouveau mot de passe : 6 caractères minimum.");return}
+    if(iw2&&iw2.value!==pw){say("Les deux mots de passe ne sont pas identiques.");return}
+    busy=true;say("Vérification du code de secours…",1);
+    try{
+      const res=await api("/functions/v1/reset-password",{method:"POST",body:JSON.stringify({pseudo:p,recovery_code:code,new_password:pw})});
+      const j=await api("/auth/v1/token?grant_type=password",{method:"POST",body:JSON.stringify({email:mail(p),password:pw})});
+      if(j&&j.access_token){acc=null;setSession(j,p);await afterLogin()}
+      say("Mot de passe mis à jour !",1);
+      if(res&&res.recovery_code)setTimeout(()=>showRecoveryModal(p,res.recovery_code,false),80);
+    }catch(e){say(errTxt(e))}
+    finally{busy=false;rp()}
+  }
   function formHtml(start){if(!on())return"";
     if(logged())return`<div class="accbox" id="accCreateBox"><span class="small">Connecté : <b>${esc(acc.pseudo)}</b></span></div>`;
-    return`<div class="accbox" id="${start?"accCreateBox":"accBox"}"><div class="row accform"><input class="accP" type="text" maxlength="20" placeholder="Pseudo" autocomplete="username" spellcheck="false"><input class="accW" type="password" placeholder="Mot de passe" autocomplete="current-password">
-      ${start?"":`<button class="btn pri" data-a="accCreate">Créer un compte</button>`}<button class="btn${start?" pri":""}" data-a="accLogin">Se connecter</button></div><div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`}
+    return`<div class="accbox" id="${start?"accCreateBox":"accBox"}">
+      ${start?"":`<div class="osub" style="margin-bottom:8px"><button class="${optMode==="login"?"on":""}" data-a="accOptMode" data-m="login">Connexion</button><button class="${optMode==="create"?"on":""}" data-a="accOptMode" data-m="create">Créer un compte</button><button class="${optMode==="recover"?"on":""}" data-a="accOptMode" data-m="recover">Mot de passe oublié</button></div>`}
+      ${!start&&optMode==="recover"?`<div class="row accform"><input class="accP" type="text" maxlength="20" placeholder="Pseudo" autocomplete="username" spellcheck="false"><input class="accRec" type="text" maxlength="24" placeholder="Code (VAL-XXXX-XXXX-XXXX)" spellcheck="false"><input class="accW" type="password" placeholder="Nouveau mot de passe" autocomplete="new-password"><input class="accW2" type="password" placeholder="Confirmer le mot de passe" autocomplete="new-password"><button class="btn pri" data-a="accRecover">Réinitialiser</button></div>`
+      :!start&&optMode==="create"?`<div class="row accform"><input class="accP" type="text" maxlength="20" placeholder="Pseudo (3-20 car.)" autocomplete="username" spellcheck="false"><input class="accW" type="password" placeholder="Mot de passe (6+ car.)" autocomplete="new-password"><input class="accW2" type="password" placeholder="Confirmer le mot de passe" autocomplete="new-password"><button class="btn pri" data-a="accCreate">Créer un compte</button></div>`
+      :`<div class="row accform"><input class="accP" type="text" maxlength="20" placeholder="Pseudo" autocomplete="username" spellcheck="false"><input class="accW" type="password" placeholder="Mot de passe" autocomplete="current-password"><button class="btn pri" data-a="accLogin">Se connecter</button></div>`}
+      <div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`}
   return{on,logged,formHtml,syncDraw,pseudo:()=>acc&&acc.pseudo||"",clearMsg:()=>{msg=""},uid:()=>acc&&acc.uid||null,call:(p,o)=>api(p,o,true),
+    genRecoveryCode,
     msgHtml:()=>`<div class="small accMsg ${msgOk?"accok":"accko"}" role="status">${esc(msg)}</div>`,
     /* le serveur répond-il ? (5 s maximum) */
     async ping(){try{const c=new AbortController();setTimeout(()=>c.abort(),5000);const r=await fetch(SUPA.url.replace(/\/$/,"")+"/auth/v1/health",{headers:{apikey:SUPA.key},signal:c.signal});return r.ok}catch(e){return false}},
@@ -87,9 +134,13 @@ const COMPTE=(()=>{
     html(){if(!on())return`<div class="sec"><h3>Compte en ligne</h3><p class="small muted">Les comptes en ligne ne sont pas encore activés.</p></div>`;
       if(!logged())return`<div class="sec"><h3>Compte en ligne</h3><p class="small muted">Créez un compte pour retrouver votre partie sur n'importe quel ordinateur. Votre partie actuelle est gardée et envoyée sur le compte.</p>${formHtml(false)}</div>`;
       return`<div class="sec"><h3>Compte en ligne</h3><p class="small">Connecté : <b>${esc(acc.pseudo)}</b> · envoi automatique toutes les ${ACC_EVERY} s · dernier envoi : ${when(acc.syncAt)}</p>
-        <div class="row"><button class="btn pri" data-a="accPush">Envoyer maintenant</button><button class="btn" data-a="accLogout">Se déconnecter</button></div><div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`},
-    async act(a,btn){try{const box=btn&&btn.closest&&btn.closest(".accbox");
-      if(a==="accCreate")await auth("create",box);else if(a==="accLogin")await auth("login",box);
+        <div class="row"><button class="btn pri" data-a="accPush">Envoyer maintenant</button><button class="btn" data-a="accGenRec">Nouveau code de secours</button><button class="btn" data-a="accLogout">Se déconnecter</button></div><div class="small accMsg ${msgOk?"accok":"accko"}">${esc(msg)}</div></div>`},
+    async act(a,btn){try{const box=btn&&btn.closest&&(btn.closest(".accbox")||btn.closest(".accboard"));
+      if(a==="accOptMode"){optMode=btn.dataset.m||"login";msg="";rp()}
+      else if(a==="accCreate")await auth("create",box);else if(a==="accLogin")await auth("login",box);
+      else if(a==="accRecover")await recover(box);
+      else if(a==="accGenRec"){say("Génération du code…",1);const code=await saveRecoveryCode();say("Nouveau code de secours enregistré.",1);showRecoveryModal(acc.pseudo,code,false)}
+      else if(a==="accCopyRec"){const c=btn.dataset.c||"";try{await navigator.clipboard.writeText(c);toast("Code de secours copié",1)}catch(e){toast("Sélectionnez le code pour le copier",1)}}
       else if(a==="accLogout"){try{if(logged())await push(false)}catch(e){}acc=null;keep();say("Déconnecté. Votre partie reste dans ce navigateur.",1);rp()}
       else if(a==="accPush"){say("Envoi…",1);if(await push(false))say("Partie envoyée.",1);renderPanel(true)}
       else if(a==="accUseRemote"&&choice)useData(choice.data,choice.updated_at);

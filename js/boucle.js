@@ -9,11 +9,11 @@ function playerClickAllowed(){
   playerClickTimes.push(now);
   return true;
 }
-function doClick(auto){if(!S.cls||!S.mon||S.ko>0)return;if(!auto){if(!playerClickAllowed())return;if(fx)FX.click();S.combo=Math.min(comboMax(),S.combo+1);S.comboT=1.5;inc("clicks");mx("maxCombo",Math.floor(S.combo))}let m=.6*clickMult()*(1+S.combo/50);if(Math.random()<talV("t_dore")/100){m*=10;if(fx)floatNum("Frappe dorée !","crit")}hitMon(roll(m,stats()),"click")}
+function doClick(auto){if(!S.cls||!S.mon||S.ko>0)return;if(!auto){if(!playerClickAllowed())return;if(fx)FX.click();S.combo=Math.min(comboMax(),S.combo+1);S.comboT=1.5;inc("clicks");mx("maxCombo",Math.floor(S.combo))}const m=.6*clickMult()*(1+S.combo/50);hitMon(roll(m,stats()),"click")}
 function tick(dt){VIE.tick(dt);
   S.time+=dt;if(!S.cls)return;inc("time",dt);
   const st=stats();
-  if(S.comboT>0)S.comboT-=dt;else if(S.combo>0)S.combo=Math.max(0,S.combo-dt*20*(1-talV("t_combo")/100));
+  if(S.comboT>0)S.comboT-=dt;else if(S.combo>0)S.combo=Math.max(0,S.combo-dt*20);
   if(S.ko>0){S.ko-=dt;if(S.ko<=0){S.ko=0;S.hp=st.maxHp;nextMon()}}
   else{
     S.hp=Math.min(st.maxHp,S.hp+st.maxHp*st.regen*dt);
@@ -21,7 +21,7 @@ function tick(dt){VIE.tick(dt);
     if(!S.mon){S.spawnT-=dt;if(S.spawnT<=0)nextMon()}
     else{
       S.atkT+=dt;while(S.mon&&S.atkT>=st.interval){S.atkT-=st.interval;hitMon(roll(1+S.combo/200,st),"auto");if(S.mon&&Math.random()<st.dbl)hitMon(roll(1+S.combo/200,st),"auto")}
-      {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1){floatNum(fmt(allyAcc),"ally");FX.palAtk()}allyAcc=0;allyFT=0;if(up("allyel")&&EL_DOT[st.el])addDot(EL_DOT[st.el],1)}if(S.mon.hp<=0)kill()}}
+      {const ad=allyDps();if(ad>0&&S.mon){const v=ad*dt;S.mon.hp-=v;inc("dmg",v);inc("allyDmg",v);allyAcc+=v;allyFT+=dt;if(allyFT>=1){if(fx&&allyAcc>=1)floatNum(fmt(allyAcc),"ally");allyAcc=0;allyFT=0;if(up("allyel")&&EL_DOT[st.el])addDot(EL_DOT[st.el],1)}if(S.mon.hp<=0)kill()}}
       {const rate=S.opt.autoClick===false?0:(up("auto1")?2:0)+(up("auto2")?4:0);if(rate&&S.mon){clickAcc+=dt*rate;while(clickAcc>=1&&S.mon){clickAcc-=1;doClick(true)}}}
       S.dots=S.dots.filter(d=>d.until>S.time);S.dots.forEach(d=>{d.acc+=dt;while(d.acc>=1&&S.mon){d.acc-=1;hitMon(roll(d.m,st),"dot")}});
       /* compagnons empoisonneurs, puis dégâts des DoT élémentaires */
@@ -34,15 +34,15 @@ function tick(dt){VIE.tick(dt);
         else{const dmg=Math.max(1,Math.round(S.mon.atk*st.def*(arb("g1")?.9:1)*(.85+Math.random()*.3)));S.hp-=dmg;if(S.hp<=0&&arb("g7")&&ssMon!==S.mon){ssMon=S.mon;S.hp=1;log("Second souffle : vous tenez bon à 1 PV !","g")}if(fx){floatNum("-"+fmt(dmg),"hurt");FX.monAtk()}
           if(S.hp<=0){S.hp=0;S.ko=5;S.buffs=[];S.dots=[];inc("deaths");if(fx)FX.ko();if(S.mode!=="zone"){endMode(false,"K.O.")}else{log(`${MON[S.mon.id].name} vous a mis K.O. Essayez une zone plus facile ou améliorez votre équipement.`,"r");S.mon.hp=S.mon.max;if(S.opt.koRetreat&&S.zone>0){S.zone--;S.mon=null;drawZones();log(`Retour automatique : ${ZONES[S.zone].name}.`,"w")}}}}}}
       CLASSES[S.cls].spells.forEach((sp,i)=>{if(S.auto[sp.id]&&up("sp"+(i+1)))cast(sp,true)});
-      /* Défi automatique (boutique) : boss lancé dès les 10 victoires ; 30 s d'attente après un échec */
-      if(S.opt.autoFightBoss&&up("bossauto")&&S.mode==="zone"&&S.ko<=0&&bossReady(S.zone)&&S.time>=(S.bossAutoT||0))startMode("boss");
-      /* Donjon automatique (boutique) : entre dans le donjon de la zone dès qu'on a sa clé ; le boss passe avant ; 30 s d'attente après un échec */
-      /* Grimpeur : relance la tour 3 s après la fin ; Éclaireur : monde suivant dès que son boss est battu ; Messager : quêtes récupérées */
-      if(up("tourauto")&&S.opt.autoTower&&S.mode==="zone"&&S.ko<=0&&S.towerAgainT&&S.time>=S.towerAgainT){S.towerAgainT=0;startMode("tour")}
-      if(up("zoneauto")&&S.opt.autoZone&&S.mode==="zone"&&S.ko<=0&&S.time>=(S.zoneAutoT||0)){const n=S.zone+1;if(ZONES[n]&&(S.zoneBosses||{})[S.zone]&&S.lvl>=ZONES[n].lvl[0]){S.zoneAutoT=S.time+5;goZone(n);log(`Éclaireur : en route pour ${ZONES[n].name}.`,"g")}}
-      if(up("qauto")&&S.opt.autoQuest&&S.q&&S.q.list)S.q.list.forEach((q,i)=>{if(q.done&&!q.claimed)claimQuest(i)});
-      if(S.opt.autoDungeon&&up("dgauto")&&S.mode==="zone"&&S.ko<=0&&(S.res["cle_"+S.zone]||0)>0&&S.lvl>=ZONES[S.zone].lvl[0]&&S.time>=(S.dgAutoT||0)&&!(S.opt.autoFightBoss&&up("bossauto")&&bossReady(S.zone)))startMode("donjon",S.zone);
     }
+    /* Défi automatique (boutique) : boss lancé dès les 10 victoires ; 30 s d'attente après un échec */
+    if(S.opt.autoFightBoss&&up("bossauto")&&S.mode==="zone"&&S.ko<=0&&bossReady(S.zone)&&S.time>=(S.bossAutoT||0))startMode("boss");
+    /* Grimpeur : lance ou relance la tour tant qu'aucune défaite n'a coupé l'automatisme ; Éclaireur : monde suivant dès que son boss est battu ; Messager : quêtes récupérées */
+    if(up("tourauto")&&S.opt.autoTower&&S.mode==="zone"&&S.ko<=0){S.towerAgainT=0;startMode("tour")}
+    if(up("zoneauto")&&S.opt.autoZone&&S.mode==="zone"&&S.ko<=0&&S.time>=(S.zoneAutoT||0)){const n=S.zone+1;if(ZONES[n]&&(S.zoneBosses||{})[S.zone]&&S.lvl>=ZONES[n].lvl[0]){S.zoneAutoT=S.time+5;goZone(n);log(`Éclaireur : en route pour ${ZONES[n].name}.`,"g")}}
+    if(up("qauto")&&S.opt.autoQuest&&S.q&&S.q.list)S.q.list.forEach((q,i)=>{if(q.done&&!q.claimed)claimQuest(i)});
+    /* Donjon automatique (boutique) : entre dans le donjon de la zone dès qu'on a sa clé ; le boss passe avant ; 30 s d'attente après un échec */
+    if(S.opt.autoDungeon&&up("dgauto")&&S.mode==="zone"&&S.ko<=0&&(S.res["cle_"+S.zone]||0)>0&&S.lvl>=ZONES[S.zone].lvl[0]&&S.time>=(S.dgAutoT||0)&&!(S.opt.autoFightBoss&&up("bossauto")&&bossReady(S.zone)))startMode("donjon",S.zone);
   }
   S.buffs=S.buffs.filter(b=>b.until>S.time);
   if(S.ev){if(S.time>S.ev.until){log(`Fin de l'événement : ${EVENTS.find(e=>e.id===S.ev.id).n}.`);S.ev=null;S.evNext=S.time+EV_MIN+Math.random()*(EV_MAX-EV_MIN);drawWeather();dirty=true}
@@ -57,29 +57,28 @@ function tick(dt){VIE.tick(dt);
   if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier);S.job.t=Math.min(60,(+S.job.t||0)+dt);   /* plafond : une vieille sauvegarde avec un temps énorme ne fige plus le jeu */
     const k=Math.floor(S.job.t/gt);if(k>0){S.job.t-=k*gt;gainGatherN(r.prof,r.id,k)}}
   OUV.tick(dt);
-  autoSellT+=dt;if(autoSellT>=1){autoSellT=0;autoSellFull()}
+  autoSellT+=dt;if(autoSellT>=10){autoSellT=0;autoSellFull()}
 }
 let offSell=null;   /* ventes automatiques comptées pendant le calcul hors ligne */
-function offline(sec){
+/* Progression hors ligne : le stockage correspond au nombre maximal de secondes où le jeu farm en AFK. */
+function offline(rawSec){
   if(!S.cls)return null;
-  if(arb("t7"))sec*=2;   /* Maître du temps : le temps hors ligne compte double */
-  const room=Math.max(0,bagCap()-bagWeight());
-  sec=Math.min(Math.max(0,sec),room);
-  S.afkWeight=sec;
+  const cap=bagCap(),raw=Math.max(0,rawSec),sec=Math.min(raw,cap),capped=raw>cap,doubled=arb("t7"),effSec=doubled?sec*2:sec;   /* Maître du temps : double le rendement sur la durée farmée */
   if(S.mode!=="zone"){S.mode="zone";S.dg=null;S.timer=0;S.mon=null}
-  const sum={sec,xp:0,ecus:0,kills:0,res:{}},st=stats(),z=ZONES[S.zone];
+  const sum={sec,rawSec:raw,cap,capped,doubled,xp:0,ecus:0,kills:0,res:{}},st=stats(),z=ZONES[S.zone];
   const qDone=()=>S.q?S.q.list.filter(q=>q.done).length:0,b0={lvl:S.lvl,jobs:Object.fromEntries(Object.entries(S.jobs).map(([k,j])=>[k,j.lvl])),q:qDone()};offSell={n:0,g:0};
   const lvl=Math.round((z.lvl[0]+Math.min(zoneTop(z),S.lvl+4))/2),ms=monsterStats(Math.max(z.lvl[0],lvl));
   const ef=z.mons.reduce((a,m)=>a+(1-monRes(m.el,st.el)/100),0)/z.mons.length,tk=ms.hp/(st.dps*ef+allyDps())+1.5,danger=ms.atk*st.def/2*tk>st.maxHp*1.5;
-  const kills=danger?0:Math.floor(sec/tk*.5);
+  const kills=danger?0:Math.floor(effSec/tk*.5);
   if(kills>0){sum.kills=kills;sum.xp=Math.round(kills*ms.xp*st.xpM);sum.ecus=gainEcus(kills*ms.ecus*(1+(st.pros-1)/2));S.kills+=kills;
-    const dr=Math.floor(kills*.35*st.pros);z.mons.filter(m=>!m.extra).forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){const got=addRes(m.drop[0],n,true);if(got)sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+got}});
+    const dr=Math.floor(kills*.35*st.pros);z.mons.filter(m=>!m.extra).forEach((m,i)=>{const n=Math.floor(dr/3)+(i<dr%3?1:0);if(n>0){const got=addRes(m.drop[0],n);if(got)sum.res[m.drop[1]]=(sum.res[m.drop[1]]||0)+got}});
     const nm=z.mons.length;z.mons.forEach((m,i)=>{const n=Math.floor(kills/nm)+(i<kills%nm?1:0);if(n>0){qProg("kill",m.id,n);qProg("killEl",m.el,n)}});   /* les quêtes de chasse avancent aussi */
     fx=false;gainXp(sum.xp);fx=true}
-  if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier),t=sec+(+S.job.t||0),k=Math.min(20000,Math.floor(t/gt));   /* 20 000 récoltes max pendant l'absence, comme avant */
+  if(S.job&&RES[S.job.r]){const r=RES[S.job.r],gt=gatherTime(r.prof,r.tier),t=effSec+(+S.job.t||0),k=Math.min(20000,Math.floor(t/gt));   /* 20 000 récoltes max pendant l'absence, comme avant */
     S.job.t=Math.min(gt,t-k*gt);const tot=gainGatherN(r.prof,r.id,k,true);if(tot)sum.res[r.name]=(sum.res[r.name]||0)+tot}
-  OUV.offline(sec*(arb("r4")?2:1),sum);
-  if(arb("m10")){const g=Math.floor(S.ecus*.01*Math.min(24,sec/3600));if(g>0){S.ecus+=g;sum.ecus=(sum.ecus||0)+g}}   /* Intérêts */
+  OUV.offline(effSec*(arb("r4")?2:1),sum);
+  if(arb("m10")){const g=Math.floor(S.ecus*.01*Math.min(24,effSec/3600));if(g>0){S.ecus+=g;sum.ecus=(sum.ecus||0)+g}}   /* Intérêts */
+  autoSellFull();
   sum.danger=danger;sum.lvl=[b0.lvl,S.lvl];sum.jobs=Object.keys(b0.jobs).filter(k=>S.jobs[k]&&S.jobs[k].lvl>b0.jobs[k]).map(k=>[k,b0.jobs[k],S.jobs[k].lvl]);
   sum.qNew=qDone()-b0.q;sum.sold=offSell;offSell=null;return sum;
 }

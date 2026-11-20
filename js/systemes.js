@@ -33,7 +33,7 @@ function takePk(){
   if(p.id==="baluchon"){const z=ZONES[S.zone],got=[];
     z.mons.forEach(m=>{const n=addRes(m.drop[0],rnd(2,5));if(n)got.push(`${n}× ${m.drop[1]}`)});
     const pr=Object.keys(PROFS)[rnd(0,2)],J=S.jobs[pr],t=UNLOCK.filter(u=>u<=J.lvl).length-1,rr=PROFS[pr].res[t],n=addRes(rr[0],rnd(5,12));if(n)got.push(`${n}× ${rr[1]}`);
-    msg=got.join(", ")||"Sac plein, rien ramassé"}
+    msg=got.join(", ")}
   if(p.id==="oeuf"){msg=gold(8)+" · tous les bonus";pkBuff("dmg",3,20,"Frénésie");pkBuff("pros",3,20,"Chance");pkBuff("xp",2,20,"Inspiration")}
   log(`${p.name} : <span class="g">${msg}</span>`);if(fx){toast(`${p.name} : ${msg.replace(/<[^>]+>/g,"")}`);floatNum("✦","crit")}
   dirty=true;

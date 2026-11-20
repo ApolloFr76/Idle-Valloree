@@ -34,9 +34,9 @@ function sessHTML(r){if(!r)return"";
   return`<div class="sessrec"><h3>Votre dernière session</h3><div class="statgrid">${L.map(([a,b])=>`<div><span class="muted">${a}</span><b>${b}</b></div>`).join("")}</div>
     ${r.rec.length?`<p class="small sessbest"><b>Nouveaux records :</b> ${r.rec.join(" · ")}</p>`:""}</div>`}
 function showOffline(s){
-  const h=Math.floor(s.sec/3600),m=Math.floor(s.sec%3600/60),res=Object.entries(s.res);
+  const h=Math.floor(s.sec/3600),m=Math.floor(s.sec%3600/60),sec=Math.round(s.sec%60),res=Object.entries(s.res);
   const o=$("ov");o.hidden=false;
-  o.innerHTML=`<div class="ovc" style="max-width:${s.rec?520:460}px"><h2>${s.none?"Bon retour !":"Pendant votre absence"}</h2><p class="muted">${h?h+" h ":""}${m} min écoulées${s.sec>=8*3600&&!s.none?" (maximum 8 h)":""}.</p>
+  o.innerHTML=`<div class="ovc" style="max-width:${s.rec?520:460}px"><h2>${s.none?"Bon retour !":"Pendant votre absence"}</h2><p class="muted">${h?h+" h ":""}${m||h?m+" min ":sec+" s "}de farm AFK${s.capped&&!s.none?` (limite AFK : ${dur(s.cap)})`:""}${s.doubled?" · Maître du temps ×2":""}.</p>
   ${s.kills?`<p><b class="num">${fmt(s.kills)}</b> monstres vaincus · <span style="color:var(--xp)">+${fmt(s.xp)} XP</span> · <span style="color:var(--gold)">+${fmt(s.ecus)} écus</span></p>`:s.danger?`<p class="small muted">La zone choisie était trop dangereuse pour chasser seul.</p>`:""}
   ${res.length?`<p class="small">${res.map(([n,q])=>`${fmt(q)}× ${n}`).join(" · ")}</p>`:""}${offExtra(s)}${sessHTML(s.rec)}
   <div class="row"><button class="btn pri" data-a="closeOv">Continuer</button></div></div>`;

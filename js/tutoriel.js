@@ -33,7 +33,6 @@ const TIPS=[
   {id:"rare",c:()=>Object.values(LOOT).some(L=>L.some(l=>l.p<.06&&!l.item&&seen(l.id))),t:"Butin rare",d:"Vous avez trouvé un objet rare ! Les objets jamais obtenus apparaissent en « ??? » avec leur taux de drop dans le bestiaire.",tab:"coll"},
   {id:"ach",c:()=>achN()>=1,t:"Succès",d:"Chaque succès donne +1 % de dégâts et d'écus pour toujours. Consultez-les dans la Collection.",tab:"coll"},
   {id:"event",c:()=>!!S.ev,t:"Événement météo",d:"Pendant 2 minutes, un événement change les règles : bonus d'élément, écus doublés, butin doublé…"},
-  {id:"bag",c:()=>bagWeight()>bagCap()*.8,t:"Sac presque plein",d:"Vendez des ressources à l'Inventaire ou au Marché, sinon vous ne ramasserez plus rien. Une option permet la vente automatique.",tab:"inv"},
   {id:"tower",c:()=>S.lvl>=15,t:"La tour infinie",d:"Chaque étage record donne des dégâts jusqu'au prochain Oméga. Les monstres prennent environ 2 niveaux par étage : montez le plus haut possible !",tab:"aventure"},
   {id:"prest",c:()=>S.lvl>=PREST_LVL,t:"Oméga : la renaissance",d:"Vous pouvez renaître contre des éclats d'âme, qui débloquent des talents permanents. Vous repartez au niveau 1, mais bien plus fort.",tab:"prest"},
 ];

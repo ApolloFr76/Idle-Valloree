@@ -29,7 +29,7 @@ function drawModeBar(){
   if(m==="boss"||m==="tour"){const tot=m==="boss"?bossTime():towerTime(),f=$("mtFill");if(f){f.style.width=Math.max(0,S.timer/tot*100)+"%";$("mtBar").classList.toggle("low",S.timer<8);$("mtTxt").textContent=Math.max(0,Math.ceil(S.timer))+" s"}}
 }
 /* Journal : en grand écran (3e colonne) il remplit toute la hauteur disponible, sinon le nombre de lignes choisi dans les options */
-function renderLog(){const e=$("log"),side=e&&e.parentElement&&e.parentElement.id==="sideCard",L0=S.opt?S.opt.logLines:8,L=side&&L0>0?LOG_MAX:L0,now=Date.now();$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${l.c}${l.t&&now-l.t<700?" new":""}">${logIcon(l)}<span>${l.h}</span></div>`).join("")}
+function renderLog(){const e=$("log"),side=e&&e.parentElement&&e.parentElement.id==="sideCard",L0=S.opt?S.opt.logLines:8,L=side&&L0>0?LOG_MAX:L0,now=Date.now();$("log").hidden=L===0;$("log").innerHTML=S.log.slice(0,L).map(l=>`<div class="${esc(l.c||"w")}${l.t&&now-l.t<700?" new":""}">${logIcon(l)}<span>${sanitizeLogHtml(l.h)}</span></div>`).join("")}
 /* Compagnons : voir SCENE.drawPals() dans js/scene.js (équipe en formation) */
 /* live() tourne 10 fois par seconde : on n'écrit dans la page que ce qui a changé,
    sinon le navigateur recalcule styles et mise en page pour rien */
@@ -51,7 +51,7 @@ function live(){
   const ad=allyDps(),buffs=$("buffs");
   {const ko=S.ko>0;if($("ko").hidden===ko){$("ko").hidden=!ko;$("mon").classList.toggle("ko",ko)}if(ko)setT($("koT"),""+Math.ceil(S.ko))}
   const r=S.mon?monRes(MON[S.mon.id].el,st.el):0,elTxt=elChip(st.el,`Vous : ${ELEMS[st.el].n}${S.mon&&st.el!=="neutre"?(r<0?" · efficace":r>0?` · résisté ${r} %`:""):""}`);
-  setH(buffs,elTxt+(S.ev?(e=>`<span class="chip evchip" style="color:${e.c};border-color:${e.c}" title="${e.txt}">${e.n} · ${Math.ceil(S.ev.until-S.time)} s</span>`)(EVENTS.find(e=>e.id===S.ev.id)):"")+(ad>0?`<span class="chip">Compagnons · ${fmt(ad)}/s</span>`:"")+S.buffs.map(b=>`<span class="chip">${b.n} · ${Math.ceil(b.until-S.time)} s</span>`).join("")+(S.dots.length?`<span class="chip">Brûlure · ${Math.ceil(Math.max(...S.dots.map(d=>d.until))-S.time)} s</span>`:"")+(S.job?`<span class="chip">${PROFS[RES[S.job.r].prof].name} : ${RES[S.job.r].name}</span>`:"")+(bagWeight()>=bagCap()?`<span class="chip" style="color:var(--hp)" title="La capacité limite uniquement les gains obtenus hors ligne">Limite AFK atteinte</span>`:""));
+  setH(buffs,elTxt+(S.ev?(e=>`<span class="chip evchip" style="color:${e.c};border-color:${e.c}" title="${e.txt}">${e.n} · ${Math.ceil(S.ev.until-S.time)} s</span>`)(EVENTS.find(e=>e.id===S.ev.id)):"")+(ad>0?`<span class="chip">Compagnons · ${fmt(ad)}/s</span>`:"")+S.buffs.map(b=>`<span class="chip">${esc(b.n)} · ${Math.ceil(b.until-S.time)} s</span>`).join("")+(S.dots.length?`<span class="chip">Malédiction · ${Math.ceil(Math.max(...S.dots.map(d=>d.until))-S.time)} s</span>`:"")+(S.job?`<span class="chip">${PROFS[RES[S.job.r].prof].name} : ${RES[S.job.r].name}</span>`:""));
   CLASSES[S.cls].spells.forEach(sp=>{const b=$("sp-"+sp.id),c=$("cd-"+sp.id);if(!b||!c)return;const rem=Math.max(0,(S.cds[sp.id]||0)-S.time);setW(c,rem/spCd(sp,st)*100);if(b._wait!==rem>0){b._wait=rem>0;b.classList.toggle("wait",b._wait)}});
   if(S.job){const r=RES[S.job.r],e=$("gp-"+r.id);if(e)e.style.width=(S.job.t/gatherTime(r.prof,r.tier)*100)+"%"}
   if(S.tab==="metiers")OUV.list().forEach((w,i)=>{const e=$("ouvp-"+i);if(e&&RES[w.r])e.style.width=Math.min(100,w.t/OUV.time(w)*100)+"%"});

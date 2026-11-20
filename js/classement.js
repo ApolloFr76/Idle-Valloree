@@ -8,9 +8,17 @@ const RANG=(()=>{
   const mine=()=>({pseudo:COMPTE.pseudo(),cls:S.cls,lvl:S.lvl||1,prest:S.prest||0,souls_total:S.soulsTotal||0,tour:(S.tower&&S.tower.best)||0,degats:(()=>{const h=stats().hit;return isFinite(h)?Math.round(h):0})()});
   const errTxt=e=>/classement|PGRST205|42P01|does not exist|schema cache/i.test(JSON.stringify(e||""))?"Le classement n'est pas encore activé sur le serveur.":"Impossible de charger le classement. Vérifiez votre connexion.";
   const redraw=()=>{if(typeof ACC_OPEN!=="undefined"&&ACC_OPEN)ACCUEIL.render();else if(S&&S.cls&&S.tab==="rank")renderPanel(true)};
-  /* envoie la ligne du joueur (appelé après chaque sauvegarde en ligne) */
-  async function send(){if(!COMPTE.logged()||!S||!S.cls)return;const r=Object.assign({user_id:COMPTE.uid()},mine()),p=typeof profS==="function"?profS():null;
+  /* envoie la ligne du joueur (appelé après chaque sauvegarde en ligne) :
+     passe par la fonction RPC sécurisée sync_classement (qui lit saves côté serveur) avec repli sur /rest/v1/classement si la migration SQL n'est pas encore appliquée */
+  async function send(){if(!COMPTE.logged()||!S||!S.cls)return;const m=mine(),r=Object.assign({user_id:COMPTE.uid()},m),p=typeof profS==="function"?profS():null;
     const post=b=>COMPTE.call("/rest/v1/classement?on_conflict=user_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates"},body:JSON.stringify(b)});
+    try{
+      await COMPTE.call("/rest/v1/rpc/sync_classement",{method:"POST",body:JSON.stringify({p_degats:m.degats})});
+      if(p&&!noProf){try{await post(Object.assign({cadre:p.c,embleme:p.e},r))}catch(e){if(/cadre|embleme|PGRST204|42703/i.test(JSON.stringify(e||"")))noProf=true}}
+      sentAt=Date.now();return;
+    }catch(e){
+      if(!/PGRST202|sync_classement|42883/i.test(JSON.stringify(e||"")))throw e;
+    }
     if(p&&!noProf){try{await post(Object.assign({cadre:p.c,embleme:p.e},r));sentAt=Date.now();return}catch(e){if(!/cadre|embleme|PGRST204|42703/i.test(JSON.stringify(e||"")))throw e;noProf=true}}
     await post(r);sentAt=Date.now()}
   async function load(k){const c=C[k]=C[k]||{rows:null,at:0,err:"",busy:false};if(c.busy)return;c.busy=true;

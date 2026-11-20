@@ -19,10 +19,10 @@ Le héros combat tout seul, même quand vous n'êtes pas là. Cliquez sur le mon
 
 ## Sauvegarde
 
-- La partie est enregistrée automatiquement dans le navigateur. Pendant votre absence, le héros continue de gagner (jusqu'à 8 h) ; au retour, un écran résume ces gains et votre dernière session.
+- La partie est enregistrée automatiquement dans le navigateur. En ligne, le stockage est illimité ; pendant votre absence, le héros continue de gagner sur la durée de votre stockage AFK (qui grandit avec votre niveau, vos métiers maîtrisés, les sacs de la boutique et l'arbre Oméga) ; au retour, un écran résume ces gains et votre dernière session.
 - **Copies de secours** : le jeu garde les 3 dernières copies de votre partie (Options › Sauvegarde).
-- **Exporter / importer** : copiez le code de sauvegarde (Options › Sauvegarde) pour changer de navigateur ou garder une copie.
-- **Compte en ligne** (facultatif) : un pseudo et un mot de passe suffisent pour retrouver la partie sur n'importe quel appareil et apparaître au classement. Le petit voyant en haut de l'écran indique si la partie est bien envoyée.
+- **Exporter / importer** : copiez le code de sauvegarde signé (`V2.<signature>.<base64>`, rétrocompatible avec l'ancien format) dans Options › Sauvegarde pour changer de navigateur ou garder une copie.
+- **Compte en ligne** (facultatif) : un pseudo et un mot de passe suffisent pour retrouver la partie sur n'importe quel appareil et apparaître au classement. À la création du compte (et depuis Options › Sauvegarde), un **code de secours** (`VAL-XXXX-XXXX-XXXX`) est généré pour pouvoir réinitialiser votre mot de passe sans e-mail. Le petit voyant en haut de l'écran indique si la partie est bien envoyée.
 
 ## Raccourcis clavier
 
@@ -51,6 +51,10 @@ Le jeu est en HTML, CSS et JavaScript, sans dépendance ni étape de constructio
 - **Code** : `js/` contient des scripts classiques qui partagent la même portée globale ; leur ordre de chargement est celui de `index.html`. `js/controle.js` signale dans la console un script qui utilise un nom pas encore défini ou déjà déclaré ailleurs.
 - **Tests** (Node 18 ou plus) :
   ```
+  node tests/run.js
+  ```
+  Suite rapide sans dépendance (vérifie la syntaxe, l'ordre de chargement `CHARGE.err`, les courbes de statistiques et compagnons, le stockage AFK, les ouvriers, la signature et l'assainissement des sauvegardes, le code de secours et le générateur de biomes). Pour les tests navigateur avec Chromium :
+  ```
   npm install
   npx playwright install chromium
   npm test
@@ -58,6 +62,6 @@ Le jeu est en HTML, CSS et JavaScript, sans dépendance ni étape de constructio
   Les tests ouvrent le jeu dans Chromium, créent un héros, le laissent combattre et vérifient la sauvegarde, les migrations, l'import, l'affichage téléphone et le clavier. Aucune erreur ne doit apparaître dans la console.
 - **Publication** : `npm run assembler` (ou `node outils/assembler.js`) regroupe tous les scripts et feuilles de style dans `_site/` (un seul `jeu.js` et un seul `jeu.css`). Le workflow `.github/workflows/publier.yml` le fait à chaque envoi sur `main` et publie le résultat sur GitHub Pages, une fois la source Pages réglée sur « GitHub Actions ».
 - **Sauvegarde** : `localStorage`, clé `vallore-save-v1`. Pour changer la structure de la partie, ajouter une migration dans `MIG` (`js/etat.js`) : le numéro de version suit tout seul.
-- **Comptes et classement** : Supabase. Les scripts SQL (règles de sécurité, vérifications côté serveur) se lancent à la main dans l'éditeur SQL de Supabase.
+- **Comptes et classement** : Supabase (`supabase/securite.sql`, Edge Function `supabase/functions/reset-password/index.ts`, guide dans `supabase/README.md`).
 
 Tout le contenu (noms, dessins, personnages) est original.

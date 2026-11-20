@@ -1,7 +1,7 @@
-/* Onglet Oméga (renaissance, classe, talents). */
+/* Onglet Oméga (renaissance, arbre, classe). */
 let prestConfirm=false,ctab="ach",otabP="ren";
 function pPrest(){
-  const g=soulsGain(),can=g>0,nA=Object.keys(arbS().own).filter(k=>k!=="echo").length,nB=Object.keys(S.bossLife||{}).length;if(otabP==="tal"||otabP==="perm")otabP="arbre";
+  const a=arbS(),g=soulsGain(),can=g>0,nA=Object.keys(a.own).filter(k=>k!=="echo").length+(a.pacte>=3?1:0),nB=Object.keys(S.bossLife||{}).length;
   /* en-tête compact, toujours visible : éclats, niveau Oméga, bonus et bouton de renaissance */
   let h=`<div class="ohead"><div class="osoul"><span class="soul"></span><b class="num">${fmt(S.souls)}</b><span class="small">éclats</span></div>
     <div class="oinfo"><b>Ω ${S.prest||0}</b><span class="tag">+${10*omegaN()} % XP</span><span class="tag">+${10*omegaN()} % écus</span>${arb("coeur")?`<span class="tag" title="+12,5 % chaque fois que vos éclats gagnés depuis le début sont multipliés par 10">+${fmt(soulBonus())} % dégâts (éclats gagnés)</span>`:""}${arbS().echo?`<span class="tag">Écho ×${arbEcho().toFixed(2)}</span>`:""}</div>

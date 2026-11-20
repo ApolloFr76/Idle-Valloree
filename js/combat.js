@@ -8,20 +8,14 @@ function gainXp(x){
   mx("maxLvl",S.lvl);
   if(up){sfx("level");if(fx){FX.lvl(S.lvl);VIE.cheer()}S.hp=stats().maxHp;dirty=true;drawSpells();drawZones();if(fx)toast(`Niveau ${S.lvl} !`)}
 }
-const bagCap=()=>(1000+100*S.lvl+5000*profMaxN()+(up("sac1")?2000:0)+(up("sac2")?8000:0)+Math.round(talV("t_sac")))*(up("sacx")?2:1)*(arb("r2")?2:1);
-function bagWeight(){const eq=new Set(Object.values(S.equip));let w=0;for(const k in S.res)w+=S.res[k]||0;S.items.forEach(i=>{if(!eq.has(i.u))w+=10});return w}
-let fullWarn=0;
-/* Vente auto (Colporteur, mode « Vente » sur ON) : quand le sac dépasse sa capacité, vend tout le surplus des ressources
-   cochées « Vente auto » (en gardant « Garder toujours »). Appelée chaque seconde par tick() et quand un butin déborde. */
-function autoSellFull(need=0){if(!S.opt.autoSellFull||!up("vendeur")||bagWeight()+need<=bagCap())return false;
+/* Capacité AFK (en secondes) : durée maximale pendant laquelle le jeu farm hors ligne. En ligne, le stockage est illimité. */
+const bagCap=()=>(1000+100*S.lvl+5000*profMaxN()+(up("sac1")?2000:0)+(up("sac2")?8000:0))*(up("sacx")?2:1)*(arb("r2")?2:1);
+/* Vente auto (Colporteur, mode « Vente » sur ON) : vend périodiquement le surplus des ressources
+   cochées « Vente auto » au-dessus de la quantité « Garder toujours ». */
+function autoSellFull(){if(!S.opt.autoSellFull||!up("vendeur"))return false;
   const sur=k=>(S.res[k]||0)-sellKeep(k),L=Object.keys(S.res).filter(k=>RES[k]&&RES[k].kind!=="k"&&RES[k].kind!=="p"&&sellAuto(k)&&sur(k)>0);if(!L.length)return false;
-  let g=0,n=0;L.forEach(k=>{const q=sur(k);g+=sellRes(k,q);n+=q});if(typeof offSell!=="undefined"&&offSell){offSell.n+=n;offSell.g+=g}log(`Sac plein : ${fmt(n)} ressources vendues automatiquement (${L.map(k=>RES[k].name).join(", ")}) : +${fmt(g)} écus.`,"g");if(fx)toast(`Vente auto : +${fmt(g)} écus`);return true}
-function addRes(id,n,limitBag=false){if(!limitBag){if(n<=0)return 0;S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
-  let room=Math.max(0,bagCap()-bagWeight());
-  if(room<n&&S.opt.autoSellFull&&up("vendeur")){autoSellFull(n);room=Math.max(0,bagCap()-bagWeight())}
-  n=Math.min(n,room);
-  if(n<=0){if(S.time-fullWarn>30){fullWarn=S.time;log("Sac plein : vendez des ressources dans l'Inventaire pour continuer à ramasser.","r");if(fx)toast("Sac plein")}return 0}
-  S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
+  let g=0,n=0;L.forEach(k=>{const q=sur(k);g+=sellRes(k,q);n+=q});if(typeof offSell!=="undefined"&&offSell){offSell.n+=n;offSell.g+=g}log(`Colporteur : ${fmt(n)} ressources vendues automatiquement (${L.map(k=>RES[k].name).join(", ")}) : +${fmt(g)} écus.`,"g");if(fx)toast(`Vente auto : +${fmt(g)} écus`);return true}
+function addRes(id,n){if(n<=0)return 0;S.res[id]=(S.res[id]||0)+n;if(S.seen)S.seen[id]=1;dirty=true;return n}
 /* ---------- DoT élémentaires (poison, brûlure, gelure, saignement) : S.mdot[type] = {n charges, until} ---------- */
 function addDot(k,n){if(!S.mon||!DOTS[k]||n<=0)return;S.mdot=S.mdot||{};const D=DOTS[k],e=S.mdot[k]||(S.mdot[k]={n:0,until:0,acc:0});e.n=Math.min(D.max,e.n+n);e.until=S.time+D.d;inc("dotStacks",n)}
 function dotProcs(r,kind){if(kind!=="click"&&kind!=="auto"&&kind!=="spell")return;const t=performance.now();if(!dotProcs.st||t-dotProcs.t>250){dotProcs.t=t;dotProcs.st=stats()}const st=dotProcs.st;
@@ -76,10 +70,7 @@ const FX=(()=>{
     lvl(n){if(!fx)return;const hb=heroBox();if(hb){add("pillar",hb.x+hb.w/2,0,1100);parts(hb.x+hb.w/2,hb.y+hb.h*.6,20,["#ffd36a","#fff6d8","#ffb03c"],90,1000)}banner("Niveau "+n+" !","+"+PTS_PER_LVL+" points","lvl",1500)},
     flash(col){if(!fx)return;const e=add("flash",0,0,500);e.style.background=col},
     omega(n){const o=document.createElement("div");o.className="omegafx";o.innerHTML=`<div class="om">Ω</div><b>Oméga ${n}</b><span>Une nouvelle vie commence</span>`;document.body.appendChild(o);for(let i=0;i<24;i++){const r=document.createElement("i");r.style.setProperty("--a",(i*15)+"deg");o.appendChild(r)}setTimeout(()=>o.remove(),2600)},
-    ach(name){if(!fx)return;banner("Succès !",name,"ach",1500)},
-    /* Un compagnon au hasard bondit vers le monstre quand les dégâts des compagnons s'affichent */
-    palAtk(){return;const L=[...document.querySelectorAll("#pals .pal")];if(!L.length)return;const p=L[Math.random()*L.length|0];replayCls(p,"patk");
-      const m=monBox(),b=rel(p);if(m)setTimeout(()=>parts(m.x+m.w*.3,m.y+m.h*.55,4,["#bfe3ff","#fff"],24,300,3),140)}
+    ach(name){if(!fx)return;banner("Succès !",name,"ach",1500)}
   }})();
 function kill(){
   if(fx){FX.death(MON[S.mon.id].boss);if(!MONDE.coins(MON[S.mon.id].boss?10:1+(Math.random()*3|0)))VIE.coinFly();if(MON[S.mon.id].boss)VIE.cheer()}
@@ -98,7 +89,7 @@ function kill(){
   S.mon=null;S.spawnT=.5;S.dots=[];sfx(d.boss?"boss":"kill");gainXp(xp);
   if(mode==="zone"){S.zk[S.zone]=Math.min(BOSS_KILLS,(S.zk[S.zone]||0)+1);
     if(Math.random()<BKEY_DROP*(up("kmag")?2:1)*(arb("m9")?2:1)){const id="bkey_"+S.zone;S.res[id]=(S.res[id]||0)+1;S.seen[id]=1;log(`Butin exceptionnel : ${RES[id].name} !`,"g");toast(`Butin exceptionnel : ${RES[id].name} !`,1)}}
-  if(mode==="boss"){inc("bosses");inc("bossesLife");(S.bossLife||(S.bossLife={}))[S.zone]=1;qProg("boss");S.zk[S.zone]=0;(S.zoneBosses||(S.zoneBosses={}))[S.zone]=1;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
+  if(mode==="boss"){inc("bosses");(S.bossLife||(S.bossLife={}))[S.zone]=1;qProg("boss");S.zk[S.zone]=0;(S.zoneBosses||(S.zoneBosses={}))[S.zone]=1;if(fx)toast(`${d.name} est vaincu !`);endMode(true)}
   if(mode==="tour"){const f=S.tower.cur;if(f>S.tower.best){S.tower.best=f;const g=gainEcus(towerRec(f));log(`Tour : nouveau record, étage ${f} ! <span class="g">+${fmt(g)} écus</span>`,"g")}mx("tower",S.tower.best);S.tower.cur++;S.timer=towerTime();S.spawnT=.3}
   if(mode==="donjon"){S.dg.wave++;if(S.dg.wave>DG_WAVES){const zi=S.dg.z,z=ZONES[zi],g=gainEcus(farmGold(600)),got=[];
       z.mons.forEach(mm=>{const n=addRes(mm.drop[0],rnd(5,10));if(n)got.push(`${n}× ${mm.drop[1]}`)});

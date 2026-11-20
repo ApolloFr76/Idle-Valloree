@@ -135,20 +135,20 @@ const ALLIES=[["ecuyer","Écuyer Bertin",2,50,"#d9a46a"],["chasseuse","Chasseuse
 const ALLY_DOT={rat:["poison",1],apothicaire:["poison",2],serpent:["poison",3],sorciere:["gelure",.5],golem:["saignement",.5],dragonnet:["brulure",.5],phenix:["brulure",1]};
 /* Boutique d'améliorations */
 const UPGS=[
-  ["gants1","Gants renforcés","Dégâts de clic ×2",300],["auto1","Clic automatique","2 clics par seconde",3000],["sac1","Sac agrandi","+2 000 de poids",1500],
+  ["gants1","Gants renforcés","Dégâts de clic ×2",300],["auto1","Clic automatique","2 clics par seconde",3000],["sac1","Sac agrandi","+2 000 s de farm AFK",1500],
   ["outils1","Outils affûtés","Récolte 20 % plus rapide",2000],["aimant","Aimant à trésors","Objets cliquables 30 % plus fréquents",8000],["bourse","Bourse de marchand","Ventes +25 %",12000],
   ["allie1","Entraînement","Compagnons ×1,5",20000],["sablier","Sablier","+10 s contre les boss et dans la tour",15000],["gants2","Gants de maître","Dégâts de clic ×3",25000],
-  ["rythme","Rythme","Combo maximum 150 au lieu de 100",30000],["sac2","Grand sac","+8 000 de poids",40000],["outils2","Outils de maître","Récolte 20 % plus rapide",60000],
+  ["rythme","Rythme","Combo maximum 150 au lieu de 100",30000],["sac2","Grand sac","+8 000 s de farm AFK",40000],["outils2","Outils de maître","Récolte 20 % plus rapide",60000],
   ["auto2","Clic automatique II","+4 clics par seconde",80000],["allie2","Tactique de groupe","Compagnons ×1,5",5e5],["allie3","Bannière de guerre","Compagnons ×2",2e7],
   ["sp1","Sort automatique I","Votre 1er sort peut se lancer tout seul (case Auto)",5000],["sp2","Sort automatique II","Votre 2e sort peut se lancer tout seul (case Auto)",60000],["sp3","Sort automatique III","Votre 3e sort peut se lancer tout seul (case Auto)",6e5],
   ["potauto","Potions automatiques","Boit une potion de soin tout seul sous le seuil de PV, et enchaîne les potions à effet cochées « Auto » (sagesse, force…) dès que l'effet se termine",10000],["cdr1","Concentration","Sorts 10 % plus rapides",25000],["cdr2","Maîtrise des arcanes","Sorts encore 10 % plus rapides",3e5],
   ["bossauto","Défi automatique","Défie le boss tout seul dès que les 10 victoires sont faites",40000],
   ["dgauto","Explorateur","Entre tout seul dans le donjon de la zone dès que vous avez sa clé (case Donjon auto)",80000],
-  ["vendeur","Colporteur","Vend la plus grosse pile de ressources quand le sac est plein (case dans Options)",15000],["qauto","Messager","Récupère tout seul la récompense des quêtes terminées (case dans Options)",30000],
+  ["vendeur","Colporteur","Vend automatiquement le surplus de ressources au-dessus du seuil gardé (case dans Options)",15000],["qauto","Messager","Récupère tout seul la récompense des quêtes terminées (case dans Options)",30000],
   ["fortauto","Flasque de fortune","Boit une potion de fortune au début de chaque donjon (case dans Options)",45000],["forgex","Forge express","Forge sans mini-jeu : rareté au moins Rare (option Mini-jeu de forge désactivée)",50000],
-  ["zoneauto","Éclaireur","Passe au monde suivant dès que son boss est battu et que vous avez le niveau (case dans Options)",60000],["tourauto","Grimpeur","Relance la tour quand elle se termine, depuis 80 % du record (case dans Options)",100000],
+  ["zoneauto","Éclaireur","Passe au monde suivant dès que son boss est battu et que vous avez le niveau (case dans Options)",60000],["tourauto","Grimpeur","Relance la tour tant que vous gagnez ; une défaite ou un abandon coupe l'automatisme (case dans Options)",100000],
   ["coffre","Coffre garni","+1 objet de la zone dans le coffre final des donjons",120000],["kmag","Aimant à clés","Chance doublée de trouver une clé de boss sur les monstres",150000],
-  ["allyel","Compagnons d'élite","Vos compagnons posent chaque seconde un état de votre élément (poison, brûlure, gelure, saignement)",200000],["sacx","Sac sans fond","Capacité du sac doublée",250000]];
+  ["allyel","Compagnons d'élite","Vos compagnons posent chaque seconde un état de votre élément (poison, brûlure, gelure, saignement)",200000],["sacx","Sac sans fond","Stockage AFK doublé",250000]];
 /* Apparence de l'armure : chaque panoplie a un style (fin de jeu : cristal ; grandes panoplies et boss : plaques ; sinon selon le monstre)
    et la couleur de son élément teintée par celle de son monstre. heroArm() décrit les pièces visibles portées par le héros. */
 const ARM_STYLES=["cuir","robe","ecailles","fourrure"];

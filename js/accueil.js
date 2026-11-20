@@ -14,18 +14,25 @@ const ACCUEIL=(()=>{
   const newBlock=()=>confirmNew?`<div class="accconf">Une nouvelle partie remplace ${COMPTE.logged()?"celle du compte":"celle de ce navigateur"} (${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}). Une copie de secours est gardée dans ce navigateur.
       <div class="accrow"><button class="accsec" data-a="accNewYes">Oui, recommencer</button><button class="accsec" data-a="accNewNo">Annuler</button></div></div>`
     :`<div class="accrow"><button class="accsec" data-a="accNew">Nouvelle partie</button>${COMPTE.logged()&&online===false?`<button class="accsec" data-a="accRetry">Réessayer</button>`:""}</div>`;
-  function logged(){const off=online===false;let h=saveBox(off?"dernière sauvegarde":"sauvegardée");
+  function migBlock(){
+    let info=null,old=null;try{info=JSON.parse(localStorage.getItem(MIG_RZ2_NOTICE_KEY)||"null");old=localStorage.getItem(OLD_TREE_BACKUP)}catch(e){}
+    if(!info)return"";
+    return`<div class="accwarn" style="margin-bottom:8px"><b>Mise à jour de l'Arbre Oméga :</b> votre ancienne partie (${esc(info.name||"Aventurier")}, niveau ${fmt(info.lvl||1)}) a été archivée dans ce navigateur avant la remise à zéro.
+      <div class="accrow" style="margin-top:6px">${old?`<button class="accsec" data-a="accExportOld">Exporter l'ancienne sauvegarde</button>`:""}<button class="accsec" data-a="accDismissMig">Compris</button></div></div>`;
+  }
+  function logged(){const off=online===false;let h=migBlock()+saveBox(off?"dernière sauvegarde":"sauvegardée");
     if(off)h+=`<div class="accwarn">Le serveur ne répond pas. Vous pouvez jouer hors ligne : la partie sera envoyée dès qu'il reviendra.</div>`;
     h+=`<button class="accgo full" data-a="accGo">${hasHero()?(off?"Jouer hors ligne":"Reprendre"):"Créer mon héros"}</button>`;if(hasHero())h+=newBlock();
     h+=`<div class="accrow accme"><span>Connecté : <b>${esc(COMPTE.pseudo())}</b></span><button class="acclink" data-a="accLogout">Se déconnecter</button></div>${COMPTE.msgHtml()}
       <div class="accdot${off?" off":online===null?" wait":""}"><i></i>${off?"Serveur injoignable":online===null?"Connexion au serveur…":"Synchronisé"}</div>`;return h}
-  function guest(){const T=COMPTE.on()?[["inv","Invité"],["con","Connexion"],["cre","Créer un compte"]]:[["inv","Invité"]];if(!T.some(t=>t[0]===tab))tab="inv";
-    let h=T.length>1?`<div class="acctabs" role="tablist">${T.map(([k,n])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?"on":""}" data-a="accTab" data-t="${k}">${n}</button>`).join("")}</div>`:"";
+  function guest(){const T=COMPTE.on()?[["inv","Invité"],["con","Connexion"],["cre","Créer un compte"],["rec","Secours"]]:[["inv","Invité"]];if(!T.some(t=>t[0]===tab))tab="inv";
+    let h=migBlock()+(T.length>1?`<div class="acctabs" role="tablist">${T.map(([k,n])=>`<button role="tab" aria-selected="${tab===k}" class="${tab===k?"on":""}" data-a="accTab" data-t="${k}">${n}</button>`).join("")}</div>`:"");
     h+=`<div class="accbox">`;
     if(tab==="inv"){if(hasHero())h+=`<span class="acclbl">Votre partie d'invité</span>${saveBox("sauvegardée dans ce navigateur")}<button class="accgo full" data-a="accGo">Reprendre</button>${newBlock()}${COMPTE.on()?`<div class="accwarn">Cette partie n'existe que dans ce navigateur. Créez un compte pour la garder : elle y sera envoyée telle quelle.</div>`:""}`;
       else h+=`<label class="acclbl" for="accName">Nom de votre héros</label><div class="accfield"><div class="accin"><input id="accName" maxlength="20" value="${esc(S&&S.name||"Aventurier")}" autocomplete="off" spellcheck="false"></div><button class="accgo" data-a="accGo">Jouer</button></div><div class="acchint">Sans compte, la partie reste dans ce navigateur. Vous pourrez créer un compte plus tard sans rien perdre.</div>`}
-    if(tab==="con")h+=`<label class="acclbl">Pseudo</label><div class="accin"><input class="accP" placeholder="Votre pseudo" autocomplete="username" spellcheck="false" maxlength="20"></div><label class="acclbl">Mot de passe</label>${pw("accW","••••••","current-password")}<button class="accgo full" data-a="accLogin">Se connecter</button>`;
-    if(tab==="cre")h+=`<label class="acclbl">Pseudo</label><div class="accin"><input class="accP" placeholder="3 à 20 caractères" autocomplete="username" spellcheck="false" maxlength="20"></div><label class="acclbl">Mot de passe</label>${pw("accW","6 caractères minimum","new-password")}<label class="acclbl">Confirmer le mot de passe</label>${pw("accW2","Encore une fois","new-password")}<button class="accgo full" data-a="accCreate">Créer mon compte</button>${hasHero()?`<div class="acchint">Votre partie actuelle (${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}) sera gardée et envoyée sur le compte.</div>`:""}`;
+    if(tab==="con")h+=`<label class="acclbl">Pseudo</label><div class="accin"><input class="accP" placeholder="Votre pseudo" autocomplete="username" spellcheck="false" maxlength="20"></div><label class="acclbl">Mot de passe</label>${pw("accW","••••••","current-password")}<button class="accgo full" data-a="accLogin">Se connecter</button><div class="accrow" style="justify-content:center;margin-top:4px"><button type="button" class="acclink" data-a="accTab" data-t="rec">Mot de passe oublié ? Utiliser mon code de secours</button></div>`;
+    if(tab==="cre")h+=`<label class="acclbl">Pseudo</label><div class="accin"><input class="accP" placeholder="3 à 20 caractères" autocomplete="username" spellcheck="false" maxlength="20"></div><label class="acclbl">Mot de passe</label>${pw("accW","6 caractères minimum","new-password")}<label class="acclbl">Confirmer le mot de passe</label>${pw("accW2","Encore une fois","new-password")}<button class="accgo full" data-a="accCreate">Créer mon compte</button><div class="acchint">Un <b>code de secours</b> vous sera affiché à la création pour pouvoir réinitialiser votre mot de passe.</div>${hasHero()?`<div class="acchint">Votre partie actuelle (${CLASSES[S.cls].name} niveau ${fmt(S.lvl)}) sera gardée et envoyée sur le compte.</div>`:""}`;
+    if(tab==="rec")h+=`<label class="acclbl">Pseudo</label><div class="accin"><input class="accP" placeholder="Votre pseudo" autocomplete="username" spellcheck="false" maxlength="20"></div><label class="acclbl">Code de secours</label><div class="accin"><input class="accRec" placeholder="VAL-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" maxlength="24"></div><label class="acclbl">Nouveau mot de passe</label>${pw("accW","6 caractères minimum","new-password")}<label class="acclbl">Confirmer le mot de passe</label>${pw("accW2","Encore une fois","new-password")}<button class="accgo full" data-a="accRecover">Changer le mot de passe</button>`;
     h+=(tab==="inv"?"":COMPTE.msgHtml())+`</div>`;
     if(COMPTE.on())h+=`<div class="accdot"><i></i>Sauvegarde en ligne disponible</div>`;return h}
   function render(){if(!el)return;const keep={};el.querySelectorAll("input").forEach(i=>{keep[i.className||i.id]=i.value});const foc=document.activeElement&&el.contains(document.activeElement)?document.activeElement.className||document.activeElement.id:null;
@@ -45,7 +52,9 @@ const ACCUEIL=(()=>{
       if(a==="accEye"){showPw=!showPw;render();return}
       if(a==="accNew"){confirmNew=true;render();return}if(a==="accNewNo"){confirmNew=false;render();return}
       if(a==="accRetry"){online=null;render();return}
-      if(a==="accNewYes"){try{const cur=localStorage.getItem(SAVE_KEY);if(cur)localStorage.setItem(ACC_BACKUP,cur)}catch(e){}const o=S.opt,n=S.name;S=fresh();S.opt=o;S.name=n;save();confirmNew=false;close();return}
+      if(a==="accDismissMig"){try{localStorage.removeItem(MIG_RZ2_NOTICE_KEY)}catch(e){}render();return}
+      if(a==="accExportOld"){try{const raw=localStorage.getItem(OLD_TREE_BACKUP);if(raw){const code=encodeSave(JSON.parse(raw));navigator.clipboard.writeText(code).then(()=>toast("Ancienne sauvegarde copiée dans le presse-papiers",1)).catch(()=>prompt("Copiez votre ancienne sauvegarde :",code))}}catch(e){}return}
+      if(a==="accNewYes"){resetRun({keepOpts:true,keepName:true,backupKey:ACC_BACKUP});confirmNew=false;close();return}
       if(a==="accGo"){if(!hasHero()){const n=$("accName");if(n)S.name=(n.value||"Aventurier").trim().slice(0,20)||"Aventurier"}close();return}
       if(a==="accHome"){save();location.reload()}}};
 })();

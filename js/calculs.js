@@ -72,8 +72,8 @@ function startMode(m,zi){
 }
 function endMode(win,why){
   if(S.mode==="zone")return;
-  if(!win){sfx("fail");if(S.mode==="boss")S.bossAutoT=S.time+30;if(S.mode==="donjon")S.dgAutoT=S.time+30;if(S.mode==="tour")S.towerAgainT=S.time+3;if(S.mode==="boss")log(`${MON["boss_"+S.zone].name} vous a échappé (${why}). Retentez quand vous voulez.`,"r");
-    if(S.mode==="tour")log(`Tour : vous vous arrêtez à l'étage ${S.tower.cur} (${why}). Record : ${S.tower.best}.`,"r");
+  if(!win){sfx("fail");if(S.mode==="boss")S.bossAutoT=S.time+30;if(S.mode==="donjon")S.dgAutoT=S.time+30;if(S.mode==="boss")log(`${MON["boss_"+S.zone].name} vous a échappé (${why}). Retentez quand vous voulez.`,"r");
+    if(S.mode==="tour"){S.towerAgainT=0;const wasAuto=!!(S.opt&&S.opt.autoTower);if(S.opt)S.opt.autoTower=false;mbSig="";log(`Tour : vous vous arrêtez à l'étage ${S.tower.cur} (${why}). Record : ${S.tower.best}.${wasAuto?" Tour automatique désactivée.":""}`,"r");if(wasAuto)toast("Tour automatique désactivée",1)}
     if(S.mode==="donjon")log(`Donjon raté (${why}). La clé est perdue.`,"r")}
   S.mode="zone";S.dg=null;S.timer=0;S.mon=null;S.spawnT=.6;S.dots=[];drawZones();dirty=true;
 }
