@@ -2,7 +2,7 @@
    en un seul jeu.css, dans le dossier _site/ (moins de requêtes au chargement, surtout sur téléphone).
    Le jeu reste développé tel quel (index.html + js/ + style/, ouvert en file://) : cet outil ne sert qu'au moment de publier.
    Utilisation : node outils/assembler.js        (Node 18 ou plus, aucune dépendance)
-   Publication automatique : .github/workflows/publier.yml le lance à chaque envoi sur main. */
+   Le site en ligne est publié par GitHub Pages depuis la branche main, sans assemblage : cet outil est facultatif. */
 const fs=require("fs"),path=require("path"),crypto=require("crypto");
 const RACINE=path.join(__dirname,".."),SORTIE=path.join(RACINE,"_site");
 const lire=f=>fs.readFileSync(path.join(RACINE,f),"utf8");

@@ -60,7 +60,7 @@ Le jeu est en HTML, CSS et JavaScript, sans dépendance ni étape de constructio
   npm test
   ```
   Les tests ouvrent le jeu dans Chromium, créent un héros, le laissent combattre et vérifient la sauvegarde, les migrations, l'import, l'affichage téléphone et le clavier. Aucune erreur ne doit apparaître dans la console.
-- **Publication** : `npm run assembler` (ou `node outils/assembler.js`) regroupe tous les scripts et feuilles de style dans `_site/` (un seul `jeu.js` et un seul `jeu.css`). Le workflow `.github/workflows/publier.yml` le fait à chaque envoi sur `main` et publie le résultat sur GitHub Pages, une fois la source Pages réglée sur « GitHub Actions ».
+- **Publication** : `npm run assembler` (ou `node outils/assembler.js`) regroupe tous les scripts et feuilles de style dans `_site/` (un seul `jeu.js` et un seul `jeu.css`). Le site en ligne, lui, est publié par GitHub Pages directement depuis la branche `main` (sans assemblage) : cet outil reste disponible pour une publication assemblée plus tard.
 - **Sauvegarde** : `localStorage`, clé `vallore-save-v1`. Pour changer la structure de la partie, ajouter une migration dans `MIG` (`js/etat.js`) : le numéro de version suit tout seul.
 - **Comptes et classement** : Supabase (`supabase/securite.sql`, Edge Function `supabase/functions/reset-password/index.ts`, guide dans `supabase/README.md`).
 
