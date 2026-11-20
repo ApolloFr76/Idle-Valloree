@@ -69,7 +69,7 @@ function sanitizeSave(raw){
   f.tab=typeof raw.tab==="string"?raw.tab.slice(0,16):"perso";
   f.last=clampInt(raw.last??Date.now(),0,Date.now()+86400e3);
   f.afkSince=clampInt(raw.afkSince,0,Date.now()+86400e3);
-  for(const k of["migAuto","migSell","optV2"])if(raw[k])f[k]=1;
+  for(const k of["migAuto","migSell","optV2","_testFixV"])if(raw[k])f[k]=1;
   for(const k of Object.keys(f.alloc))f.alloc[k]=clampInt(raw.alloc?.[k],0,1e9);
   for(const k of safeKeys(raw.res))if(Object.prototype.hasOwnProperty.call(RES,k))f.res[k]=clampInt(raw.res[k],0,1e300);
   if(Array.isArray(raw.items)){
