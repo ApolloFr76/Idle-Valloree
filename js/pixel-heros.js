@@ -612,7 +612,7 @@
     const t=Math.max(0,Math.min(11,tier|0)),k="tl:"+pid+":"+t;
     if(cache[k])return cache[k];
     const pal=(TOOL_PAL[pid]||TOOL_PAL.bucheron)[t],hd=pal[0],tr=pal[1],ha=pal[2],gl=pal[3];
-    const s=new Spr(16,16),W="#ffffff",F={flat:1};
+    const s=new Spr(22,22,3,3),W="#ffffff",F={flat:1};
     let outCol=t>=11?"#341054":t>=9?"#5a1c0a":INK;
     if(pid==="bucheron"){
       s.part(ha,q=>q.line(3,13,11,5,2));
@@ -645,7 +645,7 @@
       s.set(12,10,gl);if(t>=6)s.set(11,10,W);if(t>=9){s.set(14,8,gl);s.set(10,13,gl)}
     }
     if(t>=10){s.set(2,2,gl);s.set(14,13,gl)}
-    s.outline(outCol);return cache[k]=s.url()}
+    s.outline(outCol);return cache[k]=s.fit(16).url()}
 
   /* Sprite animé d'un PNJ ouvrier (64×64 avec marge HP=16, exactement aligné sur heroSpr) */
   function workerSpr(look,pid,tier,anim,f){

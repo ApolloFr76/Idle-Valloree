@@ -58,6 +58,16 @@ const PX=(()=>{
         this.p[i]=T[I>.86&&o.sp!==0?4:I>.62?3:I>.2?2:I>-.25?1:0]}
       return this}
     shadow(cx,cy,rx,ry){this.sh.push([cx,cy,rx,ry]);return this}
+    /* fit(n) : icône n×n tirée d'un sprite dessiné avec une marge (new Spr(n+6,n+6,3,3)). Le cadre est décalé juste assez
+       pour que rien ne soit coupé (contour compris). Si le dessin est plus grand que n, le cadre se place là où il coupe
+       le moins de pixels de couleur (un contour sombre coûte peu), à égalité à sa place d'origine. */
+    fit(n){const w=this.w,h=this.h,cost=(a,b)=>{const L=.3*a[0]+.59*a[1]+.11*a[2];return L<70?.2:1},C=new Float32Array(w),R=new Float32Array(h);
+      for(let y=0;y<h;y++)for(let x=0;x<w;x++){const q=this.p[y*w+x];if(q){const c=cost(q);C[x]+=c;R[y]+=c}}
+      const pl=(A,len,st)=>{let lo=-1,hi=-1;for(let i=0;i<len;i++)if(A[i]){if(lo<0)lo=i;hi=i}if(lo<0)return st;if(hi-lo+1<=n)return lo<st?lo:hi>st+n-1?hi-n+1:st;
+        let best=st,bc=1e9;for(let s=lo;s<=hi-n+1;s++){let c=0;for(let i=0;i<len;i++)if(i<s||i>=s+n)c+=A[i];if(c<bc-1e-6||(Math.abs(c-bc)<1e-6&&Math.abs(s-st)<Math.abs(best-st))){bc=c;best=s}}return best};
+      const sx=pl(C,w,this.ox),sy=pl(R,h,this.oy),o=new Spr(n,n);
+      for(let y=0;y<n;y++)for(let x=0;x<n;x++){const X=x+sx,Y=y+sy;if(X>=0&&Y>=0&&X<w&&Y<h)o.p[y*n+x]=this.p[Y*w+X]}
+      o.sh=this.sh.map(([cx,cy,rx,ry])=>[cx-sx,cy-sy,rx,ry]);return o}
     outline(col=INK){const w=this.w,h=this.h,add=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(!this.p[y*w+x]&&(this.get(x+1,y)||this.get(x-1,y)||this.get(x,y+1)||this.get(x,y-1)))add.push(y*w+x);const c=rgb(col);add.forEach(i=>this.p[i]=c);return this}
     blit(s,ox,oy){for(let y=0;y<s.h;y++)for(let x=0;x<s.w;x++){const c=s.p[y*s.w+x];if(c)this.set(ox+x,oy+y,c)}return this}
     cvs(){const c=document.createElement("canvas");c.width=this.w;c.height=this.h;const x=c.getContext("2d"),I=x.createImageData(this.w,this.h),D=I.data;

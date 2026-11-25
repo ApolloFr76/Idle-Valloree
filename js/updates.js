@@ -1,5 +1,12 @@
 /* Notes de mise à jour accessibles depuis le bouton parchemin. */
 const UPDATE_LOGS=[
+  {date:"24 novembre 2026",title:"Touches affichées sur les boutons, affichage plus net",items:[
+    "Raccourcis clavier visibles : les boutons qui ont une touche (sorts 1, 2, 3, potion S, Défier le boss B, Pause P, onglets C, I, V, F, O, Échap pour fermer ou abandonner) l'affichent dans une encoche sombre à gauche, qui s'enfonce quand on appuie. La touche Espace s'affiche sous le monstre et E sous l'objet à ramasser. Réglage dans Options › Clavier ; masqué sur écran tactile ou si les raccourcis sont désactivés.",
+    "Icônes : les objets, ressources, outils, poissons, plantes et coffres ne sont plus coupés au bord de leur case (queues de poisson, manches d'armes, cornes, fleurs…).",
+    "Compagnons : les boutons Recruter, +10 et Max passent sous le nom, qui reste lisible sur une seule ligne avec ses dégâts et son effet (Poison, Gelure…).",
+    "Options : les intitulés comme « Thème des panneaux » ou « Format des nombres » ne passent plus sous les boutons ; ils se placent au-dessus quand la place manque.",
+    "Collection : les monstres du bestiaire ne recouvrent plus leur nom.",
+    "Métiers et Inventaire : les noms des métiers et les cases de trophées tiennent dans leur bouton, même sur petit écran."]},
   {date:"20 novembre 2026",title:"Panoplies de classe, pixel art évolutif et garde-robe",items:[
     "Refonte des panoplies dans les 12 zones : chaque monde propose désormais 8 panoplies de classe complètes (8 pièces) et 1 panoplie de boss universelle (4 pièces). Combiner 4 pièces de votre classe et 4 pièces du boss forme le meilleur équipement de la zone.",
     "Bonus de classe à 4 pièces : toutes les panoplies restent équipables par n'importe quelle classe, mais leur bonus signature de 4 pièces ne s'active que si vous jouez la classe correspondante.",

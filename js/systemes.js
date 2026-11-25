@@ -17,7 +17,7 @@ function questXpReward(z,count=50){const{st,ms}=questRewardStats(z);return Math.
 function spawnPk(){let r=Math.random()*PICKUPS.reduce((a,p)=>a+p.w,0),p=PICKUPS[0];for(const q of PICKUPS){if((r-=q.w)<0){p=q;break}}
   S.pk={id:p.id,until:S.time+PK_LIFE,x:12+Math.random()*76,y:18+Math.random()*55};drawPk()}
 function drawPk(){const old=$("pk");if(old)old.remove();if(!S.pk)return;const p=PICKUPS.find(q=>q.id===S.pk.id);
-  const b=document.createElement("button");b.id="pk";b.className="pickup";b.dataset.a="pickup";b.title=p.name;b.setAttribute("aria-label","Attraper : "+p.name);
+  const b=document.createElement("button");b.id="pk";b.className="pickup";b.dataset.a="pickup";b.dataset.key="E";b.title=p.name;b.setAttribute("aria-label","Attraper : "+p.name);
   b.style.left=S.pk.x+"%";b.style.top=S.pk.y+"%";b.style.setProperty("--g",p.g);b.innerHTML=PX.img(PX.pickup(p.id));$("arena").appendChild(b)}
 function pkBuff(k,v,d,n){S.buffs=S.buffs.filter(b=>b.n!==n);S.buffs.push({k,v,until:S.time+d,n})}
 function takePk(){
@@ -72,7 +72,7 @@ function drink(id,auto){const r=RES[id];if(!r||r.kind!=="p"||!(S.res[id]>0)||S.k
   if(!auto)log(`Vous buvez : ${r.name}.`,"w");dirty=true;drawPots()}
 let potSig="";
 function drawPots(){const ids=POTIONS.map(p=>p[0]).filter(id=>S.res[id]>0),AB=S.autoBuff||{},heal1=ids.find(id=>RES[id].fx.heal),sig=ids.map(id=>id+S.res[id]+(AB[id]?"a":"")).join()+S.autoPot+up("potauto");if(sig===potSig)return;potSig=sig;
-  $("pots").innerHTML=ids.length||S.autoPot?ids.map(id=>{const b=`<button class="btn" data-a="drink" data-r="${id}" data-tip="r:${id}" style="--ic:${RES[id].col}" title="${RES[id].txt}"><span style="color:${RES[id].col}">${glyph("potion").replace("<svg",'<svg style="width:14px;height:14px;vertical-align:-2px"')}</span> ${RES[id].name} <span class="num muted">×${S.res[id]}</span></button>`;
+  $("pots").innerHTML=ids.length||S.autoPot?ids.map(id=>{const b=`<button class="btn" data-a="drink" data-r="${id}"${id===["p_gsoin","p_soin"].find(q=>S.res[q]>0)?` data-key="S"`:""} data-tip="r:${id}" style="--ic:${RES[id].col}" title="${RES[id].txt}"><span style="color:${RES[id].col}">${glyph("potion").replace("<svg",'<svg style="width:14px;height:14px;vertical-align:-2px"')}</span> ${RES[id].name} <span class="num muted">×${S.res[id]}</span></button>`;
     if(!up("potauto"))return b;
     if(RES[id].fx.k)return`<span class="potw">${b}<label class="autot potab" title="Boire la suivante dès que l'effet se termine"><input type="checkbox" data-autobuff="${id}" ${AB[id]?"checked":""}> Auto</label></span>`;
     return id===heal1?`<span class="potw">${b}<label class="autot potab" title="Boire une potion de soin sous ${S.opt.potThreshold} % de PV"><input type="checkbox" id="autoPot" ${S.autoPot?"checked":""}> Auto</label></span>`:b}).join("")+(up("potauto")&&!heal1?`<label class="autot" style="margin:0"><input type="checkbox" id="autoPot" ${S.autoPot?"checked":""}> Boire une potion de soin sous ${S.opt.potThreshold} % de PV</label>`:""):""}

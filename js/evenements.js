@@ -136,6 +136,7 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(mg&&k==="escape"){mgClose();return}
   if(k==="escape"&&UI.o&&$("ov").hidden&&!forge&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){UI.open(false);return}
   if(ACC_OPEN||!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge||mg)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
+  if(!e.repeat){const kl={" ":"Espace",a:"Espace",escape:"Échap"}[k]||(/^[123bespcivfo]$/.test(k)?k.toUpperCase():"");if(kl)kcFlash(kl)}
   if(k==="p"){setPause(!paused);e.preventDefault();return}if(paused)return;
   if(k===" "||k==="a"){e.preventDefault();doClick(false);return}
   if(["1","2","3"].includes(k)){const sp=CLASSES[S.cls].spells[+k-1];if(sp)cast(sp,false);return}

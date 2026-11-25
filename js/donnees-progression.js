@@ -98,4 +98,4 @@ const OPT_DEF={
   textSize:100,reduceMotion:false,dmgNums:"all",weatherFx:true,shake:true,logLines:8,numFmt:"short",showHint:true,
   potThreshold:30,autoSellFull:false,koRetreat:false,autoFightBoss:true,autoDungeon:true,autoTower:false,autoQuest:true,autoZone:true,autoFortune:true,autoClick:true,pauseHidden:false,confirmPrest:true,forgeQte:true,tips:true,goals:true,goalsOpen:true,goalsN:4,forgeSpeed:1,
   toasts:"all",logKills:true,logLoot:true,logQuests:true,
-  keys:true,saveEvery:10,offline:true,showArmor:true,theme:"parchemin",fps:60};
+  keys:true,keyCaps:true,saveEvery:10,offline:true,showArmor:true,theme:"parchemin",fps:60};

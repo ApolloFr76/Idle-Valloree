@@ -2,7 +2,7 @@
 (()=>{const{cache,rgb,mix,rng,LIGHT,DARK,INK,Spr,SPR,framesOf}=PX._;
   /* ---------- Objets à ramasser (16×16) ---------- */
   function pickup(id){
-    const k="p:"+id;if(cache[k])return cache[k];const s=new Spr(16,16);
+    const k="p:"+id;if(cache[k])return cache[k];const s=new Spr(22,22,3,3);
     if(id==="coffre"){s.part("#9a5f2e",q=>q.rect(2,7,12,7));s.part("#c07e40",q=>{q.rect(2,4,12,3);q.rect(3,3,10,1)});s.part("#f7c948",q=>{q.rect(2,7,12,1);q.rect(7,7,2,3)},{flat:1});s.set(7,9,"#6b432a");s.set(8,9,"#6b432a")}
     if(id==="etoile"){s.part("#ffe27a",q=>{q.poly([[8,1],[10,6],[14,6],[11,9],[13,14],[8,11],[3,14],[5,9],[1,6],[6,6]])});s.set(6,7,"#6b4a10");s.set(9,7,"#6b4a10");s.set(7,9,"#6b4a10");s.set(8,9,"#6b4a10")}
     if(id==="trefle"){s.part("#3f7d33",q=>q.line(8,9,11,14),{flat:1});s.part("#74d05e",q=>{q.ell(4.5,4.5,2.2,2.2);q.ell(10.5,4.5,2.2,2.2);q.ell(4.5,10.5,2.2,2.2);q.ell(10.5,10.5,2.2,2.2);q.rect(6,6,3,3)});s.set(7,7,"#d6ffc2");s.set(4,4,"#d6ffc2");s.set(10,4,"#d6ffc2");s.set(4,10,"#d6ffc2");s.set(10,10,"#d6ffc2")}
@@ -10,12 +10,12 @@
     if(id==="baluchon"){s.part("#e0c68e",q=>{q.ell(8,10,6,4.5);q.rect(4,5,8,4)});s.part("#c9483a",q=>{q.rect(5,4,6,1);q.px(4,3);q.px(11,3);q.px(3,2);q.px(12,2)},{flat:1});s.part("#b89a5a",q=>q.rect(6,1,4,3))}
     if(id==="parchemin"){s.part("#f6e7c2",q=>q.rect(3,3,10,10));s.part("#d8bf88",q=>{q.rect(2,1,12,2);q.rect(2,13,12,2)});s.part("#8a6fd0",q=>{q.rect(5,5,6,1);q.rect(5,7,6,1);q.rect(5,9,4,1)},{flat:1})}
     if(id==="oeuf"){s.part("#ffd45a",q=>{q.ell(8,8,5,6);q.ell(8,5,3.6,4)});s.part("#ff8ab0",q=>q.rect(5,6,2,2),{flat:1});s.part("#5ab4e8",q=>q.rect(9,9,2,2),{flat:1});s.part("#7fd35e",q=>q.rect(9,4,1,2),{flat:1});s.part("#ef7d4a",q=>q.rect(6,11,2,1),{flat:1})}
-    s.outline();return cache[k]=s.url()}
+    s.outline();return cache[k]=s.fit(16).url()}
 
   /* ---------- Équipement (16×16) : silhouette propre à chaque classe (+ Boss), palette et menace évolutives par zone ---------- */
   function item(slot,col,it){
     const k="i:"+(it&&it.id?it.id:slot+col);if(cache[k])return cache[k];
-    const s=new Spr(16,16),cls=(it&&it.cls)||(it&&it.boss?"boss":"guerrier"),boss=!!(it&&it.boss);
+    const s=new Spr(22,22,3,3),cls=(it&&it.cls)||(it&&it.boss?"boss":"guerrier"),boss=!!(it&&it.boss);
     const th=(it&&typeof ZONE_STYLE!=="undefined"&&ZONE_STYLE[it.z])||{pri:col,sec:mix(col,LIGHT,.35),met:"#dfe5ec",acc:"#f7c948",tier:1,motif:"leaf"};
     const P1=th.pri,P2=th.sec,MT=th.met,AC=th.acc,t=th.tier||0,z=it?it.z:0;
     const DK=mix(P1,DARK,.45),LT=mix(P1,LIGHT,.45),GO=boss?"#ffd84a":(t>=3?AC:"#f2c14e"),W="#ffffff",F={flat:1};
@@ -225,7 +225,7 @@
       if(z===11){s.set(2,1,a2);s.set(14,2,a1)}
     }else if(t===3||boss){spark(14,1,boss?"#ffd84a":AC)}
     const outCol=z===11?"#3b125c":z===9?"#4a1408":z===10?"#241c4a":boss?"#523008":INK;
-    s.outline(outCol);return cache[k]=s.url()}
+    s.outline(outCol);return cache[k]=s.fit(16).url()}
 
   /* ---------- Ressources de métier (16×16) : 12 formes et silhouettes distinctes par métier ---------- */
   const RC={pecheur:["#c8b08a","#8fb06a","#6fa35a","#b0643a","#e2b66a","#8fc7e0","#f2d94a","#5fae4a","#e8684a","#f0622c","#a8e8e0","#5a4fa8"],
@@ -235,7 +235,7 @@
     herboriste:["#4fa642","#8ab298","#3fd08c","#a8de54","#f6f8ff","#b868d8","#9a74f0","#6fb84a","#68349a","#e2b860","#ff78c8","#ff92c8"]};
   function res(prof,t){
     const k="r:"+prof+t;if(cache[k])return cache[k];
-    const s=new Spr(16,16),idx=((t|0)%12+12)%12,c=(RC[prof]||RC.bucheron)[idx];
+    const s=new Spr(22,22,3,3),idx=((t|0)%12+12)%12,c=(RC[prof]||RC.bucheron)[idx];
     const lt=mix(c,LIGHT,.5),dk=mix(c,DARK,.45),W="#ffffff",F={flat:1};
     let outCol=INK;
 
@@ -491,13 +491,13 @@
         s.set(8,6,"#fff2a8");s.set(8,3,W);outCol="#3b125c";
       }
     }
-    s.outline(outCol);return cache[k]=s.url()}
+    s.outline(outCol);return cache[k]=s.fit(16).url()}
 
   /* ---------- Butins, clés, potions, familiers (16×16) ---------- */
   function drop(kind,col,rare,id){
     const d=id||"";
     const k="d:"+kind+col+(rare?1:0)+d;if(cache[k])return cache[k];
-    const s=new Spr(16,16),W="#ffffff",F={flat:1},lt=mix(col,W,.58),dk=mix(col,DARK,.45),sh=mix(col,INK,.62);
+    const s=new Spr(22,22,3,3),W="#ffffff",F={flat:1},lt=mix(col,W,.58),dk=mix(col,DARK,.45),sh=mix(col,INK,.62);
     let outCol=rare?"#8a4a08":INK;
     if(kind==="gear"){
       if(d==="b_rouage"){
@@ -1057,14 +1057,14 @@
       s.part(W,q=>{q.line(7,3,6,9);q.px(11,6);q.rect(4,12,9,1)},F);
     }
     if(rare){["#ffffff","#fff2a8"].forEach((c,i)=>{const x=i?13:2,y=i?12:2;s.set(x,y,c);s.set(x-1,y,c);s.set(x+1,y,c);s.set(x,y-1,c);s.set(x,y+1,c)})}
-    s.outline(outCol);return cache[k]=s.url()}
+    s.outline(outCol);return cache[k]=s.fit(16).url()}
   /* clé de boss : anneau doré couronné serti d'une gemme à la couleur du boss, tige et panneton en fer sombre */
-  function bkey(col){const k="bkey"+col;if(cache[k])return cache[k];const s=new Spr(16,16),G="#f2c14e",IR="#5c6078";
+  function bkey(col){const k="bkey"+col;if(cache[k])return cache[k];const s=new Spr(22,22,3,3),G="#f2c14e",IR="#5c6078";
     s.part(IR,q=>{q.line(7,8,12,13,2);q.rect(11,10,3,1);q.rect(12,11,1,1);q.rect(9,12,1,2);q.rect(8,13,2,1)});
     s.part(G,q=>{q.ell(5,6,3.8,3.8);q.clear(4,5,3,3);q.px(2,1);q.px(5,0);q.px(8,1);q.rect(2,2,7,1)},{lt:.35});
-    s.part(col,q=>q.ell(5,6,1.5,1.5),{lt:.5});s.outline();return cache[k]=s.url()}
-  function key(){if(cache.key)return cache.key;const s=new Spr(16,16),G="#f7c948";s.part(G,q=>{q.ell(5,5,3.4,3.4);q.clear(4,4,2,2);q.line(7,7,12,12,2);q.rect(11,10,3,1);q.rect(9,12,1,2)});s.outline();return cache.key=s.url()}
-  function potion(col){const k="po:"+col;if(cache[k])return cache[k];const s=new Spr(16,16);s.part("#dfeef5",q=>{q.rect(7,3,3,4);q.ell(8.5,10,4.6,4.4)},{lt:.6});s.part(col,q=>{q.ell(8.5,10.5,3.6,3.4);q.clear(0,0,16,9)});s.part(col,q=>q.rect(5,9,7,1),{flat:1});s.part("#8a5a34",q=>q.rect(6,1,5,2));s.set(6,8,"#ffffff");s.set(6,9,"#ffffff");s.outline();return cache[k]=s.url()}
+    s.part(col,q=>q.ell(5,6,1.5,1.5),{lt:.5});s.outline();return cache[k]=s.fit(16).url()}
+  function key(){if(cache.key)return cache.key;const s=new Spr(22,22,3,3),G="#f7c948";s.part(G,q=>{q.ell(5,5,3.4,3.4);q.clear(4,4,2,2);q.line(7,7,12,12,2);q.rect(11,10,3,1);q.rect(9,12,1,2)});s.outline();return cache.key=s.fit(16).url()}
+  function potion(col){const k="po:"+col;if(cache[k])return cache[k];const s=new Spr(22,22,3,3);s.part("#dfeef5",q=>{q.rect(7,3,3,4);q.ell(8.5,10,4.6,4.4)},{lt:.6});s.part(col,q=>{q.ell(8.5,10.5,3.6,3.4);q.clear(0,0,16,9)});s.part(col,q=>q.rect(5,9,7,1),{flat:1});s.part("#8a5a34",q=>q.rect(6,1,5,2));s.set(6,8,"#ffffff");s.set(6,9,"#ffffff");s.outline();return cache[k]=s.fit(16).url()}
   function pet(col){const k="pe:"+col;if(cache[k])return cache[k];const s=new Spr(16,16);s.part(col,q=>{q.poly([[3,7],[4,2],[7,5]]);q.poly([[13,7],[12,2],[9,5]])});s.part(col,q=>{q.ell(8,9,5.4,4.6);q.rect(4,11,9,3)},{lt:.5});s.set(6,8,"#1c1020");s.set(10,8,"#1c1020");s.set(6,9,"#1c1020");s.set(10,9,"#1c1020");s.set(8,11,"#1c1020");s.set(4,11,"#ff8a9a");s.set(12,11,"#ff8a9a");s.outline();SPR[k]=s;return cache[k]=s.url()}
 
   /* ---------- Familiers et montures (dessin 24×24 dans un cadre 28×28, tournés vers la droite) : apparence décrite dans ITEMS[id].look ---------- */
@@ -1120,7 +1120,7 @@
   function famFrames(id,anim,look){const k="fa:"+id;if(!SPR[k])fam(id,look);return framesOf(k,SPR[k],anim,true)}
 
   /* Plantes du mini-jeu de mémoire : 6 formes ET 6 couleurs bien différentes pour ne pas les confondre */
-  function plant(i){const k="pl:"+i;if(cache[k])return cache[k];const s=new Spr(16,16),G="#3f8a3a",L="#5fb04a";
+  function plant(i){const k="pl:"+i;if(cache[k])return cache[k];const s=new Spr(22,22,3,3),G="#3f8a3a",L="#5fb04a";
     const stem=()=>{s.part(G,q=>q.line(8,15,8,8),{flat:1});s.part(L,q=>{q.ell(5,12,2.6,1.4);q.ell(11,11,2.6,1.4)})};
     if(i===0){stem();s.part("#e8323c",q=>{[[8,3],[5,5],[11,5],[6,8],[10,8]].forEach(([x,y])=>q.ell(x,y,2.2,2.2))});s.part("#ffe04a",q=>q.ell(8,6,1.4,1.4),{flat:1})}          /* coquelicot rouge, 5 pétales */
     if(i===1){stem();s.part("#2f6ae0",q=>q.poly([[4,2],[8,6],[12,2],[12,8],[8,10],[4,8]]))}                                                                                   /* tulipe bleue */
@@ -1128,11 +1128,11 @@
     if(i===3){stem();s.part("#a040e0",q=>{for(let y=1;y<9;y+=2)q.ell(8,y+1,2.4-y*.15,1.2)})}                                                                                    /* lavande violette en épi */
     if(i===4){s.part("#f4f4f4",q=>{q.ell(8,6,6,3.6);q.rect(6,6,4,8)});s.part("#e04848",q=>{q.px(5,5);q.px(10,4);q.px(8,7);q.px(11,7)},{flat:1})}                          /* champignon blanc à points rouges */
     if(i===5){s.part("#2a9a3a",q=>{q.poly([[8,1],[13,6],[11,12],[8,15],[5,12],[3,6]])});s.part("#a8f08a",q=>q.line(8,3,8,14),{flat:1})}                                    /* feuille vert vif */
-    s.outline();return cache[k]=s.url()}
+    s.outline();return cache[k]=s.fit(16).url()}
   /* Poisson vu de côté (16×16) : 12 silhouettes distinctes (une par palier/zone).
      rk : 0 commun, 1 rare (rayures, éclat), 2 légendaire (contour doré, couronne), 3 mythique (arc-en-ciel). */
   function fish(col,rk=0,t=0){const k="fi:"+col+rk+t;if(cache[k])return cache[k];
-    const s=new Spr(16,16),idx=((t|0)%12+12)%12,dk=mix(col,DARK,.38),lt=mix(col,"#ffffff",.55),big=rk===2,F={flat:1};
+    const s=new Spr(22,22,3,3),idx=((t|0)%12+12)%12,dk=mix(col,DARK,.38),lt=mix(col,"#ffffff",.55),big=rk===2,F={flat:1};
     let ex=12,ey=7;
     if(idx===0){
       /* 0 Goujon : petit poisson rond de rivière */
@@ -1207,9 +1207,9 @@
     if(rk>=1){const g=rk===2?"#ffd84a":"#ffffff";s.set(14,2,g);s.set(13,2,g);s.set(15,2,g);s.set(14,1,g);s.set(14,3,g)}
     if(rk===2)["#ffd84a","#fff2a8","#ffd84a"].forEach((c,i)=>s.set(6+i*2,0,c));
     if(rk===3){/* mythique : écailles arc-en-ciel, nageoires dorées, étincelles */const RB=["#ff5a5a","#ffa04a","#ffe04a","#6ad86a","#5ab0ff","#a87aff"];
-      for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=s.p[y*16+x];if(c&&x>=3&&x<=13&&y>=4&&y<=12&&!(x===ex&&(y===ey||y===ey+1)))s.p[y*16+x]=rgb(RB[Math.min(5,Math.max(0,Math.floor((x-3)/1.9)))])}
+      for(let y=0;y<16;y++)for(let x=0;x<16;x++){const c=s.p[(y+3)*22+x+3];if(c&&x>=3&&x<=13&&y>=4&&y<=12&&!(x===ex&&(y===ey||y===ey+1)))s.p[(y+3)*22+x+3]=rgb(RB[Math.min(5,Math.max(0,Math.floor((x-3)/1.9)))])}
       s.outline("#8a3a6a");s.set(ex,ey,"#ffffff");s.set(ex,ey+1,"#1c1020");[[1,1],[14,1],[15,13],[0,14],[8,0]].forEach(([x,y])=>s.set(x,y,"#fff8e6"))}
-    return cache[k]=s.url()}
+    return cache[k]=s.fit(16).url()}
 
   /* ---------- Accessoires de décor ---------- */
   const prop={
