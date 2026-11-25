@@ -374,7 +374,7 @@ input[type=text]{background:#121922;border:1px solid var(--line);color:var(--fg)
 *,*::before,*::after{border-radius:0!important}
 img.px{image-rendering:pixelated;image-rendering:crisp-edges;image-rendering:pixelated;user-select:none;-webkit-user-select:none}
 /* monstres : image 46×46 (marge de 3 px autour du repère 40×40), agrandie d'autant pour garder la même taille de pixel */
-img.mpx{scale:1.15}
+#monBtn img.mpx{scale:1.15}
 html,body{background-color:#2a1712}
 body{font-size:18px;line-height:1.3;font-synthesis:none;background-image:none;background-size:128px 128px;image-rendering:pixelated;font-weight:500}
 h1,h2,h3{letter-spacing:.3px}
@@ -1502,3 +1502,33 @@ html.th-contraste .btn{text-shadow:1px 1px 0 #000,-1px 0 0 #000}
 .tminf b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tminf span{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+
+/* ===== Chevauchements corrigés (vérification de toutes les pages) ===== */
+/* Compagnons : les boutons passent sous le texte, qui garde toute la largeur */
+.ally{grid-template-columns:60px minmax(0,1fr)}
+.ally .av{grid-row:span 2}
+.ally .btns{grid-column:2;justify-content:flex-start}
+.ally .dchip{white-space:nowrap;display:inline-block}
+/* Options : l'intitulé passe au-dessus du réglage quand la place manque */
+.orow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.orow .ol{flex:1 1 10em;min-width:0;overflow-wrap:break-word}
+.orow .oc{flex:0 1 auto;margin-left:auto;min-width:0}
+/* Métiers en fenêtre étroite : icône au-dessus du nom */
+@container (max-width:900px){.mprof{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center}.mpn{align-items:center}}
+/* Trophées : le nom de l'emplacement tient dans la case */
+.trophies .eslot .lb{font-size:9px;letter-spacing:0;white-space:nowrap;overflow:hidden}
+/* ===== Touches clavier sur les boutons : encoche sombre à gauche (body.kcaps, attribut data-key) ===== */
+body.kcaps [data-key]{--kw:22px}
+body.kcaps .spell[data-key],body.kcaps .btn[data-key],body.kcaps .tab[data-key]{position:relative;padding-left:calc(var(--kw) + 8px)!important}
+body.kcaps .spell[data-key]::before,body.kcaps .btn[data-key]::before,body.kcaps .tab[data-key]::before{content:attr(data-key);position:absolute;left:0;top:0;bottom:0;width:var(--kw);display:flex;align-items:center;justify-content:center;
+  background:rgba(28,16,32,.38);border-right:2px solid var(--ink);color:#fff;font:700 10px/1 var(--display);letter-spacing:0;text-shadow:none;pointer-events:none;transition:background .1s}
+body.kcaps .btn[data-key="Échap"],body.kcaps .btn[data-key="Espace"]{--kw:34px}
+body.kcaps .btn[data-key="Échap"]::before{font-size:9px}
+body.kcaps .spell[data-key] .cd{left:calc(var(--kw) + 3px);max-width:calc(100% - var(--kw) - 6px)}
+body.kcaps .spell[data-key]:disabled::before{opacity:.5}
+/* monstre et objet à ramasser : pas de texte, la touche se pose juste dessous */
+body.kcaps #monBtn[data-key],body.kcaps .pickup[data-key]{position:relative}
+body.kcaps #monBtn[data-key]::before,body.kcaps .pickup[data-key]::before{content:attr(data-key);position:absolute;top:100%;left:50%;transform:translateX(-50%);z-index:3;
+  background:rgba(28,16,32,.6);border:2px solid var(--ink);color:#fff;font:700 10px/1 var(--display);padding:3px 5px 2px;white-space:nowrap;pointer-events:none}
+body.kcaps .pickup[data-key]{position:absolute}
+body.kcaps [data-key].kchit::before{background:var(--sun);color:var(--ink)}
