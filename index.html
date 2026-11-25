@@ -15,7 +15,7 @@
     <canvas class="wcv" id="wcv" aria-hidden="true"></canvas>
     <div class="mon" id="mon"><div class="pals" id="pals" aria-hidden="true"></div><div class="queue" id="queue" aria-hidden="true"></div><img class="px afam" id="afam" alt="" hidden>
       <div class="hslot"><div class="htag" aria-label="Vos points de vie"><div class="bar hp"><i class="lag" id="pHpLag"></i><i id="pHpBar"></i></div><span class="num" id="pHpTxt"></span></div><img class="px ahero" id="ahero" alt="" hidden></div>
-      <div class="mslot"><div class="mtag"><div class="mhead"><h3 id="mName">…</h3><span class="mlvl num" id="mLvl"></span></div><div class="mel" id="mEl"></div><div class="bar mhp"><i class="lag" id="mHpLag"></i><i id="mHpBar"></i></div><span class="num mhptxt" id="mHpTxt"></span></div><button id="monBtn" data-tip="cur:mon" aria-label="Frapper le monstre"></button><div class="mdots" id="mdots" aria-hidden="true"></div></div></div>
+      <div class="mslot"><div class="mtag"><div class="mhead"><h3 id="mName">…</h3><span class="mlvl num" id="mLvl"></span></div><div class="mel" id="mEl"></div><div class="bar mhp"><i class="lag" id="mHpLag"></i><i id="mHpBar"></i></div><span class="num mhptxt" id="mHpTxt"></span></div><button id="monBtn" data-key="Espace" data-tip="cur:mon" aria-label="Frapper le monstre"></button><div class="mdots" id="mdots" aria-hidden="true"></div></div></div>
     <div class="weather" id="weather"></div>
     <div class="bossbar" id="bossBar" hidden><b id="bbName"></b><div class="bar mhp"><i class="lag" id="bbLag"></i><i id="bbFill"></i></div><span class="num" id="bbTxt"></span></div>
     <div class="letterbox" id="letterbox" aria-hidden="true"></div>
@@ -29,7 +29,7 @@
     <button class="btn updatesBtn" id="updatesBtn" data-a="updates" title="Notes de mise à jour" aria-label="Ouvrir les notes de mise à jour" style="order:7"><span id="updatesIcon" aria-hidden="true"></span><span class="dot" id="updatesDot" hidden></span></button>
     <button class="btn sync" id="syncBtn" data-a="syncInfo" hidden style="order:6"><i class="sdot" aria-hidden="true"></i><span class="slbl">Synchronisé</span></button>
     <button class="btn" id="helpBtn" data-a="help" title="Aide" style="order:8">?</button>
-    <button class="btn" id="pauseBtn" data-a="pause" title="Pause (touche P)" style="order:9">Pause</button>
+    <button class="btn" id="pauseBtn" data-a="pause" data-key="P" title="Pause (touche P)" style="order:9">Pause</button>
     <div class="hero" id="heroBox"></div>
     <div class="xpbox" data-tip="hd:xp">
       <div class="lbl"><span id="lvlTxt">Niveau 1</span><span class="num" id="xpTxt">0 / 0 XP</span></div>
@@ -57,7 +57,7 @@
 <!-- ===== Tiroir : contenu de l'onglet ouvert, posé sur le monde (js/disposition.js) ===== -->
 <div class="wrap drawer" id="app">
   <section class="card" id="panelCard" role="tabpanel" aria-labelledby="dTitle">
-    <div class="dhead"><h2 id="dTitle"></h2><button class="btn dclose" data-a="drawerClose" title="Fermer (Échap)" aria-label="Fermer le panneau">✕</button></div>
+    <div class="dhead"><h2 id="dTitle"></h2><button class="btn dclose" data-a="drawerClose" data-key="Échap" title="Fermer (Échap)" aria-label="Fermer le panneau">✕</button></div>
     <div id="panel"></div>
   </section>
 </div>
