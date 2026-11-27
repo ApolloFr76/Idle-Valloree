@@ -719,7 +719,7 @@
         P(hd,q=>q.ell(...W2(2.5,1.8),1.7,1.7),{lt:.45});
         if(t>=4){px(...W2(8+e,0),tr);px(...W2(14+e,.5),tr)}
         const tip=W2(18.5+e,1),sway=Math.round(Math.sin(ph)*1.5)+(useAnim==="staff"?2:0);
-        const bx=Math.min(44,Math.round(tip[0]+sway)),by=Math.min(28,Math.round(tip[1]+8));
+        const bx=Math.min(43-Math.max(0,T.dx[f]),Math.round(tip[0]+sway))   /* flotteur et contour restent dans le cadre, même quand le corps avance */,by=Math.min(28,Math.round(tip[1]+8));
         P(W,q=>q.line(tip[0],tip[1],bx,by),F);
         P(tr,q=>q.ell(bx,by+1,1.8,2),{lt:.5});
         px(bx,by,gl);if(t>=9){px(bx+1,by+2,W);px(bx-1,by-1,gl)}

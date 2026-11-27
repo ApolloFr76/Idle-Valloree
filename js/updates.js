@@ -1,5 +1,10 @@
 /* Notes de mise à jour accessibles depuis le bouton parchemin. */
 const UPDATE_LOGS=[
+  {date:"27 novembre 2026",title:"Icônes complètes et outils au juste prix",items:[
+    "Icônes : les objets, ressources, plantes, poissons et clés qui dépassaient encore de leur case sont maintenant entiers, contour compris (haches, boucliers, coiffes, capes, fleurs, grands poissons…).",
+    "Ouvriers pêcheurs : le flotteur de la canne ne sort plus du cadre quand l'ouvrier lance sa ligne.",
+    "Outils des ouvriers : le prix en écus suit maintenant vos gains. Il vaut ce que rapportent environ 15 monstres de votre niveau pour le premier outil, et environ 1 200 pour le dernier. Les outils ne sont donc plus hors de prix en début de partie, ni gratuits en fin de partie.",
+    "Le coût en ressources (la ressource que l'ouvrier récolte déjà) ne change pas ; après un passage Oméga, les outils redeviennent moins chers avec votre niveau."]},
   {date:"27 novembre 2026",title:"Classement enrichi",items:[
     "Nouvelles catégories : écus gagnés, monstres vaincus, succès, niveaux de métiers et temps de jeu. La Puissance compte maintenant vos dégâts par seconde (critiques, doubles coups et effets compris) au lieu du coup de base. Un menu permet de n'afficher qu'une classe.",
     "Onglet « Cette semaine » : niveaux, étages de tour et monstres gagnés depuis lundi. Chaque lundi, le top 3 de chaque catégorie entre au palmarès et débloque le cadre Laurier ; une étoile à côté du pseudo compte ces places.",

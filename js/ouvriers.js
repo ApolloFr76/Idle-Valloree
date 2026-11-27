@@ -5,7 +5,9 @@
 const OUV_MAX=6,OUV_SLOW=2,OUV_BASE=300,OUV_GROWTH=5;
 /* Outils des ouvriers : chaque ouvrier a son propre outil (w.tl = palier 0..11). Il ne récolte que les ressources
    jusqu'à ce palier, et chaque palier le rend 10 % plus rapide. L'outil suivant s'achète en écus + ressource du palier actuel. */
-const OUV_TOOL_SPD=.1,OUV_TOOL_EC=250,OUV_TOOL_GROW=3.5;
+/* Prix en écus : l'équivalent de K monstres de votre niveau (K = 15 pour le 1er outil, ×1,55 par palier, ~1 200 pour le dernier).
+   Le prix suit ainsi vos gains : ni dérisoire en fin de partie, ni hors de portée au début. */
+const OUV_TOOL_SPD=.1,OUV_TOOL_KILLS=15,OUV_TOOL_GROW=1.55;
 const OUV_NAMES=["Gaston","Margot","Baptiste","Lison","Firmin","Rosalie","Anselme","Perrine","Hector","Jeanne","Éloi","Mahaut"];
 /* 10 designs de PNJ ouvriers uniques (indices 0..9 rendus par PX.workerFrames / PX.workerPortrait) */
 const OUV_LOOK=[
@@ -30,7 +32,7 @@ const OUV=(()=>{
   /* prix de l'outil suivant : des écus et la ressource du palier actuel de l'outil (que l'ouvrier sait déjà récolter) ;
      il faut aussi avoir débloqué la ressource du palier suivant dans le métier */
   const toolCost=w=>{const r=RES[w.r],n=tl(w)+1;if(!r||n>11)return null;const pid=r.prof,[rid,rname]=PROFS[pid].res[n-1],nname=PROFS[pid].res[n][1];
-    return{pid,n,rid,rname,nname,ec:Math.round(OUV_TOOL_EC*Math.pow(OUV_TOOL_GROW,n)),q:20+10*n,lvl:UNLOCK[n],name:toolName(pid,n)}};
+    return{pid,n,rid,rname,nname,ec:Math.max(50*n,Math.round(monsterStats(Math.max(1,S.lvl|0)).ecus*OUV_TOOL_KILLS*Math.pow(OUV_TOOL_GROW,n-1))),q:20+10*n,lvl:UNLOCK[n],name:toolName(pid,n)}};
   /* palier (0..11) de la dernière ressource débloquée d'un métier */
   const toolTier=pid=>{const J=S&&S.jobs&&S.jobs[pid];if(!J)return 0;let t=0;UNLOCK.forEach((u,i)=>{if(J.lvl>=u)t=i});return t};
   const best=pid=>PROFS[pid].res[0][0];

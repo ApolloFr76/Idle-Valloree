@@ -61,7 +61,20 @@ const PX=(()=>{
     /* fit(n) : icône n×n tirée d'un sprite dessiné avec une marge (new Spr(n+6,n+6,3,3)). Le cadre est décalé juste assez
        pour que rien ne soit coupé (contour compris). Si le dessin est plus grand que n, le cadre se place là où il coupe
        le moins de pixels de couleur (un contour sombre coûte peu), à égalité à sa place d'origine. */
-    fit(n){const w=this.w,h=this.h,cost=(a,b)=>{const L=.3*a[0]+.59*a[1]+.11*a[2];return L<70?.2:1},C=new Float32Array(w),R=new Float32Array(h);
+    fit(n){const w=this.w,h=this.h;
+      /* dessin plus grand que n (contour compris) : on retire les colonnes / lignes intérieures les plus semblables à leur
+         voisine (souvent identiques) jusqu'à ce qu'il tienne, au lieu de couper un bord */
+      {let x0=w,x1=-1,y0=h,y1=-1;for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(this.p[y*w+x]){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+        if(x1>=0&&(x1-x0+1>n||y1-y0+1>n)){const K=q=>q?q[0]*65536+q[1]*256+q[2]+1:0;let G=[];for(let y=y0;y<=y1;y++){const r=[];for(let x=x0;x<=x1;x++)r.push(this.p[y*w+x]);G.push(r)}
+          const X=[],Y=[];for(let x=x0;x<=x1;x++)X.push(x);for(let y=y0;y<=y1;y++)Y.push(y);
+          const cut=(len,diff,del)=>{while(len()>n){const L=len();let best=1,bc=1e9;for(let c=1;c<L-2;c++){const d=diff(c)+Math.abs(c+.5-L/2)/(L*4);if(d<bc){bc=d;best=c}}del(best)}};
+          cut(()=>G[0].length,c=>G.reduce((a,r)=>a+(K(r[c])!==K(r[c+1])?1:0),0),c=>{G.forEach(r=>r.splice(c,1));X.splice(c,1)});
+          cut(()=>G.length,c=>G[c].reduce((a,q,i)=>a+(K(q)!==K(G[c+1][i])?1:0),0),c=>{G.splice(c,1);Y.splice(c,1)});
+          const W=G[0].length,H=G.length,ox=(n-W)>>1,oy=(n-H)>>1,o=new Spr(n,n);
+          for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(G[y][x])o.p[(y+oy)*n+x+ox]=G[y][x];
+          const map=(A,v,off)=>{let i=0;while(i<A.length-1&&A[i]<v)i++;return i+off};
+          o.sh=this.sh.map(([cx,cy,rx,ry])=>[map(X,cx,ox),map(Y,cy,oy),rx*W/(x1-x0+1),ry*H/(y1-y0+1)]);return o}}
+      const cost=(a,b)=>{const L=.3*a[0]+.59*a[1]+.11*a[2];return L<70?.2:1},C=new Float32Array(w),R=new Float32Array(h);
       for(let y=0;y<h;y++)for(let x=0;x<w;x++){const q=this.p[y*w+x];if(q){const c=cost(q);C[x]+=c;R[y]+=c}}
       const pl=(A,len,st)=>{let lo=-1,hi=-1;for(let i=0;i<len;i++)if(A[i]){if(lo<0)lo=i;hi=i}if(lo<0)return st;if(hi-lo+1<=n)return lo<st?lo:hi>st+n-1?hi-n+1:st;
         let best=st,bc=1e9;for(let s=lo;s<=hi-n+1;s++){let c=0;for(let i=0;i<len;i++)if(i<s||i>=s+n)c+=A[i];if(c<bc-1e-6||(Math.abs(c-bc)<1e-6&&Math.abs(s-st)<Math.abs(best-st))){bc=c;best=s}}return best};
