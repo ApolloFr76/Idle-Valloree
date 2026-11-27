@@ -1532,3 +1532,8 @@ body.kcaps #monBtn[data-key]::before,body.kcaps .pickup[data-key]::before{conten
   background:rgba(28,16,32,.6);border:2px solid var(--ink);color:#fff;font:700 10px/1 var(--display);padding:3px 5px 2px;white-space:nowrap;pointer-events:none}
 body.kcaps .pickup[data-key]{position:absolute}
 body.kcaps [data-key].kchit::before{background:var(--sun);color:var(--ink)}
+/* Ouvriers : bouton d'achat de l'outil suivant, sous la barre de récolte */
+.ouvc{flex-wrap:wrap}
+.ouvc .ouvup,.ouvc .btn.ouvup{flex:1 1 100%;display:flex;flex-direction:column;align-items:flex-start;gap:1px;font-size:12px;padding:3px 9px 6px;white-space:normal;text-align:left;line-height:1.25}
+.ouvc .ouvup span{font-size:11px;opacity:.9}
+.ouvh{flex-wrap:wrap}.ouvh .btn{flex:none;white-space:nowrap}
