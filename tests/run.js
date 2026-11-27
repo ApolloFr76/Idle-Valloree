@@ -745,7 +745,7 @@ test("18. All 144 monster & boss drop icons map accurately and render with uniqu
   }`, ctx);
 });
 
-test("19. 10 distinct PNJ worker designs & 5 profession tools adapting to last unlocked resource and assigned job", () => {
+test("19. 10 distinct PNJ worker designs & per-worker tools to buy (tier access, speed, look follows job)", () => {
   vm.runInContext(`{
     S = fresh(); S.cls = "guerrier"; S.ecus = 1e9;
     if (OUV_LOOK.length !== 10 || PX.WORKERS_N !== 10) throw new Error("Expected 10 PNJ worker looks");
@@ -772,27 +772,37 @@ test("19. 10 distinct PNJ worker designs & 5 profession tools adapting to last u
     }
     if (toolHashes.size !== 60) throw new Error("Expected 60 unique profession tool icons, got " + toolHashes.size);
 
-    // 3. Tool adapts to last unlocked resource tier AND switches when worker changes profession
+    // 3. Each worker buys its own tool: it unlocks the next resource tier, speeds up harvesting, and its look follows tier and job
     S.jobs.bucheron = { lvl: 1, xp: 0 };
     S.jobs.mineur = { lvl: 110, xp: 0 };
     S.jobs.pecheur = { lvl: 60, xp: 0 };
     OUV.hire("bucheron");
     const w = OUV.list()[0];
-    const pWood0 = OUV.portrait(w);
-    if (OUV.toolTier("bucheron") !== 0 || OUV.toolName("bucheron") !== "Hache de Frêne") throw new Error("Unexpected tier 0 axe name");
+    if (OUV.tl(w) !== 0 || w.r !== "frene") throw new Error("New worker should start with tier 0 tool on frene");
+    if (OUV.toolName("bucheron", 0) !== "Hache de Frêne") throw new Error("Unexpected tier 0 axe name");
+    if (OUV.toolName("bucheron", 11) !== "Hache de Séquoia") throw new Error("Unexpected tier 11 axe name: " + OUV.toolName("bucheron", 11));
+    const pWood0 = OUV.portrait(w), t0 = OUV.time(w);
+    S.ecus = 1e12;
+    OUV.upTool(0);
+    if (OUV.tl(w) !== 0) throw new Error("Tool bought before its resource tier was unlocked");
     S.jobs.bucheron.lvl = 110;
-    const pWood11 = OUV.portrait(w);
-    if (pWood11 === pWood0) throw new Error("Worker tool did not evolve when profession unlocked higher resource");
-    if (OUV.toolName("bucheron") !== "Hache de Séquoia") throw new Error("Unexpected tier 11 axe name: " + OUV.toolName("bucheron"));
-
-    // Assign same worker to Mineur -> tool switches to Pioche en Obsidienne
+    const c1 = OUV.toolCost(w);
+    S.res[c1.rid] = c1.q;
+    OUV.upTool(0);
+    if (OUV.tl(w) !== 1 || S.res[c1.rid] !== 0) throw new Error("Tool upgrade did not apply or did not consume resources");
+    if (!(OUV.time(w) < t0)) throw new Error("Better tool should make the worker faster");
+    const pWood1 = OUV.portrait(w);
+    if (pWood1 === pWood0) throw new Error("Worker tool look did not evolve after buying the next tool");
+    const hi = PROFS.bucheron.res[5][0];
+    OUV.assign(0, hi);
+    if (w.r === hi) throw new Error("Worker was assigned above its tool tier");
+    // Same worker moved to Mineur / Pecheur (tier 0 resources): tool look switches with the job
     OUV.assign(0, "fer");
-    const pMine11 = OUV.portrait(w);
-    if (pMine11 === pWood11) throw new Error("Worker tool did not change when reassigned to mineur");
-    // Assign same worker to Pecheur -> tool switches to Canne d'Orage (tier 6 at lvl 60)
+    const pMine = OUV.portrait(w);
+    if (pMine === pWood1) throw new Error("Worker tool did not change when reassigned to mineur");
     OUV.assign(0, "p_goujon");
-    const pFish6 = OUV.portrait(w);
-    if (pFish6 === pMine11 || pFish6 === pWood11) throw new Error("Worker tool did not change when reassigned to pecheur");
+    const pFish = OUV.portrait(w);
+    if (pFish === pMine || pFish === pWood1) throw new Error("Worker tool did not change when reassigned to pecheur");
     // Cycle PNJ look updates appearance cleanly
     const prevLook = w.look;
     OUV.cycleLook(0);
