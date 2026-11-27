@@ -44,7 +44,7 @@ Votre héros combat tout seul, même quand vous n'êtes pas là. Cliquez sur le 
 
 ### Collection et classement
 - Bestiaire, succès, Poissonnédia.
-- **Classement** des joueurs avec un compte : niveau, éclats Oméga, tour et puissance.
+- **Classement** des joueurs avec un compte : niveau, éclats Oméga, tour, puissance (dégâts par seconde), écus gagnés, monstres vaincus, succès, niveaux de métiers et temps de jeu, avec un filtre par classe. Un onglet **Cette semaine** compte ce qui a été gagné depuis lundi ; chaque lundi, le top 3 entre au **palmarès** et débloque le cadre **Laurier**. Les **records du serveur** gardent le nom du premier joueur à atteindre chaque palier (niveau 100, premier passage Oméga, étage 50…). Cliquer sur un joueur ouvre sa fiche ; un point vert signale les joueurs actifs ces dernières 24 h, une flèche montre votre progression depuis votre dernière visite et l'écart avec le joueur juste au-dessus est indiqué.
 
 ## Sauvegarde
 
@@ -115,7 +115,7 @@ Ils ouvrent le jeu, créent un héros, le laissent combattre et vérifient la sa
 Le site est publié par GitHub Pages directement depuis la branche `main`, sans assemblage. `npm run assembler` (ou `node outils/assembler.js`) peut regrouper tous les scripts et feuilles de style dans `_site/` (un seul `jeu.js` et un seul `jeu.css`) pour une publication assemblée.
 
 ### Comptes et classement
-Supabase : règles de sécurité dans `supabase/securite.sql`, fonction de réinitialisation du mot de passe dans `supabase/functions/reset-password/index.ts`, guide dans `supabase/README.md`.
+Supabase : règles de sécurité dans `supabase/securite.sql`, classement enrichi (nouvelles catégories, semaine, palmarès, records) dans `supabase/classement-lot6.sql`, fonction de réinitialisation du mot de passe dans `supabase/functions/reset-password/index.ts`, guide dans `supabase/README.md`.
 
 ---
 
