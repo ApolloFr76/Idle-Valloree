@@ -136,14 +136,14 @@ document.addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(k==="esca
   if(mg&&k==="escape"){mgClose();return}
   if(k==="escape"&&UI.o&&$("ov").hidden&&!forge&&!/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)){UI.open(false);return}
   if(ACC_OPEN||!S||!S.cls||!S.opt.keys||e.ctrlKey||e.metaKey||e.altKey||forge||mg)return;if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))return;
-  if(!e.repeat){const kl={" ":"Espace",a:"Espace",escape:"Échap"}[k]||(/^[123bespcivfo]$/.test(k)?k.toUpperCase():"");if(kl)kcFlash(kl)}
+  if(!e.repeat){const kl={" ":"Espace",a:"Espace",escape:"Échap"}[k]||(/^[123bespcivguqmrlftko]$/.test(k)?k.toUpperCase():"");if(kl)kcFlash(kl)}
   if(k==="p"){setPause(!paused);e.preventDefault();return}if(paused)return;
   if(k===" "||k==="a"){e.preventDefault();doClick(false);return}
   if(["1","2","3"].includes(k)){const sp=CLASSES[S.cls].spells[+k-1];if(sp)cast(sp,false);return}
   if(k==="b"){if(tabOpen("aventure"))startMode("boss");return}if(k==="e"){if(S.pk)takePk();return}
   if(k==="s"){const p=["p_gsoin","p_soin"].find(id=>S.res[id]>0);if(p)drink(p,false);return}
   if(k==="escape"&&S.mode!=="zone"){endMode(false,"abandon");return}
-  const tk={c:"perso",i:"inv",v:"aventure",f:"atelier",o:"opts"}[k];if(tk&&tabOpen(tk)){if(S.tab===tk&&UI.o)UI.open(false);else{S.tab=tk;UI.open(true)}renderPanel()}});
+  const tk={c:"perso",i:"inv",v:"aventure",g:"allies",u:"shop",q:"quests",m:"market",r:"prest",l:"coll",f:"atelier",t:"metiers",k:"rank",o:"opts"}[k];if(tk&&tabOpen(tk)){if(S.tab===tk&&UI.o)UI.open(false);else{S.tab=tk;UI.open(true)}renderPanel()}});
 function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$("pauseBtn").classList.toggle("pri",v);$("pauseOv").hidden=!v;if(v)save()}
 function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0]||i>0&&!(S.zoneBosses||{})[i-1])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
 document.addEventListener("input",e=>{if(e.target.id==="invSearch"){invQ=e.target.value;invP=0;invSellArm=false;renderPanel(true);return}if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});

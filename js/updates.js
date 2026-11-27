@@ -1,6 +1,7 @@
 /* Notes de mise à jour accessibles depuis le bouton parchemin. */
 const UPDATE_LOGS=[
   {date:"24 novembre 2026",title:"Touches affichées sur les boutons, affichage plus net",items:[
+    "Un raccourci pour chaque onglet : Compagnons G, Boutique U, Quêtes Q, Marché M, Oméga R, Collection L, Métiers T et Classement K, en plus de Personnage C, Inventaire I, Aventure V, Atelier F et Options O. Chaque touche est rappelée dans l'encoche de son onglet ; la liste complète est dans Options › Clavier.",
     "Raccourcis clavier visibles : les boutons qui ont une touche (sorts 1, 2, 3, potion S, Défier le boss B, Pause P, onglets C, I, V, F, O, Échap pour fermer ou abandonner) l'affichent dans une encoche sombre à gauche, qui s'enfonce quand on appuie. La touche Espace s'affiche sous le monstre et E sous l'objet à ramasser. Réglage dans Options › Clavier ; masqué sur écran tactile ou si les raccourcis sont désactivés.",
     "Icônes : les objets, ressources, outils, poissons, plantes et coffres ne sont plus coupés au bord de leur case (queues de poisson, manches d'armes, cornes, fleurs…).",
     "Compagnons : les boutons Recruter, +10 et Max passent sous le nom, qui reste lisible sur une seule ligne avec ses dégâts et son effet (Poison, Gelure…).",

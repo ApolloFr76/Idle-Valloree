@@ -59,7 +59,7 @@ function live(){
 
 /* --- Onglets --- */
 /* touches des onglets (voir evenements.js) : affichées dans l'encoche des onglets */
-const TAB_KEY={perso:"C",inv:"I",aventure:"V",atelier:"F",opts:"O"};
+const TAB_KEY={perso:"C",inv:"I",aventure:"V",allies:"G",shop:"U",quests:"Q",market:"M",prest:"R",coll:"L",atelier:"F",metiers:"T",rank:"K",opts:"O"};
 /* touche pressée : l'encoche du bouton correspondant s'enfonce un instant */
 function kcFlash(lbl){if(!document.body.classList.contains("kcaps"))return;document.querySelectorAll(`[data-key="${lbl}"]`).forEach(b=>{b.classList.remove("kchit");void b.offsetWidth;b.classList.add("kchit");setTimeout(()=>b.classList.remove("kchit"),180)})}
 const TABS=[["perso","Personnage"],["inv","Inventaire"],["aventure","Aventure"],["allies","Compagnons"],["shop","Boutique"],["quests","Quêtes"],["market","Marché"],["prest","Oméga"],["coll","Collection"],["atelier","Atelier"],["metiers","Métiers"],["rank","Classement"],["opts","Options"]];
