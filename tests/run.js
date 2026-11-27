@@ -816,6 +816,29 @@ test("19. 10 distinct PNJ worker designs & per-worker tools to buy (tier access,
   }`, ctx);
 });
 
+test("20. Classement : week start, categories, Laurier frame and save key", () => {
+  vm.runInContext(`{
+    S = fresh(); S.cls = "berserk";
+    // lundi 0 h UTC, comme date_trunc('week') côté serveur
+    if (rangWeek(Date.UTC(2026, 10, 27, 12)) !== "2026-11-23") throw new Error("rangWeek Friday -> " + rangWeek(Date.UTC(2026, 10, 27, 12)));
+    if (rangWeek(Date.UTC(2026, 10, 23, 0, 0, 1)) !== "2026-11-23") throw new Error("rangWeek Monday wrong");
+    if (rangWeek(Date.UTC(2026, 10, 22, 23, 59)) !== "2026-11-16") throw new Error("rangWeek Sunday wrong");
+    const keys = RANG_CRIT.map(c => c[0]);
+    for (const k of ["niv","ecl","tour","deg","ecus","kills","succ","met","temps","wlvl","wtour","wkills"]) if (!keys.includes(k)) throw new Error("Missing ranking category " + k);
+    if (new Set(keys).size !== keys.length) throw new Error("Duplicate ranking category");
+    // cadre Laurier : verrouillé sans place dans un top 3, débloqué avec S.champ
+    const lau = CADRE_ID.laurier;
+    if (!lau) throw new Error("Laurier frame missing");
+    if (cadreOk(lau)) throw new Error("Laurier frame should be locked by default");
+    S.champ = 1;
+    if (!cadreOk(lau)) throw new Error("Laurier frame should unlock with S.champ");
+    if (cadreOk(CADRE_ID.omega)) throw new Error("Omega frame must still need a prestige");
+    const raw = JSON.parse(JSON.stringify(S)); raw.champ = 3;
+    const f = sanitizeSave(raw);
+    if (!f || f.champ !== 3) throw new Error("S.champ not kept by the save sanitizer");
+  }`, ctx);
+});
+
 const failed = results.filter(r => !r.ok);
 console.log(`\nSummary: ${results.length - failed.length}/${results.length} passed.`);
 if (failed.length) process.exit(1);
