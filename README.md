@@ -34,7 +34,7 @@ Votre héros combat tout seul, même quand vous n'êtes pas là. Cliquez sur le 
 
 ### Métiers et économie
 - 5 métiers, chacun avec son mini-jeu et 12 ressources, soit 60 ressources avec leur propre scène de récolte animée.
-- **Ouvriers** : des personnages qui récoltent pour vous, avec un outil qui s'améliore avec vos ressources débloquées.
+- **Ouvriers** : des personnages qui récoltent pour vous. Chacun a son propre outil, à acheter palier par palier (écus + la ressource qu'il récolte déjà) : il ouvre l'accès aux ressources plus rares et rend l'ouvrier 10 % plus rapide à chaque palier.
 - Alchimie (potions), marché aux prix qui bougent, quêtes du jour, boutique d'améliorations.
 - **Poissonnédia** : 29 poissons à pêcher, du commun au mythique.
 
