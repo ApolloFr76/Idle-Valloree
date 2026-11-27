@@ -143,7 +143,9 @@ function sanitizeSave(raw){
   if(Array.isArray(raw.workers)){
     for(const w of raw.workers.slice(0,OUV_MAX+2)){
       if(!isPlainObj(w)||typeof w.r!=="string"||!RES[w.r]?.prof)continue;
-      f.workers.push({name:(typeof w.name==="string"?w.name.replace(/[<>]/g,"").trim().slice(0,20):"Ouvrier")||"Ouvrier",look:clampInt(w.look,0,OUV_LOOK.length-1),r:w.r,t:clampNum(w.t,0,3600),n:clampInt(w.n,0,1e15)});
+      f.workers.push({name:(typeof w.name==="string"?w.name.replace(/[<>]/g,"").trim().slice(0,20):"Ouvrier")||"Ouvrier",look:clampInt(w.look,0,OUV_LOOK.length-1),r:w.r,t:clampNum(w.t,0,3600),n:clampInt(w.n,0,1e15),
+        /* palier d'outil ; les anciens ouvriers gardent celui de la ressource qu'ils récoltaient */
+        tl:clampInt(w.tl!=null?w.tl:(RES[w.r]?RES[w.r].tier:0),0,11)});
     }
   }
   if(Array.isArray(raw.log)){

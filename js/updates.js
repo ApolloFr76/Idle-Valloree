@@ -1,5 +1,10 @@
 /* Notes de mise à jour accessibles depuis le bouton parchemin. */
 const UPDATE_LOGS=[
+  {date:"27 novembre 2026",title:"Outils des ouvriers à acheter",items:[
+    "Chaque ouvrier a désormais son propre outil, à améliorer depuis sa fiche dans l'onglet Métiers : l'outil suivant coûte des écus et des unités de la ressource que l'ouvrier sait déjà récolter (par exemple du Frêne pour la Hache de Châtaignier). Il faut aussi avoir débloqué la ressource suivante dans le métier.",
+    "L'outil décide où l'ouvrier peut travailler : il ne récolte que les ressources jusqu'au palier de son outil. Les ressources trop rares apparaissent grisées avec la mention « outil requis ».",
+    "Chaque palier d'outil rend l'ouvrier 10 % plus rapide ; le gain est indiqué à côté de son temps de récolte.",
+    "Les ouvriers déjà embauchés gardent un outil du palier de la ressource qu'ils récoltaient : rien ne s'arrête. Les nouveaux ouvriers commencent avec l'outil de base."]},
   {date:"24 novembre 2026",title:"Touches affichées sur les boutons, affichage plus net",items:[
     "Un raccourci pour chaque onglet : Compagnons G, Boutique U, Quêtes Q, Marché M, Oméga R, Collection L, Métiers T et Classement K, en plus de Personnage C, Inventaire I, Aventure V, Atelier F et Options O. Chaque touche est rappelée dans l'encoche de son onglet ; la liste complète est dans Options › Clavier.",
     "Raccourcis clavier visibles : les boutons qui ont une touche (sorts 1, 2, 3, potion S, Défier le boss B, Pause P, onglets C, I, V, F, O, Échap pour fermer ou abandonner) l'affichent dans une encoche sombre à gauche, qui s'enfonce quand on appuie. La touche Espace s'affiche sous le monstre et E sous l'objet à ramasser. Réglage dans Options › Clavier ; masqué sur écran tactile ou si les raccourcis sont désactivés.",

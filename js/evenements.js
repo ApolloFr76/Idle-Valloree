@@ -115,6 +115,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"ouvHire":{OUV.hire(b.dataset.p);renderPanel();break}
     case"ouvLook":{OUV.cycleLook(+b.dataset.i);renderPanel();break}
     case"ouvFire":{OUV.fire(+b.dataset.i);renderPanel();break}
+    case"ouvTool":{OUV.upTool(+b.dataset.i);renderPanel();break}
     case"job":{const r=b.dataset.r;S.job=S.job&&S.job.r===r?null:{r,t:0};renderPanel();break}
     case"copy":{const t=$("exportBox");const done=()=>toast("Code de sauvegarde copié",1);try{navigator.clipboard.writeText(t.value).then(done,()=>{t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)})}catch(err){t.focus();t.select();toast("Sélectionné : copiez avec Ctrl+C",1)}break}
     case"bkLoad":{const i=+b.dataset.i;if(bkArm!==i){bkArm=i;renderPanel(true);break}bkArm=-1;if(bkLoad(i)){boot2();toast("Sauvegarde de secours restaurée",1)}else toast("Cette sauvegarde de secours est illisible.",1);renderPanel(true);break}
