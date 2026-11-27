@@ -3,14 +3,17 @@
 const RANG_CRIT=[["niv","Niveau","lvl.desc,prest.desc",r=>`niveau ${fmt(r.lvl)}${r.prest?" · Ω "+fmt(r.prest):""}`],
   ["ecl","Éclats Oméga","souls_total.desc",r=>`${fmt(r.souls_total)} éclats`],["tour","Tour","tour.desc",r=>`étage ${fmt(r.tour)}`],["deg","Puissance","degats.desc",r=>`${fmt(r.degats)} dégâts`]];
 const RANG_N=50,RANG_AGE=60;
+/* plafond des dégâts envoyés : celui de sync_classement côté serveur (au-delà, le nombre ne tient plus dans un bigint et tout l'envoi échouait) */
+const RANG_DEG_MAX=1e15;
 const RANG=(()=>{
-  const C={};let crit="niv",sentAt=0,noProf=false;   /* noProf : colonnes cadre/embleme absentes sur le serveur */
-  const mine=()=>({pseudo:COMPTE.pseudo(),cls:S.cls,lvl:S.lvl||1,prest:S.prest||0,souls_total:S.soulsTotal||0,tour:(S.tower&&S.tower.best)||0,degats:(()=>{const h=stats().hit;return isFinite(h)?Math.round(h):0})()});
+  const C={};let crit="niv",sentAt=0,noProf=false,sendErr="";   /* sendErr : dernier échec de mise à jour de la ligne du joueur */   /* noProf : colonnes cadre/embleme absentes sur le serveur */
+  const mine=()=>({pseudo:COMPTE.pseudo(),cls:S.cls,lvl:S.lvl||1,prest:S.prest||0,souls_total:S.soulsTotal||0,tour:(S.tower&&S.tower.best)||0,degats:(()=>{const h=stats().hit;return isFinite(h)?Math.max(0,Math.min(RANG_DEG_MAX,Math.round(h))):0})()});
   const errTxt=e=>/classement|PGRST205|42P01|does not exist|schema cache/i.test(JSON.stringify(e||""))?"Le classement n'est pas encore activé sur le serveur.":"Impossible de charger le classement. Vérifiez votre connexion.";
   const redraw=()=>{if(typeof ACC_OPEN!=="undefined"&&ACC_OPEN)ACCUEIL.render();else if(S&&S.cls&&S.tab==="rank")renderPanel(true)};
   /* envoie la ligne du joueur (appelé après chaque sauvegarde en ligne) :
      passe par la fonction RPC sécurisée sync_classement (qui lit saves côté serveur) avec repli sur /rest/v1/classement si la migration SQL n'est pas encore appliquée */
-  async function send(){if(!COMPTE.logged()||!S||!S.cls)return;const m=mine(),r=Object.assign({user_id:COMPTE.uid()},m),p=typeof profS==="function"?profS():null;
+  async function send(){try{await send0();sendErr=""}catch(e){sendErr=String((e&&(e.message||e.msg))||JSON.stringify(e||"")).slice(0,160);throw e}}
+  async function send0(){if(!COMPTE.logged()||!S||!S.cls)return;const m=mine(),r=Object.assign({user_id:COMPTE.uid()},m),p=typeof profS==="function"?profS():null;
     const post=b=>COMPTE.call("/rest/v1/classement?on_conflict=user_id",{method:"POST",headers:{Prefer:"resolution=merge-duplicates"},body:JSON.stringify(b)});
     try{
       await COMPTE.call("/rest/v1/rpc/sync_classement",{method:"POST",body:JSON.stringify({p_degats:m.degats})});
@@ -43,7 +46,7 @@ const RANG=(()=>{
     /* onglet Classement */
     html(){if(!COMPTE.on()||!COMPTE.logged())return`<div class="sec"><h3>Classement</h3><p class="small muted">Le classement est réservé aux joueurs qui ont un compte. Créez un compte ou connectez-vous : votre partie actuelle est gardée et vous apparaîtrez dans le classement.</p>${COMPTE.formHtml(false)}</div>`;
       const c=C[crit]||{};return`<div class="sec"><div class="osub">${RANG_CRIT.map(([k,n])=>`<button class="${crit===k?"on":""}" data-a="rkTab" data-t="${k}">${n}</button>`).join("")}</div>
-        ${table(crit,RANG_N)}<div class="row" style="justify-content:space-between;align-items:center;margin-top:8px"><span class="small muted">Comptes uniquement · mis à jour à chaque sauvegarde en ligne${c.at?" · actualisé "+(Date.now()-c.at<5000?"à l'instant":`il y a ${Math.floor((Date.now()-c.at)/1000)} s`):""}</span><button class="btn" data-a="rkRefresh">Actualiser</button></div></div>`},
+        ${sendErr?`<p class="small rkyou">Votre ligne n'a pas pu être mise à jour (${esc(sendErr)}). Elle sera renvoyée à la prochaine sauvegarde en ligne.</p>`:""}${table(crit,RANG_N)}<div class="row" style="justify-content:space-between;align-items:center;margin-top:8px"><span class="small muted">Comptes uniquement · mis à jour à chaque sauvegarde en ligne${c.at?" · actualisé "+(Date.now()-c.at<5000?"à l'instant":`il y a ${Math.floor((Date.now()-c.at)/1000)} s`):""}</span><button class="btn" data-a="rkRefresh">Actualiser</button></div></div>`},
     /* encadré de l'écran d'accueil (connecté seulement) */
     board(){if(!COMPTE.on()||!COMPTE.logged())return"";
       return`<div class="accrank"><h3 class="acctitle">Classement</h3><div class="acctabs rktabs" role="tablist">${RANG_CRIT.map(([k,n])=>`<button role="tab" aria-selected="${crit===k}" class="${crit===k?"on":""}" data-a="rkTab" data-t="${k}">${n}</button>`).join("")}</div>${table(crit,10)}</div>`},
