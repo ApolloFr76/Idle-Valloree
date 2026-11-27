@@ -12,6 +12,15 @@ Ce script :
 - Retire les droits d'écriture directs (`INSERT` / `UPDATE` / `DELETE`) sur `public.classement` pour les utilisateurs et crée la fonction `public.sync_classement(p_degats)` qui lit `saves.data` côté serveur et contrôle les valeurs et sauts anormaux ;
 - Crée la table privée `public.recovery_codes` (hachage bcrypt via `pgcrypto`, blocage 15 min après 5 échecs) et les fonctions `set_recovery_code`, `verify_recovery_code`, `rotate_recovery_code`.
 
+## 1 bis. Classement enrichi (`classement-lot6.sql`)
+
+Copier-coller [`classement-lot6.sql`](classement-lot6.sql) dans le **SQL Editor** puis **Run** (peut être relancé sans danger). Il reprend la vérification du classement (valeurs relues dans la sauvegarde en ligne, comptes signalés gelés) et ajoute :
+- les colonnes `ecus_total`, `kills`, `succes`, `metiers`, `temps` (lues dans la sauvegarde) et celles de la semaine (`sem_debut`, `sem_lvl`, `sem_tour`, `sem_kills`, remises à zéro chaque lundi 0 h UTC) ;
+- la table `classement_palmares` : le top 3 de chaque semaine y est archivé à la première écriture de la semaine suivante (il débloque le cadre `laurier`) ;
+- la table `classement_records` : le premier compte à atteindre chaque palier.
+
+Tant que ce script n'est pas lancé, le jeu affiche l'ancien classement (niveau, éclats, tour, puissance) et masque les nouveautés.
+
 ## 2. Déployer la Edge Function `reset-password`
 
 ```bash
