@@ -62,7 +62,8 @@ Votre héros combat tout seul, même quand vous n'êtes pas là. Cliquez sur le 
 | S | Boire une potion de soin |
 | E | Ramasser l'objet qui apparaît |
 | B | Défier le boss de la zone |
-| C, I, V, F, O | Personnage, Inventaire, Aventure, Atelier, Options |
+| C, I, V, G, U, Q | Personnage, Inventaire, Aventure, Compagnons, Boutique, Quêtes |
+| M, R, L, F, T, K, O | Marché, Oméga, Collection, Atelier, Métiers, Classement, Options |
 | P | Pause |
 | Échap | Fermer le panneau ou la fenêtre |
 
