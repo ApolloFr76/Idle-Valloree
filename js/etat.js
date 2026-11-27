@@ -6,7 +6,7 @@ const MIG_RZ2_NOTICE_KEY="vallore-mig-rz2-notice";
 let S;
 function fresh(){return{v:SAVE_V,born:Date.now(),cls:null,name:"Aventurier",lvl:1,xp:0,pts:0,alloc:{vit:0,agi:0,sagesse:0,feu:0,eau:0,terre:0,air:0},ecus:0,hp:60,zone:0,mon:null,spawnT:0,
   res:{},items:[],equip:{},skins:{},transmog:{},uid:1,jobs:{bucheron:{lvl:1,xp:0},mineur:{lvl:1,xp:0},paysan:{lvl:1,xp:0},herboriste:{lvl:1,xp:0},pecheur:{lvl:1,xp:0}},job:null,fdex:{},mgCd:{},cds:{},auto:{},buffs:[],dots:[],
-  kills:0,pkN:0,seen:{},pkNext:20,pk:null,mode:"zone",zoneBosses:{},bossLife:{},zk:{},dg:null,timer:0,tower:{best:0,cur:1},allies:{},up:{},combo:0,comboT:0,best:{},st:{},souls:0,soulsTotal:0,prest:0,ach:{},q:null,mk:{},mkPrev:{},mkT:0,autoPot:false,autoBuff:{},arb:{own:{},voies:[],pacte:0,echo:0},rz:2,potCd:0,ev:null,evNext:90,opt:{},time:0,atkT:0,monT:0,ko:0,log:[],workers:[],tab:"perso",last:Date.now(),afkSince:0,hist:[],outfits:[],prof:{c:"bois",e:"cls"},sess:null}}
+  kills:0,pkN:0,seen:{},pkNext:20,pk:null,mode:"zone",zoneBosses:{},bossLife:{},zk:{},dg:null,timer:0,tower:{best:0,cur:1},allies:{},up:{},combo:0,comboT:0,best:{},st:{},souls:0,soulsTotal:0,prest:0,ach:{},q:null,mk:{},mkPrev:{},mkT:0,autoPot:false,autoBuff:{},arb:{own:{},voies:[],pacte:0,echo:0},rz:2,potCd:0,ev:null,evNext:90,opt:{},time:0,atkT:0,monT:0,ko:0,log:[],workers:[],tab:"perso",last:Date.now(),afkSince:0,hist:[],outfits:[],prof:{c:"bois",e:"cls"},sess:null,champ:0}}
 /* Débloque l'apparence d'un objet (transmogrification) dès qu'il est obtenu */
 function unlockSkin(id){if(!S||!id)return;const it=ITEMS[id];if(!it||!it.set||!VIS_SLOTS.includes(it.slot))return;S.skins=S.skins||{};if(!S.skins[id]){S.skins[id]=1;dirty=true}}
 /* Trophée en double : fusionne avec celui qu'on a déjà (+1 rang). */
@@ -48,6 +48,7 @@ function sanitizeSave(raw){
   f.zone=clampInt(raw.zone,0,ZONES.length-1);
   f.uid=clampInt(raw.uid??1,1,1e12);
   f.kills=clampInt(raw.kills,0,1e15);
+  f.champ=clampInt(raw.champ,0,1e6);   /* places dans un top 3 hebdomadaire du classement (cadre Laurier) */
   f.pkN=clampInt(raw.pkN,0,1e12);
   f.pkNext=clampNum(raw.pkNext??20,0,1e12);
   f.mode=["zone","boss","donjon","tour"].includes(raw.mode)?raw.mode:"zone";

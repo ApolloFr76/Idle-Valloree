@@ -17,10 +17,11 @@ function doPrestige(){
    Affichés sur la fiche du personnage, l'écran d'accueil et dans le classement (colonnes cadre et embleme). */
 const CADRES=[["bois","Bois",0,["#5c3620","#c08348","#8f5a32"]],["cuivre","Cuivre",5,["#7a3a1a","#e89a5a","#b8693a"]],["argent","Argent",15,["#5a6676","#eef3f8","#a8b4c4"]],
   ["or","Or",30,["#7a4a06","#ffe27a","#d9941c"]],["givre","Givre",45,["#2a6a9a","#e6f8ff","#6ab8e8"]],["braise","Braise",60,["#6a1408","#ffc04a","#e2502c"]],
-  ["omega","Oméga",-1,["#3a1a6a","#d8c0ff","#8a5ac8"]],["astral","Astral",76,["#0e0820","#fff2a8","#5a3aa0"]]];
+  ["omega","Oméga",-1,["#3a1a6a","#d8c0ff","#8a5ac8"]],["astral","Astral",76,["#0e0820","#fff2a8","#5a3aa0"]],
+  ["laurier","Laurier",-2,["#2c4410","#ffe27a","#6a9a2a"]]];   /* -2 : une place dans un top 3 de la semaine (classement) */
 const CADRE_ID=Object.fromEntries(CADRES.map(c=>[c[0],c]));
-const cadreNeed=c=>c[2]<0?"Un passage Oméga":c[2]>=ACH.length?"Tous les succès":`${c[2]} succès`;
-const cadreOk=(c,n=achN(),pr=S.prest||0)=>!!c&&(c[2]<0?pr>0:n>=Math.min(c[2],ACH.length));
+const cadreNeed=c=>c[2]===-2?"Top 3 d'une semaine du classement":c[2]<0?"Un passage Oméga":c[2]>=ACH.length?"Tous les succès":`${c[2]} succès`;
+const cadreOk=(c,n=achN(),pr=S.prest||0)=>!!c&&(c[2]===-2?(S.champ|0)>0:c[2]<0?pr>0:n>=Math.min(c[2],ACH.length));
 const profS=()=>{const p=S.prof&&typeof S.prof==="object"?S.prof:(S.prof={c:"bois",e:"cls"});if(!cadreOk(CADRE_ID[p.c]))p.c="bois";if(!(p.e==="cls"||ELG[p.e]&&p.e!=="neutre"))p.e="cls";return p};
 /* pastille de profil : cadre en pixels + emblème de classe ou d'élément */
 function profBadge(c,e,cls,size=40){const C=(CADRE_ID[c]||CADRES[0])[3],k=CLASSES[cls]?cls:"guerrier",el=e&&e!=="cls"&&ELG[e]?e:null,col=el?ELEMS[el].c:CLASSES[k].col;

@@ -1,5 +1,10 @@
 /* Notes de mise à jour accessibles depuis le bouton parchemin. */
 const UPDATE_LOGS=[
+  {date:"27 novembre 2026",title:"Classement enrichi",items:[
+    "Nouvelles catégories : écus gagnés, monstres vaincus, succès, niveaux de métiers et temps de jeu. La Puissance compte maintenant vos dégâts par seconde (critiques, doubles coups et effets compris) au lieu du coup de base. Un menu permet de n'afficher qu'une classe.",
+    "Onglet « Cette semaine » : niveaux, étages de tour et monstres gagnés depuis lundi. Chaque lundi, le top 3 de chaque catégorie entre au palmarès et débloque le cadre Laurier ; une étoile à côté du pseudo compte ces places.",
+    "Onglet « Palmarès et records » : les gagnants des semaines passées et les records du serveur, qui gardent le nom du premier joueur à atteindre le niveau 100, l'étage 50, un passage Oméga…",
+    "Cliquez sur un joueur pour ouvrir sa fiche (toutes ses valeurs, ses records, sa dernière activité). Un point vert signale les joueurs actifs ces dernières 24 h, une flèche montre si vous avez gagné ou perdu des places depuis votre dernière visite, et l'écart avec le joueur juste au-dessus est indiqué."]},
   {date:"27 novembre 2026",title:"Outils des ouvriers à acheter",items:[
     "Chaque ouvrier a désormais son propre outil, à améliorer depuis sa fiche dans l'onglet Métiers : l'outil suivant coûte des écus et des unités de la ressource que l'ouvrier sait déjà récolter (par exemple du Frêne pour la Hache de Châtaignier). Il faut aussi avoir débloqué la ressource suivante dans le métier.",
     "L'outil décide où l'ouvrier peut travailler : il ne récolte que les ressources jusqu'au palier de son outil. Les ressources trop rares apparaissent grisées avec la mention « outil requis ».",

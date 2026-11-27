@@ -50,7 +50,7 @@ document.addEventListener("click",e=>{ptrDown=false;
     case"optDefault":S.opt=Object.assign({},OPT_DEF);applyOpts();toast("Réglages par défaut rétablis",1);renderPanel();break;
     case"code":{const i=$("codeBox");useCode(i&&i.value);if(i)i.value="";break}
     case"accCreate":case"accLogin":case"accLogout":case"accPush":case"accUseRemote":case"accUseLocal":case"accRecover":case"accGenRec":case"accCopyRec":case"accOptMode":COMPTE.act(a,b);break;
-    case"rkTab":case"rkRefresh":RANG.act(a,b);break;
+    case"rkTab":case"rkRefresh":case"rkView":case"rkCard":RANG.act(a,b);break;
     case"accTab":case"accEye":case"accNew":case"accNewNo":case"accNewYes":case"accRetry":case"accGo":case"accHome":case"accDismissMig":case"accExportOld":ACCUEIL.act(a,b);break;
     case"saveNow":save();lastSave=Date.now();toast("Partie enregistrée",1);break;
     case"pause":setPause(!paused);break;
@@ -149,6 +149,7 @@ function setPause(v){paused=v;$("pauseBtn").textContent=v?"Reprendre":"Pause";$(
 function goZone(i){if(!ZONES[i]||S.lvl<ZONES[i].lvl[0]||i>0&&!(S.zoneBosses||{})[i-1])return;if(S.mode!=="zone")endMode(false,"abandon");S.zone=i;S.mon=null;S.spawnT=.2;S.dots=[];drawZones();drawMonster();dirty=true}
 document.addEventListener("input",e=>{if(e.target.id==="invSearch"){invQ=e.target.value;invP=0;invSellArm=false;renderPanel(true);return}if(e.target.id==="allocN"){const v=Math.floor(+e.target.value);if(v>=1){allocN=v;document.querySelectorAll('[data-n="custom"]').forEach(b=>b.textContent="+"+fmt(v))}}});
 document.addEventListener("change",e=>{const ds=e.target.dataset||{};
+  if(e.target.id==="rkCls"){RANG.setCls(e.target.value);return}
   if(e.target.id==="arbVue"){arbVue=e.target.value;if(arbVue!=="carte"&&!arbPlace(arbVue)[arbSel])arbSel=Object.keys(arbPlace(arbVue))[0];renderPanel(true);return}
   if(ds.sell){S.sellCfg=S.sellCfg||{};(S.sellCfg[ds.sell]=S.sellCfg[ds.sell]||{}).on=e.target.checked;renderPanel(true);return}
   if(ds.keep!=null){S.sellCfg=S.sellCfg||{};const v=Math.max(0,Math.floor(+e.target.value||0));(S.sellCfg[ds.keep]=S.sellCfg[ds.keep]||{}).keep=v;e.target.value=v;renderPanel(true);return}
